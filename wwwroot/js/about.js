@@ -99,19 +99,3 @@ faqs.forEach((item, i) => {
         </div>
       </div>`;
 });
-
-function toggleFaq(i) {
-  const answer = document.getElementById(`faq-${i}`);
-  const chevron = document.getElementById(`chevron-${i}`);
-  const isOpen = answer.classList.contains("open");
-  document
-    .querySelectorAll(".faq-answer")
-    .forEach((el) => el.classList.remove("open"));
-  document
-    .querySelectorAll(".faq-chevron")
-    .forEach((el) => el.classList.remove("open"));
-  if (!isOpen) {
-    answer.classList.add("open");
-    chevron.classList.add("open");
-  }
-}
