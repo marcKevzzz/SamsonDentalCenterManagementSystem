@@ -1,0 +1,263 @@
+@page "/Contacts"
+@model ContactsModel
+@{
+    ViewData["Title"] = "Contacts page";
+}
+
+<section class="bg-brand pt-[68px]">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-16">
+    
+    <h1 class="brand-font font-extrabold text-[2.8rem] text-white mb-3">Contact Us</h1>
+    <p class="font-body text-[0.92rem] text-white/45 max-w-sm leading-relaxed">
+      We'd love to hear from you. Reach out to schedule an appointment or ask any questions.
+    </p>
+  </div>
+</section>
+ 
+ 
+<!-- ══════════════════════════════════
+     QUICK INFO CARDS
+═══════════════════════════════════ -->
+<section class="bg-offwhite">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-14">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+ 
+      <!-- Phone -->
+      <div class="info-card fade-up bg-white rounded-2xl p-6 shadow-sm">
+        <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.95-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Phone</div>
+        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">+63 2 8888 1234</div>
+        <div class="font-body text-[0.78rem] text-muted">Mon–Sat, 8 AM – 6 PM</div>
+      </div>
+ 
+      <!-- Email -->
+      <div class="info-card fade-up bg-white rounded-2xl p-6 shadow-sm">
+        <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Email</div>
+        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">hello@samsondentalph</div>
+        <div class="font-body text-[0.78rem] text-muted">We reply within 24 hours</div>
+      </div>
+ 
+      <!-- Location -->
+      <div class="info-card fade-up bg-white rounded-2xl p-6 shadow-sm">
+        <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Address</div>
+        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">7 Himlayan Rd</div>
+        <div class="font-body text-[0.78rem] text-muted">Tandang Sora, Quezon City</div>
+      </div>
+ 
+      <!-- Status -->
+      <div class="info-card fade-up bg-white rounded-2xl p-6 shadow-sm">
+        <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Clinic Status</div>
+        <div class="flex items-center gap-2 mb-0.5">
+          <span class="dot-pulse w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+          <span class="brand-font font-bold text-[0.95rem] text-green-600">Open Now</span>
+        </div>
+        <div class="font-body text-[0.78rem] text-muted">Closes at 6:00 PM today</div>
+      </div>
+ 
+    </div>
+  </div>
+</section>
+ 
+ 
+<!-- ══════════════════════════════════
+     CONTACT FORM + MAP
+═══════════════════════════════════ -->
+<section class="bg-white" id="contactSection">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+ 
+    <!-- LEFT: Form -->
+    <div class="fade-up">
+      <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
+        <span class="w-2 h-2 rounded-full bg-primary"></span>
+        Get In Touch
+      </div>
+      <h2 class="brand-font font-extrabold leading-[1.1] text-brand mb-3" style="font-size:clamp(1.8rem,3.5vw,2.4rem);">
+        Send Us<br>a Message
+      </h2>
+      <p class="font-body text-[0.9rem] text-muted leading-relaxed mb-10">
+        Have a question, concern, or just want to say hello? Fill out the form and our team will get back to you within one business day.
+      </p>
+ 
+      <!-- Success message -->
+      <div id="successMsg" class="bg-green-50 border border-green-200 rounded-2xl p-5 flex items-start gap-4 mb-6">
+        <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-font font-bold text-green-800 text-[0.9rem]">Message Sent!</div>
+          <div class="font-body text-[0.82rem] text-green-700 mt-0.5">Thank you! We'll be in touch within one business day.</div>
+        </div>
+      </div>
+ 
+      <form id="contactForm" onsubmit="handleSubmit(event)" class="space-y-4">
+ 
+        <!-- Name row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">First Name</label>
+            <input type="text" class="form-input" placeholder="Juan" required/>
+          </div>
+          <div>
+            <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Last Name</label>
+            <input type="text" class="form-input" placeholder="Dela Cruz" required/>
+          </div>
+        </div>
+ 
+        <!-- Email + Phone -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Email Address</label>
+            <input type="email" class="form-input" placeholder="juan@email.com" required/>
+          </div>
+          <div>
+            <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Phone Number</label>
+            <input type="tel" class="form-input" placeholder="+63 9XX XXX XXXX"/>
+          </div>
+        </div>
+ 
+        <!-- Subject -->
+        <div class="relative">
+          <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Subject</label>
+          <select class="form-input pr-10" required>
+            <option value="" disabled selected>What is this about?</option>
+            <option>General Inquiry</option>
+            <option>Service Information</option>
+            <option>Insurance & Billing</option>
+            <option>Feedback or Concern</option>
+            <option>Partnership / Business</option>
+            <option>Other</option>
+          </select>
+          <svg class="absolute right-3 top-[2.85rem] w-4 h-4 text-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+ 
+        <!-- Message -->
+        <div>
+          <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Your Message</label>
+          <textarea class="form-input resize-none" rows="6" placeholder="Write your message here — we read every one and respond personally..." required></textarea>
+        </div>
+ 
+        <!-- Submit -->
+        <button type="submit"
+          class="submit-btn w-full brand-font font-bold text-[0.88rem] tracking-wider uppercase bg-brand text-white py-4 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer mt-2">
+          Send Message →
+        </button>
+ 
+        <p class="font-body text-[0.74rem] text-muted text-center leading-relaxed">
+          By submitting, you agree to our <a href="#" class="text-primary hover:underline">Privacy Policy</a>. We never share your information.
+        </p>
+ 
+      </form>
+    </div>
+ 
+    <!-- RIGHT: Map + Hours -->
+    <div class="fade-up space-y-6">
+ 
+      <!-- Map -->
+      <div class="map-wrap shadow-xl h-[340px]">
+        <iframe class="w-full h-full border-0"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.4!2d121.057!3d14.694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b17b7b8a5e9d%3A0x8e3e6f6d8d1f8b5e!2sTandang%20Sora%20Ave%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1710000000000"
+          allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+ 
+      <!-- Directions link -->
+      <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
+         class="flex items-center justify-between bg-offwhite hover:bg-red-50 rounded-2xl px-6 py-4 transition-colors group no-underline">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-font font-bold text-[0.85rem] text-brand">Get Directions</div>
+            <div class="font-body text-[0.74rem] text-muted">7 Himlayan Rd, Tandang Sora, QC</div>
+          </div>
+        </div>
+        <svg class="w-4 h-4 text-muted group-hover:text-primary transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+ 
+      <!-- Hours card -->
+      <div class="bg-offwhite rounded-2xl overflow-hidden">
+        <div class="flex items-center gap-2 px-6 pt-5 pb-3">
+          <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <span class="brand-font font-bold text-[0.85rem] text-brand">Operating Hours</span>
+        </div>
+        <div class="px-6 pb-2">
+          <div class="flex justify-between items-center py-3 border-b border-[#e5e7eb]">
+            <span class="font-body text-[0.87rem] text-muted">Monday – Friday</span>
+            <span class="brand-font font-bold text-[0.87rem] text-brand">9:00 AM – 6:00 PM</span>
+          </div>
+          <div class="flex justify-between items-center py-3 border-b border-[#e5e7eb]">
+            <span class="font-body text-[0.87rem] text-muted">Saturday</span>
+            <span class="brand-font font-bold text-[0.87rem] text-brand">8:00 AM – 5:00 PM</span>
+          </div>
+          <div class="flex justify-between items-center py-3">
+            <span class="font-body text-[0.87rem] text-muted">Sunday</span>
+            <span class="font-body text-[0.87rem] text-muted italic">By Appointment Only</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Social / quick contacts -->
+      <div class="grid grid-cols-2 gap-4">
+        <a href="tel:+63288881234"
+           class="info-card bg-brand text-white rounded-2xl p-5 flex items-center gap-3 no-underline hover:bg-primary transition-colors group">
+          <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.95-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-font font-bold text-[0.78rem] text-white">Call Us</div>
+            <div class="font-body text-[0.72rem] text-white/60">+63 2 8888 1234</div>
+          </div>
+        </a>
+        <a href="mailto:hello@samsondentalph"
+           class="info-card bg-offwhite rounded-2xl p-5 flex items-center gap-3 no-underline hover:bg-red-50 transition-colors group">
+          <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-font font-bold text-[0.78rem] text-brand">Email Us</div>
+            <div class="font-body text-[0.72rem] text-muted">hello@samsondentalph</div>
+          </div>
+        </a>
+      </div>
+ 
+    </div>
+  </div>
+</section>

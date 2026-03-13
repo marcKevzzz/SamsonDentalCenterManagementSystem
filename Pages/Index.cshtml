@@ -1,0 +1,215 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden">
+
+  <!-- BG layers -->
+  <div class="absolute inset-0 bg-gradient-to-r from-[#cfcfd8] via-[#d2d2da] to-[#b8b8c4]"></div>
+  <div class="home-hero-bg-img absolute inset-0 opacity-90"></div>
+  <div class="absolute inset-0 bg-gradient-to-r from-[#cfcfd8]/95 via-[#f5f5f7]/60 to-transparent"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-8 lg:px-12 w-full pt-24">
+
+    <span class="inline-block font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-muted bg-black/[0.05] px-3 py-1.5 rounded-full mb-6">
+      Welcome to Samson Dental Center
+    </span>
+
+    <h1 class="brand-font font-extrabold leading-[1.05] text-brand  mb-6"
+        style="font-size: clamp(2.8rem, 6vw, 4.8rem);">
+      Your Smile Is Our First Priority.
+    </h1>
+
+    <p class="font-body text-base text-muted max-w-[430px] leading-relaxed mb-10">
+      Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and aesthetic goals.
+    </p>
+
+    <div class="flex flex-wrap gap-4">
+      <a href="#location"
+         class="brand-font font-bold text-sm bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-all hover:-translate-y-0.5 duration-150 no-underline">
+        Make an Appointment
+      </a>
+      <a href="#perks"
+         class="brand-font font-bold text-sm border-2 border-brand text-brand px-8 py-3.5 rounded-xl hover:bg-brand hover:text-white transition-all hover:-translate-y-0.5 duration-150 no-underline">
+        Explore Services
+      </a>
+    </div>
+
+    <!-- Social proof -->
+    <div class="flex items-center gap-3 mt-10">
+      <div class="avatar-stack flex">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg"   class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
+        <img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
+      </div>
+      <div>
+        <div class="text-[#f59e0b] text-lg tracking-wide leading-none mb-1">★★★★★</div>
+        <div class="font-body text-[0.74rem] text-muted">Trusted by 2,000+ Happy Patients</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     EXCLUSIVE PATIENT PERKS
+═════════════════════════════════════ -->
+<section id="perks" class="bg-offwhite">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24">
+
+    <!-- Section header -->
+    <div class="flex flex-wrap justify-between items-end gap-8 mb-14">
+      <div>
+        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          Limited Time Offers
+        </div>
+        <h2 class="brand-font font-extrabold leading-[1.1] text-brand" style="font-size:clamp(2rem,4vw,3rem);">
+          Exclusive<br>Patient Perks
+        </h2>
+      </div>
+      <p class="font-body text-[0.92rem] text-muted leading-relaxed max-w-[300px]">
+        Take advantage of our seasonal promotions designed to make premium dental care more accessible.
+      </p>
+    </div>
+
+    <!-- Perk cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Card 1: New Patient -->
+      <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
+        <span class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white bg-brand px-4 py-1.5 rounded-full mb-6">
+          20% OFF
+        </span>
+        <span class="absolute top-8 right-8 text-[#e5e7eb] text-xl select-none">♡</span>
+        <h3 class="brand-font font-bold text-xl mb-3">New Patient Special</h3>
+        <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
+          Get 20% off your first comprehensive exam, x-rays, and cleaning.
+        </p>
+        <div class="flex justify-between items-center border-t border-[#e5e7eb] pt-4">
+          <span class="font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted">Promo Code</span>
+          <span class="brand-font font-bold text-[0.78rem] tracking-[0.12em]">NEW20</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Teeth Whitening -->
+      <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
+        <span class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
+              style="background:var(--tw-color-primary, #7c3aed); background-color:#7c3aed;">
+          $100 OFF
+        </span>
+        <span class="absolute top-8 right-8 text-[#e5e7eb] text-xl select-none">♡</span>
+        <h3 class="brand-font font-bold text-xl mb-3">Teeth Whitening</h3>
+        <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
+          Brighten your smile with our professional in-office whitening treatment.
+        </p>
+        <div class="flex justify-between items-center border-t border-[#e5e7eb] pt-4">
+          <span class="font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted">Promo Code</span>
+          <span class="brand-font font-bold text-[0.78rem] tracking-[0.12em]">BRIGHT100</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Invisalign -->
+      <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
+        <span class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
+              style="background-color:#059669;">
+          FREE
+        </span>
+        <span class="absolute top-8 right-8 text-[#e5e7eb] text-xl select-none">♡</span>
+        <h3 class="brand-font font-bold text-xl mb-3">Invisalign Consultation</h3>
+        <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
+          Book a complimentary consultation to see if Invisalign is right for you.
+        </p>
+        <div class="flex justify-between items-center border-t border-[#e5e7eb] pt-4">
+          <span class="font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted">Promo Code</span>
+          <span class="brand-font font-bold text-[0.78rem] tracking-[0.12em]">SMILEFREE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     REVIEWS
+═════════════════════════════════════ -->
+<section id="reviews" class="bg-brand">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 flex flex-wrap gap-16 items-center">
+
+    <!-- Left label -->
+    <div class="fade-up w-64 shrink-0">
+      <h2 class="brand-font font-extrabold text-white leading-[1.1]" style="font-size:clamp(2rem,4vw,3rem);">
+        What makes<br><span class="text-[#b07d5c] italic">us smile?</span>
+      </h2>
+      <div class="flex gap-3 mt-8">
+        <button onclick="prevReview()"
+          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-primary hover:border-primary transition-colors flex items-center justify-center text-base cursor-pointer bg-transparent">
+          ←
+        </button>
+        <button onclick="nextReview()"
+          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-primary hover:border-primary transition-colors flex items-center justify-center text-base cursor-pointer bg-transparent">
+          →
+        </button>
+      </div>
+    </div>
+
+    <!-- Review cards -->
+    <div id="reviewsContainer" class="flex gap-6 flex-1 min-w-0 overflow-hidden">
+      <!-- Rendered via JS -->
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     OPERATING HOURS + MAP
+═════════════════════════════════════ -->
+<section id="location" class="bg-white">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+
+    <!-- Left -->
+    <div class="fade-up">
+      <h2 class="brand-font font-extrabold text-[1.8rem] mb-7">Operating Hours</h2>
+
+      <div class="bg-offwhite rounded-2xl overflow-hidden">
+        <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
+          <span class="font-body text-[0.9rem] text-muted">Monday – Friday</span>
+          <span class="brand-font font-bold text-[0.9rem]">9:00 AM – 6:00 PM</span>
+        </div>
+        <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
+          <span class="font-body text-[0.9rem] text-muted">Saturday</span>
+          <span class="brand-font font-bold text-[0.9rem]">8:00 AM – 5:00 PM</span>
+        </div>
+        <div class="flex justify-between items-center px-7 py-5">
+          <span class="font-body text-[0.9rem] text-muted">Sunday</span>
+          <span class="font-body text-[0.9rem] text-muted italic">Closed (By Appointment)</span>
+        </div>
+      </div>
+
+      <h3 class="brand-font font-extrabold text-[1.5rem] mt-10 mb-2">Visit Us</h3>
+      <p class="brand-font font-semibold text-[0.92rem] mb-2">
+        7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila
+      </p>
+      <p class="font-body text-[0.84rem] text-muted leading-relaxed mb-5">
+        Located near Tandang Sora Market, easily accessible via Commonwealth Avenue. We have ample parking space available for our patients.
+      </p>
+      <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
+         class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-brand border-b-2 border-primary pb-0.5 hover:text-primary transition-colors no-underline">
+        GET DIRECTIONS →
+      </a>
+    </div>
+
+    <!-- Right: Map -->
+    <div class="fade-up rounded-2xl overflow-hidden shadow-xl h-[400px]">
+      <iframe class="w-full h-full border-0"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.4!2d121.057!3d14.694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b17b7b8a5e9d%3A0x8e3e6f6d8d1f8b5e!2sTandang%20Sora%20Ave%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1710000000000"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+
+  </div>
+</section>

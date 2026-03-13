@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
+  <script type="importmap"></script>
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/tailwind.css">
+  <link rel="stylesheet" href="~/SamsonDentalCenterManagementSystem.styles.css" asp-append-version="true" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+  href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
+  rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+
+</head>
+<body>
+
+  <header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl ">
+
+    <div class="max-w-7xl mx-auto px-6 h-[68px] flex items-center justify-between gap-6">
+
+      <a href="/" class="flex items-center gap-2.5 shrink-0">
+        <div class="w-9 h-9 rounded-full border-2 border-[#c0392b] flex items-center justify-center">
+          <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5">
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </div>
+        <span class="text-[0.78rem] font-extrabold tracking-[0.07em] uppercase text-[#0f1117]">
+          Samson Dental <span class="text-[#c0392b]">Center</span>
+        </span>
+      </a>
+
+      <nav id="desktopNav" class="hidden md:flex items-center gap-8">
+
+        <a href="/"
+           class="text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b] transition">Home</a>
+
+        <a href="/about"
+           class="text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b] transition">About</a>
+
+        <div id="servicesWrapper" class="relative">
+          <button id="servicesBtn"
+                  class="flex items-center gap-1 text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b] transition">
+            Services
+            <svg id="chevronIcon" class="w-[14px] h-[14px] transition-transform" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                    d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+
+        <a href="/contacts" class="text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b] transition">
+          Contacts
+        </a>
+
+      </nav>
+
+      <button id="bookBtn"
+              class="hidden md:block text-[0.65rem] font-bold tracking-[0.1em] uppercase border-[1.5px] border-[#0f1117] px-5 py-2 rounded-full hover:bg-[#c0392b] hover:text-white hover:border-[#c0392b] transition">
+        Book Now
+      </button>
+
+      <button id="hamburgerBtn" class="md:hidden p-1">
+        <svg class="w-6 h-6" viewBox="0 0 24 24">
+          <path stroke="#0f1117" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- MEGA MENU -->
+  <div id="servicesMega" class=" fixed top-[68px] left-0 right-0 z-[9999] flex justify-center px-4">
+
+    <div id="megaPanel"
+         class="w-full max-w-[740px] bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 overflow-hidden">
+
+    
+
+      <div class="grid grid-cols-3 px-7 py-6">
+
+        <div class="pr-6 border-r border-slate-100">
+          <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">General Dentistry</p>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Dental Checkup</a>
+          <a href="/services/teeth-cleaning" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Teeth Cleaning</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Tooth Filling</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Fluoride Treatment</a>
+        </div>
+
+        <div class="px-6 border-r border-slate-100">
+          <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Cosmetic</p>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Teeth Whitening</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Dental Veneers</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Smile Makeover</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Composite Bonding</a>
+        </div>
+
+        <div class="pl-6">
+          <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Specialized</p>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Root Canal</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Braces & Aligners</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Dental Implants</a>
+          <a href="#" class="block py-1.5 text-[0.85rem] hover:text-[#c0392b]">Oral Surgery</a>
+        </div>
+
+      </div>
+
+      <div
+        class="mx-7 mb-5 p-4 bg-red-50 border border-red-300 rounded-xl flex items-center justify-between flex-wrap gap-3">
+
+        <div>
+          <p class="text-[0.75rem] font-bold text-[#c0392b]">Free Consultation</p>
+          <p class="text-[0.78rem] text-red-700">For new patients — no obligation</p>
+        </div>
+
+        <a href="#contact"
+           class="text-[0.62rem] font-bold tracking-[0.1em] uppercase bg-[#c0392b] text-white px-4 py-2 rounded-full hover:bg-[#a93226]">
+          Book Free Visit
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div id="mobileMenu"
+       class="hidden fixed top-[68px] left-0 right-0 bottom-0 z-[9998] bg-white overflow-y-auto border-t">
+
+    <div class="px-6 pb-10">
+
+      <a href="/"
+         class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b]">Home</a>
+
+      <a href="/about"
+         class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b]">About</a>
+
+      <button id="mobileServicesBtn"
+              class="w-full flex justify-between items-center py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b]">
+
+        Services
+
+        <svg id="mobileChevron" class="w-4 h-4 transition-transform" viewBox="0 0 24 24">
+          <path stroke="#0f1117" stroke-width="2" stroke-linecap="round" d="m6 9 6 6 6-6" />
+        </svg>
+
+      </button>
+
+      <div id="mobileServicesMenu" class="max-h-0 overflow-hidden transition-all duration-300">
+
+        <div class="pb-2">
+
+          <p class="text-[0.57rem] font-bold tracking-[0.13em] uppercase text-gray-400 pt-3 pl-3">General</p>
+          <a href="#" class="block py-2 pl-3 text-sm text-gray-600 hover:text-[#c0392b]">Dental Checkup</a>
+          <a href="#" class="block py-2 pl-3 text-sm text-gray-600 hover:text-[#c0392b]">Teeth Cleaning</a>
+
+        </div>
+
+      </div>
+
+      <a href="#contact"
+         class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-[#c0392b]">
+        Contact
+      </a>
+
+      <button
+        class="w-full mt-6 py-3 rounded-full bg-[#c0392b] text-white text-[0.68rem] font-bold tracking-[0.1em] uppercase hover:bg-[#a93226]">
+        Book Appointment
+      </button>
+
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen ">
+    <main role="main" class="pb-3">
+      @RenderBody()
+    </main>
+  </div>
+
+  <footer class="bg-brand text-white">
+    <div class="max-w-7xl mx-auto px-8 lg:px-12 pt-16 pb-8">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 pb-12 border-b border-white/10">
+
+        <!-- Brand -->
+        <div>
+          <div
+            class="brand-font b flex items-center gap-2 font-extrabold text-[0.9rem] tracking-[0.07em] uppercase text-white mb-4">
+            <div class="w-8 h-8 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5">
+                <circle cx="12" cy="12" r="9" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </div>
+            Samson Dental <span class="text-primary ml-1">Center</span>
+          </div>
+          <p class="font-body text-[0.82rem] text-white/40 leading-relaxed max-w-[220px] mb-6">
+            Empowering communities with world-class dental solutions and compassionate care since 2008.
+          </p>
+          <div class="flex gap-3">
+            <a href="#"
+               class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 text-xs font-bold hover:bg-primary hover:border-primary hover:text-white transition-all">f</a>
+            <a href="#"
+               class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 text-xs font-bold hover:bg-primary hover:border-primary hover:text-white transition-all">in</a>
+            <a href="#"
+               class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 text-xs font-bold hover:bg-primary hover:border-primary hover:text-white transition-all">𝕏</a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="brand-font font-bold text-[0.85rem] text-white mb-5">Quick Links</h4>
+          <a href="#hero"
+             class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">Home</a>
+          <a href="#perks"
+             class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">About</a>
+          <a href="#perks"
+             class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">Services</a>
+          <a href="#location"
+             class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">Contacts</a>
+        </div>
+
+        <!-- Specialties -->
+        <div>
+          <h4 class="brand-font font-bold text-[0.85rem] text-white mb-5">Specialties</h4>
+          <a href="#"
+             class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">General
+            Dentistry</a>
+            <a href="#"
+               class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">Orthodontics</a>
+            <a href="#"
+               class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">Oral
+              Surgery</a>
+              <a href="#"
+                 class="block font-body text-[0.83rem] text-white/40 hover:text-primary transition-colors mb-3">Pediatric
+                Care</a>
+              </div>
+
+              <!-- Newsletter -->
+              <div>
+                <h4 class="brand-font font-bold text-[0.85rem] text-white mb-3">Newsletter</h4>
+                <p class="font-body text-[0.8rem] text-white/38 leading-relaxed mb-4">Stay updated with dental tips and
+                  offers.</p>
+                  <div class="flex rounded-xl overflow-hidden border border-white/10"
+                       style="background:rgba(255,255,255,0.07);">
+                    <input type="email" placeholder="Your email"
+                           class="nl-input flex-1 bg-transparent border-none outline-none px-4 py-3 font-body text-[0.83rem] text-white" />
+                    <button
+                    class="bg-primary px-4 text-white text-base hover:opacity-85 transition-opacity cursor-pointer border-none">→</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Footer bottom -->
+              <div class="flex flex-wrap justify-between items-center pt-7 gap-4">
+                <p class="font-body text-[0.74rem] text-white/28">© 2024 Samson Dental Center. All Rights Reserved.</p>
+                <div class="flex gap-6">
+                  <a href="#" class="font-body text-[0.74rem] text-white/28 hover:text-primary transition-colors">Privacy
+                    Policy</a>
+                    <a href="#" class="font-body text-[0.74rem] text-white/28 hover:text-primary transition-colors">Terms of
+                      Service</a>
+                    </div>
+                  </div>
+
+                </div>
+              </footer>
+
+
+              <!-- Chat Bubble -->
+              <div
+                class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-brand rounded-full flex items-center justify-center cursor-pointer shadow-xl hover:bg-primary hover:scale-110 transition-all duration-200">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+
+              <script src="~/lib/jquery/dist/jquery.min.js"></script>
+              <script src="~/js/site.js" asp-append-version="true"></script>
+
+              @await RenderSectionAsync("Scripts", required: false)
+            </body>
+
+          </html>

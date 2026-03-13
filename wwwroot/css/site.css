@@ -1,0 +1,188 @@
+body {
+  font-family: "DM Sans", sans-serif;
+}
+h1,
+h2,
+h3,
+h4,
+.brand-font {
+  font-family: "Syne", sans-serif;
+}
+
+.home-hero-bg-img {
+  background: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80")
+    center / cover no-repeat;
+}
+.about-hero-bg-img {
+  background: url("https://scontent.fmnl17-3.fna.fbcdn.net/v/t39.30808-6/503908776_1263894849071969_3493022581600617445_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGx1_nmgxQoegt63_wAXTGERsV2jREbIwVGxXaNERsjBdCIB7ugm5vfqHHE2uODXpFkJPMYkNpnJEqVkGsPJx9U&_nc_ohc=gmXUUCwGQWMQ7kNvwHYnMb2&_nc_oc=AdnUghTac5kDbAUjMBrA21E56a1GTD1QxDQ8P6NJp6a2fuyEN3gsJD0r0LbXlntKcjc&_nc_zt=23&_nc_ht=scontent.fmnl17-3.fna&_nc_gid=3N2OJdonTtj4pUcMvE4vuw&_nc_ss=8&oh=00_AfzF7RKOGA3WU5H7R50pMHpaDG8XeeLLeBfEa8B5ukUOyQ&oe=69B91BC2")
+    center / cover no-repeat;
+}
+
+/* Navbar transition */
+#navbar {
+  transition:
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    backdrop-filter 0.35s ease;
+}
+
+/* Avatar overlap */
+.avatar-stack > img + img {
+  margin-left: -10px;
+}
+
+/* Perk card hover */
+.perk-card {
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+.perk-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* GSAP targets start hidden */
+.fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+/* Newsletter placeholder */
+.nl-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Dimmed review card */
+.review-dim {
+  opacity: 0.42;
+  transform: scale(0.97);
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+
+.stat-card {
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+.team-thumb {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
+  cursor: pointer;
+}
+.team-thumb:hover {
+  transform: scale(1.1);
+  opacity: 1 !important;
+}
+.team-thumb.active {
+  box-shadow: 0 0 0 3px #c0392b;
+  opacity: 1 !important;
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.faq-answer.open {
+  max-height: 200px;
+}
+.faq-chevron {
+  transition: transform 0.3s ease;
+}
+.faq-chevron.open {
+  transform: rotate(180deg);
+}
+
+.form-input {
+  width: 100%;
+  background: #f5f5f7;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.form-input:focus {
+  background: #ffffff;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.08);
+}
+.form-input::placeholder {
+  color: #9ca3af;
+}
+select.form-input {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Info cards hover */
+.info-card {
+  transition:
+    transform 0.22s,
+    box-shadow 0.22s;
+}
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.09);
+}
+
+/* Submit button ripple */
+.submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.submit-btn:hover::after {
+  opacity: 1;
+}
+
+/* Success message */
+#successMsg {
+  display: none;
+}
+
+/* Map */
+.map-wrap {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Dot pulse animation for "open now" indicator */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.4);
+  }
+}
+.dot-pulse {
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+.nl-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
