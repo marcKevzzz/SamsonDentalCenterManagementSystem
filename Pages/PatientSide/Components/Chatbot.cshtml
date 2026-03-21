@@ -1,0 +1,184 @@
+<button
+  id="chatFab"
+  onclick="toggleChat()"
+  class="fixed bottom-6 right-6 z-10 w-14 h-14 rounded-full bg-brand border-none cursor-pointer shadow-2xl flex items-center justify-center hover:bg-primary transition-all duration-200 hover:scale-110"
+>
+  <span class="icon-chat flex items-center justify-center">
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  </span>
+  <span class="icon-close hidden items-center justify-center">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  </span>
+</button>
+
+<div
+  id="chatWindow"
+  class="fixed bottom-6 right-24 z-40 win-closed w-[390px] max-w-[calc(100vw-32px)] h-[620px] max-h-[calc(100vh-120px)] bg-white rounded-[22px] shadow-2xl flex flex-col overflow-hidden"
+>
+  <!-- ── Header ── -->
+  <div class="bg-brand flex items-center gap-3 px-5 py-4 shrink-0">
+    <!-- Avatar -->
+    <div
+      class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    </div>
+    <!-- Info -->
+    <div class="flex-1 min-w-0">
+      <div class="brand-font font-bold text-white text-[0.9rem] tracking-wide">
+        Samson Dental Center
+      </div>
+      <div class="flex items-center gap-1.5 mt-0.5">
+        <span
+          class="online-dot w-1.5 h-1.5 rounded-full bg-green-400 inline-block"
+        ></span>
+        <span class="font-body text-[0.68rem] text-white/50"
+          >Online · Replies instantly</span
+        >
+      </div>
+    </div>
+    <!-- Close button -->
+    <button
+      onclick="toggleChat()"
+      class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border-none cursor-pointer flex items-center justify-center transition-colors shrink-0"
+    >
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- ── Messages ── -->
+  <div
+    id="chatMessages"
+    class="flex-1 overflow-y-auto flex flex-col gap-2.5 px-4 py-4 scroll-smooth bg-offwhite"
+  ></div>
+
+  <!-- ── Topic chips ── -->
+  <div
+    id="topicChips"
+    class="flex gap-1 flex-wrap px-2 py-2.5 bg-white border-t border-[#e5e7eb] shrink-0"
+  >
+    <button
+      class="font-body text-[0.7rem] font-medium px-3 py-1.5 rounded-full border border-[#e5e7eb] bg-offwhite text-muted hover:border-primary hover:text-primary hover:bg-red-50 transition-all cursor-pointer"
+      onclick="sendQuick('📅 Schedule')"
+    >
+      📅 Schedule
+    </button>
+    <button
+      class="font-body text-[0.7rem] font-medium px-3 py-1.5 rounded-full border border-[#e5e7eb] bg-offwhite text-muted hover:border-primary hover:text-primary hover:bg-red-50 transition-all cursor-pointer"
+      onclick="sendQuick('🦷 Services')"
+    >
+      🦷 Services
+    </button>
+    <button
+      class="font-body text-[0.7rem] font-medium px-3 py-1.5 rounded-full border border-[#e5e7eb] bg-offwhite text-muted hover:border-primary hover:text-primary hover:bg-red-50 transition-all cursor-pointer"
+      onclick="sendQuick('📍 Location')"
+    >
+      📍 Location
+    </button>
+    <button
+      class="font-body text-[0.7rem] font-medium px-3 py-1.5 rounded-full border border-[#e5e7eb] bg-offwhite text-muted hover:border-primary hover:text-primary hover:bg-red-50 transition-all cursor-pointer"
+      onclick="sendQuick('💰 Pricing')"
+    >
+      💰 Pricing
+    </button>
+    <button
+      class="font-body text-[0.7rem] font-medium px-3 py-1.5 rounded-full border border-[#e5e7eb] bg-offwhite text-muted hover:border-primary hover:text-primary hover:bg-red-50 transition-all cursor-pointer"
+      onclick="sendQuick('🏥 Insurance')"
+    >
+      🏥 Insurance
+    </button>
+    <button
+      class="font-body text-[0.7rem] font-medium px-3 py-1.5 rounded-full border border-[#e5e7eb] bg-offwhite text-muted hover:border-primary hover:text-primary hover:bg-red-50 transition-all cursor-pointer"
+      onclick="sendQuick('📞 Contact')"
+    >
+      📞 Contact
+    </button>
+  </div>
+
+  <!-- ── Quick replies ── -->
+  <div
+    id="quickReplies"
+    class="flex gap-1 flex-wrap px-2 pb-2 pt-1 bg-white shrink-0"
+  ></div>
+
+  <!-- ── Input ── -->
+  <div
+    class="flex items-end gap-2.5 px-4 py-3 bg-white border-t border-[#e5e7eb] shrink-0"
+  >
+    <textarea
+      id="chatInput"
+      rows="1"
+      class="flex-1 font-body text-[0.87rem] text-[#1a1a2e] bg-offwhite border border-[#e5e7eb] rounded-xl px-3.5 py-2.5 outline-none resize-none leading-snug focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-[#aaa] max-h-24"
+      placeholder="Ask me anything…"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    >
+    </textarea>
+    <button
+      id="sendBtn"
+      onclick="sendMessage()"
+      class="w-10 h-10 rounded-full bg-brand border-none cursor-pointer shrink-0 flex items-center justify-center hover:bg-primary transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+    >
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="22" y1="2" x2="11" y2="13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>
+    </button>
+  </div>
+</div>

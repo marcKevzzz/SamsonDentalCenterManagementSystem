@@ -59,43 +59,54 @@ function selectDoctor(index) {
   });
 }
 
-/* ── FAQ data ── */
-const faqs = [
-  {
-    q: "Do you accept walk-in patients?",
-    a: "Yes, we welcome walk-in patients during regular clinic hours. However, we recommend booking an appointment in advance to minimize your waiting time and ensure a dedicated slot with your preferred doctor.",
-  },
-  {
-    q: "What insurance plans do you accept?",
-    a: "We accept most major HMO providers including Maxicare, Intellicare, Medicard, and PhilHealth. Please bring your insurance card for verification prior to your appointment.",
-  },
-  {
-    q: "Do you offer installment plans?",
-    a: "Yes, we offer flexible installment options for select procedures through partner financing programs. Our patient coordinators can walk you through available payment schemes during your consultation.",
-  },
-  {
-    q: "How often should I get a dental cleaning?",
-    a: "We recommend professional dental cleanings every six months. Patients with a history of gum disease or higher plaque buildup may benefit from more frequent visits — your dentist will advise accordingly.",
-  },
-  {
-    q: "Is there parking available?",
-    a: "Yes, we have ample parking space on-site at 7 Himlayan Rd, Tandang Sora. Additional street parking is also available nearby along Commonwealth Avenue.",
-  },
-];
+/* ── Facilities & Offers Carousel ── */
+(function () {
+  const track = document.getElementById("facTrack");
+  const dotsWrap = document.getElementById("facDots");
+  const cards = track.querySelectorAll(".fac-card");
+  const total = cards.length;
+  const perView = 3;
+  const maxIdx = total - perView;
+  let idx = 0;
 
-const faqList = document.getElementById("faqList");
-faqs.forEach((item, i) => {
-  faqList.innerHTML += `
-      <div class="border border-[#e5e7eb] rounded-2xl overflow-hidden">
-        <button onclick="toggleFaq(${i})"
-          class="w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-offwhite transition-colors">
-          <span class="brand-font font-semibold text-[0.9rem] text-brand">${item.q}</span>
-          <svg id="chevron-${i}" class="faq-chevron shrink-0 ml-4 text-muted w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-        <div id="faq-${i}" class="faq-answer bg-white px-6">
-          <p class="font-body text-[0.86rem] text-muted leading-relaxed pb-5 pt-1">${item.a}</p>
-        </div>
-      </div>`;
-});
+  // Build dots
+  for (let i = 0; i <= maxIdx; i++) {
+    const dot = document.createElement("button");
+    dot.className = `w-2 h-2 rounded-full transition-all duration-300 cursor-pointer border-none ${i === 0 ? "bg-brand w-5" : "bg-[#d1d5db]"}`;
+    dot.onclick = () => goFac(i);
+    dotsWrap.appendChild(dot);
+  }
+
+  function goFac(n) {
+    if (n > maxIdx) {
+      idx = 0; // loop back to start
+    } else if (n < 0) {
+      idx = maxIdx; // loop to end
+    } else {
+      idx = n;
+    }
+
+    const cardW = cards[0].offsetWidth;
+    const gap = 20;
+    const offset = idx * (cardW + gap);
+
+    track.style.transform = `translateX(-${offset}px)`;
+
+    dotsWrap.querySelectorAll("button").forEach((d, i) => {
+      d.className = `rounded-full transition-all duration-300 cursor-pointer border-none h-2 ${
+        i === idx ? "bg-brand w-5" : "bg-[#d1d5db] w-2"
+      }`;
+    });
+  }
+
+  setInterval(() => {
+    goFac(idx + 1);
+  }, 3000); // every 3 seconds
+
+  window.shiftFac = function (dir) {
+    goFac(idx + dir);
+  };
+
+  // Recalculate on resize
+  window.addEventListener("resize", () => goFac(idx));
+})();

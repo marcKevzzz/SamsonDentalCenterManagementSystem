@@ -1,0 +1,385 @@
+@page "/sign-in"
+@model SigninModel
+@{
+    Layout = "_AuthLayout";
+}
+
+<div
+  class="hidden lg:flex lg:w-[44%] bg-brand flex-col justify-between p-12 relative overflow-hidden shrink-0"
+>
+  <div class="absolute inset-0 bg-grid"></div>
+  <div
+    class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/15 blur-3xl pointer-events-none"
+  ></div>
+  <div
+    class="absolute top-20 -right-24 w-64 h-64 rounded-full bg-primary/08 blur-2xl pointer-events-none"
+  ></div>
+
+  <!-- Logo -->
+  <a
+    href="../"
+    class="brand-font flex items-center gap-2.5 font-extrabold text-[1rem] tracking-[0.07em] uppercase text-white no-underline relative z-10"
+  >
+    <div
+      class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center shrink-0"
+    >
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#c0392b"
+        stroke-width="2.5"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    </div>
+    Samson Dental <span class="text-primary ml-1">Center</span>
+  </a>
+
+  <!-- Center -->
+  <div class="relative z-10">
+    <div
+      class="flex items-center gap-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/35 mb-5"
+    >
+      <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Patient
+      Portal
+    </div>
+    <h2
+      class="brand-font font-extrabold text-white leading-[1.08] mb-5"
+      style="font-size: clamp(2rem, 3.2vw, 2.8rem)"
+    >
+      Your smile,<br />your account.
+    </h2>
+    <p
+      class="font-body text-[0.9rem] text-white/50 leading-relaxed max-w-xs mb-10"
+    >
+      Access appointments, treatment history, and exclusive member offers — all
+      in one place.
+    </p>
+    <div class="space-y-3.5">
+      <div
+        class="flex items-center gap-3 font-body text-[0.84rem] text-white/65"
+      >
+        <span
+          class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0"
+          ><svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c0392b"
+            stroke-width="3"
+          >
+            <polyline points="20 6 9 17 4 12" /></svg
+        ></span>
+        View & manage upcoming appointments
+      </div>
+      <div
+        class="flex items-center gap-3 font-body text-[0.84rem] text-white/65"
+      >
+        <span
+          class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0"
+          ><svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c0392b"
+            stroke-width="3"
+          >
+            <polyline points="20 6 9 17 4 12" /></svg
+        ></span>
+        Access treatment history & records
+      </div>
+      <div
+        class="flex items-center gap-3 font-body text-[0.84rem] text-white/65"
+      >
+        <span
+          class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0"
+          ><svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c0392b"
+            stroke-width="3"
+          >
+            <polyline points="20 6 9 17 4 12" /></svg
+        ></span>
+        Exclusive promos & member discounts
+      </div>
+      <div
+        class="flex items-center gap-3 font-body text-[0.84rem] text-white/65"
+      >
+        <span
+          class="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0"
+          ><svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c0392b"
+            stroke-width="3"
+          >
+            <polyline points="20 6 9 17 4 12" /></svg
+        ></span>
+        Faster check-in on every visit
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust -->
+  <div class="relative z-10 flex items-center gap-4">
+    <div class="flex -space-x-2">
+      <img
+        src="https://randomuser.me/api/portraits/women/44.jpg"
+        class="w-8 h-8 rounded-full border-2 border-brand object-cover"
+        alt=""
+      />
+      <img
+        src="https://randomuser.me/api/portraits/men/32.jpg"
+        class="w-8 h-8 rounded-full border-2 border-brand object-cover"
+        alt=""
+      />
+      <img
+        src="https://randomuser.me/api/portraits/women/68.jpg"
+        class="w-8 h-8 rounded-full border-2 border-brand object-cover"
+        alt=""
+      />
+    </div>
+    <div>
+      <div class="text-[#f59e0b] text-sm leading-none">★★★★★</div>
+      <div class="font-body text-[0.7rem] text-white/38 mt-0.5">
+        Trusted by 2,000+ patients
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Right panel (form) ── -->
+<div
+  class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto"
+>
+  <div class="w-full max-w-[420px] card-animate">
+    <!-- Mobile logo -->
+    <div class="flex lg:hidden justify-center mb-8">
+      <a
+        href="../"
+        class="brand-font flex items-center gap-2 font-extrabold text-[1rem] tracking-[0.07em] uppercase text-brand no-underline"
+      >
+        <div
+          class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center shrink-0"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c0392b"
+            stroke-width="2.5"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </div>
+        Samson Dental <span class="text-primary ml-1">Center</span>
+      </a>
+    </div>
+
+    <div class="mb-8">
+      <h2
+        class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-1.5"
+      >
+        Welcome back
+      </h2>
+      <p class="font-body text-[0.9rem] text-muted">
+        Sign in to your patient account to continue.
+      </p>
+    </div>
+
+    <form
+      id="signinForm"
+      onsubmit="handleSignIn(event)"
+      novalidate
+      class="space-y-4"
+    >
+      <!-- Email -->
+      <div>
+        <label
+          class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2"
+          >Email Address</label
+        >
+        <div class="relative">
+          <span
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+          </span>
+          <input
+            id="si_email"
+            type="email"
+            class="auth-input"
+            placeholder="juan@email.com"
+            oninput="clearErr('si_email')"
+          />
+        </div>
+        <div id="err_si_email" class="field-error">
+          Please enter a valid email address.
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label
+            class="font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted"
+            >Password</label
+          >
+          <a
+            href="#"
+            class="font-body text-[0.76rem] text-primary hover:underline"
+            >Forgot password?</a
+          >
+        </div>
+        <div class="relative">
+          <span
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </span>
+          <input
+            id="si_password"
+            type="password"
+            class="auth-input pr-11"
+            placeholder="Enter your password"
+            oninput="clearErr('si_password')"
+          />
+          <button
+            type="button"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors"
+            onclick="togglePw('si_password', this)"
+          >
+            <svg
+              class="eye-show"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg
+              class="eye-hide hidden"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+              />
+              <path
+                d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+              />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+        <div id="err_si_password" class="field-error">
+          Password is required.
+        </div>
+      </div>
+
+      <!-- Remember me -->
+      <div class="flex items-center gap-2.5">
+        <input
+          type="checkbox"
+          id="rememberMe"
+          class="accent-primary w-4 h-4 cursor-pointer rounded"
+        />
+        <label
+          for="rememberMe"
+          class="font-body text-[0.83rem] text-muted cursor-pointer select-none"
+          >Keep me signed in</label
+        >
+      </div>
+
+      <!-- Sign in btn -->
+      <button
+        type="submit"
+        class="brand-font font-bold text-[0.85rem] tracking-wider uppercase w-full bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer"
+      >
+        Sign In →
+      </button>
+
+      <div class="or-line font-body">or</div>
+
+      <!-- Guest -->
+      <a
+        href="../"
+        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        Continue as Guest
+      </a>
+    </form>
+
+    <p class="font-body text-[0.85rem] text-muted text-center mt-7">
+      Don't have an account?
+      <a
+        href="/sign-up"
+        class="text-primary font-medium hover:underline ml-1"
+        >Create one →</a
+      >
+    </p>
+  </div>
+</div>

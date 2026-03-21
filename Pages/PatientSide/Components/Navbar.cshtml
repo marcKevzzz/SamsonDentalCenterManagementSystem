@@ -1,0 +1,201 @@
+<header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl ">
+
+    <div class="max-w-7xl mx-auto px-2 md:px-6 h-[68px] flex items-center justify-between gap-6">
+
+        <a href="/" class="flex items-center gap-2 shrink-0">
+            <div class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center">
+                <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="#db3623" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+            </div>
+            <span id="logo" class="text-[0.78rem] font-extrabold tracking-[0.05em] uppercase ">
+                Samson Dental <span class="text-primary">Center</span>
+            </span>
+        </a>
+
+        <nav id="desktopNav" class="hidden md:flex items-center gap-8">
+
+            <a href="/" id="nav-home"
+                class="nav-link text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-primary transition">Home</a>
+
+            <a href="/about" id="nav-about"
+                class="nav-link text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-primary transition">About</a>
+
+            <div id="servicesWrapper" class="relative">
+                <button id="servicesBtn"
+                    class="nav-link flex items-center gap-1 text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-primary transition">
+                    Services
+                    @* <svg id="chevronIcon" transition-transform" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                            d="m6 9 6 6 6-6" />
+                    </svg> *@
+                    <i class="fa-solid fa-caret-down transition-transform " id="chevronIcon"></i>
+                </button>
+            </div>
+
+            <a href="/contacts" id="nav-contacts"
+                class="nav-link text-[0.72rem] font-bold tracking-[0.09em] uppercase hover:text-primary transition">
+                Contacts
+            </a>
+
+        </nav>
+        <div class="flex items-center gap-4">
+            <a id="bookBtn" href="/Appointments"
+                class="hidden md:flex items-center text-[0.65rem] font-bold tracking-[0.1em] uppercase border-[1.5px] px-5 py-2 rounded-full hover:bg-primary hover:text-white hover:border-primary/90 transition">
+                Book Now
+            </a>
+
+            <div class="flex items-center">
+                <partial name="./Profile.cshtml" />
+            </div>
+
+            <button id="hamburgerBtn" class="md:hidden p-1">
+                <svg class="w-6 h-6" viewBox="0 0 24 24">
+                    <path stroke="currentcolor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+            </button>
+        </div>
+
+    </div>
+</header>
+
+<!-- MEGA MENU -->
+<div id="servicesMega" class="hidden fixed top-[68px] left-0 right-0 z-[9999] flex justify-center px-4">
+
+    <div id="megaPanel"
+        class="w-full max-w-[740px] bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 overflow-hidden">
+
+
+
+        <div class="grid grid-cols-3 px-7 py-6">
+
+            <div class="pr-6 border-r border-slate-100">
+                <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">General Dentistry</p>
+                <a href="/Services/dental-checkup" class="block py-1.5 text-[0.85rem] hover:text-primary">Dental
+                    Checkup</a>
+                <a href="/Services/teeth-cleaning" class="block py-1.5 text-[0.85rem] hover:text-primary">Teeth
+                    Cleaning</a>
+                <a href="/Services/tooth-filling" class="block py-1.5 text-[0.85rem] hover:text-primary">Tooth
+                    Filling</a>
+                <a href="/Services/fluoride-treatment" class="block py-1.5 text-[0.85rem] hover:text-primary">Fluoride
+                    Treatment</a>
+            </div>
+
+            <div class="px-6 border-r border-slate-100">
+                <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Cosmetic</p>
+                <a href="/Services/teeth-whitening" class="block py-1.5 text-[0.85rem] hover:text-primary">Teeth
+                    Whitening</a>
+                <a href="/Services/dental-veneers" class="block py-1.5 text-[0.85rem] hover:text-primary">Dental
+                    Veneers</a>
+                <a href="/Services/smile-makeover" class="block py-1.5 text-[0.85rem] hover:text-primary">Smile
+                    Makeover</a>
+                <a href="/Services/composite-bonding" class="block py-1.5 text-[0.85rem] hover:text-primary">Composite
+                    Bonding</a>
+            </div>
+
+            <div class="pl-6">
+                <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Specialized</p>
+                <a href="#" class="block py-1.5 text-[0.85rem] hover:text-primary">Root Canal</a>
+                <a href="#" class="block py-1.5 text-[0.85rem] hover:text-primary">Braces & Aligners</a>
+                <a href="#" class="block py-1.5 text-[0.85rem] hover:text-primary">Dental Implants</a>
+                <a href="#" class="block py-1.5 text-[0.85rem] hover:text-primary">Oral Surgery</a>
+            </div>
+
+        </div>
+
+        <div
+            class="mx-7 mb-5 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-between flex-wrap gap-3">
+
+            <div>
+                <p class="text-[0.75rem] font-bold text-primary">Free Consultation</p>
+                <p class="text-[0.78rem] text-primary">For new patients — no obligation</p>
+            </div>
+
+            <a href="#contact"
+                class="text-[0.62rem] font-bold tracking-[0.1em] uppercase bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition">
+                Book Free Visit
+            </a>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobileMenu" class="hidden fixed top-[68px] left-0 right-0 bottom-0 z-[9998] bg-white overflow-y-auto border-t">
+
+    <div class="px-6 pb-10 flex flex-col">
+
+        <!-- <div class="py-6 border-b flex items-center gap-4 relative">
+            <partial name="./Profile.cshtml" />
+            <div class="flex flex-col ">
+                <span class="text-[0.75rem] font-bold uppercase tracking-wider">My Account</span>
+                <a href="#" class="text-[0.65rem] hover:text-gray-500 underline">Manage Profile</a>
+            </div>
+        </div> -->
+
+        <a href="/"
+            class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">Home</a>
+
+        <a href="/about"
+            class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">About</a>
+
+        <button id="mobileServicesBtn"
+            class="w-full flex justify-between items-center py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">
+
+            Services
+
+            <svg id="mobileChevron" class="w-4 h-4 transition-transform" viewBox="0 0 24 24">
+                <path stroke="#0f1117" stroke-width="2" stroke-linecap="round" d="m6 9 6 6 6-6" />
+            </svg>
+
+        </button>
+
+        <div id="mobileServicesMenu" class="max-h-0 overflow-hidden transition-all duration-300">
+
+            <div class="pb-2">
+
+                <p class="text-[0.57rem] font-bold tracking-[0.13em] uppercase text-gray-400 pt-3 pl-3">General</p>
+                <a href="/Services/dental-checkup"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Dental Checkup</a>
+                <a href="/Services/teeth-cleaning"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Teeth
+                    Cleaning</a>
+                <a href="/Services/tooth-filling" class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Tooth
+                    Filling</a>
+                <a href="/Services/fluoride-treatment"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Fluoride
+                    Treatment</a>
+            </div>
+            <div class="pb-2">
+
+                <p class="text-[0.57rem] font-bold tracking-[0.13em] uppercase text-gray-400 pt-3 pl-3">Cosmetic</p>
+                <a href="/Services/teeth-whitening"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Teeth
+                    Whitening</a>
+                <a href="/Services/dental-veneers"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Dental
+                    Veneers</a>
+                <a href="/Services/smile-makeover"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Smile
+                    Makeover</a>
+                <a href="/Services/composite-bonding"
+                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Composite
+                    Bonding</a>
+            </div>
+
+        </div>
+
+        <a href="#contact"
+            class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">
+            Contact
+        </a>
+
+        <a href="/Appointments"
+            class=" w-fit mt-6 py-3 px-4 rounded-full bg-primary text-white text-[0.68rem] font-bold tracking-[0.1em] uppercase hover:bg-primary/90 transition">
+            Book Appointment
+        </a>
+
+    </div>
+</div>

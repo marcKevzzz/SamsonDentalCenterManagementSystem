@@ -1,39 +1,44 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+ViewData["Title"] = "Home page";
 }
 
 <section id="hero" class="relative min-h-screen flex items-center overflow-hidden">
 
   <!-- BG layers -->
-  <div class="absolute inset-0 bg-gradient-to-r from-[#cfcfd8] via-[#d2d2da] to-[#b8b8c4]"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] via-[#49494b] to-[#56565e]"></div>
   <div class="home-hero-bg-img absolute inset-0 opacity-90"></div>
-  <div class="absolute inset-0 bg-gradient-to-r from-[#cfcfd8]/95 via-[#f5f5f7]/60 to-transparent"></div>
+  <div class="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/70 to-brand/50"></div>
 
   <!-- Content -->
   <div class="relative z-10 max-w-7xl mx-auto px-8 lg:px-12 w-full pt-24">
 
-    <span class="inline-block font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-muted bg-black/[0.05] px-3 py-1.5 rounded-full mb-6">
+    <span
+      class="inline-block font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6">
       Welcome to Samson Dental Center
     </span>
 
-    <h1 class="brand-font font-extrabold leading-[1.05] text-brand  mb-6"
-        style="font-size: clamp(2.8rem, 6vw, 4.8rem);">
-      Your Smile Is Our First Priority.
+    <h1 class="brand-font font-extrabold leading-[0.9] text-white  mb-6 flex flex-col "
+      style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
+      Your Smile Is Our 
+      <span class="text-primary">
+        First Priority.
+      </span>
     </h1>
 
-    <p class="font-body text-base text-muted max-w-[430px] leading-relaxed mb-10">
-      Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and aesthetic goals.
+    <p class="font-body text-base text-white/80 max-w-[430px] leading-relaxed mb-10">
+      Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and
+      aesthetic goals.
     </p>
 
     <div class="flex flex-wrap gap-4">
-      <a href="#location"
-         class="brand-font font-bold text-sm bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-all hover:-translate-y-0.5 duration-150 no-underline">
+      <a href="/Appointments"
+        class="brand-font font-bold text-sm bg-primary text-white px-8 py-3.5 rounded-full hover:bg-primary transition-all hover:-translate-y-0.5 duration-150 no-underline">
         Make an Appointment
       </a>
-      <a href="#perks"
-         class="brand-font font-bold text-sm border-2 border-brand text-brand px-8 py-3.5 rounded-xl hover:bg-brand hover:text-white transition-all hover:-translate-y-0.5 duration-150 no-underline">
+      <a href="/Services"
+        class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-brand transition-all hover:-translate-y-0.5 duration-150 no-underline">
         Explore Services
       </a>
     </div>
@@ -41,9 +46,12 @@
     <!-- Social proof -->
     <div class="flex items-center gap-3 mt-10">
       <div class="avatar-stack flex">
-        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg"   class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
-        <img src="https://randomuser.me/api/portraits/women/68.jpg" class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg"
+          class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg"
+          class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
+        <img src="https://randomuser.me/api/portraits/women/68.jpg"
+          class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
       </div>
       <div>
         <div class="text-[#f59e0b] text-lg tracking-wide leading-none mb-1">★★★★★</div>
@@ -63,7 +71,8 @@
     <!-- Section header -->
     <div class="flex flex-wrap justify-between items-end gap-8 mb-14">
       <div>
-        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
+        <div
+          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
           <span class="w-2 h-2 rounded-full bg-primary"></span>
           Limited Time Offers
         </div>
@@ -81,10 +90,11 @@
 
       <!-- Card 1: New Patient -->
       <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
-        <span class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white bg-brand px-4 py-1.5 rounded-full mb-6">
+        <span
+          class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white bg-brand px-4 py-1.5 rounded-full mb-6">
           20% OFF
         </span>
-        <span class="absolute top-8 right-8 text-[#e5e7eb] text-xl select-none">♡</span>
+        <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
         <h3 class="brand-font font-bold text-xl mb-3">New Patient Special</h3>
         <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
           Get 20% off your first comprehensive exam, x-rays, and cleaning.
@@ -97,11 +107,12 @@
 
       <!-- Card 2: Teeth Whitening -->
       <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
-        <span class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
-              style="background:var(--tw-color-primary, #7c3aed); background-color:#7c3aed;">
+        <span
+          class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
+          style="background:var(--tw-color-primary, #7c3aed); background-color:#7c3aed;">
           $100 OFF
         </span>
-        <span class="absolute top-8 right-8 text-[#e5e7eb] text-xl select-none">♡</span>
+         <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
         <h3 class="brand-font font-bold text-xl mb-3">Teeth Whitening</h3>
         <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
           Brighten your smile with our professional in-office whitening treatment.
@@ -114,11 +125,12 @@
 
       <!-- Card 3: Invisalign -->
       <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
-        <span class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
-              style="background-color:#059669;">
+        <span
+          class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
+          style="background-color:#059669;">
           FREE
         </span>
-        <span class="absolute top-8 right-8 text-[#e5e7eb] text-xl select-none">♡</span>
+        <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
         <h3 class="brand-font font-bold text-xl mb-3">Invisalign Consultation</h3>
         <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
           Book a complimentary consultation to see if Invisalign is right for you.
@@ -137,30 +149,46 @@
 <!-- ════════════════════════════════════
      REVIEWS
 ═════════════════════════════════════ -->
-<section id="reviews" class="bg-brand">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 flex flex-wrap gap-16 items-center">
+<section id="reviews" class="bg-brand overflow-hidden">
+  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 flex md:flex-row flex-col md:gap-16 gap-8 md:items-center">
 
-    <!-- Left label -->
-    <div class="fade-up w-64 shrink-0">
+    <div class="fade-up md:w-72 w-full shrink-0 flex md:flex-col flex-row justify-between items-center md:items-start">
       <h2 class="brand-font font-extrabold text-white leading-[1.1]" style="font-size:clamp(2rem,4vw,3rem);">
         What makes<br><span class="text-[#b07d5c] italic">us smile?</span>
       </h2>
-      <div class="flex gap-3 mt-8">
-        <button onclick="prevReview()"
-          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-primary hover:border-primary transition-colors flex items-center justify-center text-base cursor-pointer bg-transparent">
+      <div class="flex gap-3 md:mt-8">
+        <button onclick="prevReview()" class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
           ←
         </button>
-        <button onclick="nextReview()"
-          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-primary hover:border-primary transition-colors flex items-center justify-center text-base cursor-pointer bg-transparent">
+        <button onclick="nextReview()" class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
           →
         </button>
       </div>
     </div>
 
-    <!-- Review cards -->
-    <div id="reviewsContainer" class="flex gap-6 flex-1 min-w-0 overflow-hidden">
-      <!-- Rendered via JS -->
+    <div class="overflow-hidden w-full" id="carouselViewport">
+      <div id="reviewsContainer" class="flex gap-6 will-change-transform">
+        </div>
     </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     FAQ
+═══════════════════════════════════ -->
+<section class="bg-white">
+  <div class="max-w-2xl mx-auto px-8 lg:px-12 pt-12">
+
+    <div class="text-center mb-12 fade-up">
+      <h2 class="brand-font font-extrabold text-brand mb-3" style="font-size:clamp(1.8rem,3.5vw,2.5rem);">
+        Frequently Asked Questions
+      </h2>
+      <p class="font-body text-[0.9rem] text-muted">Common questions from our patients.</p>
+    </div>
+
+    <div class="space-y-3 fade-up" id="faqList"></div>
+
   </div>
 </section>
 
@@ -195,10 +223,11 @@
         7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila
       </p>
       <p class="font-body text-[0.84rem] text-muted leading-relaxed mb-5">
-        Located near Tandang Sora Market, easily accessible via Commonwealth Avenue. We have ample parking space available for our patients.
+        Located near Tandang Sora Market, easily accessible via Commonwealth Avenue. We have ample parking space
+        available for our patients.
       </p>
       <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
-         class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-brand border-b-2 border-primary pb-0.5 hover:text-primary transition-colors no-underline">
+        class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-brand border-b-2 border-primary pb-0.5 hover:text-primary transition-colors no-underline">
         GET DIRECTIONS →
       </a>
     </div>

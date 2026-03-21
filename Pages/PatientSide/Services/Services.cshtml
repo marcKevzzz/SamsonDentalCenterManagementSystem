@@ -1,0 +1,156 @@
+@page "/Services"
+@model ServicesModel
+@{
+    ViewData["Title"] = "Services page";
+}
+
+<!-- ═════════════════ HERO ═════════════════ -->
+<section class="bg-brand pt-[68px] relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]"
+         style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 py-20 relative z-10">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
+
+            <!-- Left -->
+            <div>
+                <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4 text-[clamp(2.6rem,6vw,4.2rem)]">
+                    Our Services
+                </h1>
+                <p class="font-body text-[0.95rem] text-white/60 max-w-md leading-relaxed">
+                    From routine checkups to advanced cosmetic and surgical procedures — everything your smile needs, all under one roof.
+                </p>
+            </div>
+
+            <!-- Right Stats -->
+            <div class="flex gap-6 shrink-0">
+                <div class="text-center">
+                    <div class="brand-font font-extrabold text-white text-2xl">12</div>
+                    <div class="text-xs text-white/40 uppercase">Services</div>
+                </div>
+                <div class="w-px bg-white/10"></div>
+                <div class="text-center">
+                    <div class="brand-font font-extrabold text-white text-2xl">3</div>
+                    <div class="text-xs text-white/40 uppercase">Specialties</div>
+                </div>
+                <div class="w-px bg-white/10"></div>
+                <div class="text-center">
+                    <div class="brand-font font-extrabold text-white text-2xl">16+</div>
+                    <div class="text-xs text-white/40 uppercase">Years</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ═════════════════ FILTER BAR ═════════════════ -->
+<div id="filterBar"
+     class="sticky top-[68px] z-40 border-b border-gray-200 px-6 lg:px-12 py-4 bg-white backdrop-blur">
+
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Tabs -->
+        <div class="flex flex-wrap gap-2">
+            <button class="acat-tab active" data-cat="all" onclick="filterServices('all')">All</button>
+            <button class="acat-tab" data-cat="General Dentistry" onclick="filterServices('General Dentistry')">General</button>
+            <button class="acat-tab" data-cat="Cosmetic" onclick="filterServices('Cosmetic')">Cosmetic</button>
+            <button class="acat-tab" data-cat="Specialized" onclick="filterServices('Specialized')">Specialized</button>
+        </div>
+
+        <!-- Search -->
+        <div class="relative">
+            <input type="text"
+                   id="svcSearch"
+                   placeholder="Search services..."
+                   oninput="searchServices(this.value)"
+                   class="pl-9 pr-4 py-2 w-56 rounded-full border border-gray-200 bg-offwhite focus:border-primary focus:bg-white outline-none text-sm" />
+
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═════════════════ SERVICES ═════════════════ -->
+<section class="bg-offwhite">
+    <div class="max-w-8xl mx-auto px-6 lg:px-12 py-16 flex flex-col gap-16">
+
+        <!-- ================= GENERAL ================= -->
+        <div id="section-general">
+            <div class="flex items-center gap-4 mb-8">
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-muted mb-1">Category 01</p>
+                    <h2 class="text-2xl font-extrabold text-brand">General Dentistry</h2>
+                </div>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach (var service in Model.Services.Where(s => s.Category == "General Dentistry"))
+                {
+                    <partial name="Components/ServiceCard" model="service" />
+                }
+            </div>
+        </div>
+
+
+        <!-- ================= COSMETIC ================= -->
+        <div id="section-cosmetic">
+            <div class="flex items-center gap-4 mb-8">
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-muted mb-1">Category 02</p>
+                    <h2 class="text-2xl font-extrabold text-brand">Cosmetic</h2>
+                </div>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <!-- FIXED GRID (this was broken before) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach (var service in Model.Services.Where(s => s.Category == "Cosmetic"))
+                {
+                    <partial name="Components/ServiceCard" model="service" />
+                }
+            </div>
+        </div>
+
+
+        <!-- ================= SPECIALIZED ================= -->
+        <div id="section-specialized">
+            <div class="flex items-center gap-4 mb-8">
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-muted mb-1">Category 03</p>
+                    <h2 class="text-2xl font-extrabold text-brand">Specialized</h2>
+                </div>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <!-- FIXED GRID -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach (var service in Model.Services.Where(s => s.Category == "Specialized"))
+                {
+                    <partial name="Components/ServiceCard" model="service" />
+                }
+            </div>
+        </div>
+
+
+        <!-- ================= EMPTY STATE ================= -->
+        <div id="noResults" class="hidden text-center py-24">
+            <h3 class="text-lg font-bold text-brand mb-2">No services found</h3>
+            <p class="text-sm text-muted">Try a different search.</p>
+            <button onclick="clearSearch()" class="mt-4 text-primary font-semibold hover:underline">
+                Clear search
+            </button>
+        </div>
+
+    </div>
+</section>
+
+<script src="~/js/services.js"></script>

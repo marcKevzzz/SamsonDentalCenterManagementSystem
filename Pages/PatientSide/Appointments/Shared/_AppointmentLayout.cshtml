@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
+  <script type="importmap"></script>
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/tailwind.css">
+  <link rel="stylesheet" href="~/SamsonDentalCenterManagementSystem.styles.css" asp-append-version="true" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <link
+  href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
+  rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+
+</head>
+
+<body>
+
+    <main class="min-h-screen flex flex-col">
+        <!-- ══════════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════════ -->
+        <div class="bg-white border-b border-[#e5e7eb] px-6 py-4 sticky top-0 z-10">
+            <div class="max-w-3xl mx-auto flex items-center justify-between">
+
+                <!-- Left: back + breadcrumb -->
+                <div class="flex items-center gap-3">
+                    <button id="backBtn" onclick="goBack()"
+                            class="hidden items-center gap-1.5 font-body text-[.78rem] font-medium text-muted hover:text-brand transition-colors bg-transparent border-none p-0 cursor-pointer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                        Back
+                    </button>
+                    <nav id="breadcrumb" class="flex items-center gap-1.5 font-body text-[.74rem] text-muted"></nav>
+                </div>
+
+                <!-- Right: cancel + brand -->
+                <div class="flex items-center gap-5">
+                    <button onclick="cancelBooking()"
+                            class="font-body text-[.75rem] font-medium text-muted hover:text-primary transition-colors bg-transparent border-none cursor-pointer p-0">
+                        Cancel
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+       STEP PROGRESS
+  ═══════════════════════════════════════════════ -->
+        <div id="progressWrap" class="bg-white border-b border-[#e5e7eb] px-6 py-4">
+            <div class="max-w-3xl mx-auto">
+                <div id="stepIndicators" class="flex items-center mb-3"></div>
+            </div>
+        </div>
+
+
+
+
+        @RenderBody()
+    </main>
+
+
+ 
+              <script src="~/lib/jquery/dist/jquery.min.js"></script>
+              <script src="~/js/appointment.js" asp-append-version="true"></script>
+
+              @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

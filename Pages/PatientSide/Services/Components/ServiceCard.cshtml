@@ -1,0 +1,45 @@
+@model SamsonDentalCenterManagementSystem.Models.DentalService
+
+<a
+  href="/Services/@Model.Slug"
+  class="asvc-item asvc-card fade-up"
+  data-cat="@Model.Category"
+  data-name="@Model.Name.ToLower()"
+>
+  <div class="overflow-hidden h-52 bg-offwhite">
+    <img
+      src="@Model.Hero"
+      alt="@Model.Name"
+      class="card-img w-full h-full object-cover"
+    />
+  </div>
+
+  <div class="p-5">
+    <div class="flex items-center justify-between mb-2">
+      <span class="badge bg-offwhite text-muted">@Model.Category</span>
+      <span class="font-body text-[0.75rem] font-semibold text-primary"
+        >@Model.Price</span
+      >
+    </div>
+
+    <h3 class="brand-font font-bold text-brand text-[1rem] mb-1">
+      @Model.Name
+    </h3>
+
+    <p
+      class="font-body text-[0.78rem] text-muted leading-relaxed mb-4 line-clamp-2"
+    >
+      @Model.Tagline
+    </p>
+
+    <div class="flex items-center justify-between">
+      <span
+        class="flex items-center gap-1.5 font-body text-[0.72rem] text-muted"
+      >
+        ⏱ @Model.Duration
+      </span>
+
+      <div class="card-arrow">→</div>
+    </div>
+  </div>
+</a>

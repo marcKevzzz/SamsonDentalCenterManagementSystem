@@ -1,0 +1,402 @@
+<div class="relative" id="profileTrigger">
+  <button
+    id="profileBtn"
+    onclick="toggleProfile()"
+    class="flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 group"
+  >
+    <!-- Guest avatar -->
+    <div
+      id="guestAvatar"
+      class="w-9 h-9 rounded-full border group-hover:border-primary group-hover:bg-primary/20 transition-all duration-200 flex items-center justify-center"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    </div>
+
+    <!-- Signed-in avatar -->
+    <div id="signedInAvatar" class="hidden">
+      <div
+        class="w-9 h-9 rounded-full bg-primary border-2 border-primary avatar-ring flex items-center justify-center"
+      >
+        <span
+          id="navInitials"
+          class="brand-font font-bold text-white text-[0.78rem]"
+        ></span>
+      </div>
+    </div>
+
+    <svg
+      id="profileChevron"
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </button>
+
+  <!-- ════════════════════════════════
+             DROPDOWN PANEL
+        ═════════════════════════════════ -->
+  <div
+    id="profilePanel"
+    class="panel-hidden absolute right-0 top-[calc(100%+10px)] z-50 w-[260px] bg-white rounded-2xl shadow-2xl border border-[#e5e7eb] overflow-hidden"
+  >
+    <!-- ── GUEST STATE ── -->
+    <div id="guestState">
+      <!-- Header -->
+      <div class="bg-brand px-4 py-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-full bg-white/10 border-2 border-white/15 flex items-center justify-center shrink-0"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <div>
+            <div class="brand-font font-bold text-white text-[0.9rem]">
+              Hello, Guest
+            </div>
+            <div class="font-body text-[0.72rem] text-white/45 mt-0.5">
+              Sign in to your account
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auth buttons -->
+      <div class="p-3 space-y-2 border-b border-[#e5e7eb]">
+        <a
+          href="/sign-in"
+          class="brand-font font-bold text-[0.75rem] tracking-wider uppercase w-full bg-brand text-white py-2.5 rounded-xl hover:bg-primary transition-colors flex items-center justify-center gap-2 no-underline"
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          Sign In
+        </a>
+        <a
+          href="/sign-up"
+          class="brand-font font-bold text-[0.75rem] tracking-wider uppercase w-full border-[1.5px] border-[#e5e7eb] text-brand py-2.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all flex items-center justify-center gap-2 no-underline"
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="23" y1="11" x2="17" y2="11" />
+          </svg>
+          Create Account
+        </a>
+      </div>
+
+      <!-- Guest quick links -->
+      <div class="p-2">
+        <a href="appointment/index.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          Book Appointment
+        </a>
+        <a href="services.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            />
+          </svg>
+          Our Services
+        </a>
+        <a href="contact.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.95-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"
+            />
+          </svg>
+          Contact Us
+        </a>
+        <a href="about.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          About SDC
+        </a>
+      </div>
+
+      <!-- Demo shortcut -->
+      <div class="px-3 pb-3">
+        <button
+          onclick="mockSignIn()"
+          class="w-full font-body text-[0.72rem] text-muted hover:text-primary transition-colors cursor-pointer border-none bg-transparent py-1.5 text-center"
+        >
+          Demo: Sign In as Juan →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SIGNED IN STATE ── -->
+    <div id="signedInState" class="hidden">
+      <!-- Header -->
+      <div class="bg-brand px-4 py-4">
+        <div class="flex items-center gap-3">
+          <div
+            id="modalAvatar"
+            class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 border-2 border-primary/30"
+          >
+            <span
+              id="modalInitials"
+              class="brand-font font-bold text-white text-[0.9rem]"
+            ></span>
+          </div>
+          <div class="min-w-0">
+            <div
+              id="modalName"
+              class="brand-font font-bold text-white text-[0.9rem] truncate"
+            ></div>
+            <div
+              id="modalEmail"
+              class="font-body text-[0.7rem] text-white/45 mt-0.5 truncate"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signed-in links -->
+      <div class="p-2">
+        <a href="dashboard.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="appointments.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          My Appointments
+        </a>
+        <a href="records.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+          Dental Records
+        </a>
+        <a href="appointment/index.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+          Book Appointment
+        </a>
+        <a href="prescriptions.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+            />
+          </svg>
+          Prescriptions
+        </a>
+
+        <div class="menu-divider mx-2"></div>
+
+        <a href="profile-settings.html" class="menu-link">
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+            />
+          </svg>
+          Account Settings
+        </a>
+
+        <div class="menu-divider mx-2"></div>
+
+        <button
+          onclick="mockSignOut()"
+          class="menu-link w-full text-left border-none bg-transparent !text-muted hover:!text-primary"
+        >
+          <svg
+            class="menu-icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /profileTrigger -->
