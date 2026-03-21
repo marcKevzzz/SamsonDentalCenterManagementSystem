@@ -793,3 +793,39 @@ textarea.form-input {
 .step-indicator {
   transition: all 0.25s;
 }
+
+/* Filter tab */
+    .filter-tab {
+      font-family:'DM Sans',sans-serif; font-size:.75rem; font-weight:600;
+      letter-spacing:.06em; text-transform:uppercase;
+      padding:.5rem 1.1rem; border-radius:999px;
+      border:1.5px solid #e5e7eb; background:#fff; color:#6b7280;
+      cursor:pointer; transition:all .18s; white-space:nowrap;
+    }
+    .filter-tab:hover { border-color:#0f1117; color:#0f1117; }
+    .filter-tab.active { background:#0f1117; color:#fff; border-color:#0f1117; }
+ 
+    /* Appointment card */
+    .appt-card { transition:box-shadow .2s, transform .2s; }
+    .appt-card:hover { box-shadow:0 12px 36px rgba(0,0,0,0.09); transform:translateY(-2px); }
+ 
+    /* Feedback expand */
+    .feedback-body { max-height:0; overflow:hidden; transition:max-height .35s ease; }
+    .feedback-body.open { max-height:500px; }
+    .feedback-chevron { transition:transform .28s ease; }
+    .feedback-chevron.open { transform:rotate(180deg); }
+ 
+    /* Rating stars */
+    .star-fill { color:#f59e0b; }
+    .star-empty { color:#e5e7eb; }
+ 
+    /* Sidebar nav link */
+    .side-link {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 12px; border-radius:10px;
+      font-family:'DM Sans',sans-serif; font-size:.85rem; color:#6b7280;
+      text-decoration:none; transition:background .15s, color .15s;
+    }
+    .side-link:hover { background:#f5f5f7; color:#1a1a2e; }
+    .side-link.active { background:#f5f5f7; color:#c0392b; font-weight:500; }
+    .side-link.active svg { color:#c0392b; }
