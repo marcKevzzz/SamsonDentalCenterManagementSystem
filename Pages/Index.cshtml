@@ -12,39 +12,47 @@ ViewData["Title"] = "Home page";
   <div class="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/70 to-brand/50"></div>
 
   <!-- Content -->
-  <div class="relative z-10 max-w-7xl mx-auto px-8 lg:px-12 w-full pt-24">
+  <div id="heroContent" class="relative z-10 max-w-7xl mx-auto px-8 lg:px-12 w-full pt-24">
 
     <span
-      class="inline-block font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6">
+      class="hero-reveal-late inline-block font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6">
       Welcome to Samson Dental Center
     </span>
 
-    <h1 class="brand-font font-extrabold leading-[0.9] text-white  mb-6 flex flex-col "
-      style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
-      Your Smile Is Our 
-      <span class="text-primary">
-        First Priority.
-      </span>
-    </h1>
+ <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.9] text-white mb-6 flex flex-col"
+    style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
+  
+  <span class="line flex flex-wrap gap-x-[0.3em]">
+    <span class="word">Your</span>
+    <span class="word">Smile</span>
+    <span class="word">Is</span>
+    <span class="word">Our</span>
+  </span>
 
-    <p class="font-body text-base text-white/80 max-w-[430px] leading-relaxed mb-10">
+  <span class="line text-primary flex flex-wrap gap-x-[0.3em]">
+    <span class="word">First</span>
+    <span class="word">Priority.</span>
+  </span>
+</h1>
+
+    <p class="hero-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed mb-10">
       Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and
       aesthetic goals.
     </p>
 
-    <div class="flex flex-wrap gap-4">
+    <div class="hero-reveal-late flex flex-wrap gap-4">
       <a href="/Appointments"
-        class="brand-font font-bold text-sm bg-primary text-white px-8 py-3.5 rounded-full hover:bg-primary transition-all hover:-translate-y-0.5 duration-150 no-underline">
+        class="brand-font font-bold text-sm bg-primary text-white px-8 py-3.5 rounded-full hover:bg-primary/80 transition-all duration-150 no-underline">
         Make an Appointment
       </a>
       <a href="/Services"
-        class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-brand transition-all hover:-translate-y-0.5 duration-150 no-underline">
+        class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-brand transition-all duration-150 no-underline">
         Explore Services
       </a>
     </div>
 
     <!-- Social proof -->
-    <div class="flex items-center gap-3 mt-10">
+    <div class="hero-reveal-late flex items-center gap-3 mt-10">
       <div class="avatar-stack flex">
         <img src="https://randomuser.me/api/portraits/women/44.jpg"
           class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
@@ -242,3 +250,5 @@ ViewData["Title"] = "Home page";
 
   </div>
 </section>
+
+<script src="~/js/home.js"></script>
