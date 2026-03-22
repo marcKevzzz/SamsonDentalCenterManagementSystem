@@ -1,0 +1,59 @@
+@{
+    Layout = "_Layout";
+}
+
+<div class="pt-[68px] max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-10 flex gap-8 items-start bg-offwhite">
+   
+  <!-- ── Sidebar ── -->
+  <aside class="hidden lg:block w-56 shrink-0 sticky top-[88px]">
+ 
+    <!-- User card -->
+    <div class="bg-brand rounded-2xl p-4 mb-4">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+          <span class="brand-font font-bold text-white text-[0.9rem]">JD</span>
+        </div>
+        <div class="min-w-0">
+          <div class="brand-font font-bold text-white text-[0.88rem] truncate">Juan Dela Cruz</div>
+          <div class="font-body text-[0.7rem] text-white/45 truncate">juan@email.com</div>
+        </div>
+      </div>
+      <a href="appointment/index.html"
+        class="brand-font font-bold text-[0.7rem] tracking-wider uppercase w-full bg-primary text-white
+               py-2.5 rounded-xl flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Book Appointment
+      </a>
+    </div>
+ 
+    <!-- Nav -->
+    <div class="bg-white rounded-2xl p-2 border border-[#e5e7eb]">
+      <a href="dashboard.html" class="side-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="appointments.html" class="side-link active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Appointments
+      </a>
+      <a href="records.html" class="side-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Dental Records
+      </a>
+      <a href="prescriptions.html" class="side-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        Prescriptions
+      </a>
+      <div class="h-px bg-[#e5e7eb] my-1"></div>
+      <a href="profile-settings.html" class="side-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </div>
+  </aside>
+ 
+
+    <section>
+        @RenderBody()
+    </section>
+</div>
