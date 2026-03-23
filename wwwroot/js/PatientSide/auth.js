@@ -131,18 +131,18 @@ function checkStrength(pw) {
   if (/[0-9]/.test(pw)) score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;
 
-  const colors = ["#c0392b", "#f59e0b", "#3b82f6", "#059669"];
+  const colorss = ["#c0392b", "#f59e0b", "#3b82f6", "#059669"];
   const labels = ["Weak", "Fair", "Good", "Strong"];
   const barIds = ["sb1", "sb2", "sb3", "sb4"];
 
   barIds.forEach((id, i) => {
     const el = document.getElementById(id);
-    el.style.background = i < score ? colors[score - 1] : "#e5e7eb";
+    el.style.background = i < score ? colorss[score - 1] : "#e5e7eb";
   });
 
   const lbl = document.getElementById("strengthLabel");
   lbl.textContent = pw ? (labels[score - 1] ?? "") : "";
-  lbl.style.color = score > 0 ? colors[score - 1] : "#6b7280";
+  lbl.style.color = score > 0 ? colorss[score - 1] : "#6b7280";
 }
 
 function clearErr(id) {
