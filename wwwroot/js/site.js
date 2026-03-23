@@ -80,10 +80,28 @@ document.addEventListener("click", (e) => {
 
 const hamburgerBtn = document.getElementById("hamburgerBtn");
 const mobileMenu = document.getElementById("mobileMenu");
+const navIconPath = document.getElementById("navIconPath");
+
+const hamburgerPath = "M4 7h16M4 12h16M4 17h16";
+const closePath = "M6 18L18 6M6 6l12 12";
 
 hamburgerBtn.addEventListener("click", () => {
+  const isMenuOpening = mobileMenu.classList.contains("hidden");
+
+  if (window.scrollY < 50) {
+    toggleNavbar(isMenuOpening);
+  }
+
+  // Toggle the menu visibility
   mobileMenu.classList.toggle("hidden");
   servicesMega.classList.add("hidden");
+
+  // Swap the icon path
+  if (isMenuOpening) {
+    navIconPath.setAttribute("d", closePath);
+  } else {
+    navIconPath.setAttribute("d", hamburgerPath);
+  }
 });
 
 const mobileServicesBtn = document.getElementById("mobileServicesBtn");

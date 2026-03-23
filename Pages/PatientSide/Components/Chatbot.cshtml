@@ -150,21 +150,21 @@
 
   <!-- ── Input ── -->
   <div
-    class="flex items-end gap-2.5 px-4 py-3 bg-white border-t border-[#e5e7eb] shrink-0"
+    class="flex items-end gap-2.5 px-4 py-3 bg-white border-t border-[#e5e7eb] shrink-0 pb-[safe-area-inset-bottom]"
   >
     <textarea
       id="chatInput"
       rows="1"
-      class="flex-1 font-body text-[0.87rem] text-[#1a1a2e] bg-offwhite border border-[#e5e7eb] rounded-xl px-3.5 py-2.5 outline-none resize-none leading-snug focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-[#aaa] max-h-24"
+      class="flex-1 font-body text-[16px] text-[#1a1a2e] bg-offwhite border border-[#e5e7eb] rounded-xl px-3.5 py-2.5 outline-none resize-none leading-snug focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-[#aaa] max-h-32"
       placeholder="Ask me anything…"
       onkeydown="handleKey(event)"
       oninput="autoResize(this)"
-    >
-    </textarea>
-    <button
+      enterkeyhint="send"
+    ></textarea
+    ><button
       id="sendBtn"
       onclick="sendMessage()"
-      class="w-10 h-10 rounded-full bg-brand border-none cursor-pointer shrink-0 flex items-center justify-center hover:bg-primary transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+      class="w-10 h-10 rounded-full bg-brand border-none cursor-pointer shrink-0 flex items-center justify-center hover:bg-primary transition-colors duration-200 active:scale-95"
     >
       <svg
         width="15"

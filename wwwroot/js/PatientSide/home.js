@@ -6,7 +6,7 @@ function playHero() {
 
   // 2. The Stagger Timeline
   tl.fromTo(
-    ".hero-reveal:not(#heroTitle)", // Animate other reveals first (like the welcome badge)
+    ".hero-reveal", // Animate other reveals first (like the welcome badge)
     { opacity: 0, y: 20 },
     { opacity: 1, y: 0, duration: 0.6 },
   )
@@ -30,7 +30,7 @@ function playHero() {
     .fromTo(
       ".hero-reveal-late", // Animate buttons and social proof last
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
+      { opacity: 1, y: 0, duration: 0.6, stagger: 0.2 },
       "-=0.5",
     );
 }
