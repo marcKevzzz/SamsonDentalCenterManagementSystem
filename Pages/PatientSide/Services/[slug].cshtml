@@ -4,20 +4,24 @@
 
 <section class="relative bg-brand pt-[68px] overflow-hidden">
   <div class="absolute inset-0">
-    <img src="@Model.Service.Hero" alt="@Model.Service.Name" class="w-full h-full object-cover opacity-20"/>
+    <img src="@Model.Service.Hero" alt="@Model.Service.Name" class="w-full h-full object-cover opacity-20" />
     <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-transparent"></div>
   </div>
-  <div class="relative z-10 max-w-7xl mx-auto px-8 lg:px-12 py-20">
-    <div class="flex items-center gap-3 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-primary mb-4">
+  <div class="relative z-10 max-w mx-auto px-8 lg:px-12 py-20">
+    <div
+      class="flex items-center gap-3 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-primary mb-4">
       <i class="@Model.Service.Icon text-[1rem]"></i> @Model.Service.Category
     </div>
-    <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4" style="font-size:clamp(2.4rem,5vw,4rem);">@Model.Service.Name</h1>
+    <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4" style="font-size:clamp(2.4rem,5vw,4rem);">
+      @Model.Service.Name</h1>
     <p class="font-body text-[1rem] text-white/55 max-w-md leading-relaxed mb-8">@Model.Service.Tagline</p>
     <div class="flex flex-wrap gap-4">
-      <a href="/Contact" class="brand-font font-bold text-[0.82rem] tracking-wider uppercase bg-primary text-white px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
+      <a href="/Contact"
+        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase bg-primary text-white px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
         Book This Service
       </a>
-      <a href="#overview" class="brand-font font-bold text-[0.82rem] tracking-wider uppercase border-2 border-white/20 text-white px-7 py-3.5 rounded-xl hover:border-white/50 transition-colors no-underline">
+      <a href="#overview"
+        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase border-2 border-white/20 text-white px-7 py-3.5 rounded-xl hover:border-white/50 transition-colors no-underline">
         Learn More <i class="fa-solid fa-arrow-down ml-2"></i>
       </a>
     </div>
@@ -25,109 +29,117 @@
 </section>
 
 <div class="bg-offwhite border-b border-[#e5e7eb]">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-10 grid grid-cols-3 gap-4">
-    <div class="flex items-center justify-center gap-3">
+  <div class="max-w mx-auto px-8 lg:px-12 py-10 grid grid-cols-3 gap-4">
+    <div class="flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-clock text-primary text-sm"></i>
       </div>
       <div>
-        <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted">Duration</div>
-        <div class="brand-font font-bold text-lg text-brand">@Model.Service.Duration</div>
+        <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">Duration</div>
+        <div class="brand-font font-bold text-lg text-brand text-center md:text-left">@Model.Service.Duration</div>
       </div>
     </div>
-    <div class="flex items-center justify-center gap-3">
+    <div class="flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-heart-pulse text-primary text-sm"></i>
       </div>
       <div>
-        <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted">Recovery</div>
-        <div class="brand-font font-bold text-lg text-brand">@Model.Service.Recovery</div>
+        <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">Recovery</div>
+        <div class="brand-font font-bold text-lg text-brand text-center md:text-left">@Model.Service.Recovery</div>
       </div>
     </div>
-    <div class="flex items-center justify-center gap-3">
+    <div class="flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-tags text-primary text-sm"></i>
       </div>
       <div>
-        <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted">Starting Price</div>
-        <div class="brand-font font-bold text-lg text-brand">@Model.Service.Price</div>
+        <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">Starting Price</div>
+        <div class="brand-font font-bold text-lg text-brand text-center md:text-left">@Model.Service.Price</div>
       </div>
     </div>
   </div>
 </div>
 
 <section id="overview" class="bg-white">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-20 flex flex-col lg:flex-row gap-14">
+  <div class="max-w mx-auto px-8 lg:px-12 py-20 flex flex-col lg:flex-row gap-14">
 
     <div class="flex-1 min-w-0">
-      
+
       <div class="fade-up mb-14">
-        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
+        <div
+          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
           <i class="fa-solid fa-circle-info text-primary text-[8px]"></i>
           Overview
         </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-5" style="font-size:clamp(1.6rem,3vw,2.2rem);">What is @Model.Service.Name?</h2>
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-5" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          What is @Model.Service.Name?</h2>
         <p class="font-body text-[0.95rem] text-muted leading-relaxed">@Model.Service.Summary</p>
       </div>
 
       <div class="fade-up mb-14">
-        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
+        <div
+          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
           <i class="fa-solid fa-sparkles text-primary text-[8px]"></i>
           What to Expect
         </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-6" style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Benefits of This Treatment</h2>
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-6"
+          style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Benefits of This Treatment</h2>
         <ul class="space-y-3.5">
-            @foreach (var benefit in Model.Service.Benefits)
-            {
-                <li class="flex items-start gap-3 font-body text-[0.9rem] text-[#6b7280]">
-                  <span class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <i class="fa-solid fa-check text-primary text-[9px]"></i>
-                  </span>
-                  @benefit
-                </li>
-            }
+          @foreach (var benefit in Model.Service.Benefits)
+          {
+          <li class="flex items-start gap-3 font-body text-[0.9rem] text-[#6b7280]">
+            <span class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="fa-solid fa-check text-primary text-[9px]"></i>
+            </span>
+            @benefit
+          </li>
+          }
         </ul>
       </div>
 
       <div class="fade-up">
-        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
-           <i class="fa-solid fa-circle-question text-primary text-[8px]"></i>
-           FAQ
+        <div
+          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
+          <i class="fa-solid fa-circle-question text-primary text-[8px]"></i>
+          FAQ
         </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-7" style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Common Questions</h2>
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-7"
+          style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Common Questions</h2>
         <div class="space-y-3">
-          @for (int i = 0; i < Model.Service.Faqs.Count; i++)
-          {
-              var faq = Model.Service.Faqs[i];
-              <div class="border border-[#e5e7eb] rounded-2xl overflow-hidden">
-                <button onclick="toggleFaq(@i)" class="w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-[#f5f5f7] transition-colors">
-                  <span class="brand-font font-semibold text-[0.9rem] text-[#0f1117]"> @faq.Q</span>
-                  <i id="chevron-@i" class="fa-solid fa-chevron-down faq-chevron text-[#6b7280] text-[10px] transition-transform duration-300"></i>
-                </button>
-                <div id="faq-@i" class="faq-answer bg-white px-6 ">
-                  <p class="font-body text-[0.86rem] text-[#6b7280] leading-relaxed pb-5 pt-1">@faq.A</p>
-                </div>
-              </div>
-          }
+          @for (int i = 0; i < Model.Service.Faqs.Count; i++) { var faq=Model.Service.Faqs[i]; <div
+            class="border border-[#e5e7eb] rounded-2xl overflow-hidden">
+            <button onclick="toggleFaq(@i)"
+              class="w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-[#f5f5f7] transition-colors">
+              <span class="brand-font font-semibold text-[0.9rem] text-[#0f1117]"> @faq.Q</span>
+              <i id="chevron-@i"
+                class="fa-solid fa-chevron-down faq-chevron text-[#6b7280] text-[10px] transition-transform duration-300"></i>
+            </button>
+            <div id="faq-@i" class="faq-answer bg-white px-6 ">
+              <p class="font-body text-[0.86rem] text-[#6b7280] leading-relaxed pb-5 pt-1">@faq.A</p>
+            </div>
         </div>
+        }
       </div>
     </div>
+  </div>
 
-    <div class="w-full lg:w-72 shrink-0">
-      <div class="sidebar-sticky space-y-5">
-        <div class="fade-up bg-brand rounded-2xl p-6 text-white">
-          <div class="brand-font font-extrabold text-[1.1rem] mb-2">Ready to get started?</div>
-          <p class="font-body text-[0.82rem] text-white/55 leading-relaxed mb-5">Book a consultation today and let our team create the best plan for your smile.</p>
-          <a href="/Contact" class="block brand-font font-bold text-[0.8rem] tracking-wider uppercase text-center bg-primary text-white py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
-            Book Consultation
-          </a>
-          <div class="flex items-center gap-3 mt-4 pt-4 border-t border-white/10">
-            <i class="fa-solid fa-phone text-primary text-[12px]"></i>
-            <span class="font-body text-[0.78rem] text-white/55">+63 2 8888 1234</span>
-          </div>
+  <div class="w-full lg:w-72 shrink-0">
+    <div class="sidebar-sticky space-y-5">
+      <div class="fade-up bg-brand rounded-2xl p-6 text-white">
+        <div class="brand-font font-extrabold text-[1.1rem] mb-2">Ready to get started?</div>
+        <p class="font-body text-[0.82rem] text-white/55 leading-relaxed mb-5">Book a consultation today and let our
+          team create the best plan for your smile.</p>
+        <a href="/Contact"
+          class="block brand-font font-bold text-[0.8rem] tracking-wider uppercase text-center bg-primary text-white py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
+          Book Consultation
+        </a>
+        <div class="flex items-center gap-3 mt-4 pt-4 border-t border-white/10">
+          <i class="fa-solid fa-phone text-primary text-[12px]"></i>
+          <span class="font-body text-[0.78rem] text-white/55">+63 2 8888 1234</span>
         </div>
       </div>
     </div>
+  </div>
 
   </div>
 </section>

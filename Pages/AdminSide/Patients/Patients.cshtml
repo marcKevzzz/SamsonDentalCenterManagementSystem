@@ -1,0 +1,306 @@
+<!-- ── PATIENTS ──
+<div id="page-patients" class="page p-4 md:p-6">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div>
+      <h2 class="font-display text-xl font-extrabold text-brand-900">
+        Patients
+      </h2>
+      <p class="text-[12px] text-brand-500 mt-0.5">
+        Manage all registered patients
+      </p>
+    </div>
+    <button
+      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-gradient-to-r from-primary to-primary-dark shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow"
+    >
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" /></svg
+      >Add Patient
+    </button>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div
+      class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100"
+    >
+      <div class="relative flex-1 min-w-[140px] max-w-[260px]">
+        <svg
+          class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" /></svg
+        ><input
+          placeholder="Search patients…"
+          class="w-full pl-7 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary/40"
+        />
+      </div>
+      <select
+        class="px-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-brand-500 outline-none"
+      >
+        <option>All Status</option>
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="dtable w-full min-w-[500px]">
+        <thead class="bg-slate-50">
+          <tr>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Patient
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Age / Gender
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Last Visit
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Doctor
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Status
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[10px] font-bold font-display flex-shrink-0"
+                >
+                  ML
+                </div>
+                <div>
+                  <div class="text-[13px] font-medium">Maria Lim</div>
+                  <div class="text-[10px] text-brand-400">#P-1031</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">34 / F</td>
+            <td
+              class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap"
+            >
+              Mar 20
+            </td>
+            <td class="px-4 py-3 text-[12.5px]">Dr. Santos</td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
+                >Active</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <button
+                class="text-[11px] font-semibold text-primary hover:underline"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-[10px] font-bold font-display flex-shrink-0"
+                >
+                  JR
+                </div>
+                <div>
+                  <div class="text-[13px] font-medium">Juan Reyes</div>
+                  <div class="text-[10px] text-brand-400">#P-1032</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">52 / M</td>
+            <td
+              class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap"
+            >
+              Mar 18
+            </td>
+            <td class="px-4 py-3 text-[12.5px]">Dr. Cruz</td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
+                >Active</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <button
+                class="text-[11px] font-semibold text-primary hover:underline"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-violet-50 flex items-center justify-center text-violet-700 text-[10px] font-bold font-display flex-shrink-0"
+                >
+                  AC
+                </div>
+                <div>
+                  <div class="text-[13px] font-medium">Ana Cruz</div>
+                  <div class="text-[10px] text-brand-400">#P-1033</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">8 / F</td>
+            <td
+              class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap"
+            >
+              Mar 15
+            </td>
+            <td class="px-4 py-3 text-[12.5px]">Dr. Reyes</td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
+                >Active</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <button
+                class="text-[11px] font-semibold text-primary hover:underline"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-[10px] font-bold font-display flex-shrink-0"
+                >
+                  BM
+                </div>
+                <div>
+                  <div class="text-[13px] font-medium">Ben Marcos</div>
+                  <div class="text-[10px] text-brand-400">#P-1034</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">45 / M</td>
+            <td
+              class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap"
+            >
+              Mar 10
+            </td>
+            <td class="px-4 py-3 text-[12.5px]">Dr. Garcia</td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display"
+                >Inactive</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <button
+                class="text-[11px] font-semibold text-primary hover:underline"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-700 text-[10px] font-bold font-display flex-shrink-0"
+                >
+                  LC
+                </div>
+                <div>
+                  <div class="text-[13px] font-medium">Lina Castillo</div>
+                  <div class="text-[10px] text-brand-400">#P-1035</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">28 / F</td>
+            <td
+              class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap"
+            >
+              Mar 22
+            </td>
+            <td class="px-4 py-3 text-[12.5px]">Dr. Santos</td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
+                >Active</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <button
+                class="text-[11px] font-semibold text-primary hover:underline"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100"
+    >
+      <span class="text-[10.5px] text-brand-400"
+        >Showing 5 of 248 patients</span
+      >
+      <div class="flex gap-1.5">
+        <button
+          class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50"
+        >
+          ← Prev
+        </button>
+        <button
+          class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg bg-primary text-white"
+        >
+          1
+        </button>
+        <button
+          class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50"
+        >
+          2
+        </button>
+        <button
+          class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  </div>
+</div> -->

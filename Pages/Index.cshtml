@@ -4,7 +4,7 @@
 ViewData["Title"] = "Home page";
 }
 
-<section id="hero" class="relative min-h-screen flex items-center overflow-hidden">
+<section id="hero" class="relative h-screen max-h-[900px] flex items-center overflow-hidden">
 
   <!-- BG layers -->
   <div class="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] via-[#49494b] to-[#56565e]"></div>
@@ -12,35 +12,35 @@ ViewData["Title"] = "Home page";
   <div class="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/70 to-brand/50"></div>
 
   <!-- Content -->
-  <div id="heroContent" class="relative z-10 max-w-7xl mx-auto px-8 lg:px-12 w-full pt-24">
+  <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-12 w-full justify-center flex flex-col sm:pt-0 pt-8">
 
     <span
-      class="hero-reveal inline-block font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6">
+      class="hero-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full sm:mb-6 mb-2">
       Welcome to Samson Dental Center
     </span>
 
- <h1 id="heroTitle" class=" brand-font font-extrabold leading-[0.9] text-white mb-6 flex flex-col"
-    style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
-  
-  <span class="line flex flex-wrap gap-x-[0.3em]">
-    <span class="word">Your</span>
-    <span class="word">Smile</span>
-    <span class="word">Is</span>
-    <span class="word">Our</span>
-  </span>
+    <h1 id="heroTitle" class=" brand-font font-extrabold leading-[0.9] text-white sm:mb-6 mb-3 flex flex-col"
+      style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
 
-  <span class="line text-primary flex flex-wrap gap-x-[0.3em]">
-    <span class="word">First</span>
-    <span class="word">Priority.</span>
-  </span>
-</h1>
+      <span class="line flex flex-wrap gap-x-[0.3em]">
+        <span class="word">Your</span>
+        <span class="word">Smile</span>
+        <span class="word">Is</span>
+        <span class="word">Our</span>
+      </span>
 
-    <p class="hero-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed mb-10">
+      <span class="line text-primary flex flex-wrap gap-x-[0.3em]">
+        <span class="word">First</span>
+        <span class="word">Priority.</span>
+      </span>
+    </h1>
+
+    <p class="hero-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed sm:mb-10 mb-4">
       Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and
       aesthetic goals.
     </p>
 
-    <div class="hero-reveal-late flex flex-wrap gap-4">
+    <div class="hero-reveal-late flex flex-wrap sm:gap-4 gap-2">
       <a href="/Appointments"
         class="brand-font font-bold text-sm bg-primary text-white px-8 py-3.5 rounded-full hover:bg-primary/80 transition-all duration-150 no-underline">
         Make an Appointment
@@ -74,18 +74,18 @@ ViewData["Title"] = "Home page";
      EXCLUSIVE PATIENT PERKS
 ═════════════════════════════════════ -->
 <section id="perks" class="bg-offwhite">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24">
+  <div class="max-w  mx-auto px-8 lg:px-12 py-24">
 
     <!-- Section header -->
     <div class="flex flex-wrap justify-between items-end gap-8 mb-14">
-      <div>
+      <div class="flex-1">
         <div
           class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
           <span class="w-2 h-2 rounded-full bg-primary"></span>
           Limited Time Offers
         </div>
         <h2 class="brand-font font-extrabold leading-[1.1] text-brand" style="font-size:clamp(2rem,4vw,3rem);">
-          Exclusive<br>Patient Perks
+          Exclusive Patient Perks
         </h2>
       </div>
       <p class="font-body text-[0.92rem] text-muted leading-relaxed max-w-[300px]">
@@ -120,7 +120,7 @@ ViewData["Title"] = "Home page";
           style="background:var(--tw-color-primary, #7c3aed); background-color:#7c3aed;">
           $100 OFF
         </span>
-         <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
+        <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
         <h3 class="brand-font font-bold text-xl mb-3">Teeth Whitening</h3>
         <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
           Brighten your smile with our professional in-office whitening treatment.
@@ -158,17 +158,19 @@ ViewData["Title"] = "Home page";
      REVIEWS
 ═════════════════════════════════════ -->
 <section id="reviews" class="bg-brand overflow-hidden">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 flex md:flex-row flex-col md:gap-16 gap-8 md:items-center">
+  <div class="max-w mx-auto px-8 lg:px-12 py-24 flex md:flex-row flex-col md:gap-16 gap-8 md:items-center">
 
     <div class="fade-up md:w-72 w-full shrink-0 flex md:flex-col flex-row justify-between items-center md:items-start">
       <h2 class="brand-font font-extrabold text-white leading-[1.1]" style="font-size:clamp(2rem,4vw,3rem);">
         What makes<br><span class="text-[#b07d5c] italic">us smile?</span>
       </h2>
       <div class="flex gap-3 md:mt-8">
-        <button onclick="prevReview()" class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
+        <button onclick="prevReview()"
+          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
           ←
         </button>
-        <button onclick="nextReview()" class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
+        <button onclick="nextReview()"
+          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
           →
         </button>
       </div>
@@ -176,7 +178,7 @@ ViewData["Title"] = "Home page";
 
     <div class="overflow-hidden w-full" id="carouselViewport">
       <div id="reviewsContainer" class="flex gap-6 will-change-transform">
-        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -186,7 +188,7 @@ ViewData["Title"] = "Home page";
      FAQ
 ═══════════════════════════════════ -->
 <section class="bg-white">
-  <div class="max-w-2xl mx-auto px-8 lg:px-12 pt-12">
+  <div class="max-w mx-auto px-8 lg:px-12 pt-12">
 
     <div class="text-center mb-12 fade-up">
       <h2 class="brand-font font-extrabold text-brand mb-3" style="font-size:clamp(1.8rem,3.5vw,2.5rem);">
@@ -194,8 +196,9 @@ ViewData["Title"] = "Home page";
       </h2>
       <p class="font-body text-[0.9rem] text-muted">Common questions from our patients.</p>
     </div>
+      <div class="space-y-3 fade-up max-w-3xl mx-auto" id="faqList"></div>
 
-    <div class="space-y-3 fade-up" id="faqList"></div>
+    </div>
 
   </div>
 </section>
@@ -205,7 +208,7 @@ ViewData["Title"] = "Home page";
      OPERATING HOURS + MAP
 ═════════════════════════════════════ -->
 <section id="location" class="bg-white">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+  <div class="max-w mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
     <!-- Left -->
     <div class="fade-up">

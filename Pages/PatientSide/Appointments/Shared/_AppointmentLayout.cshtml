@@ -38,37 +38,31 @@
       >
         <div class="max-w-3xl mx-auto flex items-center justify-between">
           <!-- Left: back + breadcrumb -->
-          <div class="flex items-center gap-3">
-            <button
-              id="backBtn"
-              onclick="goBack()"
-              class="hidden items-center gap-1.5 font-body text-[.78rem] font-medium text-muted hover:text-brand transition-colors bg-transparent border-none p-0 cursor-pointer"
+          <button
+            id="backBtn"
+            onclick="goBack()"
+            class="hidden items-center gap-1.5 font-body text-[.78rem] font-medium text-muted hover:text-brand transition-colors bg-transparent border-none p-0 cursor-pointer px-2 py-1 hover:bg-slate-100 rounded-full"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-              Back
-            </button>
-            <nav
-              id="breadcrumb"
-              class="flex items-center gap-1.5 font-body text-[.74rem] text-muted"
-            ></nav>
-          </div>
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back
+          </button>
 
           <!-- Right: cancel + brand -->
           <div class="flex items-center gap-5">
             <button
               onclick="cancelBooking()"
-              class="font-body text-[.75rem] font-medium text-muted hover:text-primary transition-colors bg-transparent border-none cursor-pointer p-0"
+              class="font-body text-[.75rem] font-medium text-muted hover:text-primary transition-colors bg-transparent border-none cursor-pointer px-2 py-1 hover:text-slate-50 hover:bg-red-500 rounded-full"
             >
               Cancel
             </button>
