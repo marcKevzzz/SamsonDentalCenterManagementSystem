@@ -54,7 +54,10 @@ if (path === "/" || path === "") {
   setActive("nav-dashboard");
 } else if (path.startsWith("/profile/myappointments")) {
   setActive("side-myappointments");
-  setActive("nav-myappointments");
+} else if (path.startsWith("/profile/settings")) {
+  setActive("side-settings");
+} else if (path.startsWith("/profile/notifications")) {
+  setActive("side-notifications");
 }
 
 window.addEventListener("scroll", () => {
