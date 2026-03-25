@@ -51,6 +51,7 @@ if (path === "/" || path === "") {
   setActive("nav-contacts");
 } else if (path.startsWith("/profile/dashboard")) {
   setActive("side-dashboard");
+  setActive("nav-dashboard");
 } else if (path.startsWith("/profile/myappointments")) {
   setActive("side-myappointments");
 } else if (path.startsWith("/profile/settings")) {

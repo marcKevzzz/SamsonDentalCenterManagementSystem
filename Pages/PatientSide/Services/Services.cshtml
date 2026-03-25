@@ -47,25 +47,25 @@
 
 <!-- ═════════════════ FILTER BAR ═════════════════ -->
 <div id="filterBar"
-     class="sticky top-[68px] z-40 border-b border-gray-200 px-6 lg:px-12 py-4 bg-white backdrop-blur">
+     class="sticky top-[68px] z-40 border-b border-gray-200 px-2 md:px-12 py-4 bg-white backdrop-blur">
 
-    <div class="max-w mx-auto flex flex-wrap items-center justify-between gap-4 lg:px-8">
+    <div class="max-w mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4 lg:px-8">
 
         <!-- Tabs -->
         <div class="flex flex-wrap gap-2">
-            <button class="acat-tab active" data-cat="all" onclick="filterServices('all')">All</button>
-            <button class="acat-tab" data-cat="General Dentistry" onclick="filterServices('General Dentistry')">General</button>
-            <button class="acat-tab" data-cat="Cosmetic" onclick="filterServices('Cosmetic')">Cosmetic</button>
-            <button class="acat-tab" data-cat="Specialized" onclick="filterServices('Specialized')">Specialized</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2 active" data-cat="all" onclick="filterServices('all')">All</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="General Dentistry" onclick="filterServices('General Dentistry')">General</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="Cosmetic" onclick="filterServices('Cosmetic')">Cosmetic</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="Specialized" onclick="filterServices('Specialized')">Specialized</button>
         </div>
 
         <!-- Search -->
-        <div class="relative">
+        <div class="relative sm:block hidden">
             <input type="text"
                    id="svcSearch"
                    placeholder="Search services..."
                    oninput="searchServices(this.value)"
-                   class="pl-9 pr-4 py-2 w-56 rounded-full border border-gray-200 bg-offwhite focus:border-primary focus:bg-white outline-none text-sm" />
+                   class="pl-9 pr-4 py-2 w-56 rounded-full border border-gray-200 bg-offwhite focus:border-primary focus:bg-white outline-none text-sm " />
 
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
