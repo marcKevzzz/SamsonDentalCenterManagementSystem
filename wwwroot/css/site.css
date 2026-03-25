@@ -958,3 +958,17 @@ textarea.form-input {
   transition: width 0.8s ease;
   width: 0;
 }
+
+.strength-seg { height: 3px; border-radius: 2px; flex: 1; background: #e5e7eb; transition: background .3s; }
+  .strength-seg.weak   { background: #ef4444; }
+  .strength-seg.medium { background: #f59e0b; }
+  .strength-seg.strong { background: #10b981; }
+  .avatar-img { width:100%; height:100%; object-fit:cover; border-radius:9999px; }
+
+    .notif-item { transition: background .15s; }
+  .notif-item:hover { background: #f8fafc; }
+  .unread-dot { animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
