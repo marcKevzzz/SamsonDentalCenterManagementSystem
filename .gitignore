@@ -9,6 +9,12 @@ obj/
 *.db
 *.log
 appsettings*.json
+appsettings.Production.json
 
 # VS Code
 .vscode/
+
+
+*.user
+*.pubxml
+*.pubxml.user

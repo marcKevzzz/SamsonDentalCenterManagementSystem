@@ -12,31 +12,31 @@
       class="flex items-center gap-3 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-primary mb-4">
       <i class="@Model.Service.Icon text-[1rem]"></i> @Model.Service.Category
     </div>
-    <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4" style="font-size:clamp(2.4rem,5vw,4rem);">
+    <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4 line-clamp-3" style="font-size:clamp(1.8rem,5vw,4rem);">
       @Model.Service.Name</h1>
     <p class="font-body text-[1rem] text-white/55 max-w-md leading-relaxed mb-8">@Model.Service.Tagline</p>
-    <div class="flex flex-wrap gap-4">
+    <div class="flex flex-wrap gap-2 sm:gap-4">
       <a href="/Contact"
-        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase bg-primary text-white px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
+        class="brand-font flex items-center font-bold text-[0.82rem] tracking-wider uppercase bg-primary text-white px-4 sm:px-7 py-3 sm:py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
         Book This Service
       </a>
       <a href="#overview"
-        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase border-2 border-white/20 text-white px-7 py-3.5 rounded-xl hover:border-white/50 transition-colors no-underline">
-        Learn More <i class="fa-solid fa-arrow-down ml-2"></i>
+        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase border-2 border-white/20 text-white px-4 sm:px-7 py-3 sm:py-3.5 rounded-xl hover:border-white/50 transition-colors no-underline">
+        Learn More <i class="fa-solid fa-arrow-down ml-2 "></i>
       </a>
     </div>
   </div>
 </section>
 
 <div class="bg-offwhite border-b border-[#e5e7eb]">
-  <div class="max-w mx-auto px-8 lg:px-12 py-10 grid grid-cols-3 gap-4">
+  <div class="max-w mx-auto px-2  lg:px-12 py-10 grid grid-cols-3 gap-4">
     <div class="flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-clock text-primary text-sm"></i>
       </div>
       <div>
         <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">Duration</div>
-        <div class="brand-font font-bold text-lg text-brand text-center md:text-left">@Model.Service.Duration</div>
+        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@Model.Service.Duration</div>
       </div>
     </div>
     <div class="flex md:flex-row flex-col items-center justify-center gap-3">
@@ -45,7 +45,7 @@
       </div>
       <div>
         <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">Recovery</div>
-        <div class="brand-font font-bold text-lg text-brand text-center md:text-left">@Model.Service.Recovery</div>
+        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@Model.Service.Recovery</div>
       </div>
     </div>
     <div class="flex md:flex-row flex-col items-center justify-center gap-3">
@@ -54,7 +54,7 @@
       </div>
       <div>
         <div class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">Starting Price</div>
-        <div class="brand-font font-bold text-lg text-brand text-center md:text-left">@Model.Service.Price</div>
+        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@Model.Service.Price</div>
       </div>
     </div>
   </div>
@@ -71,7 +71,7 @@
           <i class="fa-solid fa-circle-info text-primary text-[8px]"></i>
           Overview
         </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-5" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-5 " style="font-size:clamp(1.6rem,3vw,2.2rem);">
           What is @Model.Service.Name?</h2>
         <p class="font-body text-[0.95rem] text-muted leading-relaxed">@Model.Service.Summary</p>
       </div>

@@ -97,9 +97,16 @@ h4,
 }
 .menu-link:hover {
   background: #f5f5f7;
-  color: #1e40af;
+  color: black;
 }
 .menu-link:hover .menu-icon {
+  color: black;
+}
+.menu-link.active {
+  background: #f5f5f7;
+  color: #1e40af;
+}
+.menu-link.active .menu-icon {
   color: #1e40af;
 }
 .menu-icon {
@@ -708,7 +715,7 @@ textarea.form-input {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 0.55rem 1.2rem;
+  /* padding: 0.55rem 1.2rem; */
   border-radius: 999px;
   border: 1.5px solid #e5e7eb;
   background: #fff;
