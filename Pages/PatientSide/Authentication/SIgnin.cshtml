@@ -246,17 +246,13 @@
 
       <!-- Password -->
       <div>
-        <div class="flex items-center justify-between mb-2">
+       
           <label
-            class="font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted"
+            class="font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2"
             >Password</label
           >
-          <a
-            href="#"
-            class="font-body text-[0.76rem] text-primary hover:underline"
-            >Forgot password?</a
-          >
-        </div>
+       
+      
         <div class="relative">
           <span
             class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
@@ -327,7 +323,9 @@
         </div>
       </div>
 
-      <!-- Remember me -->
+      <div class="flex items-center justify-between">
+
+        <!-- Remember me -->
       <div class="flex items-center gap-2.5">
         <input
           type="checkbox"
@@ -338,7 +336,13 @@
           for="rememberMe"
           class="font-body text-[0.83rem] text-muted cursor-pointer select-none"
           >Keep me signed in</label
-        >
+          >
+        </div>
+           <a
+            href="#"
+            class="font-body text-[0.76rem] text-primary hover:underline"
+            >Forgot password?</a
+          >
       </div>
 
       <!-- Sign in btn -->

@@ -11,7 +11,13 @@ function handleSignIn(e) {
     showErr("si_password");
     ok = false;
   }
-  if (ok) window.location.href = "../"; // TODO: connect auth API
+
+  if (email === "admin@gmail.com" && pass === "admin123") {
+    window.location.href = "../admin/dashboard"; // TODO: connect auth API
+  } else {
+    showErr("si_email");
+    showErr("si_password");
+  }
 }
 function showErr(id) {
   document.getElementById("err_" + id)?.classList.add("show");

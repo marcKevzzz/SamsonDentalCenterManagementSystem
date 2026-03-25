@@ -1,0 +1,197 @@
+<!-- ── APPOINTMENTS ──
+<div id="page-appointments" class="page p-4 md:p-6">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div>
+      <h2 class="font-display text-xl font-extrabold text-brand-900">
+        Appointments
+      </h2>
+      <p class="text-[12px] text-brand-500 mt-0.5">
+        Schedule and manage appointments
+      </p>
+    </div>
+    <button
+      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-gradient-to-r from-primary to-primary-dark shadow-md shadow-primary/25"
+    >
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" /></svg
+      >Book Appointment
+    </button>
+  </div>
+  <div class="grid grid-cols-3 gap-3 mb-5">
+    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
+      <div class="font-display text-2xl font-extrabold text-primary">47</div>
+      <div class="text-[10.5px] text-brand-400 mt-0.5">Confirmed</div>
+    </div>
+    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
+      <div class="font-display text-2xl font-extrabold text-amber-500">15</div>
+      <div class="text-[10.5px] text-brand-400 mt-0.5">Pending</div>
+    </div>
+    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
+      <div class="font-display text-2xl font-extrabold text-accent">12</div>
+      <div class="text-[10.5px] text-brand-400 mt-0.5">Cancelled</div>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="dtable w-full min-w-[580px]">
+        <thead class="bg-slate-50">
+          <tr>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              ID
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Patient
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Doctor
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Service
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Date &amp; Time
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Status
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr>
+            <td class="px-4 py-3 text-[10.5px] text-brand-400">#APT-0891</td>
+            <td class="px-4 py-3 text-[13px]">Maria Lim</td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Santos</td>
+            <td class="px-4 py-3 text-[12.5px]">General Checkup</td>
+            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">
+              Mar 23 · 9:00 AM
+            </td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
+                >Confirmed</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex gap-1">
+                <button
+                  class="text-[10.5px] px-2 py-1 rounded-lg text-primary hover:bg-blue-50"
+                >
+                  Edit</button
+                ><button
+                  class="text-[10.5px] px-2 py-1 rounded-lg text-accent hover:bg-red-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-[10.5px] text-brand-400">#APT-0892</td>
+            <td class="px-4 py-3 text-[13px]">Juan Reyes</td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Cruz</td>
+            <td class="px-4 py-3 text-[12.5px]">Cardiology</td>
+            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">
+              Mar 23 · 10:30 AM
+            </td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display"
+                >Pending</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex gap-1">
+                <button
+                  class="text-[10.5px] px-2 py-1 rounded-lg text-primary hover:bg-blue-50"
+                >
+                  Confirm</button
+                ><button
+                  class="text-[10.5px] px-2 py-1 rounded-lg text-accent hover:bg-red-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-[10.5px] text-brand-400">#APT-0893</td>
+            <td class="px-4 py-3 text-[13px]">Ana Cruz</td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Reyes</td>
+            <td class="px-4 py-3 text-[12.5px]">Pediatrics</td>
+            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">
+              Mar 23 · 11:00 AM
+            </td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
+                >Confirmed</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex gap-1">
+                <button
+                  class="text-[10.5px] px-2 py-1 rounded-lg text-primary hover:bg-blue-50"
+                >
+                  Edit</button
+                ><button
+                  class="text-[10.5px] px-2 py-1 rounded-lg text-accent hover:bg-red-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-[10.5px] text-brand-400">#APT-0894</td>
+            <td class="px-4 py-3 text-[13px]">Ben Marcos</td>
+            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Garcia</td>
+            <td class="px-4 py-3 text-[12.5px]">Orthopedics</td>
+            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">
+              Mar 23 · 2:00 PM
+            </td>
+            <td class="px-4 py-3">
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-display"
+                >Cancelled</span
+              >
+            </td>
+            <td class="px-4 py-3">
+              <button
+                class="text-[10.5px] px-2 py-1 rounded-lg text-primary hover:bg-blue-50"
+              >
+                Reschedule
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> -->

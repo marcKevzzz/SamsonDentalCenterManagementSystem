@@ -1,0 +1,128 @@
+body {
+  font-family: "DM Sans", sans-serif;
+}
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Syne", sans-serif;
+}
+
+#sidebar.collapsed .sidebar-text {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-item.active {
+  background-color: #1e40af;
+}
+
+/* Page fade-in */
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+  animation: fadeIn 0.22s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* Donut ring rotation */
+.dr {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Pulse */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+}
+.pulse {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Stat card top border */
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px 16px 0 0;
+  border-top-width: 3px;
+  border-style: solid;
+}
+.stat-blue::before {
+  border-color: #1e40af;
+}
+.stat-red::before {
+  border-color: #c0392b;
+}
+.stat-teal::before {
+  border-color: #059669;
+}
+.stat-purple::before {
+  border-color: #7c3aed;
+}
+
+.translate-half {
+  transform: translateY(-50%);
+}
+
+/* Table row hover */
+.dtable tbody tr:hover td {
+  background: #fafbff;
+}
+
+/* Chart bar */
+.cbar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.cbar-inner {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.cbar-inner:hover {
+  filter: brightness(1.12);
+}

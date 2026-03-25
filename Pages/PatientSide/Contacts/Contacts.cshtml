@@ -4,10 +4,12 @@
     ViewData["Title"] = "Contacts page";
 }
 
-<section class="bg-brand pt-[68px]">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-16">
+<section class="bg-brand pt-[68px] h-[400px] relative overflow-hidden">
+  <div class="absolute inset-0 opacity-[0.04]"
+         style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
+  <div class="max-w mx-auto px-8 lg:px-12 py-16">
     
-    <h1 class="brand-font font-extrabold text-[2.8rem] text-white mb-3">Contact Us</h1>
+    <h1 class="brand-font font-extrabold leading-[1.05]  text-[clamp(2.6rem,6vw,4.2rem)] text-white mb-3">Contact Us</h1>
     <p class="font-body text-[0.92rem] text-white/45 max-w-sm leading-relaxed">
       We'd love to hear from you. Reach out to schedule an appointment or ask any questions.
     </p>
@@ -19,7 +21,7 @@
      QUICK INFO CARDS
 ═══════════════════════════════════ -->
 <section class="bg-offwhite">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-14">
+  <div class="max-w mx-auto px-8 lg:px-12 py-14">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
  
       <!-- Phone -->
@@ -37,7 +39,7 @@
       <!-- Email -->
       <div class="info-card fade-up bg-white rounded-2xl p-6 shadow-sm">
         <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="# q" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
@@ -83,7 +85,7 @@
      CONTACT FORM + MAP
 ═══════════════════════════════════ -->
 <section class="bg-white" id="contactSection">
-  <div class="max-w-7xl mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+  <div class="max-w mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
  
     <!-- LEFT: Form -->
     <div class="fade-up">

@@ -18,6 +18,21 @@ h4,
     center / cover no-repeat;
 }
 
+.max-w {
+  max-width: 85dvw;
+}
+@media (max-width: 580px) {
+  .max-w {
+    max-width: 100dvw;
+  }
+}
+
+@media (min-width: 1680px) {
+  .max-w {
+    max-width: 1500px;
+  }
+}
+
 /* Navbar transition */
 #navbar {
   transition:
