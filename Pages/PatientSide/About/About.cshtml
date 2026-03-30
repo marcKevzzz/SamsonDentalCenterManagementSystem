@@ -7,8 +7,9 @@ ViewData["Title"] = "About page";
 <section class="pt-[68px] relative overflow-hidden h-[400px] bg-brand">
 
   <!-- <div class="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] via-[#49494b] to-[#414147]"></div> -->
-   <div class="absolute inset-0 opacity-[0.04]"
-         style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
+  <div class="absolute inset-0 opacity-[0.04]"
+    style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;">
+  </div>
   <!-- <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div> -->
 
 
@@ -227,11 +228,11 @@ ViewData["Title"] = "About page";
 
     <!-- Thumbnail selector -->
     <div class="flex justify-center gap-4">
-      <img src="https://randomuser.me/api/portraits/men/46.jpg" onclick="handleManualSelect(0)"
+      <img src="https://randomuser.me/api/portraits/men/46.jpg" id="teamThumb1"
         class="team-thumb w-14 h-14 rounded-full cursor-pointer transition-all" />
-      <img src="https://randomuser.me/api/portraits/women/44.jpg" onclick="handleManualSelect(1)"
+      <img src="https://randomuser.me/api/portraits/women/44.jpg" id="teamThumb2"
         class="team-thumb w-14 h-14 rounded-full cursor-pointer transition-all" />
-      <img src="https://randomuser.me/api/portraits/men/32.jpg" onclick="handleManualSelect(2)"
+      <img src="https://randomuser.me/api/portraits/men/32.jpg" id="teamThumb3"
         class="team-thumb w-14 h-14 rounded-full cursor-pointer transition-all" />
     </div>
 
@@ -259,14 +260,14 @@ ViewData["Title"] = "About page";
       </div>
       <!-- Carousel nav buttons -->
       <div class="flex gap-3 shrink-0">
-        <button id="facPrev" onclick="shiftFac(-1)"
+        <button id="facPrev" 
           class="w-11 h-11 rounded-full border border-[#e5e7eb] flex items-center justify-center hover:border-brand hover:bg-brand hover:text-white transition-all cursor-pointer bg-white text-brand">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <button id="facNext" onclick="shiftFac(1)"
+        <button id="facNext" 
           class="w-11 h-11 rounded-full border border-[#e5e7eb] flex items-center justify-center hover:border-brand hover:bg-brand hover:text-white transition-all cursor-pointer bg-white text-brand">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
@@ -491,4 +492,4 @@ ViewData["Title"] = "About page";
 </section>
 
 
-<script src="~/js/PatientSide/about.js"></script>
+<script type="module" src="~/js/PatientSide/about.js"></script>

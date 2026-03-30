@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/tailwind.css" />
-    <link
-      rel="stylesheet"
-      href="~/SamsonDentalCenterManagementSystem.styles.css"
-      asp-append-version="true"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
+  <script type="importmap"></script>
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/tailwind.css" />
+  <link rel="stylesheet" href="~/SamsonDentalCenterManagementSystem.styles.css" asp-append-version="true" />
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
-      rel="stylesheet"
-    />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  </head>
-  <body class="min-h-screen bg-offwhite flex">
-    @RenderBody()
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
+    rel="stylesheet" />
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/config.js" asp-append-version="true"></script>
-    <script src="~/js/PatientSide/auth.js" asp-append-version="true"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
 
-    @await RenderSectionAsync("Scripts", required: false)
-  </body>
+<body class="min-h-screen bg-offwhite flex">
+  @RenderBody()
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-50"></div>
+
+  <!-- Modal Root -->
+  <div id="modal-root"></div>
+
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  <script src="~/js/config.js" asp-append-version="true"></script>
+  <script src="~/js/ui.js" type="module" asp-append-version="true"></script>
+  <script src="~/js/PatientSide/auth.js" type="module" asp-append-version="true"></script>
+
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+
 </html>

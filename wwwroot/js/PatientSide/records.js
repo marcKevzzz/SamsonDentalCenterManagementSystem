@@ -1,17 +1,22 @@
-window.disableNavScroll = true;
-toggleNavbar(true);
+document.querySelectorAll(".fade-up").forEach((el, i) => {
+  setTimeout(() => el.classList.add("animate"), i * 90);
+});
 
-function filterTab(name) {
-    currentFilter = name;
-    ['all','unread','appointments','system'].forEach(t => {
-      const btn = document.getElementById('ftab-' + t);
-      if (t === name) {
-        btn.classList.remove('text-muted','border-transparent');
-        btn.classList.add('text-primary','border-primary');
-      } else {
-        btn.classList.remove('text-primary','border-primary');
-        btn.classList.add('text-muted','border-transparent');
-      }
-    });
-    applyFilter();
-  }
+/* ── Section accordion ── */
+function toggleSection(btn) {
+  const body = btn.nextElementSibling;
+  const chevron = btn.querySelector(".rec-chevron");
+  body.classList.toggle("open");
+  chevron.classList.toggle("open");
+}
+
+/* ── Tab filter ── */
+function switchTab(tab) {
+  document
+    .querySelectorAll(".rec-tab")
+    .forEach((t) => t.classList.toggle("active", t.dataset.tab === tab));
+  document.querySelectorAll(".rec-section").forEach((sec) => {
+    const match = tab === "all" || sec.dataset.section === tab;
+    sec.style.display = match ? "" : "none";
+  });
+}

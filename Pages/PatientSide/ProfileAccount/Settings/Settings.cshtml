@@ -1,215 +1,253 @@
 @page "/Profile/Settings"
 @model SettingsModel
 @{
-    ViewData["Title"] = "Settings page";
+ViewData["Title"] = "Settings page";
 }
 
-<Section class="flex-1 min-w-0">
-    <div class="mb-6">
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-2 h-2 rounded-full bg-primary"></div>
-        <span class="text-primary text-xs font-bold tracking-[0.12em] uppercase" style="font-family:'Syne',sans-serif">Account Settings</span>
-        <div class="ml-auto flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
-          <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-          Patient since Jan 2024
-        </div>
+<Section class="flex-1 min-w-0 fade-up">
+  <div class="mb-6">
+    <div class="flex items-center gap-2 ">
+      <div
+        class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Account Settings
       </div>
-      <h1 class="font-extrabold text-3xl text-brand" style="font-family:'Syne',sans-serif">Your Profile</h1>
-      <p class="text-muted text-sm mt-1">Manage your personal information, contact details, and security settings.</p>
+      <div class="ml-auto flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
+        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+        Patient since Jan 2024
+      </div>
     </div>
- 
-    <!-- Tabs -->
-    <div class="flex border-b-2 border-gray-200 mb-6">
-      <button onclick="switchTab('personal')" id="tab-btn-personal"
-        class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-primary border-primary" style="font-family:'Syne',sans-serif">
-        Personal Info
-      </button>
-      <button onclick="switchTab('contact')" id="tab-btn-contact"
-        class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand" style="font-family:'Syne',sans-serif">
-        Contact &amp; Address
-      </button>
-      <button onclick="switchTab('security')" id="tab-btn-security"
-        class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand" style="font-family:'Syne',sans-serif">
-        Security
-      </button>
-    </div>
- 
-    <!-- TAB: Personal Info -->
-    <div id="tab-personal" class="space-y-4">
- 
-      <!-- Profile picture -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">Profile Picture</h3>
-        <div class="flex items-center gap-6">
-          <div class="relative flex-shrink-0">
-            <div id="avatarCircle" class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center font-black text-2xl text-white border-[3px] border-white shadow-[0_0_0_2px_#e5e7eb] overflow-hidden" style="font-family:'Syne',sans-serif">
-              JD
-            </div>
-            <button onclick="document.getElementById('avatarInput').click()"
-              class="absolute bottom-0 right-0 w-6 h-6 bg-brand border-2 border-white rounded-full flex items-center justify-center hover:bg-accent transition-colors">
-              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/></svg>
+    <h1 class="font-extrabold text-3xl text-brand" style="font-family:'Syne',sans-serif">Your Profile</h1>
+    <p class="text-muted text-sm mt-1">Manage your personal information, contact details, and security settings.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex border-b-2 border-gray-200 mb-6">
+    <button data-tab="personal" id="tab-btn-personal"
+      class="tab-btn px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-primary border-primary"
+      style="font-family:'Syne',sans-serif">
+      Personal Info
+    </button>
+    <button data-tab="contact" id="tab-btn-contact"
+      class="tab-btn px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand"
+      style="font-family:'Syne',sans-serif">
+      Contact &amp; Address
+    </button>
+    <button data-tab="security" id="tab-btn-security"
+      class="tab-btn px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand"
+      style="font-family:'Syne',sans-serif">
+      Security
+    </button>
+  </div>
+
+  <!-- TAB: Personal Info -->
+  <div id="tab-personal" class="space-y-4">
+
+    <!-- Profile picture -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+      <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">
+        Profile Picture</h3>
+      <div class="flex items-center gap-6">
+        <div class="relative flex-shrink-0">
+          <div id="avatarCircle"
+            class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center font-black text-2xl text-white border-[3px] border-white shadow-[0_0_0_2px_#e5e7eb] overflow-hidden"
+            style="font-family:'Syne',sans-serif">
+            JD
+          </div>
+          <button id="triggerAvatar"
+            class="absolute bottom-0 right-0 w-6 h-6 bg-brand border-2 border-white rounded-full flex items-center justify-center hover:bg-accent transition-colors">
+            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2"
+                stroke-linecap="round" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2" />
+            </svg>
+          </button>
+          <input type="file" id="avatarInput" accept="image/*" class="hidden" />
+        </div>
+        <div>
+          <p class="font-bold text-sm text-brand mb-1" style="font-family:'Syne',sans-serif">Profile Photo</p>
+          <p class="text-gray-400 text-xs mb-3">JPG, PNG or GIF — max 5MB</p>
+          <div class="flex gap-2">
+            <button id="uploadBtn"
+              class="bg-blue-50 text-primary border-[1.5px] border-blue-200 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+              style="font-family:'Syne',sans-serif">
+              Upload Photo
             </button>
-            <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="previewAvatar(event)"/>
+            <button id="removeBtn"
+              class="text-accent border-[1.5px] border-red-200 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+              style="font-family:'Syne',sans-serif">
+              Remove
+            </button>
           </div>
-          <div>
-            <p class="font-bold text-sm text-brand mb-1" style="font-family:'Syne',sans-serif">Profile Photo</p>
-            <p class="text-gray-400 text-xs mb-3">JPG, PNG or GIF — max 5MB</p>
-            <div class="flex gap-2">
-              <button onclick="document.getElementById('avatarInput').click()"
-                class="bg-blue-50 text-primary border-[1.5px] border-blue-200 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors" style="font-family:'Syne',sans-serif">
-                Upload Photo
-              </button>
-              <button onclick="removeAvatar()"
-                class="text-accent border-[1.5px] border-red-200 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-red-50 transition-colors" style="font-family:'Syne',sans-serif">
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
- 
-      <!-- Personal info -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">Personal Information</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">First Name</label>
-            <input type="text" value="Juan" placeholder="e.g. Juan"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Last Name</label>
-            <input type="text" value="Dela Cruz" placeholder="e.g. Dela Cruz"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Date of Birth</label>
-            <input type="date" value="1995-06-15"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Sex</label>
-            <select class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer">
-              <option value="">Select sex</option>
-              <option value="male" selected>Male</option>
-              <option value="female">Female</option>
-              <option value="prefer_not">Prefer not to say</option>
-            </select>
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all" style="font-family:'Syne',sans-serif">Cancel</button>
-          <button onclick="showToast('Personal info updated!')" class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95" style="font-family:'Syne',sans-serif">Save Changes</button>
         </div>
       </div>
     </div>
- 
-    <!-- TAB: Contact & Address -->
-    <div id="tab-contact" class="space-y-4 hidden">
- 
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">Contact Information</h3>
-        <div class="space-y-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Email Address</label>
-            <input type="email" value="juan@email.com" placeholder="your@email.com"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-            <span class="text-xs text-gray-400">Changing your email will require re-verification.</span>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Contact Number</label>
-            <input type="tel" value="09123456789" placeholder="09XX XXX XXXX"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-          </div>
+
+    <!-- Personal info -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+      <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">
+        Personal Information</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">First Name</label>
+          <input type="text" value="Juan" placeholder="e.g. Juan"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Last Name</label>
+          <input type="text" value="Dela Cruz" placeholder="e.g. Dela Cruz"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Date of Birth</label>
+          <input type="date" value="1995-06-15"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Sex</label>
+          <select
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer">
+            <option value="">Select sex</option>
+            <option value="male" selected>Male</option>
+            <option value="female">Female</option>
+            <option value="prefer_not">Prefer not to say</option>
+          </select>
         </div>
       </div>
- 
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">Address</h3>
-        <div class="space-y-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Street Address</label>
-            <input type="text" value="123 Maharlika St., Brgy. Bagong Silang" placeholder="House no., Street, Barangay"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">City</label>
-            <input type="text" value="Quezon City" placeholder="City / Municipality"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">ZIP Code</label>
-            <input type="text" value="1100" placeholder="ZIP Code"
-              class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-          </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <button
+          class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
+          style="font-family:'Syne',sans-serif">Cancel</button>
+        <button id="savePersonalInfo"
+          class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
+          style="font-family:'Syne',sans-serif">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Contact & Address -->
+  <div id="tab-contact" class="space-y-4 hidden">
+
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+      <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">
+        Contact Information</h3>
+      <div class="space-y-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Email Address</label>
+          <input type="email" value="juan@email.com" placeholder="your@email.com"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+          <span class="text-xs text-gray-400">Changing your email will require re-verification.</span>
         </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all" style="font-family:'Syne',sans-serif">Cancel</button>
-          <button onclick="showToast('Contact info updated!')" class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95" style="font-family:'Syne',sans-serif">Save Changes</button>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Contact Number</label>
+          <input type="tel" value="09123456789" placeholder="09XX XXX XXXX"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
         </div>
       </div>
     </div>
- 
-    <!-- TAB: Security -->
-    <div id="tab-security" class="space-y-4 hidden">
- 
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">Change Password</h3>
-        <div class="space-y-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Current Password</label>
-            <div class="relative">
-              <input type="password" id="currentPw" placeholder="Enter current password"
-                class="w-full px-3.5 py-2.5 pr-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-              <button onclick="togglePw('currentPw',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">New Password</label>
-            <div class="relative">
-              <input type="password" id="newPw" placeholder="At least 8 characters" oninput="checkStrength(this.value)"
-                class="w-full px-3.5 py-2.5 pr-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-              <button onclick="togglePw('newPw',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
-              </button>
-            </div>
-            <div class="flex gap-1 mt-1">
-              <div class="strength-seg" id="s1"></div>
-              <div class="strength-seg" id="s2"></div>
-              <div class="strength-seg" id="s3"></div>
-              <div class="strength-seg" id="s4"></div>
-            </div>
-            <span class="text-xs text-gray-400" id="strengthLabel">Enter a new password</span>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-gray-600 tracking-wide">Confirm New Password</label>
-            <div class="relative">
-              <input type="password" id="confirmPw" placeholder="Repeat new password"
-                class="w-full px-3.5 py-2.5 pr-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300"/>
-              <button onclick="togglePw('confirmPw',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
-              </button>
-            </div>
-          </div>
+
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+      <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">
+        Address</h3>
+      <div class="space-y-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Complete Address</label>
+          <textarea type="text" placeholder="House no., Street, Barangay, City/Municipality, Province, Zip Code"
+            style=" resize: none; " rows="3"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300">123 Maharlika St., Brgy. Bagong Silang</textarea>
         </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all" style="font-family:'Syne',sans-serif">Cancel</button>
-          <button onclick="handlePasswordSave()" class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95" style="font-family:'Syne',sans-serif">Update Password</button>
-        </div>
+
       </div>
- 
-      <!-- Danger zone -->
-      <div class="bg-white rounded-2xl border-[1.5px] border-red-100 p-6">
-        <div class="font-bold text-sm text-accent mb-1" style="font-family:'Syne',sans-serif">Danger Zone</div>
-        <p class="text-xs text-gray-400 mb-4">Permanently delete your account and all associated data. This action cannot be undone.</p>
-        <button class="border-[1.5px] border-red-300 text-accent font-bold text-xs px-4 py-2 rounded-lg hover:bg-accent hover:text-white transition-all" style="font-family:'Syne',sans-serif">
-          Delete Account
-        </button>
+      <div class="flex justify-end gap-2 mt-6">
+        <button
+          class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
+          style="font-family:'Syne',sans-serif">Cancel</button>
+        <button id="saveContactInfo"
+          class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
+          style="font-family:'Syne',sans-serif">Save Changes</button>
       </div>
     </div>
+  </div>
+
+  <!-- TAB: Security -->
+  <div id="tab-security" class="space-y-4 hidden">
+
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+      <h3 class="font-bold text-sm text-brand border-b border-gray-100 pb-3 mb-5" style="font-family:'Syne',sans-serif">
+        Change Password</h3>
+      <div class="space-y-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Current Password</label>
+          <div class="relative">
+            <input type="password" id="currentPw" placeholder="Enter current password"
+              class="w-full px-3.5 py-2.5 pr-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+            <button data-target="currentPw"
+              class="pw-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2" />
+                <circle cx="12" cy="12" r="3" stroke-width="2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">New Password</label>
+          <div class="relative">
+            <input type="password" id="newPw" placeholder="At least 8 characters"
+              class="w-full px-3.5 py-2.5 pr-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+            <button data-target="newPw"
+              class="pw-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2" />
+                <circle cx="12" cy="12" r="3" stroke-width="2" />
+              </svg>
+            </button>
+          </div>
+          <div class="flex gap-1 mt-1">
+            <div class="strength-seg" id="s1"></div>
+            <div class="strength-seg" id="s2"></div>
+            <div class="strength-seg" id="s3"></div>
+            <div class="strength-seg" id="s4"></div>
+          </div>
+          <span class="text-xs text-gray-400" id="strengthLabel">Enter a new password</span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide">Confirm New Password</label>
+          <div class="relative">
+            <input type="password" id="confirmPw" placeholder="Repeat new password"
+              class="w-full px-3.5 py-2.5 pr-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+            <button data-target="confirmPw"
+              class="pw-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2" />
+                <circle cx="12" cy="12" r="3" stroke-width="2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <button
+          class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
+          style="font-family:'Syne',sans-serif">Cancel</button>
+        <button id="savePassword"
+          class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
+          style="font-family:'Syne',sans-serif">Update Password</button>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="bg-white rounded-2xl border-[1.5px] border-red-100 p-6">
+      <div class="font-bold text-sm text-accent mb-1" style="font-family:'Syne',sans-serif">Danger Zone</div>
+      <p class="text-xs text-gray-400 mb-4">Permanently delete your account and all associated data. This action cannot
+        be undone.</p>
+      <button
+        class="border-[1.5px] border-red-300 text-accent font-bold text-xs px-4 py-2 rounded-lg hover:bg-accent hover:text-white transition-all"
+        style="font-family:'Syne',sans-serif">
+        Delete Account
+      </button>
+    </div>
+  </div>
 </Section>
 
-  <script src="~/js/site.js"></script>
-<script src="~/js/PatientSide/settings.js"></script>
+<script type="module" src="~/js/site.js"></script>
+<script type="module" src="~/js/PatientSide/settings.js"></script>

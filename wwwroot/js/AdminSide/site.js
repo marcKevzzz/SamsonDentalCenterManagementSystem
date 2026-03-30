@@ -3,6 +3,11 @@ document.getElementById("cur-date").textContent = new Date().toLocaleDateString(
   { month: "short", day: "numeric", year: "numeric" },
 );
 
+let sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+
+const SIDEBAR_EXPANDED = "w-[256px]";
+const SIDEBAR_COLLAPSED = "w-[68px]";
+
 const pageTitles = {
   dashboard: ["Dashboard", "Overview · Today"],
   patients: ["Patients", "People · Registry"],
@@ -11,60 +16,62 @@ const pageTitles = {
   services: ["Services", "Operations · Catalog"],
   reports: ["Reports", "Analytics · Insights"],
   inquiries: ["Inquiries", "Analytics · Messages"],
-  activity: ["Activity Logs", "Analytics · Audit Trail"],
+  activitylogs: ["Activity Logs", "Analytics · Audit Trail"], // Match the URL slug
 };
 
-function navigate(pageId, el) {
-  document
-    .querySelectorAll(".page")
-    .forEach((p) => p.classList.remove("active"));
-  document.getElementById("page-" + pageId).classList.add("active");
-  document.querySelectorAll(".nav-item").forEach((n) => {
-    n.classList.remove(
-      "active",
-      "bg-primary",
-      "shadow-[0_4px_14px_rgba(30,64,175,.35)]",
-    );
-  });
-  if (el) {
-    el.classList.add("active", "bg-primary");
+function UpdateSidebar() {
+  applySidebarState();
+
+  const currentPath = window.location.pathname.toLowerCase();
+
+  function setActive(id) {
+    document.getElementById(id)?.classList.add("active");
   }
-  const t = pageTitles[pageId] || [pageId, ""];
-  document.getElementById("page-title").textContent = t[0];
-  document.getElementById("page-breadcrumb").textContent = t[1];
-  window.scrollTo(0, 0);
-  // close on mobile
-  if (window.innerWidth < 1024) closeSidebar();
+
+  if (currentPath === "/admin" || currentPath === "/admin/dashboard") {
+    setActive("admin-dashboard");
+  } else if (currentPath.startsWith("/admin/patients")) {
+    setActive("admin-patients");
+  } else if (currentPath.startsWith("/admin/doctors")) {
+    setActive("admin-doctors");
+  } else if (currentPath.startsWith("/admin/appointments")) {
+    setActive("admin-appointments");
+  } else if (currentPath.startsWith("/admin/services")) {
+    setActive("admin-services");
+  } else if (currentPath.startsWith("/admin/reports")) {
+    setActive("admin-reports");
+  } else if (currentPath.startsWith("/admin/inquiries")) {
+    setActive("admin-inquiries");
+  } else if (currentPath.startsWith("/admin/activitylogs")) {
+    setActive("admin-activitylogs");
+  }
+  updateHeader(currentPath.split("/").pop() || "dashboard");
 }
-let sidebarCollapsed = false;
 
-const SIDEBAR_EXPANDED = "w-[256px]";
-const SIDEBAR_COLLAPSED = "w-[68px]";
+UpdateSidebar();
 
+function updateHeader(pageId) {
+  const t = pageTitles[pageId] || [
+    pageId.charAt(0).toUpperCase() + pageId.slice(1),
+    "",
+  ];
+  const titleEl = document.getElementById("page-title");
+  const breadcrumbEl = document.getElementById("page-breadcrumb");
+
+  if (titleEl) titleEl.textContent = t[0];
+  if (breadcrumbEl) breadcrumbEl.textContent = t[1];
+}
+function applySidebarState() {
+  const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+  const root = document.documentElement;
+
+  root.classList.toggle("sb-collapsed", isCollapsed);
+}
 function toggleSidebar() {
-  const sb = document.getElementById("sidebar");
-  const main = document.getElementById("main");
-  const icon = document.getElementById("toggle-icon");
+  sidebarCollapsed = !sidebarCollapsed;
+  localStorage.setItem("sidebarCollapsed", sidebarCollapsed);
 
-  if (window.innerWidth >= 1024) {
-    sidebarCollapsed = !sidebarCollapsed;
-
-    if (sidebarCollapsed) {
-      sb.classList.remove(SIDEBAR_EXPANDED);
-      sb.classList.add(SIDEBAR_COLLAPSED);
-      sb.classList.add("collapsed");
-      icon.classList.add("rotate-180");
-      if (main) main.style.marginLeft = "68px";
-    } else {
-      sb.classList.remove(SIDEBAR_COLLAPSED);
-      sb.classList.add(SIDEBAR_EXPANDED);
-      sb.classList.remove("collapsed");
-      icon.classList.remove("rotate-180");
-      if (main) main.style.marginLeft = "256px";
-    }
-  } else {
-    sb.classList.contains("-translate-x-full") ? openSidebar() : closeSidebar();
-  }
+  document.documentElement.classList.toggle("sb-collapsed", sidebarCollapsed);
 }
 
 function openSidebar() {
@@ -97,15 +104,7 @@ window.addEventListener("resize", () => {
     sb.classList.remove("-translate-x-full");
     sb.classList.add("translate-x-0");
 
-    if (sidebarCollapsed) {
-      sb.classList.remove(SIDEBAR_EXPANDED);
-      sb.classList.add(SIDEBAR_COLLAPSED);
-      if (main) main.style.marginLeft = "68px";
-    } else {
-      sb.classList.remove(SIDEBAR_COLLAPSED);
-      sb.classList.add(SIDEBAR_EXPANDED);
-      if (main) main.style.marginLeft = "256px";
-    }
+    applySidebarState();
 
     document.getElementById("overlay")?.classList.add("hidden");
     document.body.style.overflow = "";

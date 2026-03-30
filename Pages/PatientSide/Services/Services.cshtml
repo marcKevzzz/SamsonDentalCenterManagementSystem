@@ -1,13 +1,14 @@
 @page "/Services"
 @model ServicesModel
 @{
-    ViewData["Title"] = "Services page";
+ViewData["Title"] = "Services page";
 }
 
 <!-- ═════════════════ HERO ═════════════════ -->
 <section class="bg-brand pt-[68px] relative overflow-hidden h-[400px]">
     <div class="absolute inset-0 opacity-[0.04]"
-         style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
+        style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;">
+    </div>
 
     <div class="max-w mx-auto px-6 lg:px-12 py-20 relative z-10">
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
@@ -18,7 +19,8 @@
                     Our Services
                 </h1>
                 <p class="font-body text-[0.95rem] text-white/40 max-w-md leading-relaxed">
-                    From routine checkups to advanced cosmetic and surgical procedures — everything your smile needs, all under one roof.
+                    From routine checkups to advanced cosmetic and surgical procedures — everything your smile needs,
+                    all under one roof.
                 </p>
             </div>
 
@@ -46,31 +48,27 @@
 
 
 <!-- ═════════════════ FILTER BAR ═════════════════ -->
-<div id="filterBar"
-     class="sticky top-[68px] z-40 border-b border-gray-200 px-2 md:px-12 py-4 bg-white backdrop-blur">
+<div id="filterBar" class="sticky top-[68px] z-40 border-b border-gray-200 px-2 md:px-12 py-4 bg-white backdrop-blur">
 
     <div class="max-w mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4 lg:px-8">
 
         <!-- Tabs -->
         <div class="flex flex-wrap gap-2">
-            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2 active" data-cat="all" onclick="filterServices('all')">All</button>
-            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="General Dentistry" onclick="filterServices('General Dentistry')">General</button>
-            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="Cosmetic" onclick="filterServices('Cosmetic')">Cosmetic</button>
-            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="Specialized" onclick="filterServices('Specialized')">Specialized</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2 active" data-cat="all">All</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="General Dentistry">General</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="Cosmetic">Cosmetic</button>
+            <button class="acat-tab px-2 sm:px-4 py-1 sm:py-2" data-cat="Specialized">Specialized</button>
         </div>
 
         <!-- Search -->
         <div class="relative sm:block hidden">
-            <input type="text"
-                   id="svcSearch"
-                   placeholder="Search services..."
-                   oninput="searchServices(this.value)"
-                   class="pl-9 pr-4 py-2 w-56 rounded-full border border-gray-200 bg-offwhite focus:border-primary focus:bg-white outline-none text-sm " />
+            <input type="text" id="svcSearch" placeholder="Search services..."
+                class="pl-9 pr-4 py-2 w-56 rounded-full border border-gray-200 bg-offwhite focus:border-primary focus:bg-white outline-none text-sm" />
 
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
         </div>
 
@@ -95,7 +93,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach (var service in Model.Services.Where(s => s.Category == "General Dentistry"))
                 {
-                    <partial name="Components/ServiceCard" model="service" />
+                <partial name="Components/ServiceCard" model="service" />
                 }
             </div>
         </div>
@@ -115,7 +113,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach (var service in Model.Services.Where(s => s.Category == "Cosmetic"))
                 {
-                    <partial name="Components/ServiceCard" model="service" />
+                <partial name="Components/ServiceCard" model="service" />
                 }
             </div>
         </div>
@@ -135,7 +133,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach (var service in Model.Services.Where(s => s.Category == "Specialized"))
                 {
-                    <partial name="Components/ServiceCard" model="service" />
+                <partial name="Components/ServiceCard" model="service" />
                 }
             </div>
         </div>
@@ -145,12 +143,12 @@
         <div id="noResults" class="hidden text-center py-24">
             <h3 class="text-lg font-bold text-brand mb-2">No services found</h3>
             <p class="text-sm text-muted">Try a different search.</p>
-            <button onclick="clearSearch()" class="mt-4 text-primary font-semibold hover:underline">
-                Clear search
-            </button>
+            <button id="clearSearchBtn" class="mt-4 text-primary font-semibold hover:underline">Clear search</button>
         </div>
 
     </div>
 </section>
 
-<script src="~/js/PatientSide/services.js"></script>
+@section Scripts {
+<script src="~/js/PatientSide/services.js" type="module"></script>
+}

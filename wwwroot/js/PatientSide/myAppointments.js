@@ -1,6 +1,3 @@
-window.disableNavScroll = true;
-toggleNavbar(true);
-
 document.querySelectorAll(".fade-up").forEach((el, i) => {
   setTimeout(() => el.classList.add("animate"), i * 80);
 });

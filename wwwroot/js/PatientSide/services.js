@@ -1,104 +1,122 @@
-const filterBar = document.getElementById("filterBar");
-window.addEventListener("scroll", () => {
-  filterBar.classList.toggle("stuck", window.scrollY > 100);
+/* ── DOM Elements ── */
+const svcSearch = document.getElementById("svcSearch");
+const categoryTabs = document.querySelectorAll(".acat-tab");
+const clearSearchBtn = document.getElementById("clearSearchBtn");
+const sections = {
+  all: null,
+  "General Dentistry": document.getElementById("section-general"),
+  Cosmetic: document.getElementById("section-cosmetic"),
+  Specialized: document.getElementById("section-specialized"),
+};
+
+/* ── Initialization ── */
+document.addEventListener("DOMContentLoaded", () => {
+  initEvents();
 });
 
-/* ── Category filter ── */
-function filterServices(cat) {
-  // Update tab active state
-  document.querySelectorAll(".acat-tab").forEach((t) => {
-    t.classList.toggle("active", t.dataset.cat === cat);
+function initEvents() {
+  // Tab clicks
+  categoryTabs.forEach((tab) => {
+    tab.addEventListener("click", () => filterServices(tab.dataset.cat));
   });
 
-  const items = document.querySelectorAll(".asvc-item");
-  const sections = [
-    "section-general",
-    "section-cosmetic",
-    "section-specialized",
-  ];
+  // Search input
+  svcSearch?.addEventListener("input", (e) => searchServices(e.target.value));
 
-  if (cat === "all") {
-    items.forEach((el) => el.classList.remove("hidden-card"));
-    sections.forEach((id) => (document.getElementById(id).style.display = ""));
-    document.getElementById("noResults").classList.add("hidden");
-    return;
-  }
+  // Clear search button
+  clearSearchBtn?.addEventListener("click", clearSearch);
 
-  const catMap = {
-    "General Dentistry": "section-general",
-    Cosmetic: "section-cosmetic",
-    Specialized: "section-specialized",
-  };
-
-  sections.forEach((id) => {
-    document.getElementById(id).style.display =
-      catMap[cat] === id ? "" : "none";
+  // Scroll effect for filter bar
+  const filterBar = document.getElementById("filterBar");
+  window.addEventListener("scroll", () => {
+    if (filterBar) filterBar.classList.toggle("stuck", window.scrollY > 100);
   });
-
-  // Scroll to section
-  const targetId = catMap[cat];
-  if (targetId) {
-    setTimeout(() => {
-      document
-        .getElementById(targetId)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  }
 }
 
-/* ── Search ── */
-function searchServices(val) {
-  const q = val.toLowerCase().trim();
-  const items = document.querySelectorAll(".asvc-item");
-  const sections = {
-    general: document.getElementById("section-general"),
-    cosmetic: document.getElementById("section-cosmetic"),
-    specialized: document.getElementById("section-specialized"),
-  };
+/* ── Category Filter ── */
+function filterServices(cat) {
+  // 1. UI: Update Tabs
+  categoryTabs.forEach((t) =>
+    t.classList.toggle("active", t.dataset.cat === cat),
+  );
 
-  // Reset category filter tabs to "all"
-  if (q) {
+  // 2. Logic: Show/Hide Sections
+  const sectionList = Object.keys(sections).filter((k) => k !== "all");
+
+  if (cat === "all") {
+    sectionList.forEach((key) => (sections[key].style.display = ""));
+    // Reset hidden cards
     document
-      .querySelectorAll(".acat-tab")
-      .forEach((t) => t.classList.remove("active"));
-    document
-      .querySelectorAll('.acat-tab[data-cat="all"]')
-      .forEach((t) => t.classList.add("active"));
-    Object.values(sections).forEach((s) => (s.style.display = ""));
+      .querySelectorAll(".asvc-item")
+      .forEach((el) => el.classList.remove("hidden-card"));
+  } else {
+    sectionList.forEach((key) => {
+      sections[key].style.display = key === cat ? "" : "none";
+    });
   }
 
-  let anyVisible = false;
-  items.forEach((el) => {
-    const name = el.dataset.name || "";
-    const cat = el.dataset.cat || "";
-    const matches = !q || name.includes(q) || cat.toLowerCase().includes(q);
-    el.classList.toggle("hidden-card", !matches);
-    if (matches) anyVisible = true;
+  // 3. UI: Scroll to target
+  if (cat !== "all" && sections[cat]) {
+    setTimeout(() => {
+      window.scrollTo({
+        top: sections[cat].offsetTop - 140, // Offset for sticky header
+        behavior: "smooth",
+      });
+    }, 50);
+  }
+
+  // Clear search input when switching categories for better UX
+  if (svcSearch) svcSearch.value = "";
+  document.getElementById("noResults")?.classList.add("hidden");
+}
+
+/* ── Search Logic ── */
+function searchServices(val) {
+  const query = val.toLowerCase().trim();
+  const allItems = document.querySelectorAll(".asvc-item");
+  const allSections = document.querySelectorAll(".service-section");
+  const noResults = document.getElementById("noResults");
+
+  // 1. If searching, reset the category tabs to "All"
+  if (query !== "") {
+    document.querySelectorAll(".acat-tab").forEach((t) => {
+      t.classList.toggle("active", t.dataset.cat === "all");
+    });
+  }
+
+  let totalVisible = 0;
+
+  // 2. Filter individual cards
+  allItems.forEach((card) => {
+    // We look for the name in a data-attribute or the h3 text
+    const name = (
+      card.dataset.name ||
+      card.querySelector("h3")?.innerText ||
+      ""
+    ).toLowerCase();
+    const matches = name.includes(query);
+
+    card.classList.toggle("hidden", !matches); // Use 'hidden' or your 'hidden-card' class
+    if (matches) totalVisible++;
   });
 
-  // Hide empty sections
-  if (q) {
-    ["section-general", "section-cosmetic", "section-specialized"].forEach(
-      (secId) => {
-        const sec = document.getElementById(secId);
-        const grid = sec.querySelector('[id^="grid-"]');
-        const visibleInSection =
-          grid &&
-          [...grid.querySelectorAll(".asvc-item")].some(
-            (el) => !el.classList.contains("hidden-card"),
-          );
-        sec.style.display = visibleInSection ? "" : "none";
-      },
-    );
-  }
+  // 3. Hide/Show entire sections based on if they have visible children
+  allSections.forEach((section) => {
+    const visibleInThisSection = [
+      ...section.querySelectorAll(".asvc-item"),
+    ].some((card) => !card.classList.contains("hidden"));
 
-  document
-    .getElementById("noResults")
-    .classList.toggle("hidden", anyVisible || !q);
+    section.style.display = visibleInThisSection || query === "" ? "" : "none";
+  });
+
+  // 4. Toggle Empty State
+  if (noResults) {
+    noResults.classList.toggle("hidden", totalVisible > 0 || query === "");
+  }
 }
 
 function clearSearch() {
-  document.getElementById("svcSearch").value = "";
+  if (svcSearch) svcSearch.value = "";
   searchServices("");
   filterServices("all");
 }

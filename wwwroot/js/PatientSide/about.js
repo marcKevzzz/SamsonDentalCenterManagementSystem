@@ -13,6 +13,37 @@ gsap.utils.toArray(".fade-up").forEach((el) => {
   });
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Team Thumbs
+  const thumbs = document.querySelectorAll(".team-thumb");
+  thumbs.forEach((thumb, i) => {
+    thumb.addEventListener("click", () => handleManualSelect(i));
+  });
+
+  // 2. Facility Navigation
+  document
+    .getElementById("facPrev")
+    ?.addEventListener("click", () => shiftFac(-1));
+  document
+    .getElementById("facNext")
+    ?.addEventListener("click", () => shiftFac(1));
+
+  // 3. Facility Hover Pause
+  const facTrack = document.getElementById("facTrack");
+  facTrack?.addEventListener("mouseenter", stopFacTimer);
+  facTrack?.addEventListener("mouseleave", startFacTimer);
+
+  // 4. Initialization
+  initFacDots();
+  startFacTimer();
+});
+
+// Resize handler
+window.addEventListener("resize", () => {
+  initFacDots();
+  goFac(facIdx);
+});
+
 /* ── Team data ── */
 const doctors = [
   {
@@ -67,23 +98,19 @@ function selectDoctor(index) {
   });
 
   // GSAP Transition
-  gsap.to(teamCard, {
-    opacity: 0,
-    y: 15,
-    duration: 0.25,
-    onComplete: () => {
-      // Data Swap
+  const tl = gsap.timeline();
+
+  tl.to(teamCard, { opacity: 0, y: 10, duration: 0.2 })
+    .call(() => {
+      // Content Swap
       document.getElementById("teamName").textContent = d.name;
       document.getElementById("teamRole").textContent = d.role;
       document.getElementById("teamQuote").textContent = d.quote;
       document.getElementById("teamEdu").textContent = d.edu;
       document.getElementById("teamExp").textContent = d.exp;
       document.getElementById("teamImg").src = d.img;
-
-      // Fade Back In
-      gsap.to(teamCard, { opacity: 1, y: 0, duration: 0.4 });
-    },
-  });
+    })
+    .to(teamCard, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.2)" });
 }
 
 // 2. The Auto-Swapping Logic
@@ -119,53 +146,72 @@ window.addEventListener("load", () => {
 });
 
 /* ── Facilities & Offers Carousel ── */
-(function () {
-  const track = document.getElementById("facTrack");
-  const dotsWrap = document.getElementById("facDots");
-  const cards = track.querySelectorAll(".fac-card");
-  const total = cards.length;
-  const perView = 3;
-  const maxIdx = total - perView;
-  let idx = 0;
+/* ── Facilities & Offers Carousel ── */
+let facIdx = 0;
+let facInterval;
+const FAC_SWAP_SPEED = 3000;
 
-  // Build dots
+function goFac(n) {
+  const track = document.getElementById("facTrack");
+  const cards = document.querySelectorAll(".fac-card");
+  const dotsWrap = document.getElementById("facDots");
+  if (!track || cards.length === 0) return;
+
+  const total = cards.length;
+  const perView = window.innerWidth < 768 ? 1 : 3;
+  const maxIdx = Math.max(0, total - perView);
+
+  // Loop logic
+  if (n > maxIdx) facIdx = 0;
+  else if (n < 0) facIdx = maxIdx;
+  else facIdx = n;
+
+  const cardW = cards[0].offsetWidth;
+  const gap = 20;
+  const offset = facIdx * (cardW + gap);
+
+  track.style.transform = `translateX(-${offset}px)`;
+
+  // Update Dots
+  const dots = dotsWrap?.querySelectorAll("button");
+  dots?.forEach((d, i) => {
+    d.className = `rounded-full transition-all duration-300 cursor-pointer border-none h-2 ${
+      i === facIdx ? "bg-brand w-5" : "bg-[#d1d5db] w-2"
+    }`;
+  });
+}
+
+function shiftFac(dir) {
+  goFac(facIdx + dir);
+  startFacTimer(); // Reset timer on manual click
+}
+
+function startFacTimer() {
+  stopFacTimer();
+  facInterval = setInterval(() => shiftFac(1), FAC_SWAP_SPEED);
+}
+
+function stopFacTimer() {
+  clearInterval(facInterval);
+}
+
+// Initialize Dots
+function initFacDots() {
+  const dotsWrap = document.getElementById("facDots");
+  const cards = document.querySelectorAll(".fac-card");
+  if (!dotsWrap) return;
+
+  const perView = window.innerWidth < 768 ? 1 : 3;
+  const maxIdx = Math.max(0, cards.length - perView);
+
+  dotsWrap.innerHTML = "";
   for (let i = 0; i <= maxIdx; i++) {
     const dot = document.createElement("button");
-    dot.className = `w-2 h-2 rounded-full transition-all duration-300 cursor-pointer border-none ${i === 0 ? "bg-brand w-5" : "bg-[#d1d5db]"}`;
-    dot.onclick = () => goFac(i);
+    dot.className = `w-2 h-2 rounded-full transition-all duration-300 cursor-pointer border-none bg-[#d1d5db]`;
+    dot.onclick = () => {
+      goFac(i);
+      startFacTimer();
+    };
     dotsWrap.appendChild(dot);
   }
-
-  function goFac(n) {
-    if (n > maxIdx) {
-      idx = 0; // loop back to start
-    } else if (n < 0) {
-      idx = maxIdx; // loop to end
-    } else {
-      idx = n;
-    }
-
-    const cardW = cards[0].offsetWidth;
-    const gap = 20;
-    const offset = idx * (cardW + gap);
-
-    track.style.transform = `translateX(-${offset}px)`;
-
-    dotsWrap.querySelectorAll("button").forEach((d, i) => {
-      d.className = `rounded-full transition-all duration-300 cursor-pointer border-none h-2 ${
-        i === idx ? "bg-brand w-5" : "bg-[#d1d5db] w-2"
-      }`;
-    });
-  }
-
-  setInterval(() => {
-    goFac(idx + 1);
-  }, 3000); // every 3 seconds
-
-  window.shiftFac = function (dir) {
-    goFac(idx + dir);
-  };
-
-  // Recalculate on resize
-  window.addEventListener("resize", () => goFac(idx));
-})();
+}

@@ -1,60 +1,63 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/tailwind.css" />
-    <link
-      rel="stylesheet"
-      href="~/SamsonDentalCenterManagementSystem.styles.css"
-      asp-append-version="true"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
+  <script type="importmap"></script>
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <link rel="stylesheet" href="~/css/tailwind.css" />
+  <link rel="stylesheet" href="~/SamsonDentalCenterManagementSystem.styles.css" asp-append-version="true" />
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
-      rel="stylesheet"
-    />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="~/js/config.js" asp-append-version="true"></script>
-  </head>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
+    rel="stylesheet" />
 
-  <body>
-    <partial name="../PatientSide/Components/Navbar" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="~/js/config.js" asp-append-version="true"></script>
+</head>
 
-    <div
-      id="profileBackdrop"
-      class="fixed inset-0 z-40 hidden"
-      onclick="closeProfile()"
-    ></div>
+<body>
+  <partial name="../PatientSide/Components/Navbar" />
 
-    <div class="w-full min-h-screen">
-      <main role="main" class="pb-3">@RenderBody()</main>
-    </div>
+  <script>
+    // Fast check before the big JS files load
+    if (localStorage.getItem("sb_user")) {
+      document.documentElement.classList.add("is-signed-in");
+    }
+  </script>
 
-    <partial name="../PatientSide/Components/Footer" />
+  <div id="profileBackdrop" class="fixed inset-0 z-40 hidden" onclick="closeProfile()"></div>
 
-    <!-- Chat Bubble -->
+  <div class="w-full min-h-screen main-class">
+    <main role="main" class="pb-3">@RenderBody()</main>
+  </div>
 
-    <partial name="../PatientSide/Components/Chatbot" />
+  <partial name="../PatientSide/Components/Footer" />
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script
-      src="~/js/PatientSide/chatbot.js"
-      asp-append-version="true"
-    ></script>
+  <!-- Chat Bubble -->
 
-    @await RenderSectionAsync("Scripts", required: false)
-  </body>
+  <partial name="../PatientSide/Components/Chatbot" />
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-50"></div>
+
+  <!-- Modal Root -->
+  <div id="modal-root"></div>
+
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  <script type="module" src="~/js/site.js" asp-append-version="true"></script>
+  <script src="~/js/PatientSide/chatbot.js" asp-append-version="true"></script>
+
+  <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
+
+
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+
 </html>

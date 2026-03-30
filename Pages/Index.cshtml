@@ -9,10 +9,11 @@ ViewData["Title"] = "Home page";
   <!-- BG layers -->
   <div class="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] via-[#49494b] to-[#56565e]"></div>
   <div class="home-hero-bg-img absolute inset-0 opacity-90"></div>
-  <div class="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/70 to-brand/50"></div>
+  <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div>
 
   <!-- Content -->
-  <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-12 w-full justify-center flex flex-col sm:pt-0 pt-8">
+  <div id="heroContent"
+    class="relative z-10 max-w mx-auto px-8 lg:px-12 w-full justify-center flex flex-col sm:pt-0 pt-8">
 
     <span
       class="hero-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full sm:mb-6 mb-2">
@@ -29,7 +30,7 @@ ViewData["Title"] = "Home page";
         <span class="word">Our</span>
       </span>
 
-      <span class="line text-primary brightness-110 flex flex-wrap gap-x-[0.3em]">
+      <span class="line text-[#194eff]  flex flex-wrap gap-x-[0.3em]">
         <span class="word">First</span>
         <span class="word">Priority.</span>
       </span>
@@ -165,11 +166,11 @@ ViewData["Title"] = "Home page";
         What makes<br><span class="text-[#b07d5c] italic">us smile?</span>
       </h2>
       <div class="flex gap-3 md:mt-8">
-        <button onclick="prevReview()"
+        <button id="prevReview"
           class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
           ←
         </button>
-        <button onclick="nextReview()"
+        <button id="nextReview"
           class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
           →
         </button>
@@ -196,9 +197,9 @@ ViewData["Title"] = "Home page";
       </h2>
       <p class="font-body text-[0.9rem] text-muted">Common questions from our patients.</p>
     </div>
-      <div class="space-y-3 fade-up max-w-3xl mx-auto" id="faqList"></div>
+    <div class="space-y-3 fade-up max-w-3xl mx-auto" id="faqList"></div>
 
-    </div>
+  </div>
 
   </div>
 </section>
@@ -254,4 +255,4 @@ ViewData["Title"] = "Home page";
   </div>
 </section>
 
-<script src="~/js/PatientSide/home.js"></script>
+<script type="module" src="~/js/PatientSide/home.js"></script>

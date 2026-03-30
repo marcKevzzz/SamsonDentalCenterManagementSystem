@@ -1,3 +1,11 @@
+import { toggleFaq } from "../site.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Animate fade-up elements
+  document.getElementById("nextReview")?.addEventListener("click", nextReview);
+  document.getElementById("prevReview")?.addEventListener("click", prevReview);
+});
+
 function playHero() {
   const tl = gsap.timeline();
 
@@ -208,7 +216,7 @@ const faqList = document.getElementById("faqList");
 faqs.forEach((item, i) => {
   faqList.innerHTML += `
       <div class="border border-[#e5e7eb] rounded-2xl overflow-hidden">
-        <button onclick="toggleFaq(${i})"
+        <button id="toggleBtn"
           class="w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-offwhite transition-colors">
           <span class="brand-font font-semibold text-[0.9rem] text-brand">${item.q}</span>
           <svg id="chevron-${i}" class="faq-chevron shrink-0 ml-4 text-muted w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -219,4 +227,8 @@ faqs.forEach((item, i) => {
           <p class="font-body text-[0.86rem] text-muted leading-relaxed pb-5 pt-1">${item.a}</p>
         </div>
       </div>`;
+});
+
+document.querySelectorAll("#toggleBtn").forEach((btn, i) => {
+  btn.addEventListener("click", () => toggleFaq(i));
 });

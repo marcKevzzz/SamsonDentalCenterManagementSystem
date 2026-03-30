@@ -1,216 +1,278 @@
 @page "/Profile/Notifications"
 @model NotificationsModel
 @{
-    ViewData["Title"] = "Notifications";
+ViewData["Title"] = "Notifications";
 }
 
-<section class="flex-1 min-w-0">
-    <div class="mb-6">
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-2 h-2 rounded-full bg-primary"></div>
-        <span class="text-primary text-xs font-bold tracking-[0.12em] uppercase" style="font-family:'Syne',sans-serif">Notifications</span>
-        <div class="ml-auto flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
-          <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-          Patient since Jan 2024
-        </div>
+<section class="flex-1 min-w-0 fade-up">
+  <div class="mb-6">
+    <div class="flex items-center gap-2 ">
+      <div
+        class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Notifications
       </div>
-      <h1 class="font-extrabold text-3xl text-brand" style="font-family:'Syne',sans-serif">Your Notifications</h1>
-      <p class="text-muted text-sm mt-1">Stay updated on your appointments, records, and clinic announcements.</p>
+      <div class="ml-auto flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
+        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+        Patient since Jan 2024
+      </div>
     </div>
- 
-    <!-- Filter tabs + actions -->
-    <div class="flex items-center justify-between border-b-2 border-gray-200 mb-6">
-      <div class="flex">
-        <button onclick="filterTab('all')" id="ftab-all"
-          class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-primary border-primary" style="font-family:'Syne',sans-serif">
-          All
-        </button>
-        <button onclick="filterTab('unread')" id="ftab-unread"
-          class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand" style="font-family:'Syne',sans-serif">
-          Unread
-        </button>
-        <button onclick="filterTab('appointments')" id="ftab-appointments"
-          class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand" style="font-family:'Syne',sans-serif">
-          Appointments
-        </button>
-        <button onclick="filterTab('system')" id="ftab-system"
-          class="px-5 py-2.5 font-bold text-xs tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand" style="font-family:'Syne',sans-serif">
-          System
-        </button>
-      </div>
-      <button onclick="markAllRead()" class="text-xs text-primary font-semibold hover:underline mb-1" style="font-family:'Syne',sans-serif">Mark all as read</button>
+    <h1 class="font-extrabold text-3xl text-brand" style="font-family:'Syne',sans-serif">Your Notifications</h1>
+    <p class="text-muted text-sm mt-1">Stay updated on your appointments, records, and clinic announcements.</p>
+  </div>
+
+  <!-- Filter tabs + actions -->
+  <div class="flex items-center justify-between border-b-2 border-gray-200 mb-6">
+    <div class="flex">
+      <button onclick="filterTab('all')" id="ftab-all"
+        class="px-5 py-2.5 font-bold text-xs max-w-full truncate sm:tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-primary border-primary"
+        style="font-family:'Syne',sans-serif">
+        All
+      </button>
+
+      <button onclick="filterTab('appointments')" id="ftab-appointments"
+        class="px-5 py-2.5 font-bold text-xs max-w-full truncate sm:tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand"
+        style="font-family:'Syne',sans-serif">
+        Appointments
+      </button>
+      <button onclick="filterTab('system')" id="ftab-system"
+        class="px-5 py-2.5 font-bold text-xs max-w-full truncate sm:tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand"
+        style="font-family:'Syne',sans-serif">
+        System
+      </button>
     </div>
- 
-    <!-- Notification list -->
-    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden" id="notifList">
- 
-      <!-- GROUP: Today -->
-      <div class="px-6 py-3 bg-offwhite border-b border-gray-100">
-        <span class="text-xs font-bold text-muted tracking-widest uppercase" style="font-family:'Syne',sans-serif">Today</span>
-      </div>
- 
-      <!-- Unread: Appointment reminder -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 bg-blue-50/40 cursor-pointer" data-type="appointments" data-read="false" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-brand">Appointment Reminder</p>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="text-xs text-muted">10:32 AM</span>
-              <div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>
-            </div>
-          </div>
-          <p class="text-sm text-muted mt-0.5">Your <span class="font-medium text-brand">Teeth Cleaning</span> with Dr. Marcus Rivera is tomorrow, April 15 at 10:00 AM at SDC — Quezon City.</p>
-          <div class="flex gap-2 mt-2.5">
-            <button class="text-xs font-semibold text-primary border-[1.5px] border-blue-200 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors" style="font-family:'Syne',sans-serif">View Appointment</button>
-            <button class="text-xs font-semibold text-muted border-[1.5px] border-gray-200 px-3 py-1 rounded-lg hover:border-gray-300 transition-colors" style="font-family:'Syne',sans-serif">Dismiss</button>
-          </div>
-        </div>
-      </div>
- 
-      <!-- Unread: Dental record updated -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 bg-blue-50/40 cursor-pointer" data-type="system" data-read="false" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-brand">Dental Record Updated</p>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="text-xs text-muted">8:15 AM</span>
-              <div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>
-            </div>
-          </div>
-          <p class="text-sm text-muted mt-0.5">Dr. Marcus Rivera has updated your dental record following your last visit on <span class="font-medium text-brand">April 2, 2026</span>.</p>
-          <div class="flex gap-2 mt-2.5">
-            <button class="text-xs font-semibold text-primary border-[1.5px] border-blue-200 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors" style="font-family:'Syne',sans-serif">View Records</button>
-          </div>
-        </div>
-      </div>
- 
-      <!-- Unread: Promo -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 bg-blue-50/40 cursor-pointer" data-type="system" data-read="false" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke-width="2" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <p class="text-sm font-semibold text-brand">Special Offer for You</p>
-              <span class="text-[10px] font-bold bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full" style="font-family:'Syne',sans-serif">PROMO</span>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="text-xs text-muted">7:00 AM</span>
-              <div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>
-            </div>
-          </div>
-          <p class="text-sm text-muted mt-0.5">As a valued member, enjoy <span class="font-medium text-brand">20% off</span> on teeth whitening this April. Book now before slots fill up!</p>
-          <div class="flex gap-2 mt-2.5">
-            <button class="text-xs font-semibold text-white bg-brand px-3 py-1 rounded-lg hover:bg-primary transition-colors" style="font-family:'Syne',sans-serif">Book Now</button>
-            <button class="text-xs font-semibold text-muted border-[1.5px] border-gray-200 px-3 py-1 rounded-lg hover:border-gray-300 transition-colors" style="font-family:'Syne',sans-serif">Maybe Later</button>
-          </div>
-        </div>
-      </div>
- 
-      <!-- GROUP: Yesterday -->
-      <div class="px-6 py-3 bg-offwhite border-b border-gray-100">
-        <span class="text-xs font-bold text-muted tracking-widest uppercase" style="font-family:'Syne',sans-serif">Yesterday</span>
-      </div>
- 
-      <!-- Read: Appointment confirmed -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer" data-type="appointments" data-read="true" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-muted">Appointment Confirmed</p>
-            <span class="text-xs text-muted flex-shrink-0">3:44 PM</span>
-          </div>
-          <p class="text-sm text-muted mt-0.5">Your booking for <span class="font-medium text-brand">Teeth Cleaning</span> on April 15, 2026 has been confirmed. See you then!</p>
-        </div>
-      </div>
- 
-      <!-- Read: Prescription ready -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer" data-type="system" data-read="true" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-            <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-muted">Prescription Available</p>
-            <span class="text-xs text-muted flex-shrink-0">11:20 AM</span>
-          </div>
-          <p class="text-sm text-muted mt-0.5">Your prescription from Dr. Marcus Rivera is now available under <span class="font-medium text-brand">My Prescriptions</span>.</p>
-          <div class="flex gap-2 mt-2.5">
-            <button class="text-xs font-semibold text-primary border-[1.5px] border-blue-200 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors" style="font-family:'Syne',sans-serif">View Prescription</button>
-          </div>
-        </div>
-      </div>
- 
-      <!-- GROUP: Earlier -->
-      <div class="px-6 py-3 bg-offwhite border-b border-gray-100">
-        <span class="text-xs font-bold text-muted tracking-widest uppercase" style="font-family:'Syne',sans-serif">Earlier</span>
-      </div>
- 
-      <!-- Read: Appointment completed -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer" data-type="appointments" data-read="true" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-            <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/><polyline points="9 16 11 18 15 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-muted">Visit Completed</p>
-            <span class="text-xs text-muted flex-shrink-0">Apr 2</span>
-          </div>
-          <p class="text-sm text-muted mt-0.5">Your <span class="font-medium text-brand">General Check-up</span> with Dr. Marcus Rivera has been marked as completed. Don't forget to leave a review!</p>
-          <div class="flex gap-2 mt-2.5">
-            <button class="text-xs font-semibold text-amber-600 border-[1.5px] border-amber-200 bg-amber-50 px-3 py-1 rounded-lg hover:bg-amber-100 transition-colors" style="font-family:'Syne',sans-serif">⭐ Leave Review</button>
-          </div>
-        </div>
-      </div>
- 
-      <!-- Read: Welcome -->
-      <div class="notif-item flex items-start gap-4 px-6 py-4 cursor-pointer" data-type="system" data-read="true" onclick="markRead(this)">
-        <div class="flex-shrink-0 mt-0.5">
-          <div class="w-10 h-10 rounded-xl bg-brand flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" stroke-linecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-muted">Welcome to Samson Dental!</p>
-            <span class="text-xs text-muted flex-shrink-0">Jan 2024</span>
-          </div>
-          <p class="text-sm text-muted mt-0.5">Your patient portal is ready. You can book appointments, view dental records, and manage your prescriptions all in one place.</p>
-        </div>
-      </div>
- 
+  </div>
+
+  <!-- Notification list -->
+  <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden" id="notifList">
+
+    <!-- GROUP: Today -->
+    <div class="px-6 py-3 bg-offwhite border-b border-gray-100">
+      <span class="text-xs font-bold text-muted tracking-widest uppercase"
+        style="font-family:'Syne',sans-serif">Today</span>
     </div>
- 
-    <!-- Empty state (hidden by default) -->
-    <div id="emptyState" class="hidden bg-white rounded-2xl border border-gray-200 py-16" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-      <div class="w-14 h-14 bg-offwhite rounded-full flex items-center justify-center mb-4">
-        <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round"/></svg>
+
+    <!-- Unread: Appointment reminder -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 bg-blue-50/40 cursor-pointer"
+      data-type="appointments" data-read="false" onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
       </div>
-      <p class="font-bold text-sm text-brand mb-1" style="font-family:'Syne',sans-serif">No notifications here</p>
-      <p class="text-xs text-muted">You're all caught up! Check back later.</p>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm font-semibold text-brand">Appointment Reminder</p>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xs text-muted">10:32 AM</span>
+            <div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>
+          </div>
+        </div>
+        <p class="text-sm text-muted mt-0.5">Your <span class="font-medium text-brand">Teeth Cleaning</span> with Dr.
+          Marcus Rivera is tomorrow, April 15 at 10:00 AM at SDC — Quezon City.</p>
+        <div class="flex gap-2 mt-2.5">
+          <button
+            class="text-xs font-semibold text-primary border-[1.5px] border-blue-200 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors"
+            style="font-family:'Syne',sans-serif">View Appointment</button>
+          <button
+            class="text-xs font-semibold text-muted border-[1.5px] border-gray-200 px-3 py-1 rounded-lg hover:border-gray-300 transition-colors"
+            style="font-family:'Syne',sans-serif">Dismiss</button>
+        </div>
+      </div>
     </div>
+
+    <!-- Unread: Dental record updated -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 bg-blue-50/40 cursor-pointer"
+      data-type="system" data-read="false" onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" />
+            <polyline points="14 2 14 8 20 8" stroke-width="2" />
+            <line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round" />
+            <line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm font-semibold text-brand">Dental Record Updated</p>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xs text-muted">8:15 AM</span>
+            <div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>
+          </div>
+        </div>
+        <p class="text-sm text-muted mt-0.5">Dr. Marcus Rivera has updated your dental record following your last visit
+          on <span class="font-medium text-brand">April 2, 2026</span>.</p>
+        <div class="flex gap-2 mt-2.5">
+          <button
+            class="text-xs font-semibold text-primary border-[1.5px] border-blue-200 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors"
+            style="font-family:'Syne',sans-serif">View Records</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unread: Promo -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 bg-blue-50/40 cursor-pointer"
+      data-type="system" data-read="false" onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              stroke-width="2" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <p class="text-sm font-semibold text-brand">Special Offer for You</p>
+            <span class="text-[10px] font-bold bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full"
+              style="font-family:'Syne',sans-serif">PROMO</span>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xs text-muted">7:00 AM</span>
+            <div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>
+          </div>
+        </div>
+        <p class="text-sm text-muted mt-0.5">As a valued member, enjoy <span class="font-medium text-brand">20%
+            off</span> on teeth whitening this April. Book now before slots fill up!</p>
+        <div class="flex gap-2 mt-2.5">
+          <button
+            class="text-xs font-semibold text-white bg-brand px-3 py-1 rounded-lg hover:bg-primary transition-colors"
+            style="font-family:'Syne',sans-serif">Book Now</button>
+          <button
+            class="text-xs font-semibold text-muted border-[1.5px] border-gray-200 px-3 py-1 rounded-lg hover:border-gray-300 transition-colors"
+            style="font-family:'Syne',sans-serif">Maybe Later</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP: Yesterday -->
+    <div class="px-6 py-3 bg-offwhite border-b border-gray-100">
+      <span class="text-xs font-bold text-muted tracking-widest uppercase"
+        style="font-family:'Syne',sans-serif">Yesterday</span>
+    </div>
+
+    <!-- Read: Appointment confirmed -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer"
+      data-type="appointments" data-read="true" onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm font-semibold text-muted">Appointment Confirmed</p>
+          <span class="text-xs text-muted flex-shrink-0">3:44 PM</span>
+        </div>
+        <p class="text-sm text-muted mt-0.5">Your booking for <span class="font-medium text-brand">Teeth Cleaning</span>
+          on April 15, 2026 has been confirmed. See you then!</p>
+      </div>
+    </div>
+
+    <!-- Read: Prescription ready -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer" data-type="system"
+      data-read="true" onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"
+              stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm font-semibold text-muted">Prescription Available</p>
+          <span class="text-xs text-muted flex-shrink-0">11:20 AM</span>
+        </div>
+        <p class="text-sm text-muted mt-0.5">Your prescription from Dr. Marcus Rivera is now available under <span
+            class="font-medium text-brand">My Prescriptions</span>.</p>
+        <div class="flex gap-2 mt-2.5">
+          <button
+            class="text-xs font-semibold text-primary border-[1.5px] border-blue-200 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors"
+            style="font-family:'Syne',sans-serif">View Prescription</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP: Earlier -->
+    <div class="px-6 py-3 bg-offwhite border-b border-gray-100">
+      <span class="text-xs font-bold text-muted tracking-widest uppercase"
+        style="font-family:'Syne',sans-serif">Earlier</span>
+    </div>
+
+    <!-- Read: Appointment completed -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer"
+      data-type="appointments" data-read="true" onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round" />
+            <polyline points="9 16 11 18 15 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm font-semibold text-muted">Visit Completed</p>
+          <span class="text-xs text-muted flex-shrink-0">Apr 2</span>
+        </div>
+        <p class="text-sm text-muted mt-0.5">Your <span class="font-medium text-brand">General Check-up</span> with Dr.
+          Marcus Rivera has been marked as completed. Don't forget to leave a review!</p>
+        <div class="flex gap-2 mt-2.5">
+          <button
+            class="text-xs font-semibold text-amber-600 border-[1.5px] border-amber-200 bg-amber-50 px-3 py-1 rounded-lg hover:bg-amber-100 transition-colors"
+            style="font-family:'Syne',sans-serif">⭐ Leave Review</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Read: Welcome -->
+    <div class="notif-item flex items-start gap-4 px-6 py-4 cursor-pointer" data-type="system" data-read="true"
+      onclick="markRead(this)">
+      <div class="flex-shrink-0 mt-0.5">
+        <div class="w-10 h-10 rounded-xl bg-brand flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" stroke-linecap="round" />
+            <polyline points="22 4 12 14.01 9 11.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-sm font-semibold text-muted">Welcome to Samson Dental!</p>
+          <span class="text-xs text-muted flex-shrink-0">Jan 2024</span>
+        </div>
+        <p class="text-sm text-muted mt-0.5">Your patient portal is ready. You can book appointments, view dental
+          records, and manage your prescriptions all in one place.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Empty state (hidden by default) -->
+  <div id="emptyState" class="hidden bg-white rounded-2xl border border-gray-200 py-16"
+    style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="w-14 h-14 bg-offwhite rounded-full flex items-center justify-center mb-4">
+      <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </div>
+    <p class="font-bold text-sm text-brand mb-1" style="font-family:'Syne',sans-serif">No notifications here</p>
+    <p class="text-xs text-muted">You're all caught up! Check back later.</p>
+  </div>
 </section>
 
-  <script src="~/js/site.js"></script>
+<script type="module" src="~/js/site.js"></script>
 <script src="~/js/PatientSide/notifications.js"></script>
