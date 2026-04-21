@@ -1,0 +1,112 @@
+<!-- ─── STEP 3: Your Details ─── -->
+@* <!-- In ASP.NET: @await Html.PartialAsync("_Step3Details", Model) --> *@
+<div id="step-3" class="step-panel">
+    <div class="mb-8">
+        <div
+            class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 3 of 4
+        </div>
+        <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Your Details</h1>
+        <p class="font-body text-[.9rem] text-muted" id="s3Subtitle">We need a few basic details to complete your
+            booking.</p>
+    </div>
+
+    <!-- Mini summary bar -->
+    <div id="s3MiniBar" class="bg-brand rounded-2xl p-4 mb-6 flex flex-wrap items-center gap-4 justify-between"></div>
+
+    <!-- Form -->
+    <!-- <div class="bg-white rounded-2xl p-6 shadow-sm mb-6">
+        <div class="brand-font font-bold text-[.9rem] text-brand mb-5">Personal Information</div>
+        <div class="space-y-4">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label
+                        class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">First
+                        Name <span class="text-primary">*</span></label>
+                    <input id="f_firstName" type="text" class="form-input" placeholder="Juan"
+                        oninput="clearErr('firstName')" />
+                    <div id="err_firstName" class="field-error">First name is required.</div>
+                </div>
+                <div>
+                    <label
+                        class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Last
+                        Name <span class="text-primary">*</span></label>
+                    <input id="f_lastName" type="text" class="form-input" placeholder="Dela Cruz"
+                        oninput="clearErr('lastName')" />
+                    <div id="err_lastName" class="field-error">Last name is required.</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label
+                        class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Email
+                        Address <span class="text-primary">*</span></label>
+                    <input id="f_email" type="email" class="form-input" placeholder="juan@email.com"
+                        oninput="clearErr('email')" />
+                    <div id="err_email" class="field-error">Valid email address is required.</div>
+                </div>
+                <div>
+                    <label
+                        class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Phone
+                        Number <span class="text-primary">*</span></label>
+                    <input id="f_phone" type="tel" class="form-input" placeholder="+63 9XX XXX XXXX"
+                        oninput="clearErr('phone')" />
+                    <div id="err_phone" class="field-error">Phone number is required.</div>
+                </div>
+            </div>
+
+            <div>
+                <label
+                    class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-3">Patient
+                    Type</label>
+                <div class="flex gap-5 flex-wrap">
+                    <label class="flex items-center gap-2.5 cursor-pointer font-body text-[.88rem] text-brand">
+                        <input type="radio" name="patientType" value="New Patient" checked
+                            class="accent-primary w-4 h-4" /> New Patient
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer font-body text-[.88rem] text-brand">
+                        <input type="radio" name="patientType" value="Returning Patient"
+                            class="accent-primary w-4 h-4" /> Returning Patient
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label
+                    class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Additional
+                    Notes <span class="font-normal normal-case text-muted">(optional)</span></label>
+                <textarea id="f_notes" class="form-input" rows="4"
+                    placeholder="Any allergies, current medications, or concerns you'd like us to know..."></textarea>
+            </div>
+        </div>
+    </div> -->
+
+
+    <!-- Consent -->
+    <!-- <div class="bg-offwhite rounded-2xl p-4 mb-8 flex items-start gap-3" id="consentBox">
+        <input type="checkbox" id="f_consent" class="accent-primary w-4 h-4 mt-0.5 shrink-0 cursor-pointer"
+            onchange="clearErr('consent')" />
+        <label for="f_consent" class="font-body text-[.8rem] text-muted leading-relaxed cursor-pointer">
+            I consent to Samson Dental Center collecting and using my personal information to process this booking in
+            accordance with their
+            <a href="#" class="text-primary hover:underline">Privacy Policy</a>.
+        </label>
+    </div>
+    <div id="err_consent" class="field-error -mt-6 mb-6 pl-1">You must accept the privacy policy to continue.</div>
+
+    <div class="flex justify-end">
+        <button onclick="submitDetails()"
+            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-colors cursor-pointer">
+            Review Booking →
+        </button>
+    </div> -->
+
+
+    <div id="detailsFormContainer">
+        <div class="flex items-center justify-center py-12">
+            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+    </div>
+</div>

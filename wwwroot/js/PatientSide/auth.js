@@ -221,10 +221,14 @@ function handleSignUp() {
           Toast.show(json.errors?.[0] ?? "Registration failed.", "danger");
           return;
         }
+
+        if (json.needsConfirmation) {
+          Toast.show("Check your email to confirm your account!", "success");
+          return;
+        }
         if (json.user) {
           signIn(json.user); // Run your fancy GSAP/UI update
         }
-        Toast.show("Welcome! Please check your email to verify.", "success");
         setTimeout(() => (window.location.href = "../"), 2000);
       } catch (err) {
         Toast.show("An unexpected error occurred.", "danger");
@@ -270,6 +274,7 @@ async function handleSignIn() {
     const response = await fetch("/sign-in", {
       method: "POST",
       body: formData,
+      credentials: "include",
       headers: {
         RequestVerificationToken: document.querySelector(
           'input[name="__RequestVerificationToken"]',
@@ -287,7 +292,11 @@ async function handleSignIn() {
       console.log(result);
       Toast.show("Welcome back!", "success");
       setTimeout(() => {
-        window.location.href = "/"; // Go to site root
+        if (result.user && result.user.role === "admin") {
+          window.location.href = "/Admin/Dashboard";
+        } else {
+          window.location.href = "/"; // Go to site root
+        }
       }, 2000);
     } else {
       // 4. Handle Errors (Show a toast or label)

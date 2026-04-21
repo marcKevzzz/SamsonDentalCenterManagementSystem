@@ -1,152 +1,205 @@
-﻿@page
+@page
 @model IndexModel
 @{
 ViewData["Title"] = "Home page";
 }
 
-<section id="hero" class="relative h-screen max-h-[900px] flex items-center overflow-hidden">
+<style>
 
-  <!-- BG layers -->
-  <div class="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] via-[#49494b] to-[#56565e]"></div>
-  <div class="home-hero-bg-img absolute inset-0 opacity-90"></div>
-  <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div>
+    /* Skeleton / Loading State */
+    .hero-skeleton {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, #1f1f1f 8%, #2a2a2a 18%, #1f1f1f 33%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite linear;
+        z-index: 5;
+        transition: opacity 0.8s ease-out;
+    }
 
-  <!-- Content -->
-  <div id="heroContent"
-    class="relative z-10 max-w mx-auto px-8 lg:px-12 w-full justify-center flex flex-col sm:pt-0 pt-8">
+    @@keyframes shimmer {
+        to { background-position-x: -200%; }
+    }
 
-    <span
-      class="hero-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full sm:mb-6 mb-2">
-      Welcome to Samson Dental Center
-    </span>
+    .glass-pill {
+        background:  rgba(49, 49, 49, 0.40);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.57);
+    }
+</style>
 
-    <h1 id="heroTitle" class=" brand-font font-extrabold leading-[0.9] text-white sm:mb-6 mb-3 flex flex-col"
-      style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
+<section id="hero" class="relative h-screen max-h-[900px] flex items-center overflow-hidden bg-[var(--brand-dark)]">
+    <!-- Skeleton Loader -->
+    <div class="hero-skeleton" id="heroSkeleton"></div>
 
-      <span class="line flex flex-wrap gap-x-[0.3em]">
-        <span class="word">Your</span>
-        <span class="word">Smile</span>
-        <span class="word">Is</span>
-        <span class="word">Our</span>
-      </span>
+    <!-- BG layers -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[var(--brand-dark)] via-[#1e293b] to-[var(--brand-dark)]"></div>
+    <div id="heroBg" class="home-hero-bg-img absolute inset-0 opacity-0 transition-opacity duration-1000 scale-105"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div>
 
-      <span class="line text-[#194eff]  flex flex-wrap gap-x-[0.3em]">
-        <span class="word">First</span>
-        <span class="word">Priority.</span>
-      </span>
-    </h1>
+    <!-- Content -->
+    <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-0 w-full flex flex-col lg:flex-row lg:items-center justify-between gap-12 sm:pt-0 pt-8">
+        <div class="max-w-3xl xl:w-1/2">
+            <span class="hero-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full sm:mb-6 mb-2 border border-white/5">
+                Welcome to Samson Dental Center
+            </span>
 
-    <p class="hero-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed sm:mb-10 mb-4">
-      Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and
-      aesthetic goals.
-    </p>
+            <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.9] text-white sm:mb-6 mb-3 flex flex-col"
+                style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
+                <span class="line flex flex-wrap gap-x-[0.3em] overflow-hidden">
+                    <span class="word inline-block">Your</span>
+                    <span class="word inline-block">Smile</span>
+                    <span class="word inline-block">Is</span>
+                    <span class="word inline-block">Our</span>
+                </span>
+                <span class="line text-[var(--primary)] brightness-125 flex flex-wrap gap-x-[0.3em] overflow-hidden">
+                    <span class="word inline-block">First</span>
+                    <span class="word inline-block">Priority.</span>
+                </span>
+            </h1>
 
-    <div class="hero-reveal-late flex flex-wrap sm:gap-4 gap-2">
-      <a href="/Appointments"
-        class="brand-font font-bold text-sm bg-primary text-white px-8 py-3.5 rounded-full hover:brightness-90 transition-all duration-150 no-underline">
-        Make an Appointment
-      </a>
-      <a href="/Services"
-        class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-brand transition-all duration-150 no-underline">
-        Explore Services
-      </a>
+            <p class="hero-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed sm:mb-10 mb-4">
+                Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and aesthetic goals.
+            </p>
+
+            <div class="hero-reveal-late flex flex-wrap sm:gap-4 gap-2">
+                <a href="/Appointments"
+                    class="brand-font font-bold text-sm bg-[var(--primary)] text-white px-8 py-3.5 rounded-full hover:brightness-90 transition-all duration-150 no-underline">
+                    Make an Appointment
+                </a>
+                <a href="/Services"
+                    class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-[var(--brand-dark)] transition-all duration-150 no-underline">
+                    Explore Services
+                </a>
+            </div>
+        </div>
+
+        <!-- Right side: Doctor Portrait (Visible on LG screens) -->
+        <div class="xl:w-1/2 hidden xl:flex justify-end items-end relative h-full">
+            <div class="hero-doctor-container relative">
+                <!-- Soft glow behind the doctor -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[100px] rounded-full -z-10 animate-pulse"></div>
+                
+                <img src="~/images/hero_doc1-remove.png" alt="Samson Dental Specialist" 
+                     class="hero-doctor-img w-full max-w-[550px] xl:max-w-[750px] 2xl:max-w-[900px] h-auto object-contain hero-reveal-late opacity-0" 
+                     style="filter: brightness(1.05); margin-bottom: -40px;"/>
+
+                <!-- Floating info badge -->
+                <div class="absolute bottom-20 -left-12 glass-pill px-6 py-4 rounded-3xl flex items-center gap-4 hero-reveal-late opacity-0 scale-90 shadow-2xl border border-white/10 backdrop-blur-4xl">
+                    <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-award text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/40">Multi-Awarded</div>
+                        <div class="text-[0.88rem] font-bold text-white">#1 Dental Team 2024</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Social proof -->
-    <div class="hero-reveal-late flex items-center gap-3 mt-10">
-      <div class="avatar-stack flex">
-        <img src="https://randomuser.me/api/portraits/women/44.jpg"
-          class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg"
-          class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
-        <img src="https://randomuser.me/api/portraits/women/68.jpg"
-          class="w-10 h-10 rounded-full border-2 border-white object-cover" alt="">
-      </div>
-      <div>
-        <div class="text-[#f59e0b] text-lg tracking-wide leading-none mb-1">★★★★★</div>
-        <div class="font-body text-[0.74rem] text-muted">Trusted by 2,000+ Happy Patients</div>
-      </div>
-    </div>
-  </div>
 </section>
 
-
-<!-- ════════════════════════════════════
-     EXCLUSIVE PATIENT PERKS
-═════════════════════════════════════ -->
-<section id="perks" class="bg-offwhite">
-  <div class="max-w  mx-auto px-8 lg:px-12 py-24">
+<!-- ------------------------------------
+     THE SAMSON STANDARD (Why Choose Us)
+------------------------------------- -->
+<section id="features" class="bg-[var(--bg-soft)] section-padding">
+  <div class="max-w mx-auto px-8 lg:px-12">
 
     <!-- Section header -->
-    <div class="flex flex-wrap justify-between items-end gap-8 mb-14">
-      <div class="flex-1">
-        <div
-          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
-          <span class="w-2 h-2 rounded-full bg-primary"></span>
-          Limited Time Offers
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 sm:mb-20">
+      <div class="max-w-2xl">
+        <div class="flex items-center gap-2 font-body text-[0.65rem] font-bold tracking-[0.2em] uppercase text-[var(--primary)] mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-pulse"></span>
+          Our Commitment to Excellence
         </div>
-        <h2 class="brand-font font-extrabold leading-[1.1] text-brand" style="font-size:clamp(2rem,4vw,3rem);">
-          Exclusive Patient Perks
+        <h2 class="brand-font font-extrabold leading-[1.1] text-[var(--brand-dark)]" style="font-size:clamp(2.2rem, 5vw, 3.5rem);">
+          Why Patients <br><span class="text-gradient">Choose Us</span>
         </h2>
       </div>
-      <p class="font-body text-[0.92rem] text-muted leading-relaxed max-w-[300px]">
-        Take advantage of our seasonal promotions designed to make premium dental care more accessible.
+      <p class="font-body text-[0.95rem] text-muted leading-relaxed max-w-[400px]">
+        We combine clinical expertise with a compassionate approach to deliver results that last a lifetime.
       </p>
     </div>
 
-    <!-- Perk cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Feature grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
 
-      <!-- Card 1: New Patient -->
-      <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
-        <span
-          class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white bg-brand px-4 py-1.5 rounded-full mb-6">
-          20% OFF
-        </span>
-        <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
-        <h3 class="brand-font font-bold text-xl mb-3">New Patient Special</h3>
-        <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
-          Get 20% off your first comprehensive exam, x-rays, and cleaning.
+      <!-- Feature 1: Expertise -->
+      <div class="feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
+          <i class="fa-solid fa-user-doctor text-white text-xl"></i>
+        </div>
+        <h3 class="brand-font font-bold text-xl mb-4 text-[var(--brand-dark)]">Expert Specialists</h3>
+        <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+          Our team consists of board-certified dentists with specialized training in restorative and aesthetic procedures.
         </p>
-        <div class="flex justify-between items-center border-t border-[#e5e7eb] pt-4">
-          <span class="font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted">Promo Code</span>
-          <span class="brand-font font-bold text-[0.78rem] tracking-[0.12em]">NEW20</span>
+      </div>
+
+      <!-- Feature 2: Technology -->
+      <div class="feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
+          <i class="fa-solid fa-microscope text-white text-xl"></i>
+        </div>
+        <h3 class="brand-font font-bold text-xl mb-4 text-[var(--brand-dark)]">Modern Technology</h3>
+        <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+          From digital x-rays to intraoral cameras, we use state-of-the-art equipment for precise diagnosis and comfort.
+        </p>
+      </div>
+
+      <!-- Feature 3: Safety -->
+      <div class="feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
+          <i class="fa-solid fa-shield-virus text-white text-xl"></i>
+        </div>
+        <h3 class="brand-font font-bold text-xl mb-4 text-[var(--brand-dark)]">Safety & Hygiene</h3>
+        <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+          We strictly adhere to international sterilization protocols to ensure the safety and well-being of every patient.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ------------------------------------
+     REVIEWS (Scroll Triggered)
+     Pinned section that scrolls horizontally
+------------------------------------- -->
+<section id="reviews" class="bg-[var(--brand-dark)] py-4 overflow-hidden">
+  <div id="reviewsPin" class="h-screen  flex items-center">
+    <div class="max-w mx-auto px-8  lg:px-12 w-full flex md:flex-row flex-col md:gap-16 gap-8 items-center">
+
+      <div class="fade-up md:w-[400px] w-full shrink-0 flex flex-col items-center md:items-start text-center md:text-left">
+        <div class="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-[0.6rem] font-bold tracking-widest uppercase md:mb-4">
+          Patient Testimonials
+        </div>
+        <h2 class="brand-font font-extrabold text-white leading-[1.1] mb-6" style="font-size:clamp(2.5rem,5vw,4rem);">
+          What makes<br><span class="text-primary  font-extrabold italic">us smile?</span>
+        </h2>
+        <p class="text-white/60 text-sm mb-8 max-w-sm">
+          Join thousands of happy patients who have experienced the Samson Dental standard of care.
+        </p>
+        <div class="flex gap-4">
+          <div class="flex flex-col">
+            <span class="text-white font-bold text-2xl">4.9/5</span>
+            <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Google Rating</span>
+          </div>
+          <div class="w-px h-10 bg-white/10"></div>
+          <div class="flex flex-col">
+            <span class="text-white font-bold text-2xl">2k+</span>
+            <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Happy Patients</span>
+          </div>
         </div>
       </div>
 
-      <!-- Card 2: Teeth Whitening -->
-      <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
-        <span
-          class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
-          style="background:var(--tw-color-primary, #7c3aed); background-color:#7c3aed;">
-          $100 OFF
-        </span>
-        <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
-        <h3 class="brand-font font-bold text-xl mb-3">Teeth Whitening</h3>
-        <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
-          Brighten your smile with our professional in-office whitening treatment.
-        </p>
-        <div class="flex justify-between items-center border-t border-[#e5e7eb] pt-4">
-          <span class="font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted">Promo Code</span>
-          <span class="brand-font font-bold text-[0.78rem] tracking-[0.12em]">BRIGHT100</span>
-        </div>
-      </div>
-
-      <!-- Card 3: Invisalign -->
-      <div class="perk-card fade-up bg-white rounded-2xl p-8 shadow-sm relative">
-        <span
-          class="inline-block brand-font font-bold text-[0.7rem] tracking-wider uppercase text-white px-4 py-1.5 rounded-full mb-6"
-          style="background-color:#059669;">
-          FREE
-        </span>
-        <span class="absolute top-8 right-8 text-[#e5e7eb] text-lg select-none"><i class="fas fa-tag"></i></span>
-        <h3 class="brand-font font-bold text-xl mb-3">Invisalign Consultation</h3>
-        <p class="font-body text-[0.86rem] text-muted leading-relaxed mb-6">
-          Book a complimentary consultation to see if Invisalign is right for you.
-        </p>
-        <div class="flex justify-between items-center border-t border-[#e5e7eb] pt-4">
-          <span class="font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted">Promo Code</span>
-          <span class="brand-font font-bold text-[0.78rem] tracking-[0.12em]">SMILEFREE</span>
+      <div class="horizontal-scroll-section w-full">
+        <div id="reviewsContainer" class="horizontal-scroll-wrapper">
+          <!-- Dynamically populated from JS -->
         </div>
       </div>
 
@@ -155,44 +208,14 @@ ViewData["Title"] = "Home page";
 </section>
 
 
-<!-- ════════════════════════════════════
-     REVIEWS
-═════════════════════════════════════ -->
-<section id="reviews" class="bg-brand overflow-hidden">
-  <div class="max-w mx-auto px-8 lg:px-12 py-24 flex md:flex-row flex-col md:gap-16 gap-8 md:items-center">
-
-    <div class="fade-up md:w-72 w-full shrink-0 flex md:flex-col flex-row justify-between items-center md:items-start">
-      <h2 class="brand-font font-extrabold text-white leading-[1.1]" style="font-size:clamp(2rem,4vw,3rem);">
-        What makes<br><span class="text-[#b07d5c] italic">us smile?</span>
-      </h2>
-      <div class="flex gap-3 md:mt-8">
-        <button id="prevReview"
-          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
-          ←
-        </button>
-        <button id="nextReview"
-          class="w-11 h-11 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center cursor-pointer bg-transparent">
-          →
-        </button>
-      </div>
-    </div>
-
-    <div class="overflow-hidden w-full" id="carouselViewport">
-      <div id="reviewsContainer" class="flex gap-6 will-change-transform">
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ══════════════════════════════════
+<!-- ----------------------------------
      FAQ
-═══════════════════════════════════ -->
+----------------------------------- -->
 <section class="bg-white">
   <div class="max-w mx-auto px-8 lg:px-12 pt-12">
 
     <div class="text-center mb-12 fade-up">
-      <h2 class="brand-font font-extrabold text-brand mb-3" style="font-size:clamp(1.8rem,3.5vw,2.5rem);">
+      <h2 class="brand-font font-extrabold text-[var(--brand-dark)] mb-3" style="font-size:clamp(1.8rem,3.5vw,2.5rem);">
         Frequently Asked Questions
       </h2>
       <p class="font-body text-[0.9rem] text-muted">Common questions from our patients.</p>
@@ -205,9 +228,9 @@ ViewData["Title"] = "Home page";
 </section>
 
 
-<!-- ════════════════════════════════════
+<!-- ------------------------------------
      OPERATING HOURS + MAP
-═════════════════════════════════════ -->
+------------------------------------- -->
 <section id="location" class="bg-white">
   <div class="max-w mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
@@ -215,14 +238,14 @@ ViewData["Title"] = "Home page";
     <div class="fade-up">
       <h2 class="brand-font font-extrabold text-[1.8rem] mb-7">Operating Hours</h2>
 
-      <div class="bg-offwhite rounded-2xl overflow-hidden">
+      <div class="bg-[var(--bg-soft)] rounded-2xl overflow-hidden">
         <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
-          <span class="font-body text-[0.9rem] text-muted">Monday – Friday</span>
-          <span class="brand-font font-bold text-[0.9rem]">9:00 AM – 6:00 PM</span>
+          <span class="font-body text-[0.9rem] text-muted">Monday � Friday</span>
+          <span class="brand-font font-bold text-[0.9rem]">9:00 AM � 6:00 PM</span>
         </div>
         <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
           <span class="font-body text-[0.9rem] text-muted">Saturday</span>
-          <span class="brand-font font-bold text-[0.9rem]">8:00 AM – 5:00 PM</span>
+          <span class="brand-font font-bold text-[0.9rem]">8:00 AM � 5:00 PM</span>
         </div>
         <div class="flex justify-between items-center px-7 py-5">
           <span class="font-body text-[0.9rem] text-muted">Sunday</span>
@@ -239,8 +262,8 @@ ViewData["Title"] = "Home page";
         available for our patients.
       </p>
       <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
-        class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-brand border-b-2 border-primary pb-0.5 hover:text-primary transition-colors no-underline">
-        GET DIRECTIONS →
+        class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-[var(--brand-dark)] border-b-2 border-[var(--primary)] pb-0.5 hover:text-[var(--primary)] transition-colors no-underline">
+        GET DIRECTIONS ?
       </a>
     </div>
 

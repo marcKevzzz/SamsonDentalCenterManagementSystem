@@ -1,0 +1,295 @@
+@page "/Admin/Transactions"
+@model AdminTransactionsModel
+@{
+Layout = "AdminSide/_AdminLayout";
+<!-- var txns = Model.Transactions ?? new List<Transaction>();
+    var patients = Model.Patients ?? new List<SamsonDentalCenterManagementSystem.Models.Profile>(); -->
+}
+
+
+<div id="page-transactions" class="page p-4 md:p-6">
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+            <h2 class="font-display text-xl font-extrabold text-brand">Transactions</h2>
+            <p class="text-[12px] text-muted mt-0.5">Payment records encoded by receptionist</p>
+        </div>
+        <button id="addTxnBtn"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New Transaction
+        </button>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Total Revenue</p>
+            <p class="text-[22px] font-extrabold text-brand font-display" id="summaryRevenue">₱0.00</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Transactions</p>
+            <p class="text-[22px] font-extrabold text-brand font-display" id="summaryCount">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Paid</p>
+            <p class="text-[22px] font-extrabold text-emerald-600 font-display" id="summaryPaid">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Pending</p>
+            <p class="text-[22px] font-extrabold text-amber-500 font-display" id="summaryPending">0</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+
+        <div class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100">
+            <div class="relative flex-1 min-w-[140px] max-w-[240px]">
+                <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input id="searchInput" placeholder="Search patient or service…"
+                    class="w-full pl-7 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary/40" />
+            </div>
+            <select id="statusFilter"
+                class="px-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-muted outline-none">
+                <option value="">All Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Partial">Partial</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <select id="categoryFilter"
+                class="px-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-muted outline-none">
+                <option value="">All Categories</option>
+                <option value="General Dentistry">General Dentistry</option>
+                <option value="Cosmetic">Cosmetic</option>
+                <option value="Specialized">Specialized</option>
+            </select>
+            <span class="ml-auto text-[11px] text-slate-400" id="txnCount">0 records</span>
+        </div>
+
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[900px] table-fixed">
+                <colgroup>
+                    <col class="w-[18%]" />
+                    <col class="w-[16%]" />
+                    <col class="w-[11%]" />
+                    <col class="w-[12%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[10%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[6%]" />
+                    <col class="w-[7%]" />
+                </colgroup>
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Patient</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Service</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Category</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Doctor</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Fee</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Paid</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Method</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Status</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Date</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="txnTableBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+
+            <div id="emptyState" class="hidden py-16 text-center">
+                <div class="text-slate-300 text-4xl mb-3">🧾</div>
+                <p class="text-[13px] text-slate-400 font-medium">No transactions found</p>
+                <p class="text-[11px] text-slate-300 mt-1">Try adjusting your search or filters</p>
+            </div>
+        </div>
+
+        <div id="paginationBar"
+            class="hidden flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100">
+            <span class="text-[10.5px] text-muted" id="paginationInfo"></span>
+            <div class="flex gap-1.5" id="paginationBtns"></div>
+        </div>
+    </div>
+</div>
+
+<div id="txnModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <div>
+                <h3 id="modalTitle" class="font-display font-bold text-[15px] text-brand">New Transaction</h3>
+                <p class="text-[11px] text-muted mt-0.5">Fill in details provided by the doctor</p>
+            </div>
+            <button id="closeModalBtn" class="text-slate-400 hover:text-slate-700 transition-colors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-4">
+            <input type="hidden" id="modalTxnId" />
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Patient <span
+                        class="text-red-400">*</span></label>
+                <select id="mPatient"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                    <option value="">Select patient…</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Service Name <span
+                            class="text-red-400">*</span></label>
+                    <input id="mServiceName" type="text" placeholder="e.g. Teeth Cleaning"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Category</label>
+                    <select id="mCategory"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="General Dentistry">General Dentistry</option>
+                        <option value="Cosmetic">Cosmetic</option>
+                        <option value="Specialized">Specialized</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Doctor / Dentist</label>
+                <input id="mDoctorName" type="text" placeholder="e.g. Dr. Santos"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Service Fee (₱) <span
+                            class="text-red-400">*</span></label>
+                    <input id="mFee" type="number" min="0" step="0.01" placeholder="0.00"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Discount (₱)</label>
+                    <input id="mDiscount" type="number" min="0" step="0.01" placeholder="0.00"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Amount Paid (₱)</label>
+                    <input id="mAmountPaid" type="number" min="0" step="0.01" placeholder="0.00"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl px-4 py-3 flex items-center justify-between">
+                <span class="text-[12px] text-muted font-semibold">Balance Due</span>
+                <span id="balancePreview" class="text-[14px] font-extrabold text-brand font-display">₱0.00</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Payment Method</label>
+                    <select id="mPaymentMethod"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="Cash">Cash</option>
+                        <option value="GCash">GCash</option>
+                        <option value="Maya">Maya</option>
+                        <option value="Card">Card</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Status</label>
+                    <select id="mStatus"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Notes</label>
+                <textarea id="mNotes" rows="2" placeholder="Additional notes from doctor or receptionist…"
+                    style="resize:none"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"></textarea>
+            </div>
+
+            <p id="modalError" class="hidden text-[12px] text-red-500 font-medium"></p>
+        </div>
+
+        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
+            <button id="cancelModalBtn"
+                class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                Cancel
+            </button>
+            <button id="modalSaveBtn"
+                class="px-5 py-2 text-[12.5px] font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors">
+                Save Transaction
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+        </div>
+        <h3 class="font-display font-bold text-[15px] text-brand mb-1">Delete Transaction</h3>
+        <p class="text-[13px] text-slate-500 mb-5">
+            Are you sure you want to delete this transaction for <strong id="deleteTxnName"></strong>? This cannot be
+            undone.
+        </p>
+        <div class="flex gap-2 justify-end">
+            <button id="cancelDeleteBtn"
+                class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                Cancel
+            </button>
+            <button id="confirmDeleteBtn"
+                class="px-5 py-2 text-[12.5px] font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- <script type="module" src="~/js/AdminSide/transactions.js"></script> -->

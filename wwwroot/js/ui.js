@@ -28,6 +28,7 @@ export const Toast = (() => {
     const { bg, icon } = config[type] || config.neutral;
 
     const toast = document.createElement("div");
+
     toast.className = `
       flex items-center gap-3 ${bg}
       text-white px-4 py-2 rounded-xl shadow-lg

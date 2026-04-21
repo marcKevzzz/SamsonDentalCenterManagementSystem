@@ -7,13 +7,17 @@ namespace SamsonDentalCenterManagementSystem.Pages;
 
 public class ServicesModel : PageModel
 {
-   
+    private readonly DentalServiceService _svcService;
 
-   public List<DentalService> Services { get; set; } = [];
+    public List<DentalService> Services { get; set; } = [];
 
-    public void OnGet()
+    public ServicesModel(DentalServiceService svcService)
     {
-        Services = ServiceRepository.Services;
+        _svcService = svcService;
     }
 
+    public async Task OnGetAsync()
+    {
+        Services = await _svcService.GetAll(activeOnly: true);
+    }
 }

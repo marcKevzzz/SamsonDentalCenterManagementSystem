@@ -1,0 +1,110 @@
+<!-- ─── STEP 2: Schedule ─── -->
+@* <!-- In ASP.NET: @await Html.PartialAsync("_Step2Schedule", Model) --> *@
+<div id="step-2" class="step-panel">
+    <div class="mb-8">
+        <div
+            class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 2 of 4
+        </div>
+        <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Pick a Schedule</h1>
+        <p class="font-body text-[.9rem] text-muted">Select your preferred date and time for <span id="s2ServiceName"
+                class="font-semibold text-brand"></span>.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Calendar -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
+            <div id="calWidget"></div>
+        </div>
+        <!-- Time slots -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm" id="timeWidget">
+            <div class="flex items-center justify-center h-36 text-center">
+                <div>
+                    <svg class="w-8 h-8 mx-auto mb-2 text-[#e5e7eb]" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <p class="font-body text-[.82rem] text-muted">Select a date first to see available times.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selected slot summary -->
+    <div id="slotSummary" class="hidden mb-6"></div>
+
+    <!-- Fully booked notice -->
+    <div id="fullyBookedBar" class="hidden mb-6"></div>
+
+    <div class="flex justify-end">
+        <button id="step2Btn" onclick="goToStep(3)" disabled
+            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+            Continue to Details →
+        </button>
+    </div>
+</div>
+
+<!-- ─── STEP 2B: Waitlist ─── -->
+@* <!-- In ASP.NET: @await Html.PartialAsync("_Step2bWaitlist", Model) --> *@
+<div id="step-2b" class="step-panel">
+    <div class="mb-8">
+        <div
+            class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b] inline-block"></span>Waitlist
+        </div>
+        <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Join the Waitlist</h1>
+        <p class="font-body text-[.9rem] text-muted max-w-lg" id="wlIntro"></p>
+    </div>
+
+    <!-- How it works -->
+    <div class="rounded-2xl p-6 mb-8 text-white" style="background:linear-gradient(135deg,#0f1117,#2d2d44)">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#f59e0b] flex items-center justify-center shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+                    <line x1="6" y1="1" x2="6" y2="4" />
+                    <line x1="10" y1="1" x2="10" y2="4" />
+                    <line x1="14" y1="1" x2="14" y2="4" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="brand-font font-bold text-[1.05rem] mb-3">How the Waitlist Works</h3>
+                <div class="space-y-2">
+                    <div class="flex items-start gap-2.5 font-body text-[.82rem] text-white/70"><span
+                            class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-[.6rem] font-bold shrink-0 mt-0.5">1</span>You
+                        provide your contact details on the next step.</div>
+                    <div class="flex items-start gap-2.5 font-body text-[.82rem] text-white/70"><span
+                            class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-[.6rem] font-bold shrink-0 mt-0.5">2</span>We
+                        notify you via SMS and email the moment a slot opens on your chosen date.</div>
+                    <div class="flex items-start gap-2.5 font-body text-[.82rem] text-white/70"><span
+                            class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-[.6rem] font-bold shrink-0 mt-0.5">3</span>You
+                        confirm the slot within 2 hours or it moves to the next person.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Waitlist summary -->
+    <div class="bg-white rounded-2xl p-5 border border-[#e5e7eb] mb-8" id="wlSummary"></div>
+
+    <!-- Alt dates -->
+    <div class="bg-offwhite rounded-2xl p-5 mb-8">
+        <div class="brand-font font-bold text-[.85rem] text-brand mb-2">Or pick a different date</div>
+        <p class="font-body text-[.8rem] text-muted mb-3">These upcoming dates have availability:</p>
+        <div class="flex flex-wrap gap-2" id="altDates"></div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-end">
+        <button onclick="goBack()"
+            class="brand-font font-bold text-[.82rem] tracking-wider uppercase border-2 border-[#e5e7eb] text-muted px-7 py-3.5 rounded-xl hover:border-brand hover:text-brand transition-colors cursor-pointer bg-white">
+            ← Choose Different Date
+        </button>
+        <button onclick="goToStep(3)"
+            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-[#f59e0b] text-white px-8 py-3.5 rounded-xl hover:bg-[#d97706] transition-colors cursor-pointer">
+            Continue to Details →
+        </button>
+    </div>
+</div>

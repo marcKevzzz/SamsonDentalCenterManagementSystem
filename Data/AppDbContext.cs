@@ -31,8 +31,8 @@ namespace SamsonDentalCenterManagementSystem.Data
                 entity.Property(p => p.Sex).HasColumnName("sex");
                 entity.Property(p => p.PhoneNumber).HasColumnName("phone_number");
                 entity.Property(p => p.Address).HasColumnName("address");
-                entity.Property(p => p.Role).HasColumnName("role");
-                entity.Property(p => p.PatientType).HasColumnName("patient_type");
+                entity.Property(p => p.Role).HasColumnName("role");  
+                entity.Property(p => p.AvatarUrl).HasColumnName("avatar_url");  
                 entity.Property(p => p.CreatedAt).HasColumnName("created_at");
 
                 // Exclude UI-only fields — these have no DB columns

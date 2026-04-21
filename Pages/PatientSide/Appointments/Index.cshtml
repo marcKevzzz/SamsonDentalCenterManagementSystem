@@ -1,280 +1,43 @@
 @page "/Appointments"
 @model AppointmentModel
 @{
-    ViewData["Title"] = "Appointments";
+    ViewData["Title"] = "Book an Appointment";
 }
 
+@* ── Server-side user data bridge ── *@
+@* Injected once at page load — JS reads this instead of localStorage *@
+<script id="appointment-user" type="application/json">
+    @if (Model.IsLoggedIn)
+    {
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            id          = Model.CurrentUser!.Id,
+            firstName   = Model.CurrentUser.FirstName,
+            lastName    = Model.CurrentUser.LastName,
+            email       = Model.CurrentUser.Email ?? "",
+            phone       = Model.CurrentUser.PhoneNumber ?? "",
+            sex         = Model.CurrentUser.Sex ?? "",
+            dob         = Model.CurrentUser.DateOfBirth?.ToString("yyyy-MM-dd") ?? "",
+            role        = Model.CurrentUser.Role ?? "patient",
+            avatarUrl   = Model.CurrentUser.AvatarUrl ?? "",
+            initials    = ((Model.CurrentUser.FirstName?.Length > 0 ? Model.CurrentUser.FirstName[0].ToString() : "") +
+                          (Model.CurrentUser.LastName?.Length  > 0 ? Model.CurrentUser.LastName[0].ToString()  : "")).ToUpper(),
+            isLoggedIn  = true
+        }))
+    }
+    else
+    {
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new { isLoggedIn = false }))
+    }
+</script>
+
 <div class="min-h-screen flex flex-col">
-  
-  <!-- ══════════════════════════════════════════════
-       STEP PANELS
-  ═══════════════════════════════════════════════ -->
-  <div class="flex-1 py-10 px-6">
-    <div class="max-w-3xl mx-auto">
- 
-      <!-- ─── STEP 1: Select Service ─── -->
-      @* <!-- In ASP.NET: @await Html.PartialAsync("_Step1Service", Model) --> *@
-      <div id="step-1" class="step-panel active">
-        <!-- Partial: Partials/_Step1Service.html -->
-        <div class="mb-8">
-          <div class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 1 of 4
-          </div>
-          <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Select a Service</h1>
-          <p class="font-body text-[.9rem] text-muted">Choose the treatment you'd like to book. You can only book one service per appointment.</p>
+    <div class="flex-1 py-10 px-4 sm:px-6 lg:px-12">
+        <div class="max-w sm:px-6 mx-auto">
+            <partial name="PatientSide/Appointments/Services" />
+            <partial name="PatientSide/Appointments/Schedule" />
+            <partial name="PatientSide/Appointments/Details" />
+            <partial name="PatientSide/Appointments/Confirmation" />
+            <partial name="PatientSide/Appointments/Success" />
         </div>
- 
-        <!-- Category tabs -->
-        <div class="flex gap-2 mb-6 flex-wrap" id="catTabs"></div>
- 
-        <!-- Service list -->
-        <div id="svcList" class="space-y-3 mb-8"></div>
- 
-        <!-- Service detail panel -->
-        <div id="svcDetail" class="hidden mb-8"></div>
- 
-        <div class="flex justify-end">
-          <button id="step1Btn" onclick="goToStep(2)" disabled
-            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-            Continue to Schedule →
-          </button>
-        </div>
-      </div>
- 
-      <!-- ─── STEP 2: Schedule ─── -->
-      @* <!-- In ASP.NET: @await Html.PartialAsync("_Step2Schedule", Model) --> *@
-      <div id="step-2" class="step-panel">
-        <div class="mb-8">
-          <div class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 2 of 4
-          </div>
-          <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Pick a Schedule</h1>
-          <p class="font-body text-[.9rem] text-muted">Select your preferred date and time for <span id="s2ServiceName" class="font-semibold text-brand"></span>.</p>
-        </div>
- 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <!-- Calendar -->
-          <div class="bg-white rounded-2xl p-5 shadow-sm">
-            <div id="calWidget"></div>
-          </div>
-          <!-- Time slots -->
-          <div class="bg-white rounded-2xl p-5 shadow-sm" id="timeWidget">
-            <div class="flex items-center justify-center h-36 text-center">
-              <div>
-                <svg class="w-8 h-8 mx-auto mb-2 text-[#e5e7eb]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <p class="font-body text-[.82rem] text-muted">Select a date first to see available times.</p>
-              </div>
-            </div>
-          </div>
-        </div>
- 
-        <!-- Selected slot summary -->
-        <div id="slotSummary" class="hidden mb-6"></div>
- 
-        <!-- Fully booked notice -->
-        <div id="fullyBookedBar" class="hidden mb-6"></div>
- 
-        <div class="flex justify-end">
-          <button id="step2Btn" onclick="goToStep(3)" disabled
-            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-            Continue to Details →
-          </button>
-        </div>
-      </div>
- 
-      <!-- ─── STEP 2B: Waitlist ─── -->
-      @* <!-- In ASP.NET: @await Html.PartialAsync("_Step2bWaitlist", Model) --> *@
-      <div id="step-2b" class="step-panel">
-        <div class="mb-8">
-          <div class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b] inline-block"></span>Waitlist
-          </div>
-          <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Join the Waitlist</h1>
-          <p class="font-body text-[.9rem] text-muted max-w-lg" id="wlIntro"></p>
-        </div>
- 
-        <!-- How it works -->
-        <div class="rounded-2xl p-6 mb-8 text-white" style="background:linear-gradient(135deg,#0f1117,#2d2d44)">
-          <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl bg-[#f59e0b] flex items-center justify-center shrink-0">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-            </div>
-            <div>
-              <h3 class="brand-font font-bold text-[1.05rem] mb-3">How the Waitlist Works</h3>
-              <div class="space-y-2">
-                <div class="flex items-start gap-2.5 font-body text-[.82rem] text-white/70"><span class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-[.6rem] font-bold shrink-0 mt-0.5">1</span>You provide your contact details on the next step.</div>
-                <div class="flex items-start gap-2.5 font-body text-[.82rem] text-white/70"><span class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-[.6rem] font-bold shrink-0 mt-0.5">2</span>We notify you via SMS and email the moment a slot opens on your chosen date.</div>
-                <div class="flex items-start gap-2.5 font-body text-[.82rem] text-white/70"><span class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-[.6rem] font-bold shrink-0 mt-0.5">3</span>You confirm the slot within 2 hours or it moves to the next person.</div>
-              </div>
-            </div>
-          </div>
-        </div>
- 
-        <!-- Waitlist summary -->
-        <div class="bg-white rounded-2xl p-5 border border-[#e5e7eb] mb-8" id="wlSummary"></div>
- 
-        <!-- Alt dates -->
-        <div class="bg-offwhite rounded-2xl p-5 mb-8">
-          <div class="brand-font font-bold text-[.85rem] text-brand mb-2">Or pick a different date</div>
-          <p class="font-body text-[.8rem] text-muted mb-3">These upcoming dates have availability:</p>
-          <div class="flex flex-wrap gap-2" id="altDates"></div>
-        </div>
- 
-        <div class="flex flex-col sm:flex-row gap-3 justify-end">
-          <button onclick="goBack()"
-            class="brand-font font-bold text-[.82rem] tracking-wider uppercase border-2 border-[#e5e7eb] text-muted px-7 py-3.5 rounded-xl hover:border-brand hover:text-brand transition-colors cursor-pointer bg-white">
-            ← Choose Different Date
-          </button>
-          <button onclick="goToStep(3)"
-            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-[#f59e0b] text-white px-8 py-3.5 rounded-xl hover:bg-[#d97706] transition-colors cursor-pointer">
-            Continue to Details →
-          </button>
-        </div>
-      </div>
- 
-      <!-- ─── STEP 3: Your Details ─── -->
-      @* <!-- In ASP.NET: @await Html.PartialAsync("_Step3Details", Model) --> *@
-      <div id="step-3" class="step-panel">
-        <div class="mb-8">
-          <div class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 3 of 4
-          </div>
-          <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Your Details</h1>
-          <p class="font-body text-[.9rem] text-muted" id="s3Subtitle">We need a few basic details to complete your booking.</p>
-        </div>
- 
-        <!-- Mini summary bar -->
-        <div id="s3MiniBar" class="bg-brand rounded-2xl p-4 mb-6 flex flex-wrap items-center gap-4 justify-between"></div>
- 
-        <!-- Form -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <div class="brand-font font-bold text-[.9rem] text-brand mb-5">Personal Information</div>
-          <div class="space-y-4">
- 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">First Name <span class="text-primary">*</span></label>
-                <input id="f_firstName" type="text" class="form-input" placeholder="Juan" oninput="clearErr('firstName')"/>
-                <div id="err_firstName" class="field-error">First name is required.</div>
-              </div>
-              <div>
-                <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Last Name <span class="text-primary">*</span></label>
-                <input id="f_lastName" type="text" class="form-input" placeholder="Dela Cruz" oninput="clearErr('lastName')"/>
-                <div id="err_lastName" class="field-error">Last name is required.</div>
-              </div>
-            </div>
- 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Email Address <span class="text-primary">*</span></label>
-                <input id="f_email" type="email" class="form-input" placeholder="juan@email.com" oninput="clearErr('email')"/>
-                <div id="err_email" class="field-error">Valid email address is required.</div>
-              </div>
-              <div>
-                <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Phone Number <span class="text-primary">*</span></label>
-                <input id="f_phone" type="tel" class="form-input" placeholder="+63 9XX XXX XXXX" oninput="clearErr('phone')"/>
-                <div id="err_phone" class="field-error">Phone number is required.</div>
-              </div>
-            </div>
- 
-            <div>
-              <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-3">Patient Type</label>
-              <div class="flex gap-5 flex-wrap">
-                <label class="flex items-center gap-2.5 cursor-pointer font-body text-[.88rem] text-brand">
-                  <input type="radio" name="patientType" value="New Patient" checked class="accent-primary w-4 h-4"/> New Patient
-                </label>
-                <label class="flex items-center gap-2.5 cursor-pointer font-body text-[.88rem] text-brand">
-                  <input type="radio" name="patientType" value="Returning Patient" class="accent-primary w-4 h-4"/> Returning Patient
-                </label>
-              </div>
-            </div>
- 
-            <div>
-              <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Additional Notes <span class="font-normal normal-case text-muted">(optional)</span></label>
-              <textarea id="f_notes" class="form-input" rows="4" placeholder="Any allergies, current medications, or concerns you'd like us to know..."></textarea>
-            </div>
-          </div>
-        </div>
- 
-        <!-- Consent -->
-        <div class="bg-offwhite rounded-2xl p-4 mb-8 flex items-start gap-3" id="consentBox">
-          <input type="checkbox" id="f_consent" class="accent-primary w-4 h-4 mt-0.5 shrink-0 cursor-pointer" onchange="clearErr('consent')"/>
-          <label for="f_consent" class="font-body text-[.8rem] text-muted leading-relaxed cursor-pointer">
-            I consent to Samson Dental Center collecting and using my personal information to process this booking in accordance with their
-            <a href="#" class="text-primary hover:underline">Privacy Policy</a>.
-          </label>
-        </div>
-        <div id="err_consent" class="field-error -mt-6 mb-6 pl-1">You must accept the privacy policy to continue.</div>
- 
-        <div class="flex justify-end">
-          <button onclick="submitDetails()"
-            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-colors cursor-pointer">
-            Review Booking →
-          </button>
-        </div>
-      </div>
- 
-      <!-- ─── STEP 4: Review & Confirm ─── -->
-      @* <!-- In ASP.NET: @await Html.PartialAsync(partialViewName: partialViewName: "_Step4Confirmation", Model) --> *@
-      <div id="step-4" class="step-panel">
-        <div class="mb-8">
-          <div class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 4 of 4
-          </div>
-          <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Review & Confirm</h1>
-          <p class="font-body text-[.9rem] text-muted" id="s4Subtitle">Please review your appointment details before submitting.</p>
-        </div>
- 
-        <!-- Summary card -->
-        <div id="s4Summary" class="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] overflow-hidden mb-6"></div>
- 
-        <!-- Waitlist notice -->
-        <div id="s4WLNotice" class="hidden bg-[#fef3c7] border border-[#fde68a] rounded-2xl p-4 mb-6 flex items-start gap-3">
-          <svg class="w-5 h-5 text-[#b45309] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <p class="font-body text-[.82rem] text-[#92400e] leading-relaxed">This is a <strong>waitlist registration</strong>, not a confirmed appointment. You'll receive a notification once a slot opens on your requested date.</p>
-        </div>
- 
-        <!-- Reminders -->
-        <div class="bg-offwhite rounded-2xl p-5 mb-8">
-          <div class="brand-font font-bold text-[.85rem] text-brand mb-3">Before Your Visit</div>
-          <div class="space-y-2">
-            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Arrive 10–15 minutes early to complete any intake forms.</div>
-            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Bring a valid ID and your HMO/insurance card if applicable.</div>
-            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Inform us of any medications you are currently taking.</div>
-            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Eat before your appointment unless advised otherwise by your doctor.</div>
-          </div>
-        </div>
- 
-        <div class="flex justify-end">
-          <button id="confirmBtn" onclick="confirmBooking()"
-            class="brand-font font-bold text-[.88rem] tracking-wider uppercase bg-primary text-white px-10 py-4 rounded-xl hover:bg-brand transition-colors cursor-pointer">
-            Confirm Appointment ✓
-          </button>
-        </div>
-      </div>
- 
-      <!-- ─── STEP 5: Success ─── -->
-      @* <!-- In ASP.NET: @await Html.PartialAsync("_StepSuccess", Model) --> *@
-      <div id="step-5" class="step-panel">
-        <div class="text-center py-8">
-          <div id="successIcon" class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <h2 class="brand-font font-extrabold text-brand text-[1.8rem] mb-2" id="successTitle">Appointment Confirmed!</h2>
-          <p class="font-body text-[.92rem] text-muted max-w-md mx-auto mb-2" id="successMsg"></p>
-          <div class="inline-flex items-center gap-2 bg-offwhite border border-[#e5e7eb] rounded-full px-5 py-2.5 my-6">
-            <span class="font-body text-[.72rem] font-semibold uppercase tracking-wider text-muted">Reference No.</span>
-            <span id="refNumber" class="brand-font font-bold text-brand text-[.9rem] tracking-widest"></span>
-          </div>
-          <div id="successCard" class="bg-white rounded-2xl border border-[#e5e7eb] p-6 max-w-md mx-auto text-left mb-8"></div>
-          <div id="nextSteps" class="bg-offwhite rounded-2xl p-5 max-w-md mx-auto text-left mb-8"></div>
-          <div class="flex flex-wrap gap-3 justify-center">
-            <a href="../" class="brand-font font-bold text-[.82rem] tracking-wider uppercase bg-brand text-white px-7 py-3.5 rounded-xl hover:bg-primary transition-colors no-underline">Back to Home</a>
-            <button onclick="resetBooking()" class="brand-font font-bold text-[.82rem] tracking-wider uppercase bg-white text-brand border-2 border-[#e5e7eb] px-7 py-3.5 rounded-xl hover:border-brand transition-colors cursor-pointer">Book Another Service</button>
-          </div>
-        </div>
-      </div>
- 
     </div>
-  </div>
 </div>

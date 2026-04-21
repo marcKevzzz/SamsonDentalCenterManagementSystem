@@ -1,110 +1,84 @@
-<header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl ">
-
-    <div class="max-w mx-auto px-4 md:px-6 h-[68px] flex items-center justify-between gap-4 md:gap-6">
-
-        <a href="/" class="flex items-center gap-2 shrink-0">
-            <div class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center">
-                <svg class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="#db3623" stroke-width="2.5">
+<header id="navbar" class="fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 border-b border-transparent">
+    <div class="max-w mx-auto px-4 md:px-6 h-[72px] flex items-center justify-between gap-4 md:gap-6">
+        <a href="/" class="flex items-center gap-2.5 group transition-transform duration-300 hover:scale-105">
+            <div class="w-10 h-10 rounded-full border-2 border-primary/30 group-hover:border-primary flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <circle cx="12" cy="12" r="9" />
                     <circle cx="12" cy="12" r="3" />
                 </svg>
             </div>
-            <span id="logo"
-                class="text-[0.78rem] font-extrabold tracking-[0.05em] uppercase sm:block flex flex-col leading-tight">
-                Samson Dental <span class="text-primary brightness-125 sm:text-[0.78rem] text-[0.6rem]">Center</span>
+            <span id="logo" class="text-[0.8rem] font-extrabold tracking-[0.08em] uppercase sm:block flex flex-col leading-tight transition-colors">
+                Samson Dental <span class="text-primary brightness-125 sm:text-[0.8rem] text-[0.62rem]">Center</span>
             </span>
         </a>
 
-        <nav id="desktopNav" class="hidden md:flex items-center gap-8">
-
-            <a href="/" id="nav-home" class="nav-link  font-bold  uppercase hover:text-primary transition">Home</a>
-
-            <a href="/about" id="nav-about"
-                class="nav-link  font-bold  uppercase hover:text-primary transition">About</a>
-
+        <nav id="desktopNav" class="hidden md:flex items-center gap-10">
+            <a href="/" id="nav-home" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary transition-all relative group">
+                Home
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            <a href="/about" id="nav-about" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary transition-all relative group">
+                About
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+            </a>
             <div id="servicesWrapper" class="relative">
-                <button id="servicesBtn"
-                    class="nav-link flex items-center gap-1  font-bold  uppercase hover:text-primary transition">
+                <button id="servicesBtn" class="nav-link flex items-center gap-1.5 text-[0.68rem] font-bold uppercase hover:text-primary transition-all">
                     Services
-                    @* <svg id="chevronIcon" transition-transform" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                            d="m6 9 6 6 6-6" />
-                    </svg> *@
-                    <i class="fa-solid fa-caret-down transition-transform " id="chevronIcon"></i>
+                    <i class="fa-solid fa-caret-down text-[10px] transition-transform duration-300" id="chevronIcon"></i>
                 </button>
             </div>
-
-            <a href="/contacts" id="nav-contacts" class="nav-link  font-bold  uppercase hover:text-primary transition">
+            <a href="/contacts" id="nav-contacts" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary transition-all relative group">
                 Contacts
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
             </a>
-
         </nav>
-        <div class="flex items-center gap-2 sm:gap-4">
+
+        <div class="flex items-center gap-3 sm:gap-5">
             <a id="bookBtn" href="/Appointments"
-                class="hidden md:flex items-center text-[0.65rem] text-white font-bold tracking-[0.1em] uppercase  px-6 py-2 rounded-full bg-primary hover:brightness-90 transition">
+                class="hidden md:flex items-center text-center text-nowrap text-[0.65rem] text-white font-bold tracking-[0.12em] uppercase px-7 py-2.5 rounded-full bg-primary brightness-110 hover:brightness-100 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300">
                 Book Now
             </a>
 
-            <div class="flex items-center">
+            <div class="flex items-center h-full">
                 <partial name="./Profile.cshtml" />
             </div>
 
-            <button id="hamburgerBtn" class="md:hidden p-1">
-                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path id="navIconPath" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
-                </svg>
+            <button id="hamburgerBtn" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+                <div class="w-6 flex flex-col gap-1.5">
+                    <span id="burger-top" class="w-full h-0.5 bg-current transition-all duration-300"></span>
+                    <span id="burger-mid" class="w-full h-0.5 bg-current transition-all duration-300"></span>
+                    <span id="burger-bot" class="w-full h-0.5 bg-current transition-all duration-300"></span>
+                </div>
             </button>
         </div>
-
     </div>
 </header>
 
 <!-- MEGA MENU -->
-<div id="servicesMega" class="hidden fixed top-[68px] left-0 right-0 z-[9999] flex justify-center px-4">
-
+<div id="servicesMega" class="servicesMega-hidden fixed top-[68px] left-0 right-0 z-[9999] flex justify-center px-4">
     <div id="megaPanel"
         class="w-full max-w-[740px] bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 overflow-hidden">
-
-
 
         <div class="grid grid-cols-3 px-7 py-6">
 
             <div class="pr-6 border-r border-slate-100">
                 <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">General Dentistry</p>
-                <a href="/Services/dental-checkup" class="block py-1.5 text-[0.85rem] hover:text-primary">Dental
-                    Checkup</a>
-                <a href="/Services/teeth-cleaning" class="block py-1.5 text-[0.85rem] hover:text-primary">Teeth
-                    Cleaning</a>
-                <a href="/Services/tooth-filling" class="block py-1.5 text-[0.85rem] hover:text-primary">Tooth
-                    Filling</a>
-                <a href="/Services/fluoride-treatment" class="block py-1.5 text-[0.85rem] hover:text-primary">Fluoride
-                    Treatment</a>
+                <div id="cat-general-desktop"></div>
             </div>
 
             <div class="px-6 border-r border-slate-100">
                 <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Cosmetic</p>
-                <a href="/Services/teeth-whitening" class="block py-1.5 text-[0.85rem] hover:text-primary">Teeth
-                    Whitening</a>
-                <a href="/Services/dental-veneers" class="block py-1.5 text-[0.85rem] hover:text-primary">Dental
-                    Veneers</a>
-                <a href="/Services/smile-makeover" class="block py-1.5 text-[0.85rem] hover:text-primary">Smile
-                    Makeover</a>
-                <a href="/Services/composite-bonding" class="block py-1.5 text-[0.85rem] hover:text-primary">Composite
-                    Bonding</a>
+                <div id="cat-cosmetic-desktop"></div>
             </div>
 
             <div class="pl-6">
                 <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Specialized</p>
 
-                <a href="/Services/root-canal" class="block py-1.5 text-[0.85rem] hover:text-primary">Root Canal</a>
-                <a href="/Services/braces-aligners" class="block py-1.5 text-[0.85rem] hover:text-primary">Braces &
-                    Aligners</a>
-                <a href="/Services/dental-implants" class="block py-1.5 text-[0.85rem] hover:text-primary">Dental
-                    Implants</a>
-                <a href="/Services/oral-surgery" class="block py-1.5 text-[0.85rem] hover:text-primary">Oral Surgery</a>
+                <!-- <a href="/Services/root-canal" class="block py-1.5 text-[0.85rem] hover:text-primary">Root Canal</a> -->
+                <div id="cat-specialized-desktop"></div>
             </div>
-
         </div>
+
 
         <div
             class="mx-7 mb-5 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-between flex-wrap gap-3">
@@ -125,91 +99,52 @@
 </div>
 
 <!-- MOBILE MENU -->
-<div id="mobileMenu" class="hidden fixed top-[68px] left-0 right-0 bottom-0 z-[9998] bg-white overflow-y-auto border-t">
+<div id="mobileMenu" class="fixed inset-0 z-[998] bg-white opacity-0 invisible transition-all duration-500 overflow-y-auto pb-20">
+    <div class="absolute inset-0 bg-brand/5 backdrop-blur-3xl -z-10"></div>
+    <div class="min-h-full flex flex-col items-center justify-center px-8">
+        <div class="flex flex-col w-full max-w-sm pt-24">
+            <a href="/" id="m-nav-home" class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">Home</a>
+            <a href="/about" id="m-nav-about" class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">About</a>
+            
+            <button id="mobileServicesBtn" class="mobile-nav-link w-full flex justify-center items-center gap-3 text-xl font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">
+                Services
+                <i class="fa-solid fa-chevron-down text-sm transition-transform duration-300" id="mobileChevron"></i>
+            </button>
 
-    <div class="px-6 pb-10 flex flex-col">
-
-        <!-- <div class="py-6 border-b flex items-center gap-4 relative">
-            <partial name="./Profile.cshtml" />
-            <div class="flex flex-col ">
-                <span class="text-[0.75rem] font-bold uppercase tracking-wider">My Account</span>
-                <a href="#" class="text-[0.65rem] hover:text-gray-500 underline">Manage Profile</a>
-            </div>
-        </div> -->
-
-        <a href="/"
-            class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">Home</a>
-
-        <a href="/about"
-            class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">About</a>
-
-        <button id="mobileServicesBtn"
-            class="w-full flex justify-between items-center py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">
-
-            Services
-
-            <svg id="mobileChevron" class="w-4 h-4 transition-transform" viewBox="0 0 24 24">
-                <path stroke="#0f1117" stroke-width="2" stroke-linecap="round" d="m6 9 6 6 6-6" />
-            </svg>
-
-        </button>
-
-        <div id="mobileServicesMenu" class="max-h-0 overflow-hidden transition-all duration-300">
-
-            <div class="pb-2">
-
-                <p class="text-[0.57rem] font-bold tracking-[0.13em] uppercase text-gray-400 pt-3 pl-3">General</p>
-                <a href="/Services/dental-checkup"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Dental Checkup</a>
-                <a href="/Services/teeth-cleaning"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Teeth
-                    Cleaning</a>
-                <a href="/Services/tooth-filling" class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Tooth
-                    Filling</a>
-                <a href="/Services/fluoride-treatment"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Fluoride
-                    Treatment</a>
-            </div>
-            <div class="pb-2">
-
-                <p class="text-[0.57rem] font-bold tracking-[0.13em] uppercase text-gray-400 pt-3 pl-3">Cosmetic</p>
-                <a href="/Services/teeth-whitening"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Teeth
-                    Whitening</a>
-                <a href="/Services/dental-veneers"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Dental
-                    Veneers</a>
-                <a href="/Services/smile-makeover"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Smile
-                    Makeover</a>
-                <a href="/Services/composite-bonding"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Composite
-                    Bonding</a>
-            </div>
-            <div class="pb-2">
-
-                <p class="text-[0.57rem] font-bold tracking-[0.13em] uppercase text-gray-400 pt-3 pl-3">Specialized</p>
-                <a href="/Services/root-canal" class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Root
-                    Canal</a>
-                <a href="/Services/braces-aligners"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Braces & Aligners</a>
-                <a href="/Services/dental-implants"
-                    class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Dental Implants</a>
-                <a href="/Services/oral-surgery" class="block py-2 pl-3 text-sm text-gray-600 hover:text-primary">Oral
-                    Surgery</a>
+            <div id="mobileServicesMenu" class="max-h-0 overflow-hidden transition-all duration-500 bg-slate-50/50 rounded-2xl">
+                <div class="py-6 px-4 space-y-4">
+                    <div>
+                        <div class="flex items-center justify-center gap-2 mb-2">
+                            <i class="fa-solid fa-tooth text-[10px] text-primary/40"></i>
+                            <p class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40">General</p>
+                            <i class="fa-solid fa-tooth text-[10px] text-primary/40"></i>
+                        </div>
+                        <div id="cat-general-mobile" class="flex flex-col text-center"></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-center gap-2 mb-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-primary/40"></i>
+                            <p class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40">Cosmetic</p>
+                            <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-primary/40"></i>
+                        </div>
+                        <div id="cat-cosmetic-mobile" class="flex flex-col text-center"></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-center gap-2 mb-2">
+                            <i class="fa-solid fa-microscope text-[10px] text-primary/40"></i>
+                            <p class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40">Specialized</p>
+                            <i class="fa-solid fa-microscope text-[10px] text-primary/40"></i>
+                        </div>
+                        <div id="cat-specialized-mobile" class="flex flex-col text-center"></div>
+                    </div>
+                </div>
             </div>
 
+            <a href="/contacts" id="m-nav-contacts" class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">Contact</a>
+            
+            <a href="/Appointments" class="mobile-nav-link mt-6 text-center py-4 px-10 rounded-full bg-primary text-white text-[0.75rem] font-bold tracking-[0.15em] uppercase shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                Book Appointment
+            </a>
         </div>
-
-        <a href="/contacts"
-            class="block py-4 border-b text-[0.75rem] font-bold tracking-[0.09em] uppercase hover:text-primary">
-            Contact
-        </a>
-
-        <a href="/Appointments"
-            class=" w-fit mt-4 py-3 px-4 rounded-full bg-primary text-white text-[0.68rem] font-bold tracking-[0.1em] uppercase hover:bg-primary/90 transition">
-            Book Appointment
-        </a>
-
     </div>
 </div>

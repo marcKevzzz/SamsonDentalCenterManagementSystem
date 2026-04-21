@@ -1,5 +1,57 @@
+import { Toast, Modal } from "../ui.js";
+import { setupUserDisplay } from "../profile.js";
+
 document.addEventListener("DOMContentLoaded", () => {
+  initProfileData();
+  initTabs();
+  initAvatarActions();
+  initSecurity();
   // Set default tab
+
+  document
+    .getElementById("saveAllInfo")
+    ?.addEventListener("click", saveAllInfo);
+
+  document
+    .getElementById("savePassword")
+    ?.addEventListener("click", savePasswordHandler);
+});
+
+function initProfileData() {
+  const userDataElement = document.getElementById("user-data");
+  if (!userDataElement) return;
+
+  const profile = JSON.parse(userDataElement.textContent);
+  console.log("Profile data:", profile); // verify all fields are populated
+
+  displayProfile(profile);
+}
+
+function displayProfile(profile) {
+  // Populate Inputs
+  const firstNameInput = document.getElementById("firstName");
+  const lastNameInput = document.getElementById("lastName");
+  const emailInput = document.getElementById("email");
+  const addressInput = document.getElementById("address");
+
+  if (firstNameInput) firstNameInput.value = profile.firstName || "";
+  if (lastNameInput) lastNameInput.value = profile.lastName || "";
+  if (emailInput) emailInput.value = profile.email || "";
+  if (addressInput) addressInput.value = profile.address || "";
+
+  // Handle Avatar Logic
+  // if (profile.avatarUrl) {
+  //   avatarCircle.innerHTML = `<img src="${profile.avatarUrl}" class="w-full h-full object-cover" />`;
+  // } else {
+  //   const initials =
+  //     (profile.firstName?.[0] || "") + (profile.lastName?.[0] || "");
+  //   avatarCircle.innerText = initials.toUpperCase() || "JD";
+  // }
+
+  updateAvatarUI(profile.avatarUrl);
+}
+
+function initTabs() {
   document.querySelectorAll(".tab-btn")?.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tabName = btn.getAttribute("data-tab");
@@ -10,15 +62,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("newPw")
     ?.addEventListener("input", (e) => checkStrength(e.target.value));
-
-  initAvatarActions();
-  initSecurity();
-});
+}
 
 function switchTab(name) {
   ["personal", "contact", "security"].forEach((t) => {
     const panel = document.getElementById("tab-" + t);
     const btn = document.getElementById("tab-btn-" + t);
+    const grpBtn = document.getElementById("grpBtn");
     if (t === name) {
       panel.classList.remove("hidden");
       btn.classList.remove("text-muted", "border-transparent");
@@ -29,6 +79,11 @@ function switchTab(name) {
       btn.classList.add("text-muted", "border-transparent");
     }
   });
+  if (name === "security") {
+    grpBtn.classList.add("hidden");
+  } else {
+    grpBtn.classList.remove("hidden");
+  }
 }
 
 function previewAvatar(e) {
@@ -41,9 +96,52 @@ function previewAvatar(e) {
   };
   reader.readAsDataURL(file);
 }
+
 function removeAvatar() {
-  document.getElementById("avatarCircle").innerHTML = "JD";
-  document.getElementById("avatarInput").value = "";
+  Modal.open({
+    title: "Remove Profile Picture",
+    message:
+      "Are you sure you want to remove your profile picture? This action cannot be undone.",
+    type: "warning",
+    confirmText: "Confirm",
+    onConfirm: async () => {
+      try {
+        const res = await fetch("/api/settings/remove-avatar", {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        const text = await res.text(); // read raw first
+
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch {
+          throw new Error("Invalid JSON response");
+        }
+
+        if (res.ok && result.ok) {
+          const saved = localStorage.getItem("sb_user");
+          if (saved) {
+            const user = JSON.parse(saved);
+            user.avatarUrl = null;
+            localStorage.setItem("sb_user", JSON.stringify(user));
+          }
+
+          Toast.show("Profile avatar removed.", "success");
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
+        } else {
+          throw new Error(result?.error || "Delete failed");
+        }
+      } catch (err) {
+        Toast.show(err.message || "Unexpected error", "danger");
+        throw new Error(result.value?.error ?? "Delete failed");
+      }
+    },
+  });
 }
 
 function initSecurity() {
@@ -82,28 +180,63 @@ function checkStrength(pw) {
   lbl.style.color = score > 0 ? colorss[score - 1] : "#6b7280";
 }
 
-function handlePasswordSave() {
-  const np = document.getElementById("newPw").value;
-  const cp = document.getElementById("confirmPw").value;
-  if (!np || !cp) {
-    showToast("Please fill in all fields.", true);
-    return;
-  }
-  if (np !== cp) {
-    showToast("Passwords do not match.", true);
-    return;
-  }
-  showToast("Password updated!");
-}
+async function savePasswordHandler() {
+  const btn = document.getElementById("savePassword");
+  const original = btn.textContent;
 
-function showToast(msg, isError = false) {
-  const t = document.getElementById("toast");
-  document.getElementById("toastMsg").textContent = msg;
-  t.style.background = isError ? "#c0392b" : "#0f1117";
-  t.style.transform = "translateY(0)";
-  setTimeout(() => {
-    t.style.transform = "translateY(120%)";
-  }, 3000);
+  const newPw = document.getElementById("newPw").value;
+  const confirmPw = document.getElementById("confirmPw").value;
+
+  if (!newPw || !confirmPw) {
+    Toast.show("Please fill in all password fields.", "warning");
+    return;
+  }
+  if (newPw !== confirmPw) {
+    Toast.show("Passwords do not match.", "danger");
+    return;
+  }
+  if (newPw.length < 8) {
+    Toast.show("Password must be at least 8 characters.", "danger");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Updating…";
+
+  Modal.open({
+    title: "Update Password",
+    message: "Are you sure you want to update your password?",
+    type: "info",
+    onConfirm: async () => {
+      try {
+        const res = await fetch("/api/settings/update-password", {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            newPassword: newPw,
+            confirmPassword: confirmPw,
+          }),
+        });
+
+        const result = await res.json();
+        if (result.ok) {
+          Toast.show("Password updated!", "success");
+          document.getElementById("currentPw").value = "";
+          document.getElementById("newPw").value = "";
+          document.getElementById("confirmPw").value = "";
+          checkStrength("");
+        } else {
+          Toast.show(result.error ?? "Update failed.", "danger");
+        }
+      } catch {
+        Toast.show("An unexpected error occurred.", "danger");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    },
+  });
 }
 
 function initAvatarActions() {
@@ -132,43 +265,120 @@ function initAvatarActions() {
   removeBtn?.addEventListener("click", () => removeAvatar());
 }
 
+async function saveAllInfo() {
+  const btn = document.getElementById("saveAllInfo");
+  btn.disabled = true;
+
+  Modal.open({
+    title: "Save Changes",
+    message:
+      "Are you sure you want to save all changes to your profile information?",
+    type: "info",
+    onConfirm: async () => {
+      try {
+        const res = await fetch("/api/settings/update-profile", {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: document.getElementById("firstName").value.trim(),
+            lastName: document.getElementById("lastName").value.trim(),
+            dateOfBirth: document.getElementById("dateOfBirth").value || null,
+            sex: document.getElementById("sex").value,
+            email: document.getElementById("email").value.trim(),
+            phoneNumber: document.getElementById("contactNumber").value.trim(),
+            address: document.getElementById("address").value.trim(),
+          }),
+        });
+
+        const text = await res.text();
+        const result = text ? JSON.parse(text) : {};
+
+        if (result.ok) {
+          Toast.show("Profile saved!", "success");
+        } else {
+          Toast.show(result.error ?? "Save failed.", "danger");
+        }
+      } catch (err) {
+        Toast.show("An unexpected error occurred." + err.message, "danger");
+      } finally {
+        btn.disabled = false;
+      }
+    },
+  });
+}
+
 async function uploadAvatar(file) {
-  const userId = document.getElementById("settingsContainer").dataset.userid;
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${userId}-${Math.random()}.${fileExt}`;
-  const filePath = `avatars/${fileName}`;
+  const formData = new FormData();
+  formData.append("file", file);
 
-  // Upload to 'avatars' bucket
-  let { error: uploadError } = await supabase.storage
-    .from("avatars")
-    .upload(filePath, file, { upsert: true });
+  try {
+    const response = await fetch("/api/settings/upload-avatar", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+      headers: {
+        RequestVerificationToken:
+          document.querySelector('input[name="__RequestVerificationToken"]')
+            ?.value ?? "",
+      },
+    });
 
-  if (uploadError) return showToast("Upload failed", true);
+    if (response.status === 401) {
+      Toast.show("Session expired. Please sign in again.", "danger");
+      return;
+    }
 
-  // Get Public URL
-  const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-  const publicUrl = data.publicUrl;
+    if (!response.ok) {
+      Toast.show("Upload failed. Try again.", "danger");
+      return;
+    }
 
-  // Update Profile Table
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({ avatar_url: publicUrl })
-    .eq("id", userId);
+    const result = await response.json();
 
-  if (!updateError) {
-    showToast("Profile picture updated!");
-    // Sync with Navbar avatar (if it has a shared class)
-    document
-      .querySelectorAll(".nav-profile-img")
-      .forEach((img) => (img.src = publicUrl));
+    if (result.ok) {
+      // 1. Update avatar circle on this page
+      updateAvatarUI(result.url);
+
+      // 2. Sync localStorage so navbar reflects new avatar
+      const saved = localStorage.getItem("sb_user");
+      if (saved) {
+        const user = JSON.parse(saved);
+        user.avatarUrl = result.url;
+        localStorage.setItem("sb_user", JSON.stringify(user));
+
+        // 3. Update navbar avatar immediately
+        setupUserDisplay(
+          `${user.firstName} ${user.lastName}`,
+          user.email,
+          user.initials,
+          result.url,
+        );
+      }
+
+      Toast.show("Profile picture updated!", "success");
+    } else {
+      Toast.show(result.error || "Upload failed.", "danger");
+    }
+  } catch (err) {
+    console.error("Upload error:", err);
+    Toast.show("An unexpected error occurred.", "danger");
   }
 }
 
-function updateAvatarUI(url, name = "User") {
+function updateAvatarUI(url) {
   const circle = document.getElementById("avatarCircle");
+  let name = "";
+
+  const saved = localStorage.getItem("sb_user");
+  if (saved) {
+    const user = JSON.parse(saved);
+    name = user.initials;
+  }
+
   if (url) {
     circle.innerHTML = `<img src="${url}" class="w-full h-full object-cover" alt="avatar"/>`;
   } else {
-    circle.innerHTML = name.substring(0, 2).toUpperCase();
+    circle.innerHTML = name;
   }
 }

@@ -39,6 +39,8 @@ public class SignoutModel : PageModel
         Response.Cookies.Delete("sb-access-token", cookieOptions);
         Response.Cookies.Delete("sb-refresh-token", cookieOptions);
 
-        return RedirectToPage("/Index");
+
+
+        return Redirect("/sign-in");
     }
 }

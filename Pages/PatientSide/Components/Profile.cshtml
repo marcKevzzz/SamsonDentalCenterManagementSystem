@@ -13,8 +13,9 @@
 
     <!-- Signed-in avatar -->
     <div id="signedInAvatar" class="hidden">
-      <div class="w-9 h-9 rounded-full bg-primary border-2 border-primary avatar-ring flex items-center justify-center">
-        <span id="navInitials" class="brand-font font-bold text-white text-[0.78rem]"></span>
+      <div
+        class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 border-2 border-primary avatar-ring flex items-center justify-center !text-white">
+        <span id="navInitials" class="brand-font font-bold !text-white text-[0.78rem]"></span>
       </div>
     </div>
 
@@ -28,7 +29,7 @@
              DROPDOWN PANEL
         ═════════════════════════════════ -->
   <div id="profilePanel"
-    class="panel-hidden absolute right-0 top-[calc(100%+10px)] z-50 w-[260px] bg-white rounded-2xl shadow-2xl border border-[#e5e7eb] overflow-hidden">
+    class="panel-hidden absolute right-0 top-[calc(100%+20px)] z-[9999] w-[260px] bg-white rounded-2xl shadow-2xl border border-[#e5e7eb] overflow-hidden">
     <!-- ── GUEST STATE ── -->
     <div id="guestState">
       <!-- Header -->
@@ -87,8 +88,8 @@
       <div class="bg-brand px-4 py-4">
         <div class="flex items-center gap-3">
           <div id="modalAvatar"
-            class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 border-2 border-primary/30">
-            <span id="modalInitials" class="brand-font font-bold text-white text-[0.9rem]"></span>
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shrink-0 border-2 border-primary !text-white">
+            <span id="modalInitials" class="brand-font font-bold !text-white text-[0.9rem]"></span>
           </div>
           <div class="min-w-0">
             <div id="modalName" class="brand-font font-bold text-white text-[0.9rem] truncate"></div>
@@ -154,7 +155,7 @@
 
 
         <a id="signOutBtn" href="../signout"
-          class="menu-link w-full text-left border-none bg-transparent !text-muted hover:!text-primary">
+          class="menu-link w-full text-left border-none bg-transparent  hover:text-black hover:bg-red-300 rounded-lg transition-colors flex items-center gap-2 no-underline">
           <svg class="menu-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

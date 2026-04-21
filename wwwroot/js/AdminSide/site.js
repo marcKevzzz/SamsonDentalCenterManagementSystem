@@ -1,3 +1,30 @@
+import { Modal, Toast } from "../ui.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const signoutBtn = document.getElementById("signoutBtn");
+  signoutBtn.addEventListener("click", () =>
+    Modal.open({
+      title: "Confirm Sign Out",
+      message: "Are you sure you want to sign out?",
+      confirmText: "Sign Out",
+      type: "danger",
+      cancelText: "Cancel",
+      onConfirm: () => {
+        signout();
+      },
+    }),
+  );
+
+  // Close sidebar on outside click (mobile)
+  document.getElementById("overlay").addEventListener("click", closeSidebar);
+
+  const toggleBtn = document.getElementById("toggle-btn");
+  if (toggleBtn) toggleBtn.addEventListener("click", toggleSidebar);
+
+  const openSidebarBtn = document.getElementById("openSidebarBtn");
+  if (openSidebarBtn) openSidebarBtn.addEventListener("click", openSidebar);
+});
+
 document.getElementById("cur-date").textContent = new Date().toLocaleDateString(
   "en-PH",
   { month: "short", day: "numeric", year: "numeric" },
@@ -12,6 +39,7 @@ const pageTitles = {
   dashboard: ["Dashboard", "Overview · Today"],
   patients: ["Patients", "People · Registry"],
   doctors: ["Doctors", "People · Staff Directory"],
+  users: ["Users", "People · User Management"],
   appointments: ["Appointments", "Operations · Schedule"],
   services: ["Services", "Operations · Catalog"],
   reports: ["Reports", "Analytics · Insights"],
@@ -34,6 +62,8 @@ function UpdateSidebar() {
     setActive("admin-patients");
   } else if (currentPath.startsWith("/admin/doctors")) {
     setActive("admin-doctors");
+  } else if (currentPath.startsWith("/admin/users")) {
+    setActive("admin-users");
   } else if (currentPath.startsWith("/admin/appointments")) {
     setActive("admin-appointments");
   } else if (currentPath.startsWith("/admin/services")) {
@@ -118,3 +148,8 @@ window.addEventListener("resize", () => {
     closeSidebar();
   }
 });
+
+function signout() {
+  localStorage.removeItem("sb_user");
+  window.location.href = "/signout"; // Use an absolute path for reliability
+}

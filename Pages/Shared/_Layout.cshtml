@@ -23,19 +23,26 @@
 </head>
 
 <body>
-  <partial name="../PatientSide/Components/Navbar" />
 
   <script>
     // Fast check before the big JS files load
     if (localStorage.getItem("sb_user")) {
       document.documentElement.classList.add("is-signed-in");
     }
+
+    const savedUser = localStorage.getItem("sb_user");
+    const user = JSON.parse(savedUser);
+    if (user.role === "admin") {
+      window.location.replace("/admin/dashboard");
+    }
   </script>
+
+  <partial name="../PatientSide/Components/Navbar" />
 
   <div id="profileBackdrop" class="fixed inset-0 z-40 hidden" onclick="closeProfile()"></div>
 
   <div class="w-full min-h-screen main-class">
-    <main role="main" class="pb-3">@RenderBody()</main>
+    <main role="main">@RenderBody()</main>
   </div>
 
   <partial name="../PatientSide/Components/Footer" />

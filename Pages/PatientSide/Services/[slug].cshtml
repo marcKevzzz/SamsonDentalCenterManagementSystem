@@ -1,10 +1,10 @@
 @page "/Services/{slug}"
-@model SamsonDentalCenterManagementSystem.Pages.Services.SlugModel
+@model SamsonDentalCenterManagementSystem.Pages.PatientSide.Services.SlugModel
 @using SamsonDentalCenterManagementSystem.Services
 
-<section class="relative bg-brand pt-[68px] overflow-hidden">
-  <div class="absolute inset-0">
-    <img src="@Model.Service.Hero" alt="@Model.Service.Name" class="w-full h-full object-cover opacity-20" />
+<section class="relative bg-brand pt-[68px] overflow-hidden hero-section">
+  <div class="absolute inset-0 ">
+    <img src="@Model.Service.Hero" alt="@Model.Service.Name" class="w-full h-full object-cover opacity-40 hero-parallax-bg" />
     <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-transparent"></div>
   </div>
   <div class="relative z-10 max-w mx-auto px-8 lg:px-12 py-20">
@@ -12,12 +12,12 @@
       class="flex items-center gap-3 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-primary mb-4">
       <i class="@Model.Service.Icon text-[1rem]"></i> @Model.Service.Category
     </div>
-    <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4 line-clamp-3"
+    <h1 class="hero-title brand-font font-extrabold text-white leading-[1.05] mb-4 line-clamp-3"
       style="font-size:clamp(1.8rem,5vw,4rem);">
       @Model.Service.Name</h1>
-    <p class="font-body text-[1rem] text-white/55 max-w-md leading-relaxed mb-8">@Model.Service.Tagline</p>
-    <div class="flex flex-wrap gap-2 sm:gap-4">
-      <a href="../appointments"
+    <p class="hero-description font-body text-[1rem] text-white/55 max-w-md leading-relaxed mb-8">@Model.Service.Tagline</p>
+    <div class="flex gap-2 sm:gap-4 hero-actions">
+      <a href="/Appointments?service=@Model.Service.Slug"
         class="brand-font flex items-center font-bold text-[0.82rem] tracking-wider uppercase bg-primary text-white px-4 sm:px-7 py-3 sm:py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
         Book This Service
       </a>
@@ -30,8 +30,8 @@
 </section>
 
 <div class="bg-offwhite border-b border-[#e5e7eb]">
-  <div class="max-w mx-auto px-2  lg:px-12 py-10 grid grid-cols-3 gap-4">
-    <div class="flex md:flex-row flex-col items-center justify-center gap-3">
+  <div class="service-stats-container max-w mx-auto px-2  lg:px-12 py-10 grid grid-cols-3 gap-4">
+    <div class="service-stats-item flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-clock text-primary text-sm"></i>
       </div>
@@ -43,7 +43,7 @@
         </div>
       </div>
     </div>
-    <div class="flex md:flex-row flex-col items-center justify-center gap-3">
+    <div class="service-stats-item flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-heart-pulse text-primary text-sm"></i>
       </div>
@@ -55,7 +55,7 @@
         </div>
       </div>
     </div>
-    <div class="flex md:flex-row flex-col items-center justify-center gap-3">
+    <div class="service-stats-item flex md:flex-row flex-col items-center justify-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
         <i class="fa-solid fa-tags text-primary text-sm"></i>
       </div>
@@ -75,7 +75,7 @@
 
     <div class="flex-1 min-w-0">
 
-      <div class="fade-up mb-14">
+      <div class="reveal-on-scroll mb-14">
         <div
           class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
           <i class="fa-solid fa-circle-info text-primary text-[8px]"></i>
@@ -87,7 +87,7 @@
         <p class="font-body text-[0.95rem] text-muted leading-relaxed">@Model.Service.Summary</p>
       </div>
 
-      <div class="fade-up mb-14">
+      <div class="reveal-on-scroll mb-14">
         <div
           class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
           <i class="fa-solid fa-sparkles text-primary text-[8px]"></i>
@@ -95,10 +95,10 @@
         </div>
         <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-6"
           style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Benefits of This Treatment</h2>
-        <ul class="space-y-3.5">
+        <ul class="benefits-container space-y-3.5">
           @foreach (var benefit in Model.Service.Benefits)
           {
-          <li class="flex items-start gap-3 font-body text-[0.9rem] text-[#6b7280]">
+          <li class="benefit-list-item flex items-start gap-3 font-body text-[0.9rem] text-[#6b7280]">
             <span class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
               <i class="fa-solid fa-check text-primary text-[9px]"></i>
             </span>
@@ -108,7 +108,7 @@
         </ul>
       </div>
 
-      <div class="fade-up">
+      <div class="reveal-on-scroll">
         <div
           class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
           <i class="fa-solid fa-circle-question text-primary text-[8px]"></i>
@@ -137,6 +137,5 @@
 
 </section>
 
-@section Scripts {
+
 <script src="~/js/PatientSide/serviceslug.js" type="module"></script>
-}

@@ -1,19 +1,26 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Models;
 
-namespace SamsonDentalCenterManagementSystem.Pages;
+using SamsonDentalCenterManagementSystem.Services;
+namespace SamsonDentalCenterManagementSystem.Pages.AdminSide;
 
+[Authorize]
 public class AdminServicesModel : PageModel
 {
-    private readonly ILogger<AdminServicesModel> _logger;
+    private readonly DentalServiceService _svcService;
 
-    public AdminServicesModel(ILogger<AdminServicesModel> logger)
+    public List<DentalService> Services { get; set; } = new();
+
+    public AdminServicesModel(DentalServiceService svcService)
     {
-        _logger = logger;
+        _svcService = svcService;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGetAsync()
     {
-
+        Services = await _svcService.GetAll(activeOnly: false);
+        return Page();
     }
 }

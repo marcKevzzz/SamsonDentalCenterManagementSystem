@@ -3,9 +3,10 @@ using SamsonDentalCenterManagementSystem.Data;
 using Microsoft.AspNetCore.Mvc;
 using SamsonDentalCenterManagementSystem.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/profiles")]
 public class ProfileController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -42,18 +43,19 @@ public class ProfileController : ControllerBase
     }
 
     // Helper to avoid repeating the Claim lookup and DB query
-    private async Task<Profile?> GetCurrentProfileAsync()
+  private async Task<Profile?> GetCurrentProfileAsync()
+{
+    var userId = User.Identity?.Name;
+    if (string.IsNullOrEmpty(userId)) return null;
+
+    // Use FirstOrDefaultAsync to ensure we are matching the UserId column specifically
+    return await _db.Profiles.FirstOrDefaultAsync(p => p.Id == userId);
+}
+
+    public static implicit operator ProfileController?(Profile? v)
     {
-        // Supabase/JWT typically puts the UUID in the 'sub' or NameIdentifier claim
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId)) return null;
-
-        // Use the string ID to find the profile
-        return await _db.Profiles.FindAsync(userId);
+        throw new NotImplementedException();
     }
 
     
-
-       
 }

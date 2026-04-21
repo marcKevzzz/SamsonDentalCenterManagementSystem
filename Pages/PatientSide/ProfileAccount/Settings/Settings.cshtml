@@ -2,7 +2,35 @@
 @model SettingsModel
 @{
 ViewData["Title"] = "Settings page";
+var p = Model.UserProfile;
+var dob = p?.DateOfBirth?.ToString("yyyy-MM-dd") ?? "";
+var sex = p?.Sex ?? "";
+var sexOptions = new SelectList(new[]
+{
+new { Value = "", Text = "Select sex" },
+new { Value = "Male", Text = "Male" },
+new { Value = "Female", Text = "Female" },
+new { Value = "prefer_not", Text = "Prefer not to say" }
+}, "Value", "Text", sex);
+var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand";
 }
+
+
+@* JSON bridge for settings.js — matches your actual Profile columns *@
+<script id="user-data" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        id          = p?.Id          ?? "",
+        firstName   = p?.FirstName   ?? "",
+        lastName    = p?.LastName    ?? "",
+        email       = p?.Email       ?? "",
+        phoneNumber = p?.PhoneNumber ?? "",
+        dateOfBirth = p?.DateOfBirth?.ToString("yyyy-MM-dd") ?? "",
+        sex         = p?.Sex         ?? "",
+        address     = p?.Address     ?? "",
+        avatarUrl   = p?.AvatarUrl   ?? "",
+        role        = p?.Role        ?? "",
+    }))
+</script>
 
 <Section class="flex-1 min-w-0 fade-up">
   <div class="mb-6">
@@ -11,10 +39,7 @@ ViewData["Title"] = "Settings page";
         class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
         <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Account Settings
       </div>
-      <div class="ml-auto flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
-        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-        Patient since Jan 2024
-      </div>
+
     </div>
     <h1 class="font-extrabold text-3xl text-brand" style="font-family:'Syne',sans-serif">Your Profile</h1>
     <p class="text-muted text-sm mt-1">Manage your personal information, contact details, and security settings.</p>
@@ -48,10 +73,18 @@ ViewData["Title"] = "Settings page";
         Profile Picture</h3>
       <div class="flex items-center gap-6">
         <div class="relative flex-shrink-0">
+
           <div id="avatarCircle"
             class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center font-black text-2xl text-white border-[3px] border-white shadow-[0_0_0_2px_#e5e7eb] overflow-hidden"
             style="font-family:'Syne',sans-serif">
-            JD
+            @if (!string.IsNullOrEmpty(p?.AvatarUrl))
+            {
+            <img src="@p.AvatarUrl" class="w-full h-full object-cover" alt="avatar" />
+            }
+            else
+            {
+            @((p?.FirstName?[..1] ?? "") + (p?.LastName?[..1] ?? ""))
+            }
           </div>
           <button id="triggerAvatar"
             class="absolute bottom-0 right-0 w-6 h-6 bg-brand border-2 border-white rounded-full flex items-center justify-center hover:bg-accent transition-colors">
@@ -73,7 +106,7 @@ ViewData["Title"] = "Settings page";
               Upload Photo
             </button>
             <button id="removeBtn"
-              class="text-accent border-[1.5px] border-red-200 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+              class="text-accent border-[1.5px] border-red-200 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
               style="font-family:'Syne',sans-serif">
               Remove
             </button>
@@ -89,39 +122,29 @@ ViewData["Title"] = "Settings page";
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">First Name</label>
-          <input type="text" value="Juan" placeholder="e.g. Juan"
+          <input type="text" value="@p?.FirstName" placeholder="e.g. Juan" id="firstName"
             class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">Last Name</label>
-          <input type="text" value="Dela Cruz" placeholder="e.g. Dela Cruz"
+          <input type="text" value="@p?.LastName" placeholder="e.g. Dela Cruz" id="lastName"
             class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
         </div>
+        <!-- Date of Birth -->
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">Date of Birth</label>
-          <input type="date" value="1995-06-15"
+          <input type="date" value="@dob" id="dateOfBirth"
             class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
         </div>
+
+        <!-- Sex -->
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">Sex</label>
-          <select
-            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer">
-            <option value="">Select sex</option>
-            <option value="male" selected>Male</option>
-            <option value="female">Female</option>
-            <option value="prefer_not">Prefer not to say</option>
-          </select>
+          @Html.DropDownList("sex", sexOptions, new { id = "sex", @class = selectClass })
         </div>
       </div>
-      <div class="flex justify-end gap-2 mt-6">
-        <button
-          class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
-          style="font-family:'Syne',sans-serif">Cancel</button>
-        <button id="savePersonalInfo"
-          class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
-          style="font-family:'Syne',sans-serif">Save Changes</button>
-      </div>
     </div>
+
   </div>
 
   <!-- TAB: Contact & Address -->
@@ -133,13 +156,13 @@ ViewData["Title"] = "Settings page";
       <div class="space-y-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">Email Address</label>
-          <input type="email" value="juan@email.com" placeholder="your@email.com"
+          <input type="email" placeholder="your@email.com" id="email"
             class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
           <span class="text-xs text-gray-400">Changing your email will require re-verification.</span>
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">Contact Number</label>
-          <input type="tel" value="09123456789" placeholder="09XX XXX XXXX"
+          <input type="tel" value="@p?.PhoneNumber" placeholder="09XX XXX XXXX" id="contactNumber"
             class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
         </div>
       </div>
@@ -152,20 +175,26 @@ ViewData["Title"] = "Settings page";
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-semibold text-gray-600 tracking-wide">Complete Address</label>
           <textarea type="text" placeholder="House no., Street, Barangay, City/Municipality, Province, Zip Code"
-            style=" resize: none; " rows="3"
-            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300">123 Maharlika St., Brgy. Bagong Silang</textarea>
+            id="address" style=" resize: none; " rows="3"
+            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300">@p?.Address</textarea>
         </div>
 
       </div>
-      <div class="flex justify-end gap-2 mt-6">
-        <button
-          class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
-          style="font-family:'Syne',sans-serif">Cancel</button>
-        <button id="saveContactInfo"
-          class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
-          style="font-family:'Syne',sans-serif">Save Changes</button>
-      </div>
+
     </div>
+  </div>
+
+  <div class="flex justify-end gap-2 mt-6" id="grpBtn">
+    <button
+      class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
+      style="font-family:'Syne',sans-serif">
+      Cancel
+    </button>
+    <button id="saveAllInfo"
+      class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
+      style="font-family:'Syne',sans-serif">
+      Save Changes
+    </button>
   </div>
 
   <!-- TAB: Security -->
@@ -241,7 +270,7 @@ ViewData["Title"] = "Settings page";
       <p class="text-xs text-gray-400 mb-4">Permanently delete your account and all associated data. This action cannot
         be undone.</p>
       <button
-        class="border-[1.5px] border-red-300 text-accent font-bold text-xs px-4 py-2 rounded-lg hover:bg-accent hover:text-white transition-all"
+        class="border-[1.5px] border-red-300 text-accent font-bold text-xs px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all"
         style="font-family:'Syne',sans-serif">
         Delete Account
       </button>
@@ -249,5 +278,9 @@ ViewData["Title"] = "Settings page";
   </div>
 </Section>
 
+
+
+
+
 <script type="module" src="~/js/site.js"></script>
-<script type="module" src="~/js/PatientSide/settings.js"></script>
+<script src="~/js/PatientSide/settings.js" type="module"></script>

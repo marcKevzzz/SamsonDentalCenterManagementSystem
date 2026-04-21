@@ -47,8 +47,7 @@ namespace SamsonDental.ViewModels
         [Display(Name = "Phone Number")]
         public string Phone { get; set; } = "";
 
-        [Display(Name = "Patient Type")]
-        public string PatientType { get; set; } = "New Patient";
+      
 
         [Display(Name = "Additional Notes")]
         public string? Notes { get; set; }
