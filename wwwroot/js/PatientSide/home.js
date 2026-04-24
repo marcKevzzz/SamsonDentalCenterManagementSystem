@@ -326,17 +326,24 @@ function initReviewsScroll() {
             delay: 0.08,
             ease: "power3.inOut",
           },
-          onUpdate: (self) => {
-            const currentX = -gsap.getProperty(container, "x");
-            let closestIndex = 0;
-            let minDiff = Infinity;
-            cards.forEach((card, i) => {
-              const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-              const diff = Math.abs(currentX + viewportWidth / 2 - cardCenter);
-              if (diff < minDiff) { minDiff = diff; closestIndex = i; }
-            });
-            setActiveCard(closestIndex);
-          },
+         onUpdate: (self) => {
+  const p = self.progress;
+  
+  // Find which snap point we are mathematically closest to based on scroll progress
+  let closestIndex = 0;
+  let minDiff = Infinity;
+  
+  snapPoints.forEach((point, i) => {
+    const diff = Math.abs(point - p);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestIndex = i;
+    }
+  });
+
+  // This will fire instantly as you scroll, regardless of scrub lag
+  setActiveCard(closestIndex);
+},
         },
       });
     }
