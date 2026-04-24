@@ -29,21 +29,7 @@
                 <input id="mEmail" type="email" placeholder="user@email.com"
                     class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
             </div>
-            <div id="mPasswordGroup" class="flex flex-col gap-1.5 ">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Password</label>
-                <div class="relative flex flex-col">
-                    <input id="mPassword" type="password" placeholder="Min. 8 characters"
-                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
 
-                    <button data-target="mPassword"
-                        class="pw-toggle absolute right-3 top-1/2 translate-half text-gray-400 hover:text-brand transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2" />
-                            <circle cx="12" cy="12" r="3" stroke-width="2" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Date of Birth</label>
@@ -61,28 +47,27 @@
                     </select>
                 </div>
             </div>
-            <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Phone Number</label>
-                <input id="mPhone" type="tel" placeholder="09XX XXX XXXX"
-                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
-            </div>
-            <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Address</label>
-                <input id="mAddress" type="text" placeholder="Complete address"
-                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
-            </div>
             <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Phone Number</label>
+                    <input id="mPhone" type="tel" placeholder="09XX XXX XXXX"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Role</label>
                     <select id="mRole"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
                         <option value="patient">Patient</option>
                         <option value="admin">Admin</option>
-                        <option value="staff">Doctor</option>
-                        <option value="staff">Receptionist</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="receptionist">Receptionist</option>
                     </select>
                 </div>
-              
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Address</label>
+                <input id="mAddress" type="text" placeholder="Complete address"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
             </div>
             <p id="modalError" class="hidden text-[12px] text-red-500 font-medium"></p>
         </div>

@@ -138,7 +138,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? Recovery { get; set; }
 
         [Column("price")]
-        public string Price { get; set; } = string.Empty;
+        public decimal Price { get; set; }
 
         // ← Store as object to let the Supabase client handle JSONB natively
         [Column("benefits")]

@@ -128,6 +128,7 @@ export function signIn(user) {
 }
 
 export function signOut(e) {
+  e?.preventDefault();
   Modal.open({
     title: "Confirm Sign Out",
     message: "Are you sure you want to sign out?",
@@ -155,7 +156,7 @@ export function initProfile() {
   // Sign out button
   document
     .getElementById("signOutBtn")
-    ?.addEventListener("click", () => signOut());
+    ?.addEventListener("click", (e) => signOut(e));
 
   // Close on outside click
   window.addEventListener("click", (e) => {

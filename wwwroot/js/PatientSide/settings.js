@@ -184,10 +184,11 @@ async function savePasswordHandler() {
   const btn = document.getElementById("savePassword");
   const original = btn.textContent;
 
+  const currentPw = document.getElementById("currentPw").value;
   const newPw = document.getElementById("newPw").value;
   const confirmPw = document.getElementById("confirmPw").value;
 
-  if (!newPw || !confirmPw) {
+  if (!currentPw || !newPw || !confirmPw) {
     Toast.show("Please fill in all password fields.", "warning");
     return;
   }
@@ -214,6 +215,7 @@ async function savePasswordHandler() {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            currentPassword: currentPw,
             newPassword: newPw,
             confirmPassword: confirmPw,
           }),
@@ -276,6 +278,18 @@ async function saveAllInfo() {
     type: "info",
     onConfirm: async () => {
       try {
+        const dob = document.getElementById("dateOfBirth").value;
+        if (dob) {
+          const date = new Date(dob);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (date > today) {
+            Toast.show("Birthday cannot be in the future.", "warning");
+            btn.disabled = false;
+            return;
+          }
+        }
+
         const res = await fetch("/api/settings/update-profile", {
           method: "PUT",
           credentials: "include",

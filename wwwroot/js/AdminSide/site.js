@@ -42,9 +42,10 @@ const pageTitles = {
   users: ["Users", "People · User Management"],
   appointments: ["Appointments", "Operations · Schedule"],
   services: ["Services", "Operations · Catalog"],
+  transactions: ["Transactions", "Operations · Billing"],
   reports: ["Reports", "Analytics · Insights"],
   inquiries: ["Inquiries", "Analytics · Messages"],
-  activitylogs: ["Activity Logs", "Analytics · Audit Trail"], // Match the URL slug
+  activitylogs: ["Activity Logs", "Analytics · Audit Trail"],
 };
 
 function UpdateSidebar() {
@@ -56,7 +57,7 @@ function UpdateSidebar() {
     document.getElementById(id)?.classList.add("active");
   }
 
-  if (currentPath === "/admin" || currentPath === "/admin/dashboard") {
+  if (currentPath === "/admin" || currentPath === "/admin/dashboard" || currentPath === "/doctor/dashboard") {
     setActive("admin-dashboard");
   } else if (currentPath.startsWith("/admin/patients")) {
     setActive("admin-patients");
@@ -67,18 +68,23 @@ function UpdateSidebar() {
   } else if (currentPath.startsWith("/admin/appointments")) {
     setActive("admin-appointments");
   } else if (currentPath.startsWith("/admin/services")) {
-    setActive("admin-services");
+    setActive("admin-services-link");
+  } else if (currentPath.startsWith("/admin/transactions")) {
+    setActive("admin-transactions");
   } else if (currentPath.startsWith("/admin/reports")) {
     setActive("admin-reports");
   } else if (currentPath.startsWith("/admin/inquiries")) {
     setActive("admin-inquiries");
-  } else if (currentPath.startsWith("/admin/activitylogs")) {
+  } else if (currentPath.startsWith("/admin/activitylogs") || currentPath.startsWith("/receptionist/activitylogs")) {
     setActive("admin-activitylogs");
+  } else if (currentPath.startsWith("/admin/staff")) {
+    setActive("admin-doctors"); // Keep ID for active state matching
   }
   updateHeader(currentPath.split("/").pop() || "dashboard");
 }
 
 UpdateSidebar();
+
 
 function updateHeader(pageId) {
   const t = pageTitles[pageId] || [

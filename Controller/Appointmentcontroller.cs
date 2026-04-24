@@ -28,11 +28,10 @@ public class AppointmentsController : ControllerBase
         return Ok(doctors.Select(d => new
         {
             id          = d.Id,
-            doctorName        = d.DoctorName,
+            doctorName  = d.Profile != null ? $"{d.Title} {d.Profile.FirstName} {d.Profile.LastName}" : "Unknown",
             title       = d.Title,
             specialties = d.Specialties,
-            bio         = d.Bio,
-            avatarUrl   = d.AvatarUrl
+            bio         = d.Bio
         }));
     }
 
@@ -144,7 +143,7 @@ public class AppointmentsController : ControllerBase
         {
             id          = a.Id,
             serviceName = a.ServiceName,
-            doctorName  = a.DoctorName,
+            doctorName  = a.Doctor?.Profile != null ? $"{a.Doctor.Title} {a.Doctor.Profile.FirstName} {a.Doctor.Profile.LastName}" : null,
             date        = a.AppointmentDate.ToString("yyyy-MM-dd"),
             time        = a.AppointmentTime,
             emailStatus      = a.EmailStatus,
@@ -169,7 +168,7 @@ public class AppointmentsController : ControllerBase
             {
                 id          = appt.Id,
                 serviceName = appt.ServiceName,
-                doctorName  = appt.DoctorName,
+                doctorName  = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
                 date        = appt.AppointmentDate.ToString("yyyy-MM-dd"),
                 time        = appt.AppointmentTime,
                 emailStatus      = appt.EmailStatus,

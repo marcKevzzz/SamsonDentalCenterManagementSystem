@@ -16,8 +16,8 @@ tailwind.config = {
 };
 
 window.COLORS = {
-  primary: "#c0392b", // Red accent (buttons, badges, hover)
-  dark: "#0f1117", // Dark backgrounds, footer, nav scrolled
+  primary: "#1E40AF", // Red accent (buttons, badges, hover)
+  dark: "#0F172A", // Dark backgrounds, footer, nav scrolled
   darkNavBg: "rgba(15,17,23,0.92)", // Navbar bg after scroll
   white: "#ffffff",
   offwhite: "#f5f5f7", // Section bg, card bg

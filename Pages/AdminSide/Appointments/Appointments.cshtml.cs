@@ -5,12 +5,10 @@ using SamsonDentalCenterManagementSystem.Services;
 using SamsonDentalCenterManagementSystem.Helpers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace SamsonDentalCenterManagementSystem.Pages.Admin; // This must match the @namespace above
+namespace SamsonDentalCenterManagementSystem.Pages.Admin;
 
-// Add this to allow AJAX POSTs without manual token management in every fetch call
-[Authorize]
 [IgnoreAntiforgeryToken]
-public class AdminAppointmentsModel : PageModel
+public class AdminAppointmentsModel : AdminPageModel
 {
     private readonly AppointmentService _appointments;
     private readonly DentalServiceService _services;
@@ -21,7 +19,9 @@ public class AdminAppointmentsModel : PageModel
         AppointmentService appointments,
         DentalServiceService services,
         ILogger<AdminAppointmentsModel> logger,
-        SessionHelper sessionHelper)
+        SessionHelper sessionHelper,
+        ProfileService profileService)
+        : base(profileService)
     {
         _appointments = appointments;
         _services     = services;
@@ -33,7 +33,6 @@ public class AdminAppointmentsModel : PageModel
     public List<Doctor>         Doctors      { get; set; } = new();
     public List<DentalService>  Services     { get; set; } = new();
 
-    // Use string.Equals to avoid case-sensitivity bugs (e.g., "Confirmed" vs "confirmed")
     public int CountConfirmed => Appointments.Count(a => string.Equals(a.Status, "confirmed", StringComparison.OrdinalIgnoreCase));
     public int CountPending   => Appointments.Count(a => string.Equals(a.Status, "pending", StringComparison.OrdinalIgnoreCase));
     public int CountCancelled => Appointments.Count(a => string.Equals(a.Status, "cancelled", StringComparison.OrdinalIgnoreCase));
@@ -41,19 +40,16 @@ public class AdminAppointmentsModel : PageModel
 
    public async Task<IActionResult> OnGetAsync()
     {
-
         var token = await _sessionHelper.GetValidTokenAsync();
         
         if (token == null)
         {
-            // If the token is dead and couldn't be refreshed, boot them to sign-in
             return RedirectToPage("/Sign-in");
         }
 
         try
         {
             var res = await _appointments.GetAllAsync();
-            // Sort by date, then by time if available
             Appointments = res.OrderByDescending(a => a.AppointmentDate).ToList();
         }
         catch (Exception ex)
@@ -67,7 +63,6 @@ public class AdminAppointmentsModel : PageModel
         try { Services = await _services.GetAll(); }
         catch (Exception ex) { _logger.LogError(ex, "Failed to load services"); }
         return Page();
-        
     }
 
     public async Task<IActionResult> OnPostBookAsync([FromBody] AppointmentPayload payload)
@@ -75,7 +70,6 @@ public class AdminAppointmentsModel : PageModel
         try
         {
             if (payload == null) return new JsonResult(new { ok = false, error = "Invalid data" });
-            
             var appt = await _appointments.Create(payload);
             return new JsonResult(new { ok = true, id = appt.Id });
         }
@@ -132,12 +126,10 @@ public class AdminAppointmentsModel : PageModel
     {
         try
         {
-            // Use TryParse or explicit format to handle JS date strings reliably
             if (!DateTime.TryParse(req.Date, out var date))
             {
                 return new JsonResult(new { ok = false, error = "Invalid date format" });
             }
-
             var avail = await _appointments.GetAvailability(req.Category, date);
             return new JsonResult(new { ok = true, slots = avail });
         }

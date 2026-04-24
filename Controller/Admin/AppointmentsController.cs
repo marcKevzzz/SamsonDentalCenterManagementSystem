@@ -1,9 +1,12 @@
 // ── Controllers/AdminAppointmentsController.cs ───────────────────────────────
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SamsonDentalCenterManagementSystem.Services;
 
 namespace SamsonDentalCenterManagementSystem.Controllers;
 
+[Authorize(Policy = "StaffOnly")]
+[IgnoreAntiforgeryToken]
 [ApiController]
 [Route("api/admin/appointments")]
 public class AdminAppointmentsController : ControllerBase
@@ -41,7 +44,7 @@ public class AdminAppointmentsController : ControllerBase
     {
         try
         {
-            await _appointments.UpdateStatus(req.Id, req.Status);
+            await _appointments.UpdateStatus(req.Id, req.Status, req.DoctorId);
             return Ok(new { ok = true });
         }
         catch (Exception ex)
@@ -84,7 +87,22 @@ public class AdminAppointmentsController : ControllerBase
     }
 
     // ── DTOs ──────────────────────────────────────────────────────────────────
-    public record UpdateStatusRequest(string Id, string Status);
-    public record RescheduleRequest(string Id, DateTime NewDate, string NewTime, string? DoctorId);
-    public record SlotRequest(string ServiceId, string Category, string Date);
+    public record UpdateStatusRequest(
+        [property: System.Text.Json.Serialization.JsonPropertyName("id")] string Id, 
+        [property: System.Text.Json.Serialization.JsonPropertyName("status")] string Status,
+        [property: System.Text.Json.Serialization.JsonPropertyName("doctorId")] string? DoctorId = null
+    );
+
+    public record RescheduleRequest(
+        [property: System.Text.Json.Serialization.JsonPropertyName("id")] string Id, 
+        [property: System.Text.Json.Serialization.JsonPropertyName("newDate")] DateTime NewDate, 
+        [property: System.Text.Json.Serialization.JsonPropertyName("newTime")] string NewTime, 
+        [property: System.Text.Json.Serialization.JsonPropertyName("doctorId")] string? DoctorId = null
+    );
+
+    public record SlotRequest(
+        [property: System.Text.Json.Serialization.JsonPropertyName("serviceId")] string ServiceId, 
+        [property: System.Text.Json.Serialization.JsonPropertyName("category")] string Category, 
+        [property: System.Text.Json.Serialization.JsonPropertyName("date")] string Date
+    );
 }

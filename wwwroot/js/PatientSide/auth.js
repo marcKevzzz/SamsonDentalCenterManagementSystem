@@ -9,7 +9,17 @@ const STEPS = {
     fields: [
       { id: "su_fn", validate: (v) => !!v, msg: "First name is required." },
       { id: "su_ln", validate: (v) => !!v, msg: "Last name is required." },
-      { id: "su_dob", validate: (v) => !!v, msg: "Date of birth is required." },
+      { 
+        id: "su_dob", 
+        validate: (v) => {
+          if (!v) return false;
+          const date = new Date(v);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Only compare dates
+          return date <= today;
+        }, 
+        msg: "Birthday cannot be in the future." 
+      },
       { id: "su_sex", validate: (v) => !!v, msg: "Please select your sex." },
     ],
   },
@@ -25,7 +35,7 @@ const STEPS = {
       {
         id: "su_phone",
         validate: (v) => /^(09|\+639|639)\d{9}$/.test(v.replace(/\s/g, "")),
-        msg: "Phone number is required.",
+        msg: "Please enter a valid PH phone number (e.g. 09123456789).",
       },
     ],
   },
@@ -251,7 +261,10 @@ async function handleSignIn() {
     if (!email) showErr("si_email", "Email is required.");
     if (!password) showErr("si_pw", "Password is required.");
     return;
-  }
+  } 
+   else if (password.length < 8){
+    showErr("si_pw", "Password must be at least 8 characters.")
+   }
 
   // 1. UI Loading State
   const originalBtnText = signinBtn.innerHTML;
@@ -289,18 +302,35 @@ async function handleSignIn() {
       if (result.user) {
         signIn(result.user);
       }
-      console.log(result);
       Toast.show("Welcome back!", "success");
       setTimeout(() => {
-        if (result.user && result.user.role === "admin") {
-          window.location.href = "/Admin/Dashboard";
+        const staffRoles = ["admin", "doctor", "receptionist"];
+        if (result.user && staffRoles.includes(result.user.role)) {
+          if (result.user.role === "doctor") {
+            window.location.href = "/Doctor/Dashboard";
+          } else if (result.user.role === "receptionist") {
+            window.location.href = "/Receptionist/Dashboard";
+          } else {
+            window.location.href = "/Admin/Dashboard";
+          }
         } else {
           window.location.href = "/"; // Go to site root
         }
       }, 2000);
     } else {
       // 4. Handle Errors (Show a toast or label)
-      Toast.show(result.errors[0] || "Login failed", "danger");
+      const errorMsg = result.errors[0] || "Login failed";
+      
+      if (errorMsg === "This email is not registered.") {
+        showErr("si_email", "");
+      } else if (errorMsg === "Incorrect password.") {
+        showErr("si_pw", "");
+      } else if (errorMsg === "Invalid email or password.") {
+        showErr("si_email", "");
+        showErr("si_pw", "");
+      }
+      
+      Toast.show(errorMsg, "danger");
       resetBtn(signinBtn, originalBtnText);
     }
   } catch (err) {

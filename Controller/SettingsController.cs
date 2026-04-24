@@ -11,10 +11,12 @@ namespace SamsonDentalCenterManagementSystem.Controllers;
 public class SettingsController : ControllerBase
 {
     private readonly ProfileService _profileService;
+    private readonly Supabase.Client _supabase;
 
-    public SettingsController(ProfileService profileService)
+    public SettingsController(ProfileService profileService, Supabase.Client supabase)
     {
         _profileService = profileService;
+        _supabase = supabase;
     }
 
     [HttpPost("upload-avatar")]
@@ -108,6 +110,21 @@ public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest
 
     try
     {
+        // 1. Verify Current Password
+        var email = User.FindFirst("email")?.Value;
+        if (string.IsNullOrEmpty(email))
+            return Unauthorized(new { ok = false, error = "User email not found." });
+
+        if (string.IsNullOrWhiteSpace(req.CurrentPassword))
+            return BadRequest(new { ok = false, error = "Current password is required." });
+
+        try {
+            await _supabase.Auth.SignIn(email, req.CurrentPassword);
+        } catch (Exception) {
+            return BadRequest(new { ok = false, error = "Current password mismatch." });
+        }
+
+        // 2. Update to New Password
         await _profileService.UpdateUserPassword(userId, req.NewPassword);
         return Ok(new { ok = true });
     }
@@ -127,6 +144,7 @@ public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest
 
 public class UpdatePasswordRequest
 {
+    public string? CurrentPassword { get; set; }
     public string? NewPassword     { get; set; }
     public string? ConfirmPassword { get; set; }
 }

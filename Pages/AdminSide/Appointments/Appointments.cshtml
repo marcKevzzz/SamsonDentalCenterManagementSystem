@@ -2,10 +2,10 @@
 @namespace SamsonDentalCenterManagementSystem.Pages.Admin
 @model AdminAppointmentsModel
 @{
-Layout = "AdminSide/_AdminLayout";
+Layout = "AdminSide/_StaffLayout";
 }
 <!-- ── APPOINTMENTS ── -->
-<div id="page-appointments" class="page p-4 md:p-6">
+<div id="page-appointments" class="page p-4 md:p-6 relative">
 
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -25,53 +25,90 @@ Layout = "AdminSide/_AdminLayout";
   </div>
 
   <!-- Stats -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
-      <div class="font-display text-2xl font-extrabold text-primary">@Model.CountConfirmed</div>
-      <div class="text-[10.5px] text-brand-400 mt-0.5">Confirmed</div>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="stat-card stat-teal relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+           <i class="fa-solid fa-calendar-check text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountConfirmed</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Confirmed</div>
     </div>
-    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
-      <div class="font-display text-2xl font-extrabold text-amber-500">@Model.CountPending</div>
-      <div class="text-[10.5px] text-brand-400 mt-0.5">Pending</div>
+
+    <div class="stat-card stat-blue relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+           <i class="fa-solid fa-clock text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountPending</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Pending</div>
     </div>
-    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
-      <div class="font-display text-2xl font-extrabold text-accent">@Model.CountCancelled</div>
-      <div class="text-[10.5px] text-brand-400 mt-0.5">Cancelled</div>
+
+    <div class="stat-card stat-purple relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+           <i class="fa-solid fa-list-ul text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountWaitlist</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Waitlist</div>
     </div>
-    <div class="bg-white rounded-xl p-3 text-center border border-slate-200">
-      <div class="font-display text-2xl font-extrabold text-slate-400">@Model.CountWaitlist</div>
-      <div class="text-[10.5px] text-brand-400 mt-0.5">Waitlist</div>
+
+    <div class="stat-card stat-red relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-accent">
+           <i class="fa-solid fa-calendar-xmark text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountCancelled</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Cancelled</div>
     </div>
   </div>
 
   <!-- Filter bar -->
-  <div class="flex flex-wrap gap-2 mb-4">
-    <input id="search-input" type="text" placeholder="Search patient, doctor, service…"
-      oninput="filterTable()"
-      class="flex-1 min-w-[180px] text-[12px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-    <select id="status-filter" onchange="filterTable()"
-      class="text-[12px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-      <option value="">All Statuses</option>
-      <option value="confirmed">Confirmed</option>
-      <option value="pending">Pending</option>
-      <option value="cancelled">Cancelled</option>
-      <option value="waitlist">Waitlist</option>
-    </select>
+  <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 ">
+    <div class="relative flex-1 min-w-[240px]">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-brand-300 text-[11px]"></i>
+      <input id="search-input" type="text" placeholder="Search by patient name, doctor, or service…"
+        oninput="filterTable()"
+        class="w-full text-[12px] pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white" />
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Date:</span>
+      <input id="date-filter" type="date" onchange="filterTable()"
+        class="text-[12px] px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" />
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Status:</span>
+      <select id="status-filter" onchange="filterTable()"
+        class="text-[12px] px-4 md:px-8 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white min-w-[140px]">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending Approval</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="arrived">Arrived (In-Queue)</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="waitlist">On Waitlist</option>
+      </select>
+    </div>
   </div>
 
   <!-- Table -->
   <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full min-w-[640px]" id="appointments-table">
-        <thead class="bg-slate-50">
+        <thead class="bg-slate-50/50">
           <tr>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">ID</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Patient</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Doctor</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Service</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Date &amp; Time</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Status</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Actions</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Ref ID</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Patient</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Service & Doctor</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Schedule</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Status</th>
+            <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Workflow Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="appointments-body">
@@ -87,16 +124,16 @@ Layout = "AdminSide/_AdminLayout";
           {
             var shortId = "#APT-" + appt.Id[..4].ToUpper();
             var dateStr = appt.AppointmentDate.ToString("MMM dd") + " · " + appt.AppointmentTime;
-            var (badgeClasses, statusLabel) = appt.EmailStatus.ToLower() switch
+            var (badgeClasses, statusLabel) = appt.Status.ToLower() switch
             {
-              "confirmed" => ("bg-emerald-100 text-emerald-700", "Confirmed"),
-              "pending"   => ("bg-orange-100 text-orange-700",  "Pending"),
-              "arrived"   => ("bg-yellow-100 text-yellow-700",  "Arrived"),
-              "completed" => ("bg-blue-100 text-blue-700",      "Completed"),
-              "no-show"   => ("bg-slate-100 text-slate-600",    "No-Show"),
-              "cancelled" => ("bg-red-100 text-red-700",        "Cancelled"),
-              "waitlist"  => ("bg-slate-100 text-slate-600",    "Waitlist"),
-              _           => ("bg-slate-100 text-slate-600",    appt.EmailStatus)
+              "confirmed" => ("bg-emerald-50 text-emerald-600 border-emerald-100", "Confirmed"),
+              "pending"   => ("bg-blue-50 text-blue-600 border-blue-100",  "Pending"),
+              "arrived"   => ("bg-amber-50 text-amber-600 border-amber-100",  "Arrived"),
+              "completed" => ("bg-slate-50 text-slate-600 border-slate-100",      "Completed"),
+              "no_show"   => ("bg-red-50 text-red-600 border-red-100",    "No-Show"),
+              "cancelled" => ("bg-red-50 text-red-600 border-red-100",        "Cancelled"),
+              "waitlist"  => ("bg-purple-50 text-purple-600 border-purple-100",    "Waitlist"),
+              _           => ("bg-slate-50 text-slate-600 border-slate-100",    appt.Status)
             };
 
             // Serialize appointment to JSON for JS
@@ -105,33 +142,80 @@ Layout = "AdminSide/_AdminLayout";
               patientName     = appt.PatientName,
               patientEmail    = appt.PatientEmail,
               patientPhone    = appt.PatientPhone,
-              doctorId        = appt.DoctorId,
-              doctorName      = appt.DoctorName,
+              doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
               serviceName     = appt.ServiceName,
               serviceId       = appt.ServiceId,
               serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
               appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd"),
               appointmentTime = appt.AppointmentTime,
               status          = appt.Status,
-              emailStatus          = appt.EmailStatus,
               notes           = appt.Notes
             });
 
-            <tr data-status="@appt.EmailStatus" data-search="@(appt.PatientName + appt.DoctorName + appt.ServiceName)">
-              <td class="px-4 py-3 text-[10.5px] text-brand-400">@shortId</td>
-              <td class="px-4 py-3">
-                <div class="text-[13px] font-medium">@appt.PatientName</div>
-                <div class="text-[10.5px] text-brand-400">@appt.PatientEmail</div>
+            <tr class="group hover:bg-slate-50/80 transition-colors" 
+            data-status="@appt.Status" 
+            data-date="@appt.AppointmentDate.ToString("yyyy-MM-dd")"
+            data-search="@(appt.PatientName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
+              <td class="px-4 py-4">
+                <span class="text-[10px] font-bold text-brand-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">@shortId</span>
               </td>
-              <td class="px-4 py-3 text-[12.5px] text-brand-500">@(appt.DoctorName ?? "—")</td>
-              <td class="px-4 py-3 text-[12.5px]">@appt.ServiceName</td>
-              <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">@dateStr</td>
-              <td class="px-4 py-3">
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full @badgeClasses font-display">
+              <td class="px-4 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
+                    @(appt.PatientName[..1])
+                  </div>
+                  <div>
+                    <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
+                    <div class="text-[10.5px] text-brand-400">@appt.PatientEmail</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="text-[12.5px] font-medium text-brand-800">@appt.ServiceName</div>
+                <div class="text-[11px] text-brand-400">
+                  <i class="fa-solid fa-user-doctor text-[9px] mr-1"></i>
+                  @(appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned")
+                </div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentDate.ToString("MMM dd")</div>
+                <div class="text-[11px] text-brand-400">@appt.AppointmentTime</div>
+              </td>
+              <td class="px-4 py-4 text-center">
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
                   @statusLabel
                 </span>
               </td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-4 py-4 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2">
+                  <!-- Context-Aware Workflow Button -->
+                  @if (appt.Status == "pending")
+                  {
+                    <button onclick='confirmAppt(@Html.Raw(apptJson))' 
+                            class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">
+                      Confirm
+                    </button>
+                  }
+                  else if (appt.Status == "confirmed")
+                  {
+                    <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
+                            class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">
+                      Check-In
+                    </button>
+                  }
+                  else if (appt.Status == "arrived")
+                  {
+                    <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
+                            class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">
+                      Checkout
+                    </button>
+                  }
+                  else if (appt.Status == "waitlist")
+                  {
+                    <button class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-bold hover:bg-purple-700 transition-colors shadow-sm">
+                      Promote
+                    </button>
+                  }
   <div class=" inline-block text-left action-dropdown ">
     <button onclick="toggleDropdown(event, this)" 
             class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
@@ -140,61 +224,63 @@ Layout = "AdminSide/_AdminLayout";
 
     <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-50 overflow-hidden">
       <div class="py-1">
-        @if (appt.EmailStatus == "pending")
+        @if (appt.Status == "pending")
         {
           <button onclick='confirmAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-emerald-600 hover:bg-emerald-50 flex items-center gap-2">
-            <i class="fa-solid fa-check w-4"></i> Confirm
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-check-circle w-4"></i> Confirm Booking
           </button>
         }
 
-        @if (appt.EmailStatus == "confirmed")
+        @if (appt.Status == "confirmed")
         {
           <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-yellow-600 hover:bg-yellow-50 flex items-center gap-2">
-            <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Arrived
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
           </button>
         }
 
-        @if (appt.EmailStatus is "confirmed" or "arrived")
+        @if (appt.Status is "confirmed" or "arrived")
         {
           <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-blue-600 hover:bg-blue-50 flex items-center gap-2">
-            <i class="fa-solid fa-circle-check w-4"></i> Complete
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
           </button>
           
-          <button onclick='updateStatus(@Html.Raw(apptJson), "no-show")' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-slate-500 hover:bg-slate-50 flex items-center gap-2">
-            <i class="fa-solid fa-user-slash w-4"></i> No-Show
+          <button onclick='updateStatus(@Html.Raw(apptJson), "no_show")' 
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
           </button>
         }
         
-        @if (appt.EmailStatus is "confirmed" or "pending" or "arrived")
+        <div class="h-px bg-slate-100 my-1"></div>
+
+        @if (appt.Status is "confirmed" or "pending" or "arrived")
         {
           <button onclick='openEditModal(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-brand-600 hover:bg-slate-50 flex items-center gap-2">
-            <i class="fa-solid fa-pen-to-square w-4"></i> Edit
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-rotate w-4"></i> Reschedule
           </button>
           
           <button onclick='cancelAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-accent hover:bg-red-50 flex items-center gap-2">
-            <i class="fa-solid fa-xmark w-4"></i> Cancel
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-ban w-4"></i> Cancel
           </button>
         }
 
-        @if (appt.EmailStatus is "cancelled" or "no-show")
+        @if (appt.Status is "cancelled" or "no-show" or "completed")
         {
-          <button onclick='openRescheduleModal(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-primary hover:bg-blue-50 flex items-center gap-2">
-            <i class="fa-solid fa-calendar-days w-4"></i> Reschedule
+          <button onclick='openBookModal()' 
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-plus w-4"></i> Book Again
           </button>
         }
 
-        @if (appt.EmailStatus is "waitlist" or "no-show" or "cancelled" or "completed")
+        @if (appt.Status is "waitlist" or "no-show" or "cancelled" or "completed")
         {
           <button onclick='deleteAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2 text-[12px] text-red-600 hover:bg-red-50 flex items-center gap-2">
-            <i class="fa-solid fa-trash-can w-4"></i> Remove
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-trash-can w-4"></i> Remove Record
           </button>
         }
       </div>
@@ -209,155 +295,196 @@ Layout = "AdminSide/_AdminLayout";
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════════════════ -->
-<!-- BOOK APPOINTMENT MODAL                                                    -->
-<!-- ══════════════════════════════════════════════════════════════════════════ -->
+
 <div id="book-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeBookModal()"></div>
+  <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeBookModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="book-modal-box"
-      class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto pointer-events-auto
-             transform scale-95 opacity-0 transition-all duration-300">
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden pointer-events-auto
+             transform scale-95 opacity-0 transition-all duration-300 flex flex-col">
 
-      <div class="flex items-center justify-between p-5 border-b border-slate-100">
-        <h3 class="font-display font-extrabold text-[15px] text-brand-900">Book Appointment</h3>
-        <button onclick="closeBookModal()" class="text-brand-400 hover:text-brand-600">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <!-- Modal Header -->
+      <div class="relative h-32 bg-brand-900 flex items-center px-8 shrink-0 overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <div class="relative z-10">
+          <h3 class="font-display font-extrabold text-white text-2xl tracking-tight">Book Appointment</h3>
+          <p class="text-white/50 text-[11px] font-bold uppercase tracking-[0.2em] mt-1">Manual Schedule Entry</p>
+        </div>
+        <button onclick="closeBookModal()" class="absolute top-6 right-6 text-white/30 hover:text-white transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <div class="p-5 space-y-4">
-        <!-- Patient info -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2">
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">Patient Name *</label>
-            <input id="book-patient-name" type="text" placeholder="Full name"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+      <!-- Modal Body -->
+      <div class="p-8 space-y-6 overflow-y-auto">
+        
+        <!-- Section: Patient Details -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Patient Information</h4>
           </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">Email *</label>
-            <input id="book-patient-email" type="email" placeholder="email@example.com"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">Phone</label>
-            <input id="book-patient-phone" type="tel" placeholder="+63 9XX XXX XXXX"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-        </div>
-
-        <!-- Service -->
-        <div>
-          <label class="block text-[11px] font-semibold text-brand-500 mb-1">Service *</label>
-          <select id="book-service"
-            class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-            <option value="">Select a service</option>
-            @foreach (var svc in Model.Services)
-            {
-              <option value="@svc.Id" data-name="@svc.Name" data-category="@svc.Category">@svc.Name</option>
-            }
-          </select>
-        </div>
-
-        <!-- Doctor -->
-        <div>
-          <label class="block text-[11px] font-semibold text-brand-500 mb-1">Doctor</label>
-          <select id="book-doctor"
-            class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-            <option value="">Any available doctor</option>
-            @foreach (var doc in Model.Doctors)
-            {
-              <option value="@doc.Id" data-name="@doc.DoctorName" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@doc.DoctorName</option>
-            }
-          </select>
-        </div>
-
-        <!-- Date & Time -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">Date *</label>
-            <input id="book-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">Time *</label>
-            <select id="book-time"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option value="">Select time</option>
-              @foreach (var slot in SamsonDentalCenterManagementSystem.Services.AppointmentService.ALL_SLOTS)
-              {
-                <option value="@slot">@slot</option>
-              }
-            </select>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Full Name *</label>
+              <div class="relative">
+                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <input id="book-patient-name" type="text" placeholder="e.g. Juan Dela Cruz"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Email Address *</label>
+              <div class="relative">
+                <i class="fa-solid fa-envelope absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <input id="book-patient-email" type="email" placeholder="patient@example.com"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Phone Number</label>
+              <div class="relative">
+                <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <input id="book-patient-phone" type="tel" placeholder="+63 9XX XXX XXXX"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Notes -->
-        <div>
-          <label class="block text-[11px] font-semibold text-brand-500 mb-1">Notes</label>
-          <textarea id="book-notes" rows="2" placeholder="Additional notes…"
-            class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"></textarea>
+        <!-- Section: Service & Provider -->
+        <div class="space-y-4 pt-2">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Treatment Details</h4>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Select Service *</label>
+              <div class="relative">
+                <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <select id="book-service"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  <option value="">Choose a service…</option>
+                  @foreach (var svc in Model.Services)
+                  {
+                    <option value="@svc.Id" data-name="@svc.Name" data-category="@svc.Category">@svc.Name</option>
+                  }
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Assign Doctor</label>
+              <div class="relative">
+                <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <select id="book-doctor"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  <option value="">Any available specialist</option>
+                  @foreach (var doc in Model.Doctors)
+                  {
+                    <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
+                  }
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Appointment Date *</label>
+              <div class="relative">
+                <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <input id="book-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Preferred Time *</label>
+              <div class="relative">
+                <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <select id="book-time"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  <option value="">Select slot…</option>
+                  @foreach (var slot in SamsonDentalCenterManagementSystem.Services.AppointmentService.ALL_SLOTS)
+                  {
+                    <option value="@slot">@slot</option>
+                  }
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Notes -->
+        <div class="pt-2">
+          <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Additional Notes</label>
+          <textarea id="book-notes" rows="3" placeholder="Symptoms, preferences, or medical history notes…"
+            class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 p-5 border-t border-slate-100">
-        <button onclick="closeBookModal()"
-          class="px-4 py-2 text-[12.5px] rounded-xl border border-slate-200 text-brand-500 hover:bg-slate-50">
-          Cancel
-        </button>
-        <button onclick="submitBook()"
-          class="px-4 py-2 text-[12.5px] rounded-xl bg-primary text-white font-semibold shadow-md shadow-primary/25 hover:opacity-90">
-          Book Appointment
-        </button>
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between p-6 bg-slate-50 border-t border-slate-100 shrink-0">
+        <p class="text-[10px] text-brand-400 italic">* Required fields for booking</p>
+        <div class="flex gap-3">
+          <button onclick="closeBookModal()"
+            class="px-6 py-2.5 text-[12px] font-bold rounded-xl text-brand-500 hover:text-brand-900 transition-colors">
+            Cancel
+          </button>
+          <button onclick="submitBook()"
+            class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand-900 text-white shadow-xl shadow-brand-900/20 hover:opacity-90 transition-all active:scale-95">
+            Create Appointment
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════════════════ -->
-<!-- EDIT / RESCHEDULE MODAL                                                   -->
-<!-- ══════════════════════════════════════════════════════════════════════════ -->
+
 <div id="edit-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeEditModal()"></div>
+  <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeEditModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="edit-modal-box"
-      class="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto
-             transform scale-95 opacity-0 transition-all duration-300">
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto
+             transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
 
-      <div class="flex items-center justify-between p-5 border-b border-slate-100">
-        <h3 id="edit-modal-title" class="font-display font-extrabold text-[15px] text-brand-900">Edit Appointment</h3>
-        <button onclick="closeEditModal()" class="text-brand-400 hover:text-brand-600">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+      <div class="p-6 border-b border-slate-100">
+        <h3 id="edit-modal-title" class="font-display font-extrabold text-xl text-brand-900">Reschedule Appointment</h3>
+        <p class="text-brand-400 text-[11px] font-bold uppercase tracking-wider mt-1">Adjust Date or Provider</p>
       </div>
 
       <input type="hidden" id="edit-appt-id" />
 
-      <div class="p-5 space-y-4">
+      <div class="p-6 space-y-5">
         <div>
-          <label class="block text-[11px] font-semibold text-brand-500 mb-1">Doctor</label>
-          <select id="edit-doctor"
-            class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-            <option value="">Any available</option>
-            @foreach (var doc in Model.Doctors)
-            {
-              <option value="@doc.Id" data-name="@doc.DoctorName" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@doc.DoctorName</option>
-            }
-          </select>
+          <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">Assigned Doctor</label>
+          <div class="relative">
+            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+            <select id="edit-doctor"
+              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
+              <option value="">Any available specialist</option>
+              @foreach (var doc in Model.Doctors)
+              {
+                <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
+              }
+            </select>
+          </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        
+        <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">New Date *</label>
+            <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Date *</label>
             <input id="edit-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none" />
           </div>
           <div>
-            <label class="block text-[11px] font-semibold text-brand-500 mb-1">New Time *</label>
+            <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Time *</label>
             <select id="edit-time"
-              class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option value="">Select time</option>
+              class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
+              <option value="">Select slot</option>
               @foreach (var slot in SamsonDentalCenterManagementSystem.Services.AppointmentService.ALL_SLOTS)
               {
                 <option value="@slot">@slot</option>
@@ -367,14 +494,14 @@ Layout = "AdminSide/_AdminLayout";
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 p-5 border-t border-slate-100">
+      <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeEditModal()"
-          class="px-4 py-2 text-[12.5px] rounded-xl border border-slate-200 text-brand-500 hover:bg-slate-50">
+          class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">
           Cancel
         </button>
         <button onclick="submitReschedule()"
-          class="px-4 py-2 text-[12.5px] rounded-xl bg-primary text-white font-semibold shadow-md shadow-primary/25 hover:opacity-90">
-          Save Changes
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand-900/10 hover:opacity-90 transition-all">
+          Update Schedule
         </button>
       </div>
     </div>
@@ -385,47 +512,51 @@ Layout = "AdminSide/_AdminLayout";
 <!-- CONFIRM APPOINTMENT MODAL                                                 -->
 <!-- ══════════════════════════════════════════════════════════════════════════ -->
 <div id="confirm-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
+  <div class="absolute inset-0 bg-emerald-900/30 backdrop-blur-md" onclick="closeConfirmModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="confirm-modal-box"
-      class="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto
-             transform scale-95 opacity-0 transition-all duration-300">
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto
+             transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
 
-      <div class="flex items-center justify-between p-5 border-b border-slate-100">
-        <h3 class="font-display font-extrabold text-[15px] text-emerald-600">Confirm Appointment</h3>
-        <button onclick="closeConfirmModal()" class="text-brand-400 hover:text-brand-600">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+      <div class="p-6 border-b border-slate-100 bg-emerald-50/50">
+        <h3 class="font-display font-extrabold text-xl text-emerald-700">Confirm Booking</h3>
+        <p class="text-emerald-600/60 text-[11px] font-bold uppercase tracking-wider mt-1">Finalize Appointment Slot</p>
       </div>
 
-      <div class="p-5 space-y-4">
-        <p id="confirm-modal-message" class="text-[12.5px] text-brand-600"></p>
+      <div class="p-6 space-y-6">
+        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100/50">
+            <p id="confirm-modal-message" class="text-[13px] text-emerald-800 leading-relaxed"></p>
+        </div>
         
         <div>
-          <label class="block text-[11px] font-semibold text-brand-500 mb-1">Assign Doctor *</label>
-          <select id="confirm-doctor"
-            class="w-full text-[12.5px] px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-            <option value="">Select a doctor</option>
-            @foreach (var doc in Model.Doctors)
-            {
-              <option value="@doc.Id" data-name="@doc.DoctorName" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@doc.DoctorName</option>
-            }
-          </select>
-          <p id="doctor-hint" class="text-[10px] text-brand-400 mt-1 hidden italic">Note: Only doctors specializing in this service category are shown.</p>
+          <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">Assign Dental Specialist *</label>
+          <div class="relative">
+            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+            <select id="confirm-doctor"
+              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-emerald-500 transition-all outline-none appearance-none">
+              <option value="">Select a doctor…</option>
+              @foreach (var doc in Model.Doctors)
+              {
+                <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
+              }
+            </select>
+          </div>
+          <p id="doctor-hint" class="text-[10px] text-brand-400 mt-2 ml-1 hidden italic">
+            <i class="fa-solid fa-circle-info mr-1"></i> Filtering by service specialty…
+          </p>
         </div>
       </div>
 
       <input type="hidden" id="confirm-appt-id" />
 
-      <div class="flex justify-end gap-2 p-5 border-t border-slate-100">
+      <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeConfirmModal()"
-          class="px-4 py-2 text-[12.5px] rounded-xl border border-slate-200 text-brand-500 hover:bg-slate-50">
-          Cancel
+          class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">
+          Dismiss
         </button>
         <button onclick="submitConfirm()"
-          class="px-4 py-2 text-[12.5px] rounded-xl bg-emerald-600 text-white font-semibold shadow-md shadow-emerald-600/25 hover:opacity-90">
-          Confirm Appointment
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 hover:opacity-90 transition-all">
+          Approve Booking
         </button>
       </div>
     </div>

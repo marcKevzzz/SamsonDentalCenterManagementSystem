@@ -20,7 +20,6 @@ public class ProfileService
     {
         try
         {
-            Console.WriteLine($"[ProfileService] Querying profile for userId: '{userId}'");
 
             // Service role client needs to be initialized before use
             await _supabase.InitializeAsync();
@@ -30,7 +29,6 @@ public class ProfileService
                 .Where(x => x.Id == userId)
                 .Get();
 
-            Console.WriteLine($"[ProfileService] Row count returned: {response.Models.Count}");
 
             var profile = response.Models.FirstOrDefault();
             if (profile == null)
@@ -46,13 +44,31 @@ public class ProfileService
             }
 
             profile.Email = email ?? "";
-            Console.WriteLine($"[ProfileService] Found: {profile.FirstName} {profile.LastName}");
             return profile;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[ProfileService] Exception: {ex.Message}");
             return null;
+        }
+    }
+
+    public async Task<bool> CheckEmailExists(string email)
+    {
+        try
+        {
+            await _supabase.InitializeAsync();
+            var response = await _supabase
+                .From<Profile>()
+                .Where(x => x.Email == email)
+                .Get();
+            
+            return response.Models.Count > 0;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CheckEmailExists] Error: {ex.Message}");
+            return false;
         }
     }
 

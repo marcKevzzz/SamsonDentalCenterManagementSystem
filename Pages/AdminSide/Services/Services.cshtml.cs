@@ -2,18 +2,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Models;
-
 using SamsonDentalCenterManagementSystem.Services;
+using SamsonDentalCenterManagementSystem.Helpers;
+
 namespace SamsonDentalCenterManagementSystem.Pages.AdminSide;
 
-[Authorize]
-public class AdminServicesModel : PageModel
+public class AdminServicesModel : AdminPageModel
 {
     private readonly DentalServiceService _svcService;
 
     public List<DentalService> Services { get; set; } = new();
 
-    public AdminServicesModel(DentalServiceService svcService)
+    public AdminServicesModel(DentalServiceService svcService, ProfileService profileService)
+        : base(profileService)
     {
         _svcService = svcService;
     }

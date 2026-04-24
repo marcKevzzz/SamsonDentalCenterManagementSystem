@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +67,9 @@ await serviceClient.InitializeAsync();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SessionHelper>();
 
+// ── RBAC: Claims Transformer — injects app_role from profiles table ──────────
+builder.Services.AddScoped<IClaimsTransformation, SamsonDentalCenterManagementSystem.Helpers.RoleClaimsTransformer>();
+
 builder.Services.AddSingleton<ProfileService>(_ =>
     new ProfileService(serviceClient, supabaseServiceKey, supabaseUrl)
 );
@@ -92,9 +96,27 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         supabaseServiceKey, 
         supabaseUrl, 
         provider.GetRequiredService<IResend>(), 
-        appBaseUrl
+        appBaseUrl,
+        new HttpClient()
     );
 });
+
+builder.Services.AddSingleton<DoctorService>(_ =>
+    new DoctorService(new HttpClient(), supabaseUrl, supabaseServiceKey));
+
+builder.Services.AddSingleton<ReceptionistService>(_ =>
+    new ReceptionistService(new HttpClient(), supabaseUrl, supabaseServiceKey));
+
+builder.Services.AddScoped<InvoiceService>(provider =>
+{
+    return new InvoiceService(
+        serviceClient,
+        new HttpClient(),
+        supabaseUrl,
+        supabaseServiceKey
+    );
+});
+
 
 // ── EF Core ───────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -142,7 +164,13 @@ builder.Services.AddSession(options =>
 });
 
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", p => p.RequireRole("admin"));
+    options.AddPolicy("DoctorOrAdmin", p => p.RequireRole("doctor", "admin"));
+    options.AddPolicy("ReceptionistOrAdmin", p => p.RequireRole("receptionist", "admin"));
+    options.AddPolicy("StaffOnly", p => p.RequireRole("admin", "doctor", "receptionist"));
+});
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 

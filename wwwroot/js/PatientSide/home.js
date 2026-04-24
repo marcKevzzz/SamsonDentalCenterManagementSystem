@@ -225,42 +225,67 @@ const reviewsData = [
     text: "Fast, efficient, and high-quality work. I came in for an emergency and they handled it with such grace and expertise. I'm definitely making this my regular clinic.",
   },
 ];
+
 function initReviewsScroll() {
   const container = document.getElementById("reviewsContainer");
   const section = document.querySelector(".horizontal-scroll-section");
+  const dotsContainer = document.getElementById("reviewDots");
   if (!container || !section) return;
 
   container.innerHTML = reviewsData
     .map(
-      (r) => `
-    <div class="review-card-premium">
+      (r, i) => `
+    <div class="review-card-premium${i === 0 ? ' review-active' : ''}">
+      <div class="review-quote-mark">"</div>
       <div>
-        <div class="flex justify-between items-start mb-6">
-          <div class="flex items-center gap-4">
-            <img src="${r.img}" class="w-14 h-14 rounded-full object-cover border-2 border-[var(--primary)]/10" alt="${r.name}"/>
-            <div>
-              <div class="font-bold text-base text-[var(--brand-dark)]">${r.name}</div>
-              <div class="text-xs text-[var(--text-muted)]">${r.date}</div>
-            </div>
-          </div>
-          <div class="flex gap-1 text-[#f59e0b]">
-             ${Array(5).fill('<i class="fa-solid fa-star text-[10px]"></i>').join('')}
+        <p class="review-text">"${r.text}"</p>
+      </div>
+      <div class="review-footer">
+        <div class="review-author">
+          <img src="${r.img}" class="review-avatar" alt="${r.name}"/>
+          <div>
+            <div class="review-name">${r.name}</div>
+            <div class="review-date">${r.date}</div>
           </div>
         </div>
-        <p class="text-[0.95rem] text-[var(--text-muted)] leading-relaxed italic">"${r.text}"</p>
-      </div>
-      <div class="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
-        <span class="text-[0.6rem] font-bold tracking-widest uppercase text-[var(--primary)]">Verified Patient</span>
-        <i class="fa-brands fa-google text-gray-300"></i>
+        <div class="review-meta">
+          <div class="flex gap-0.5 text-[#f59e0b] mb-1 justify-end">
+            ${Array(5).fill('<i class="fa-solid fa-star text-[9px]"></i>').join('')}
+          </div>
+          <div class="review-verified">
+            <span>Verified</span>
+            <i class="fa-brands fa-google"></i>
+          </div>
+        </div>
       </div>
     </div>
-  `,
+  `
     )
     .join("");
 
+  // Build dots
+  if (dotsContainer) {
+    reviewsData.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.className = `review-dot${i === 0 ? " review-dot-active" : ""}`;
+      dot.setAttribute("aria-label", `Review ${i + 1}`);
+      dotsContainer.appendChild(dot);
+    });
+  }
+
   const cards = gsap.utils.toArray(".review-card-premium");
-  
-  // Wait for a tick to ensure rendering and styles are applied
+  const dots = dotsContainer ? dotsContainer.querySelectorAll(".review-dot") : [];
+
+  function setActiveCard(index) {
+    cards.forEach((card, i) => {
+      card.classList.toggle("review-active", i === index);
+      card.classList.toggle("review-dim", i !== index);
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("review-dot-active", i === index);
+    });
+  }
+
   setTimeout(() => {
     ScrollTrigger.refresh();
 
@@ -269,11 +294,10 @@ function initReviewsScroll() {
     const travelDistance = totalWidth - viewportWidth;
 
     if (travelDistance > 0) {
-      // Calculate individual snap points to center each card
       const snapPoints = cards.map((card) => {
         const cardOffset = card.offsetLeft;
         const cardWidth = card.offsetWidth;
-        const targetX = cardOffset - (viewportWidth / 2) + (cardWidth / 2);
+        const targetX = cardOffset - viewportWidth / 2 + cardWidth / 2;
         return gsap.utils.clamp(0, 1, targetX / travelDistance);
       });
 
@@ -283,40 +307,28 @@ function initReviewsScroll() {
         scrollTrigger: {
           trigger: "#reviewsPin",
           start: "top top",
-          end: () => `+=${travelDistance * 1.5}`, 
+          end: () => `+=${travelDistance * 1.5}`,
           pin: true,
-          scrub: 1,
+          scrub: 1.2,
           invalidateOnRefresh: true,
           snap: {
             snapTo: snapPoints,
-            duration: { min: 0.2, max: 0.6 },
-            delay: 0.1,
-            ease: "power2.inOut"
+            duration: { min: 0.25, max: 0.5 },
+            delay: 0.08,
+            ease: "power3.inOut",
           },
           onUpdate: (self) => {
-            // Find closest card to center
             const currentX = -gsap.getProperty(container, "x");
             let closestIndex = 0;
             let minDiff = Infinity;
-            
             cards.forEach((card, i) => {
               const cardCenter = card.offsetLeft + card.offsetWidth / 2;
               const diff = Math.abs(currentX + viewportWidth / 2 - cardCenter);
-              if (diff < minDiff) {
-                minDiff = diff;
-                closestIndex = i;
-              }
+              if (diff < minDiff) { minDiff = diff; closestIndex = i; }
             });
-
-            cards.forEach((card, i) => {
-              if (i === closestIndex) {
-                card.classList.remove("review-dim");
-              } else {
-                card.classList.add("review-dim");
-              }
-            });
-          }
-        }
+            setActiveCard(closestIndex);
+          },
+        },
       });
     }
   }, 100);

@@ -39,7 +39,7 @@ namespace SamsonDentalCenterManagementSystem.Controllers
 
         // GET /api/services/all — admin, includes inactive
         [HttpGet("all")]
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllAdmin()
         {
             var services = await _svcService.GetAll(activeOnly: false);
@@ -57,7 +57,7 @@ namespace SamsonDentalCenterManagementSystem.Controllers
 
         // POST /api/services — admin only
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create([FromBody] ServicePayload p)
         {
             if (string.IsNullOrWhiteSpace(p.Name) || string.IsNullOrWhiteSpace(p.Category))
@@ -81,7 +81,7 @@ namespace SamsonDentalCenterManagementSystem.Controllers
 
         // PUT /api/services/{id}
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update(string id, [FromBody] ServicePayload p)
         {
             try
@@ -98,7 +98,7 @@ namespace SamsonDentalCenterManagementSystem.Controllers
 
         // DELETE /api/services/{id}
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(string id)
         {
             try

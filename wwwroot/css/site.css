@@ -423,20 +423,95 @@ body.standalone {
 
 /* Dimmed review card */
 .review-dim {
- opacity: 0.3; /* Slightly lower for better focus contrast */
-  transform: scale(0.92); /* More pronounced shrinkage */
-  filter: blur(1px); /* Optional: slight blur adds a sense of depth */
-  pointer-events: none; 
+  opacity: 0.28;
+  transform: scale(0.94) translateY(6px);
+  filter: blur(0.8px);
+  pointer-events: none;
+}
+
+.review-quote-mark {
+  position: absolute;
+  top: -10px;
+  right: 32px;
+  font-size: 120px;
+  line-height: 1;
+  color: var(--primary, #3b82f6);
+  opacity: 0.07;
+  font-family: Georgia, serif;
+  user-select: none;
+  pointer-events: none;
+}
+
+.review-text {
+  font-size: 0.95rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.75;
+  font-style: italic;
+}
+
+.review-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 20px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(var(--primary-rgb, 59, 130, 246), 0.15);
+}
+
+.review-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--brand-dark, #0f172a);
+}
+
+.review-date {
+  font-size: 0.7rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 2px;
+}
+
+.review-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.review-verified {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary, #3b82f6);
+}
+
+.review-verified i {
+  color: #d1d5db;
+  font-size: 11px;
 }
 
 #reviewsContainer {
   display: flex;
- gap: 60px;
+  gap: 32px;
   transition: none;
-  /* GSAP handles animation */
 }
 
-#reviewsContainer>div {
+#reviewsContainer > div {
   flex-shrink: 0;
 }
 
@@ -1550,6 +1625,7 @@ textarea.form-input {
 .text-gradient {
   background: linear-gradient(135deg, var(--primary), var(--brand-accent));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1568,54 +1644,122 @@ textarea.form-input {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 40px 0; 
+  padding: 48px 0;
   margin-top: -40px;
 }
 
 .horizontal-scroll-wrapper {
   display: flex;
-  width: max-content; /* Changed from fit-content to ensure precise width */
+  width: max-content;
   will-change: transform;
-  padding-left: 5vw;
-  padding-right: 5vw; /* Match the padding to center the last card */
+  padding-left: 4vw;
+  padding-right: 4vw;
 }
 
 .review-card-premium {
-  width: 550px;
+  width: 500px;
   flex-shrink: 0;
-  border-radius: 32px;
+  border-radius: 28px;
   background: white;
-  padding: 50px;
-  border: 1px solid rgba(15, 23, 42, 0.05);
-  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04);
- transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.4s ease;
+  padding: 44px 48px 36px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.04),
+    0 12px 40px rgba(15, 23, 42, 0.06);
+  transition:
+    opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.45s ease;
   transform-origin: center center;
   will-change: transform, opacity;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
+.review-card-premium.review-active {
+  opacity: 1;
+  transform: scale(1) translateY(0px);
+  box-shadow:
+    0 4px 16px rgba(15, 23, 42, 0.06),
+    0 24px 64px rgba(15, 23, 42, 0.12);
+  filter: none;
+  pointer-events: auto;
+}
+
+.scroll-fade-left,
+.scroll-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.scroll-fade-left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--brand-dark, #0f172a) 0%,
+    transparent 100%
+  );
+}
+
+.scroll-fade-right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--brand-dark, #0f172a) 0%,
+    transparent 100%
+  );
+}
+
+/* ── Progress dots ───────────────────────────────────── */
+.review-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+}
+
+.review-dot-active {
+  width: 22px;
+  background: var(--primary, #3b82f6);
+}
 
 @media (max-width: 1024px) {
   .review-card-premium {
-    width: 450px;
-    margin-right: 40px;
-    padding: 40px;
+    width: 420px;
+    padding: 36px 40px 30px;
   }
 }
 
 @media (max-width: 640px) {
- 
   #reviewsContainer {
     gap: 20px;
   }
-
   .horizontal-scroll-wrapper {
-    padding-left: 7.5vw; /* Helps center the 85vw card */
+    padding-left: 7.5vw;
+    padding-right: 7.5vw;
   }
-  .review-card-premium{
-    width: 85vw;
+  .review-card-premium {
+    width: 82vw;
+    padding: 32px 28px 26px;
+  }
+  .scroll-fade-left,
+  .scroll-fade-right {
+    width: 60px;
+  }
+  #reviewDots {
+    display: flex !important;
   }
 }
 

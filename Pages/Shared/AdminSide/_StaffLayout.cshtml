@@ -66,13 +66,17 @@
         </div>
 
         <nav class="flex-1 overflow-y-auto py-2 overflow-x-hidden">
+          @{
+            var r = (ViewData["UserRole"]?.ToString() ?? "").ToLower();
+            var basePath = r == "admin" ? "/Admin" : (r == "doctor" ? "/Doctor" : "/Receptionist");
+          }
           <div class="nav-label px-7 py-2.5">
             <span
               class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">Main</span>
           </div>
 
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/dashboard" id="admin-dashboard">
+            href="@basePath/Dashboard" id="admin-dashboard">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7" />
@@ -82,20 +86,14 @@
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Dashboard</span>
           </a>
-          <!-- <div
-              id="tooltip-dashboard"
-              role="tooltip"
-              class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-brand rounded-lg shadow-xs opacity-0 tooltip"
-            >
-              Dashboard
-              <div class="tooltip-arrow" data-popper-arrow></div>
-            </div> -->
+
+          @if(r == "admin" || r == "receptionist") {
           <div class="nav-label px-7 py-2.5 mt-1">
             <span
               class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">People</span>
           </div>
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/patients" id="admin-patients">
+            href="@basePath/Patients" id="admin-patients">
             <svg class="pl-0.5 flex" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -105,23 +103,22 @@
             <span
               class="nav-badge sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">248</span>
           </a>
+          }
+
+          @if(r == "admin") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/doctors" id="admin-doctors">
+            href="/Admin/Staff" id="admin-doctors">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 7h-9" />
-
               <path d="M14 17H5" />
-
               <circle cx="17" cy="17" r="3" />
-
               <circle cx="7" cy="7" r="3" />
             </svg>
-
-            <span class="sidebar-text transition-opacity duration-300">Doctors</span>
+            <span class="sidebar-text transition-opacity duration-300">Staff</span>
           </a>
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/users" id="admin-users">
+            href="/Admin/Users" id="admin-users">
             <svg class="pl-0.5 flex" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -131,6 +128,7 @@
             <span
               class="nav-badge sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">248</span>
           </a>
+          }
 
           <div class="px-7 py-2.5 mt-1">
             <span
@@ -138,52 +136,58 @@
           </div>
 
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/appointments" id="admin-appointments">
+            href="@basePath/Appointments" id="admin-appointments">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-
               <line x1="16" y1="2" x2="16" y2="6" />
-
               <line x1="8" y1="2" x2="8" y2="6" />
-
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-
             <span class="sidebar-text transition-opacity duration-300">Appointments</span>
-
             <span
               class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display">12</span>
           </a>
 
+          @if(r == "admin" || r == "doctor") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/services" id="admin-services">
+            href="@basePath/Invoices" id="admin-invoices">
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            <span class="sidebar-text transition-opacity duration-300">Invoices</span>
+          </a>
+          }
+
+          @if(r == "admin") {
+          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
+            href="/Admin/Services" id="admin-services-link">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2a5 5 0 0 1 5 5v3H7V7a5 5 0 0 1 5-5z" />
-
               <rect x="2" y="10" width="20" height="12" rx="2" />
-
               <path d="M12 14v4" />
-
               <path d="M10 16h4" />
             </svg>
-
             <span class="sidebar-text transition-opacity duration-300">Services</span>
           </a>
+          }
+
+          @if(r == "admin" || r == "receptionist") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/transactions" id="admin-services">
+            href="@basePath/Transactions" id="admin-transactions">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2a5 5 0 0 1 5 5v3H7V7a5 5 0 0 1 5-5z" />
-
               <rect x="2" y="10" width="20" height="12" rx="2" />
-
               <path d="M12 14v4" />
-
               <path d="M10 16h4" />
             </svg>
-
             <span class="sidebar-text transition-opacity duration-300">Transactions</span>
           </a>
 
@@ -191,55 +195,55 @@
             <span
               class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">Analytics</span>
           </div>
+          }
 
+          @if(r == "admin") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/reports" id="admin-reports">
+            href="/Admin/Reports" id="admin-reports">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />
-
               <line x1="12" y1="20" x2="12" y2="4" />
-
               <line x1="6" y1="20" x2="6" y2="14" />
             </svg>
-
             <span class="sidebar-text transition-opacity duration-300">Reports</span>
           </a>
+          }
 
+          @if(r == "admin" || r == "receptionist") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/inquiries" id="admin-inquiries">
+            href="@basePath/Inquiries" id="admin-inquiries">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
-
             <span class="sidebar-text transition-opacity duration-300">Inquiries</span>
-
             <span
               class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display">5</span>
           </a>
 
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="../admin/activitylogs" id="admin-activitylogs">
+            href="@basePath/ActivityLogs" id="admin-activitylogs">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
-
             <span class="sidebar-text transition-opacity duration-300">Activity Logs</span>
           </a>
+          }
         </nav>
 
         <div class="p-2 border-t border-white/[0.07] flex-shrink-0 overflow-hidden">
           <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.05]">
             <div class="flex items-center gap-2.5">
               <div
-                class="w-8 h-8 rounded-full bg-primary primary/80 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
-                AJ
+                class="w-8 h-8 rounded-full bg-primary primary/80 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+                id="sidebar-user-initials">
+                @(ViewData["UserInitials"] ?? "")
               </div>
               <div class="sidebar-text flex flex-col min-w-0">
-                <span class="text-[12px] font-semibold text-white truncate">Dr. Ana J.</span>
-                <span class="text-[10px] text-white">Admin</span>
+                <span class="text-[12px] font-semibold text-white truncate" id="sidebar-user-name">@(ViewData["UserName"] ?? "Staff")</span>
+                <span class="text-[10px] text-white capitalize" id="sidebar-user-role">@(ViewData["UserRole"] ?? "")</span>
               </div>
             </div>
             <button id="signoutBtn"
@@ -321,10 +325,13 @@
   </div>
 
   <!-- Toast Container -->
-  <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-50"></div>
+  <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-[11000]"></div>
 
   <!-- Modal Root -->
   <div id="modal-root"></div>
+
+  <!-- Hidden role data for JS -->
+  <input type="hidden" id="currentUserRole" value="@(ViewData["UserRole"] ?? "")" />
 
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
 

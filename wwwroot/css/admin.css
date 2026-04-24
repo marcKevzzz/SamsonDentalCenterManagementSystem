@@ -1,3 +1,17 @@
+:root {
+  --primary: #1e40af;
+  --primary-hover: #1d4ed8;
+  --primary-light: rgba(30, 64, 175, 0.1);
+  --brand-dark: #0f172a;
+  --brand-accent: #b07d5c;
+  --bg-soft: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+}
+
 body {
   font-family: "DM Sans", sans-serif;
 }

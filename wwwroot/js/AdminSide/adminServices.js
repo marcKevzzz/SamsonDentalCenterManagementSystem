@@ -10,22 +10,22 @@ let selectedHeroFile = null;
 // ── Category config ───────────────────────────────────────────────────────────
 const CAT = {
   "General Dentistry": {
-    bg: "bg-blue-50",
-    text: "text-primary",
-    border: "border-blue-100",
-    dot: "#1E40AF",
+    bg: "bg-blue-50/50",
+    text: "text-blue-600",
+    border: "border-blue-100/50",
+    dot: "#2563eb",
   },
   Cosmetic: {
-    bg: "bg-pink-50",
-    text: "text-pink-600",
-    border: "border-pink-100",
-    dot: "#db2777",
+    bg: "bg-rose-50/50",
+    text: "text-rose-600",
+    border: "border-rose-100/50",
+    dot: "#e11d48",
   },
   Specialized: {
-    bg: "bg-violet-50",
-    text: "text-violet-600",
-    border: "border-violet-100",
-    dot: "#7c3aed",
+    bg: "bg-purple-50/50",
+    text: "text-purple-600",
+    border: "border-purple-100/50",
+    dot: "#9d56f4ff",
   },
 };
 
@@ -40,32 +40,25 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("categoryFilter")
     .addEventListener("change", applyFilters);
   document
-    .getElementById("statusFilter")
-    .addEventListener("change", applyFilters);
+    .getElementById("statusFilter")?.addEventListener("change", applyFilters);
 
   document
-    .getElementById("addServiceBtn")
-    .addEventListener("click", openAddModal);
+    .getElementById("addServiceBtn")?.addEventListener("click", openAddModal);
   document
-    .getElementById("closeModalBtn")
-    .addEventListener("click", closeModal);
+    .getElementById("closeModalBtn")?.addEventListener("click", closeModal);
   document
-    .getElementById("cancelModalBtn")
-    .addEventListener("click", closeModal);
+    .getElementById("cancelModalBtn")?.addEventListener("click", closeModal);
   document
-    .getElementById("modalSaveBtn")
-    .addEventListener("click", saveService);
+    .getElementById("modalSaveBtn")?.addEventListener("click", saveService);
   document
-    .getElementById("cancelDeleteBtn")
-    .addEventListener("click", closeDeleteModal);
+    .getElementById("cancelDeleteBtn")?.addEventListener("click", closeDeleteModal);
   document
-    .getElementById("addBenefitBtn")
-    .addEventListener("click", () => addBenefitRow(""));
+    .getElementById("addBenefitBtn")?.addEventListener("click", () => addBenefitRow(""));
 
-  document.getElementById("svcModal").addEventListener("click", (e) => {
+  document.getElementById("svcModal")?.addEventListener("click", (e) => {
     if (e.target.id === "svcModal") closeModal();
   });
-  document.getElementById("deleteModal").addEventListener("click", (e) => {
+  document.getElementById("deleteModal")?.addEventListener("click", (e) => {
     if (e.target.id === "deleteModal") closeDeleteModal();
   });
 
@@ -134,121 +127,96 @@ function renderGrid() {
 
   empty.classList.add("hidden");
   grid.innerHTML = filtered.map(cardHTML).join("");
+
+  // Entrance animation for cards
+  // gsap.from("#servicesGrid > .asvc-card", {
+  //   y: 20,
+  //   opacity: 0,
+  //   duration: 0.4,
+  //   stagger: 0.05,
+  //   ease: "back.out(1.7)"
+  // });
 }
 
 function cardHTML(s) {
   const c = CAT[s.category] ?? {
     bg: "bg-slate-50",
-    text: "text-slate-600",
+    text: "text-brand-500",
     border: "border-slate-100",
     dot: "#64748b",
   };
 
   const benefitChips = (s.benefits ?? [])
-    .slice(0, 3)
+    .slice(0, 2)
     .map(
       (b) =>
-        `<span class="text-[10px] bg-slate-50 border border-slate-100 text-muted px-2 py-0.5 rounded-full truncate">${b}</span>`,
+        `<span class="text-[11px]  text-brand-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg truncate max-w-[100px]">${b}</span>`,
     )
     .join("");
 
-  const extra =
-    s.benefits?.length > 3
-      ? `<span class="text-[10px] text-muted px-1">+${s.benefits.length - 3} more</span>`
-      : "";
+  const extra = s.benefits?.length > 2 ? `<span class="text-[11px] text-brand-300 ml-1">+${s.benefits.length - 2}</span>` : "";
 
   return `
-  <div class="bg-white rounded-2xl border ${c.border} hover:shadow-md transition-all duration-200 flex flex-col relative overflow-hidden">
-
-    <div class="absolute top-0 left-0 right-0 h-0.5 ${s.isActive ? "bg-primary/40" : "bg-slate-200"}"></div>
-
-    <div class="p-5 flex-1">
-
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-[9px] font-bold uppercase tracking-widest ${c.text} ${c.bg} px-2 py-1 rounded-full">
-          ${s.category}
-        </span>
-        <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full
-          ${s.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400"}">
-          ${s.isActive ? "Active" : "Inactive"}
-        </span>
+  <div class="asvc-card group bg-white rounded-[28px] border border-slate-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col overflow-hidden">
+    
+    <!-- Header with Category & Status -->
+    <div class="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full" style="background-color: ${c.dot}"></div>
+        <span class="text-[12px] font-medium ${c.text}">${s.category}</span>
       </div>
-
-      <div class="flex items-start gap-3 mb-3">
-        <div class="w-9 h-9 rounded-xl ${c.bg} flex items-center justify-center shrink-0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${c.dot}"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a5 5 0 0 1 5 5c0 5-5 11-5 11S7 12 7 7a5 5 0 0 1 5-5z"/>
-            <circle cx="12" cy="7" r="2"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <h4 class="font-display font-bold text-brand text-[13.5px] leading-tight truncate">${s.name}</h4>
-          <p class="text-[11px] text-muted mt-0.5 line-clamp-2 leading-relaxed">${s.tagline}</p>
-        </div>
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full ${s.isActive ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-slate-50 text-slate-400 border border-slate-100"}">
+        <span class="w-1 h-1 rounded-full ${s.isActive ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}"></span>
+        <span class="text-[11px] font-medium ">${s.isActive ? "Active" : "Inactive"}</span>
       </div>
-
-      <div class="flex items-center justify-between">
-        <span class="font-display font-extrabold text-[18px] ${c.text}">${s.price}</span>
-        <div class="flex items-center gap-3 text-[10.5px] text-muted">
-          ${
-            s.duration
-              ? `
-          <span class="flex items-center gap-1">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            ${s.duration}
-          </span>`
-              : ""
-          }
-          ${
-            s.recovery
-              ? `
-          <span class="flex items-center gap-1">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-            </svg>
-            ${s.recovery}
-          </span>`
-              : ""
-          }
-        </div>
-      </div>
-
-      ${
-        s.benefits?.length
-          ? `
-      <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-1">
-        ${benefitChips}${extra}
-      </div>`
-          : ""
-      }
     </div>
 
-    <div class="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50/60">
-      <button data-edit="${s.id}"
-        class="flex-1 py-1.5 text-[11.5px] font-semibold text-primary border border-primary/20 rounded-lg
-               hover:bg-primary hover:text-white transition-all duration-150 flex items-center justify-center gap-1.5">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        Edit
+    <!-- Content -->
+    <div class="px-6 pb-6 flex-1 flex flex-col">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-12 h-12 rounded-2xl ${c.bg} flex items-center justify-center shrink-0 border ${c.border}">
+          <i class="fa-solid ${s.category === 'Cosmetic' ? 'fa-gem' : s.category === 'Specialized' ? 'fa-microscope' : 'fa-hand-holding-heart'} text-lg" style="color: ${c.dot}"></i>
+        </div>
+        <div class="min-w-0">
+          <h4 class="font-display text-brand-900 text-[15px] leading-tight group-hover:text-primary transition-colors truncate font-bold">${s.name}</h4>
+          <p class="text-[11.5px] text-brand-400 mt-1 line-clamp-2 leading-relaxed italic">"${s.tagline}"</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+        <div>
+           <span class="text-[10px]  text-brand-300  block mb-0.5">Price starts at</span>
+           <span class="font-display font-extrabold text-[18px] text-brand-900">₱${Number(s.price).toLocaleString()}</span>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          ${s.duration ? `
+          <div class="flex items-center gap-1.5 text-[12px] text-brand-400">
+            <i class="fa-regular fa-clock text-primary/60"></i>
+            <span>${s.duration}</span>
+          </div>` : ''}
+          ${s.recovery ? `
+          <div class="flex items-center gap-1.5 text-[12px]  text-brand-400">
+            <i class="fa-solid fa-bolt-lightning text-primary/60"></i>
+            <span>${s.recovery}</span>
+          </div>` : ''}
+        </div>
+      </div>
+
+      ${s.benefits?.length ? `
+      <div class="mt-4 flex items-center gap-1 overflow-hidden">
+        ${benefitChips}${extra}
+      </div>` : ""}
+    </div>
+
+    <!-- Actions -->
+    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center gap-2 mt-auto">
+      <button data-edit="${s.id}" 
+        class="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl text-[11px]  text-brand-600 hover:border-primary hover:text-primary hover:shadow-md hover:shadow-primary/5 transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-pen-to-square"></i> Edit
       </button>
       <button data-delete="${s.id}" data-name="${s.name}"
-        class="py-1.5 px-3 text-[11.5px] font-semibold text-red-400 border border-red-100 rounded-lg
-               hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-150
-               flex items-center justify-center gap-1.5">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-          <path d="M10 11v6M14 11v6"/>
-          <path d="M9 6V4h6v2"/>
-        </svg>
-        Delete
+        class="w-10 h-10 bg-white border border-slate-200 rounded-xl text-red-400 hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all flex items-center justify-center">
+        <i class="fa-solid fa-trash-can text-xs"></i>
       </button>
     </div>
   </div>`;
@@ -375,10 +343,31 @@ async function saveService() {
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────
+function closeDeleteModal() {
+  gsap.to("#deleteModal-box", {
+    scale: 0.95,
+    opacity: 0,
+    y: 20,
+    duration: 0.2,
+    ease: "power2.in",
+    onComplete: () => {
+      const modal = document.getElementById("deleteModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  });
+}
+
 function confirmDelete(id, name) {
   document.getElementById("deleteSvcName").textContent = name;
-  document.getElementById("deleteModal").classList.remove("hidden");
-  document.getElementById("deleteModal").classList.add("flex");
+  const modal = document.getElementById("deleteModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  gsap.fromTo("#deleteModal-box", 
+    { scale: 0.95, opacity: 0, y: 20 },
+    { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+  );
 
   // Clone to remove stale listeners
   const btn = document.getElementById("confirmDeleteBtn");
@@ -397,7 +386,8 @@ function confirmDelete(id, name) {
       const result = await res.json();
       if (result.ok) {
         closeDeleteModal();
-        window.location.reload();
+        // Delay reload to let animation finish
+        setTimeout(() => window.location.reload(), 300);
       } else {
         Toast.show(result.error ?? "Delete failed.", "danger");
         fresh.disabled = false;
@@ -415,19 +405,19 @@ function confirmDelete(id, name) {
 function addBenefitRow(value = "") {
   const list = document.getElementById("benefitsList");
   const row = document.createElement("div");
-  row.className = "flex items-center gap-2";
+  row.className = "flex items-center gap-2 group/benefit";
   row.innerHTML = `
-    <input type="text" value="${value.replace(/"/g, "&quot;")}"
-      placeholder="e.g. No downtime"
-      class="benefit-input flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none
-             focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all" />
+    <div class="relative flex-1">
+      <i class="fa-solid fa-check absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 text-[12px]"></i>
+      <input type="text" value="${value.replace(/"/g, "&quot;")}"
+        placeholder="e.g. No downtime"
+        class="benefit-input w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[12px] outline-none
+               focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all" />
+    </div>
     <button type="button"
-      class="remove-benefit w-7 h-7 flex items-center justify-center rounded-lg text-slate-400
-             hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
+      class="remove-benefit w-10 h-10 flex items-center justify-center rounded-xl text-slate-300
+             hover:text-red-500 hover:bg-red-50 transition-all shrink-0">
+      <i class="fa-solid fa-trash-can text-xs"></i>
     </button>`;
   row
     .querySelector(".remove-benefit")
@@ -444,21 +434,31 @@ function getBenefits() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function showModal() {
-  document.getElementById("svcModal").classList.remove("hidden");
-  document.getElementById("svcModal").classList.add("flex");
+  const modal = document.getElementById("svcModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
   document.getElementById("modalError").classList.add("hidden");
+
+  gsap.fromTo("#svcModal-box", 
+    { scale: 0.95, opacity: 0, y: 20 },
+    { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+  );
 }
 
 function closeModal() {
-  document.getElementById("svcModal").classList.add("hidden");
-  document.getElementById("svcModal").classList.remove("flex");
+  gsap.to("#svcModal-box", {
+    scale: 0.95,
+    opacity: 0,
+    y: 20,
+    duration: 0.2,
+    ease: "power2.in",
+    onComplete: () => {
+      const modal = document.getElementById("svcModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  });
 }
-
-function closeDeleteModal() {
-  document.getElementById("deleteModal").classList.add("hidden");
-  document.getElementById("deleteModal").classList.remove("flex");
-}
-
 function clearModalFields() {
   ["mName", "mTagline", "mSummary", "mPrice", "mDuration", "mRecovery"].forEach(
     (id) => (document.getElementById(id).value = ""),

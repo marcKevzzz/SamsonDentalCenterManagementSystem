@@ -43,6 +43,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
+        [JsonIgnore]
+        public string FullName => $"{FirstName} {LastName}";
+
         // --- UI / Auth fields — excluded from Supabase insert ---
         [JsonIgnore] public string Password { get; set; } = string.Empty;
         [JsonIgnore] public string ConfirmPassword { get; set; } = string.Empty;

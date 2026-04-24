@@ -27,6 +27,9 @@ export function toggleNavbar(isActive) {
     });
     profileChevron?.classList.add("text-brand");
     profileChevron?.classList.remove("text-white");
+    const guestAvatar = document.getElementById("guestAvatar");
+    guestAvatar?.classList.add("text-brand");
+    guestAvatar?.classList.remove("text-white");
   } else {
     navbar.classList.remove("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
     navbar.classList.add("border-transparent");
@@ -44,11 +47,16 @@ export function toggleNavbar(isActive) {
         });
         profileChevron?.classList.add("text-white");
         profileChevron?.classList.remove("text-brand");
+        const guestAvatar = document.getElementById("guestAvatar");
+        guestAvatar?.classList.add("text-white");
+        guestAvatar?.classList.remove("text-brand");
     } else {
         logo?.classList.add("text-brand");
         hamburgerBtn?.classList.add("text-brand");
         navLinks.forEach(link => link.classList.add("text-brand"));
         profileChevron?.classList.add("text-brand");
+        const guestAvatar = document.getElementById("guestAvatar");
+        guestAvatar?.classList.add("text-brand");
     }
   }
 }
@@ -64,6 +72,23 @@ function setActive(id) {
   if (mel) {
       mel.classList.add("active", "text-primary");
   }
+}
+
+function syncProfileLinks() {
+  const path = window.location.pathname.toLowerCase();
+  const allProfileLinks = document.querySelectorAll(".side-link, .menu-link");
+  
+  allProfileLinks.forEach(link => {
+    link.classList.remove("active", "bg-primary/10", "text-primary");
+    const href = link.getAttribute("href")?.toLowerCase();
+    if (!href) return;
+
+    if (path.includes("dashboard") && href.includes("dashboard")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("myappointments") && href.includes("myappointments")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("records") && href.includes("records")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("notifications") && href.includes("notifications")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("settings") && href.includes("settings")) link.classList.add("active", "bg-primary/10", "text-primary");
+  });
 }
 
 export function syncActiveLink() {
@@ -83,6 +108,7 @@ export function syncActiveLink() {
   } else if (path.startsWith("/profile")) {
     isNavScrollDisabled = true;
     toggleNavbar(true);
+    syncProfileLinks();
   }
 }
 

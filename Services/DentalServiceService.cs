@@ -90,7 +90,11 @@ public class DentalServiceService
     if (!string.IsNullOrWhiteSpace(p.Name))     s.Name     = p.Name;
     if (!string.IsNullOrWhiteSpace(p.Tagline))  s.Tagline  = p.Tagline;
     if (!string.IsNullOrWhiteSpace(p.Hero))     s.Hero     = p.Hero;
-    if (!string.IsNullOrWhiteSpace(p.Price))    s.Price    = p.Price;
+    if (!string.IsNullOrWhiteSpace(p.Price))
+    {
+        var cleanPrice = p.Price.Replace("₱", "").Replace(",", "").Trim();
+        s.Price = decimal.TryParse(cleanPrice, out var pr) ? pr : 0;
+    }
     if (p.Icon     != null) s.Icon     = p.Icon;
     if (p.Summary  != null) s.Summary  = p.Summary;
     if (p.Duration != null) s.Duration = p.Duration;

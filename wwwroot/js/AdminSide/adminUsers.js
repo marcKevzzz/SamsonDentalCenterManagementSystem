@@ -23,8 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("userModal").addEventListener("click", (e) => {
     if (e.target.id === "userModal") closeModal();
   });
-
-  initSecurity();
 });
 
 // ── Filter ────────────────────────────────────────────────────────────────────
@@ -210,7 +208,6 @@ function getToken() {
 function openAddModal() {
   document.getElementById("modalTitle").textContent = "Add User";
   document.getElementById("modalUserId").value = "";
-  document.getElementById("mPasswordGroup").style.display = "";
   clearModalFields();
   showModal();
 }
@@ -230,7 +227,6 @@ function openEditModal(id) {
   document.getElementById("mPhone").value = u.phone;
   document.getElementById("mAddress").value = u.address;
   document.getElementById("mRole").value = u.role;
-  document.getElementById("mPasswordGroup").style.display = "none";
   showModal();
 }
 
@@ -245,20 +241,15 @@ async function saveUser() {
     firstName: document.getElementById("mFirstName").value.trim(),
     lastName: document.getElementById("mLastName").value.trim(),
     email: document.getElementById("mEmail").value.trim(),
-    password: document.getElementById("mPassword").value,
-    dob: document.getElementById("mDob").value,
+    dateOfBirth: document.getElementById("mDob").value,
     sex: document.getElementById("mSex").value,
-    phone: document.getElementById("mPhone").value.trim(),
+    phoneNumber: document.getElementById("mPhone").value.trim(),
     address: document.getElementById("mAddress").value.trim(),
     role: document.getElementById("mRole").value,
   };
 
   if (!payload.firstName || !payload.lastName || !payload.email) {
     Toast.show("First name, last name, and email are required.", "danger");
-    return;
-  }
-  if (!isEdit && payload.password.length < 8) {
-    Toast.show("Password must be at least 8 characters.", "danger");
     return;
   }
 
@@ -340,7 +331,6 @@ function clearModalFields() {
     "mFirstName",
     "mLastName",
     "mEmail",
-    "mPassword",
     "mDob",
     "mPhone",
     "mAddress",
@@ -349,20 +339,6 @@ function clearModalFields() {
   });
   document.getElementById("mSex").value = "";
   document.getElementById("mRole").value = "patient";
-}
-
-function initSecurity() {
-  // Re-implement your togglePw logic using addEventListener
-  document.querySelectorAll(".pw-toggle").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const input = document.getElementById(btn.getAttribute("data-target"));
-      const isPw = input.type === "password";
-      input.type = isPw ? "text" : "password";
-      btn.innerHTML = isPw
-        ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke-width="2" stroke-linecap="round"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2" stroke-linecap="round"/></svg>`
-        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>`;
-    });
-  });
 }
 
 // ── Expose save/close for inline HTML buttons ─────────────────────────────────

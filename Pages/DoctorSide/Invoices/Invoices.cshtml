@@ -1,0 +1,122 @@
+@page "/Doctor/Invoices"
+@model SamsonDentalCenterManagementSystem.Pages.DoctorSide.Invoices.InvoicesModel
+@{
+
+}
+
+<div class="page p-6">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-2xl font-extrabold text-brand tracking-tight">Invoice History</h2>
+            <p class="text-[13px] text-brand-400 mt-1">Manage and track your generated treatment invoices</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-4 py-2 bg-brand-50 border border-brand-100 rounded-xl text-[12px] font-bold text-brand">
+                Total Invoices: @Model.Invoices.Count
+            </span>
+        </div>
+    </div>
+
+    <!-- Filter Bar (Optional) -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-wrap items-center gap-4">
+        <div class="relative flex-1 min-w-[200px]">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+            <input type="text" placeholder="Search by patient name..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[13px] focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
+        </div>
+        <select class="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[13px] focus:ring-2 focus:ring-primary/20 outline-none">
+            <option value="">All Status</option>
+            <option value="pending">Pending Checkout</option>
+            <option value="paid">Paid</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <div class="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/50 border-b border-slate-100">
+                    <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Date</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Patient</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Services</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-right">Amount</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-center">Status</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                @if (!Model.Invoices.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="px-6 py-20 text-center">
+                            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                <i class="fa-solid fa-file-invoice text-slate-200 text-2xl"></i>
+                            </div>
+                            <p class="text-[13px] text-brand-400 font-medium">No invoices found yet.</p>
+                        </td>
+                    </tr>
+                }
+                @foreach (var invoice in Model.Invoices)
+                {
+                    <tr class="hover:bg-slate-50/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="text-[13px] font-bold text-brand-900">@invoice.CreatedAt.ToString("MMM dd, yyyy")</div>
+                            <div class="text-[10px] text-brand-400">@invoice.CreatedAt.ToString("hh:mm tt")</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-[10px] font-bold">
+                                    @(invoice.Patient?.FullName?.Substring(0, 1) ?? "P")
+                                </div>
+                                <div>
+                                    <div class="text-[13px] font-bold text-brand-900">@(invoice.Patient?.FullName ?? "Unknown Patient")</div>
+                                    <div class="text-[10px] text-brand-400">#@invoice.Id.Substring(0, 8)</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1 max-w-[200px]">
+                                @foreach (var item in invoice.Items?.Take(2) ?? Enumerable.Empty<SamsonDentalCenterManagementSystem.Models.InvoiceItem>())
+                                {
+                                    <span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand-600 font-medium">@item.Description</span>
+                                }
+                                @if ((invoice.Items?.Count ?? 0) > 2)
+                                {
+                                    <span class="px-2 py-0.5 bg-brand-50 rounded-md text-[10px] text-brand-600 font-bold">+@(invoice.Items.Count - 2)</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="text-[13px] font-bold text-brand-900">₱@invoice.FinalAmount.ToString("N2")</div>
+                            @if (invoice.DiscountAmount > 0)
+                            {
+                                <div class="text-[10px] text-emerald-500 font-bold">-₱@invoice.DiscountAmount.ToString("N2") Disc.</div>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @if (invoice.Status == "paid")
+                            {
+                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Paid</span>
+                            }
+                            else if (invoice.Status == "cancelled")
+                            {
+                                <span class="px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Cancelled</span>
+                            }
+                            else
+                            {
+                                <span class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Pending</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                            <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all">
+                                <i class="fa-solid fa-print text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

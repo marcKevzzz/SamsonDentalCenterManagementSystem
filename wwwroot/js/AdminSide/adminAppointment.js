@@ -5,32 +5,56 @@ const post = (url, body) =>
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
-  }).then(r => r.json());
+  }).then(async r => {
+    if (!r.ok) {
+        // Try to get error message if any
+        let err = "Server error " + r.status;
+        try { const data = await r.json(); err = data.error || err; } catch(e) {}
+        throw new Error(err);
+    }
+    return r.json();
+  }).catch(err => {
+    console.error("[POST Error]", err);
+    return { ok: false, error: err.message };
+  });
 
 // ── Table filter ──────────────────────────────────────────────────────────────
 window.filterTable = () => {
   const q      = document.getElementById('search-input').value.toLowerCase();
   const status = document.getElementById('status-filter').value;
+  const date   = document.getElementById('date-filter').value;
+
   document.querySelectorAll('#appointments-body tr[data-status]').forEach(row => {
     const matchSearch = !q || row.dataset.search?.toLowerCase().includes(q);
     const matchStatus = !status || row.dataset.status === status;
-    row.style.display = matchSearch && matchStatus ? '' : 'none';
+    const matchDate   = !date || row.dataset.date === date;
+    
+    row.style.display = matchSearch && matchStatus && matchDate ? '' : 'none';
   });
 };
 
-// ── BOOK MODAL ────────────────────────────────────────────────────────────────
-window.openBookModal = () => {
-  const modal = document.getElementById('book-modal');
-  const box   = document.getElementById('book-modal-box');
+// ── MODAL UTILS ───────────────────────────────────────────────────────────────
+const showModal = (id) => {
+  const modal = document.getElementById(id);
+  const box = document.getElementById(`${id}-box`);
   modal.classList.remove('hidden');
-  requestAnimationFrame(() => box.classList.remove('scale-95', 'opacity-0'));
+  gsap.fromTo(box, 
+    { scale: 0.9, opacity: 0, y: 20 }, 
+    { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+  );
 };
 
-window.closeBookModal = () => {
-  const box = document.getElementById('book-modal-box');
-  box.classList.add('scale-95', 'opacity-0');
-  setTimeout(() => document.getElementById('book-modal').classList.add('hidden'), 200);
+const hideModal = (id) => {
+  const modal = document.getElementById(id);
+  const box = document.getElementById(`${id}-box`);
+  gsap.to(box, { 
+    scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
+    onComplete: () => modal.classList.add('hidden')
+  });
 };
+
+window.openBookModal = () => showModal('book-modal');
+window.closeBookModal = () => hideModal('book-modal');
 
 window.submitBook = async () => {
   const name    = document.getElementById('book-patient-name').value.trim();
@@ -71,53 +95,32 @@ window.submitBook = async () => {
 
 // ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
 window.confirmAppt = (appt) => {
-  const modal = document.getElementById('confirm-modal');
-  const box   = document.getElementById('confirm-modal-box');
-  const msg   = document.getElementById('confirm-modal-message');
-  const idInp = document.getElementById('confirm-appt-id');
+  document.getElementById('confirm-appt-id').value = appt.id;
+  document.getElementById('confirm-modal-message').innerHTML = 
+    `Confirming appointment for <strong>${appt.patientName}</strong>.<br/><span class="text-[11px] opacity-70">${appt.serviceName} (${appt.serviceCategory})</span>`;
+  
   const docSel = document.getElementById('confirm-doctor');
   const hint  = document.getElementById('doctor-hint');
-
-  idInp.value = appt.id;
-  msg.innerHTML = `Confirming appointment for <strong>${appt.patientName}</strong>.<br/>Service: ${appt.serviceName} (${appt.serviceCategory})`;
   
-  // Reset doctor selection
   docSel.value = appt.doctorId || '';
-  
-  // Filtering doctors by specialty
   const category = appt.serviceCategory ? appt.serviceCategory.toLowerCase() : "";
   let shownCount = 0;
   
   Array.from(docSel.options).forEach(opt => {
-    if (!opt.value) return; // Skip "Select a doctor"
-    
+    if (!opt.value) return;
     const specs = opt.dataset.specialties ? opt.dataset.specialties.toLowerCase().split(',') : [];
-    // If no specs defined, show anyway or filter? User said: "if the doctor cant do cosmetics then it shouldnt have the option"
-    // We'll show if spec matches or if category is empty
     const isMatch = !category || specs.some(s => s.trim() === category || category.includes(s.trim()) || s.trim().includes(category));
-    
     opt.style.display = isMatch ? '' : 'none';
     if (isMatch) shownCount++;
   });
 
-  if (shownCount > 0) {
-    hint.classList.remove('hidden');
-    hint.textContent = `Note: Showing ${shownCount} doctors matching "${appt.serviceCategory}".`;
-  } else {
-    hint.classList.remove('hidden');
-    hint.textContent = `Warning: No doctors found for specialty "${appt.serviceCategory}". Showing all active doctors.`;
-    Array.from(docSel.options).forEach(opt => opt.style.display = '');
-  }
-
-  modal.classList.remove('hidden');
-  requestAnimationFrame(() => box.classList.remove('scale-95', 'opacity-0'));
+  hint.classList.toggle('hidden', shownCount === 0);
+  if (shownCount > 0) hint.textContent = `Matching specialists for ${appt.serviceCategory} shown.`;
+  
+  showModal('confirm-modal');
 };
 
-window.closeConfirmModal = () => {
-  const box = document.getElementById('confirm-modal-box');
-  box.classList.add('scale-95', 'opacity-0');
-  setTimeout(() => document.getElementById('confirm-modal').classList.add('hidden'), 200);
-};
+window.closeConfirmModal = () => hideModal('confirm-modal');
 
 window.submitConfirm = async () => {
   const id       = document.getElementById('confirm-appt-id').value;
@@ -142,21 +145,24 @@ window.submitConfirm = async () => {
 // ── STATUS UPDATES ───────────────────────────────────────────────────────────
 window.updateStatus = (appt, status) => {
   const statusLabels = {
-    arrived: "Arrived",
-    completed: "Completed",
-    "no-show": "No-Show"
+    arrived: { label: "Arrived", type: "info", msg: "Mark patient as <strong>Arrived</strong>? This will notify the doctor and start the wait-time tracker." },
+    completed: { label: "Completed", type: "success", msg: "Mark appointment as <strong>Completed</strong>? Ensure all treatments and payments are finalized." },
+    no_show: { label: "No-Show", type: "warning", msg: "Mark as <strong>No-Show</strong>? This will free up the slot for other patients." }
   };
-  const label = statusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1);
-  const type = status === 'completed' ? 'success' : (status === 'no-show' ? 'warning' : 'info');
+  
+  const config = statusLabels[status] || { label: status.replace('_', ' '), type: "info", msg: `Update status to ${status}?` };
 
   Modal.open({
-    title: `Mark as ${label}`,
-    message: `Mark appointment for <strong>${appt.patientName}</strong> as <strong>${label}</strong>?`,
-    type: type,
-    confirmText: `Yes, ${label}`,
+    title: `Change Status: ${config.label}`,
+    message: `Patient: <strong>${appt.patientName}</strong><br/>${config.msg}`,
+    type: config.type,
+    confirmText: `Confirm ${config.label}`,
     onConfirm: async () => {
       const res = await post('/api/admin/appointments/status', { id: appt.id, status: status });
-      if (res.ok) { Toast.show(`Appointment ${label.toLowerCase()}.`, 'success'); setTimeout(() => location.reload(), 600); }
+      if (res.ok) { 
+        Toast.show(`Status updated to ${config.label}.`, 'success'); 
+        setTimeout(() => location.reload(), 600); 
+      }
       else Toast.show(res.error ?? 'Failed to update status.', 'danger');
     }
   });
@@ -195,31 +201,23 @@ window.deleteAppt = (appt) => {
 // ── EDIT / RESCHEDULE MODAL ───────────────────────────────────────────────────
 window.openEditModal = (appt) => {
   document.getElementById('edit-modal-title').textContent = 'Edit Appointment';
-  _openEditModalWith(appt);
+  _setupEditModal(appt);
 };
 
 window.openRescheduleModal = (appt) => {
   document.getElementById('edit-modal-title').textContent = 'Reschedule Appointment';
-  _openEditModalWith(appt);
+  _setupEditModal(appt);
 };
 
-function _openEditModalWith(appt) {
+function _setupEditModal(appt) {
   document.getElementById('edit-appt-id').value = appt.id;
   document.getElementById('edit-date').value     = appt.appointmentDate;
   document.getElementById('edit-time').value     = appt.appointmentTime;
   document.getElementById('edit-doctor').value   = appt.doctorId ?? '';
-
-  const modal = document.getElementById('edit-modal');
-  const box   = document.getElementById('edit-modal-box');
-  modal.classList.remove('hidden');
-  requestAnimationFrame(() => box.classList.remove('scale-95', 'opacity-0'));
+  showModal('edit-modal');
 }
 
-window.closeEditModal = () => {
-  const box = document.getElementById('edit-modal-box');
-  box.classList.add('scale-95', 'opacity-0');
-  setTimeout(() => document.getElementById('edit-modal').classList.add('hidden'), 200);
-};
+window.closeEditModal = () => hideModal('edit-modal');
 
 window.submitReschedule = async () => {
   const id       = document.getElementById('edit-appt-id').value;

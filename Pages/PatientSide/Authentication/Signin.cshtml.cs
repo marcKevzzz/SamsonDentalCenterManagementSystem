@@ -48,6 +48,12 @@
 
             try
             {
+                bool emailExists = await _profileService.CheckEmailExists(Input.Email);
+                if (!emailExists)
+                {
+                    return new JsonResult(new { ok = false, error_type = "email_not_found", errors = new[] { "This email is not registered." } });
+                }
+
                 var session = await _supabase.Auth.SignIn(Input.Email, Input.Password);
 
                 if (session != null && !string.IsNullOrEmpty(session.AccessToken))
@@ -111,12 +117,23 @@
             {
                 // This will catch "Invalid login credentials" from Supabase
                 Console.WriteLine($"[Supabase Error] Connection failed: {ex.Message}");
-                if (ex.InnerException != null)
+                
+                string errorMsg = "Login failed.";
+                if (ex.Message.Contains("invalid_credentials") || ex.Message.Contains("Invalid login credentials"))
+                {
+                    errorMsg = "Incorrect password.";
+                }
+                else if (ex.Message.Contains("Email not confirmed"))
+                {
+                    errorMsg = "Please confirm your email address before signing in.";
+                }
+                else if (ex.InnerException != null)
                 {
                     Console.WriteLine($"[Inner Error] {ex.InnerException.Message}");
+                    errorMsg = "A connection error occurred. Please try again.";
                 }
 
-                return new JsonResult(new { ok = false, errors = new[] { "A connection error occurred. Please check your internet or Supabase status." } });
+                return new JsonResult(new { ok = false, errors = new[] { errorMsg } });
             }
         }
     }

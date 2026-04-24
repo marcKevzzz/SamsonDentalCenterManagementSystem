@@ -72,7 +72,7 @@ ViewData["Title"] = "Dashboard";
     <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb]">
       <div class="flex items-start justify-between mb-3">
         <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
-           <i class="fa-solid fa-check-double text-primary"></i>
+           <i class="fa-solid fa-check text-primary"></i>
         </div>
       </div>
       <div class="brand-font font-extrabold text-brand text-[1.8rem] leading-none">
@@ -120,7 +120,7 @@ ViewData["Title"] = "Dashboard";
               @Model.NextAppointment.ServiceName
             </h3>
             <div class="font-body text-[0.82rem] text-white/55">
-              @Model.NextAppointment.DoctorName
+              @(Model.NextAppointment.Doctor?.Profile != null ? $"{Model.NextAppointment.Doctor.Title} {Model.NextAppointment.Doctor.Profile.FirstName} {Model.NextAppointment.Doctor.Profile.LastName}" : "Unassigned")
             </div>
           </div>
           @{
@@ -361,7 +361,7 @@ ViewData["Title"] = "Dashboard";
                           @appt.ServiceName — @appt.Status
                         </div>
                         <div class="font-body text-[0.75rem] text-muted mt-0.5">
-                          @appt.AppointmentDate.ToString("MMM dd, yyyy") · @appt.DoctorName
+                          @appt.AppointmentDate.ToString("MMM dd, yyyy") · @(appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned")
                         </div>
                       </div>
                       <span

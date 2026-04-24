@@ -52,7 +52,7 @@ ViewData["Title"] = "My Appointments page";
     <div class="bg-white rounded-2xl p-5 border border-[#e5e7eb] shadow-sm group hover:border-primary/30 transition-all">
       <div class="flex items-center justify-between mb-3">
           <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
-              <i class="fa-solid fa-check-double"></i>
+              <i class="fa-solid fa-check"></i>
           </div>
           <div class="brand-font font-extrabold text-brand text-[1.5rem]">@Model.CompletedCount</div>
       </div>
@@ -71,7 +71,7 @@ ViewData["Title"] = "My Appointments page";
   </div>
 
   <!-- Filter Tabs -->
-  <div class="flex items-center gap-2 mb-6 border-b border-[#e5e7eb] pb-px fade-up overflow-x-auto no-scrollbar">
+  <div class="flex items-center gap-2 mb-6  pb-px fade-up overflow-x-auto no-scrollbar">
     <button onclick="filterAppts('all')" class="filter-tab active px-4 py-3 font-body text-[0.8rem] font-semibold text-muted border-b-2 border-transparent transition-all whitespace-nowrap" data-filter="all">All</button>
     <button onclick="filterAppts('confirmed')" class="filter-tab px-4 py-3 font-body text-[0.8rem] font-semibold text-muted border-b-2 border-transparent transition-all whitespace-nowrap" data-filter="confirmed">Confirmed</button>
     <button onclick="filterAppts('pending')" class="filter-tab px-4 py-3 font-body text-[0.8rem] font-semibold text-muted border-b-2 border-transparent transition-all whitespace-nowrap" data-filter="pending">Pending</button>
@@ -97,10 +97,11 @@ ViewData["Title"] = "My Appointments page";
     {
     @foreach (var appt in Model.Appointments)
     {
+        var docName = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null;
         var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
             id = appt.Id,
             serviceName = appt.ServiceName,
-            doctorName = appt.DoctorName,
+            doctorName = docName,
             date = appt.AppointmentDate.ToString("MMM dd, yyyy"),
             time = appt.AppointmentTime,
             status = appt.Status,
@@ -130,7 +131,7 @@ ViewData["Title"] = "My Appointments page";
         };
 
         <div class="appt-card fade-up group bg-white rounded-2xl border border-[#e5e7eb] hover:border-primary/20 hover:shadow-md transition-all overflow-hidden"
-             data-status="@s" data-name="@appt.ServiceName @appt.DoctorName">
+             data-status="@s" data-name="@appt.ServiceName @docName">
 
           <div class="p-5">
             <div class="flex items-start justify-between gap-4 mb-4">
@@ -141,10 +142,10 @@ ViewData["Title"] = "My Appointments page";
                     <div>
                         <h3 class="brand-font font-bold text-brand text-[1rem] leading-none mb-1">@appt.ServiceName</h3>
                         <div class="flex items-center gap-1.5 font-body text-[0.72rem] text-muted">
-                        @if(appt.DoctorName != null && s != "pending"){
+                        @if(docName != null && s != "pending"){
                             <i class="fa-solid fa-user-doctor text-[9px]"></i>
-                            @appt.DoctorName
-                        } else if(appt.DoctorName != null && s == "cancelled"){
+                            @docName
+                        } else if(docName != null && s == "cancelled"){
                             <i class="fa-solid fa-user-doctor text-[9px]"></i>
                             <span class="text-muted">As Assigned</span>
                         } else {
@@ -212,14 +213,14 @@ ViewData["Title"] = "My Appointments page";
 </div>
 
 <!-- Appointment Details Modal -->
-<div id="details-modal" class="fixed inset-0 z-50 hidden">
+<div id="details-modal" class="fixed inset-0 z-[10001] hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeDetailsModal()"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div class="absolute inset-0 flex items-center justify-center sm:p-4 pointer-events-none">
         <div id="details-modal-box" 
-             class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden pointer-events-auto transform scale-95 opacity-0 transition-all duration-300">
+             class="bg-white s rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden pointer-events-auto transform scale-95 opacity-0 transition-all duration-300">
             
             <!-- Modal Header -->
-            <div class="relative h-32 bg-brand flex items-center px-8">
+            <div class="relative h-32 bg-brand flex items-center px-8 shrink-0">
                 <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
                 <div class="relative z-10">
                     <h3 id="det-service" class="brand-font font-bold text-white text-xl">Service Name</h3>
@@ -231,7 +232,7 @@ ViewData["Title"] = "My Appointments page";
             </div>
 
             <!-- Modal Content -->
-            <div class="p-8 space-y-6">
+            <div class="p-8 space-y-6 overflow-y-auto">
                 <div class="grid grid-cols-2 gap-6">
                     <div>
                         <label class="block text-[0.65rem] font-bold text-muted uppercase tracking-wider mb-2">Date & Time</label>
@@ -287,7 +288,7 @@ ViewData["Title"] = "My Appointments page";
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0">
                 <button onclick="closeDetailsModal()" class="brand-font font-bold text-[0.75rem] tracking-wider uppercase text-muted hover:text-brand px-6 py-2 transition-colors">
                     Close
                 </button>

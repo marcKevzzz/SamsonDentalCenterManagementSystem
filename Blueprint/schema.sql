@@ -17,11 +17,10 @@ CREATE TABLE public.appointments (
   service_id uuid NOT NULL,
   service_name text NOT NULL,
   doctor_id uuid,
-  doctor_name text,
   appointment_date date NOT NULL,
   appointment_time text NOT NULL,
   duration_minutes integer NOT NULL DEFAULT 60,
-  status text NOT NULL DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'confirmed'::text, 'cancelled'::text, 'completed'::text, 'waitlist'::text, 'no_show'::text])),
+  status text NOT NULL DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'confirmed'::text, 'arrived'::text, 'completed'::text, 'no_show'::text, 'cancelled'::text])),
   is_waitlist boolean NOT NULL DEFAULT false,
   waitlist_position integer,
   confirmation_token text UNIQUE,
@@ -29,6 +28,7 @@ CREATE TABLE public.appointments (
   notes text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  email_status text DEFAULT 'Pending'::text,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id),
@@ -45,7 +45,7 @@ CREATE TABLE public.dental_services (
   summary text,
   duration text,
   recovery text,
-  price text NOT NULL,
+  price numeric NOT NULL,
   benefits jsonb NOT NULL DEFAULT '[]'::jsonb,
   steps jsonb NOT NULL DEFAULT '[]'::jsonb,
   faqs jsonb NOT NULL DEFAULT '[]'::jsonb,
@@ -66,14 +66,23 @@ CREATE TABLE public.doctor_availability (
 );
 CREATE TABLE public.doctors (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  doctor_name text NOT NULL,
   title text NOT NULL DEFAULT 'Dr.'::text,
   specialties ARRAY NOT NULL DEFAULT '{}'::text[],
   bio text,
-  avatar_url text,
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT doctors_pkey PRIMARY KEY (id)
+  profile_id uuid UNIQUE,
+  CONSTRAINT doctors_pkey PRIMARY KEY (id),
+  CONSTRAINT doctors_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.receptionists (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  desk_location text,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  profile_id uuid UNIQUE,
+  CONSTRAINT receptionists_pkey PRIMARY KEY (id),
+  CONSTRAINT receptionists_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -90,4 +99,34 @@ CREATE TABLE public.profiles (
   email text,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+
+CREATE TABLE public.invoices (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  appointment_id uuid,
+  patient_id uuid,
+  doctor_id uuid,
+  total_amount numeric NOT NULL DEFAULT 0,
+  discount_amount numeric NOT NULL DEFAULT 0,
+  final_amount numeric NOT NULL DEFAULT 0,
+  status text NOT NULL DEFAULT 'pending',
+  notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT invoices_pkey PRIMARY KEY (id),
+  CONSTRAINT invoices_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id),
+  CONSTRAINT invoices_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
+  CONSTRAINT invoices_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
+);
+
+CREATE TABLE public.invoice_items (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  invoice_id uuid,
+  service_id uuid,
+  description text NOT NULL,
+  unit_price numeric NOT NULL DEFAULT 0,
+  quantity integer NOT NULL DEFAULT 1,
+  total_price numeric NOT NULL DEFAULT 0,
+  CONSTRAINT invoice_items_pkey PRIMARY KEY (id),
+  CONSTRAINT invoice_items_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
+  CONSTRAINT invoice_items_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );

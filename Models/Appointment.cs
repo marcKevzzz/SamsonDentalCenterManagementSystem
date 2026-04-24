@@ -53,8 +53,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("doctor_id")]
         public string? DoctorId { get; set; }
 
-        [Column("doctor_name")]
-        public string? DoctorName { get; set; }
+        [Reference(typeof(Doctor))]
+        public Doctor? Doctor { get; set; }
 
         [Column("appointment_date")]
         public DateTime AppointmentDate { get; set; }
@@ -88,30 +88,5 @@ namespace SamsonDentalCenterManagementSystem.Models
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
-    }
-
-    [Table("doctors")]
-    public class Doctor : BaseModel
-    {
-        [PrimaryKey("id", false)]
-        public string Id { get; set; } = string.Empty;
-
-        [Column("doctor_name")]
-        public string DoctorName { get; set; } = string.Empty;
-
-        [Column("title")]
-        public string Title { get; set; } = "Dr.";
-
-        [Column("specialties")]
-        public string[] Specialties { get; set; } = Array.Empty<string>();
-
-        [Column("bio")]
-        public string? Bio { get; set; }
-
-        [Column("avatar_url")]
-        public string? AvatarUrl { get; set; }
-
-        [Column("is_active")]
-        public bool IsActive { get; set; } = true;
     }
 }
