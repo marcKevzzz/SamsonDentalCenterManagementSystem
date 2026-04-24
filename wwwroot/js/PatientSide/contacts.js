@@ -4,35 +4,48 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initContactsAnimations() {
-    gsap.registerPlugin(ScrollTrigger);
 
     // 1. Entrance animation for header
-    gsap.from("section:first-of-type h1, section:first-of-type p", {
-        opacity: 0,
-        y: 30,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out"
-    });
+    gsap.fromTo(".contact-reveal h1, .contact-reveal p", 
+        { autoAlpha: 0, y: 30 },
+        {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+            onComplete: function() {
+                this.targets().forEach(el => el.classList.add('revealed'));
+                gsap.set(this.targets(), { clearProps: "all" });
+            }
+        }
+    );
 
     // 2. Entrance for info cards
-    gsap.from(".info-card", {
-        scrollTrigger: {
-            trigger: ".info-card",
-            start: "top 90%",
-            once: true
-        },
-        opacity: 0,
-        y: 40,
-        scale: 0.95,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "back.out(1.7)"
-    });
+    gsap.fromTo(".mission-card", 
+        { autoAlpha: 0, y: 40, scale: 0.95 },
+        {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+                trigger: ".mission-card",
+                start: "top 90%",
+                once: true
+            },
+            onComplete: function() {
+                this.targets().forEach(el => el.classList.add('revealed'));
+                gsap.set(this.targets(), { clearProps: "all" });
+            }
+        }
+    );
 
     // 3. Hover effects for info cards (desktop)
     if (window.innerWidth > 1024) {
-        document.querySelectorAll(".info-card").forEach(card => {
+        document.querySelectorAll(".mission-card").forEach(card => {
             card.addEventListener("mouseenter", () => {
                 gsap.to(card, {
                     y: -8,
@@ -65,18 +78,25 @@ function initContactsAnimations() {
     }
 
     // 4. Form and Map reveal
-    gsap.from("#contactSection .fade-up", {
-        scrollTrigger: {
-            trigger: "#contactSection",
-            start: "top 80%",
-            once: true
-        },
-        opacity: 0,
-        y: 50,
-        duration: 1,
-        stagger: 0.3,
-        ease: "power4.out"
-    });
+    gsap.fromTo("#contactSection .reveal-up", 
+        { autoAlpha: 0, y: 50 },
+        {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            stagger: 0.3,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: "#contactSection",
+                start: "top 80%",
+                once: true
+            },
+            onComplete: function() {
+                this.targets().forEach(el => el.classList.add('revealed'));
+                gsap.set(this.targets(), { clearProps: "all" });
+            }
+        }
+    );
 }
 
 function initFormInteractions() {

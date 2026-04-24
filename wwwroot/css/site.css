@@ -38,7 +38,7 @@ html {
 }
 
 .home-hero-bg-img {
-  background: url("https://scontent.fmnl17-4.fna.fbcdn.net/v/t1.6435-9/44705784_754262068260276_6283356894270586880_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeEi__bVjGpGIidHVUUUVWtf0rsu32iJStbSuy7faIlK1i8d4Iiq--pLXcMNSFQyfNyav7Zsxj1rF8z7mWaKom49&_nc_ohc=hYpr2P8YkaAQ7kNvwFYEbcq&_nc_oc=AdofpWEyy3rKr8_pOaKIcysrdOWk6KXk-7XsPApQyb3uJviP2HOyIAer5AywMGNObM8&_nc_zt=23&_nc_ht=scontent.fmnl17-4.fna&_nc_gid=rtfl8Q4NrGUNsOIQL3M3FA&_nc_ss=7a32e&oh=00_Afz-4Z2AiEqAGvV54b5r5AnpyYcIK5w7E4XD0EkCQu_exA&oe=69E76D7D") center / cover no-repeat;
+  background: url("https://images.unsplash.com/photo-1629909613654-28e377c37b09?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWVkaWNhbCUyMGNsaW5pY3xlbnwwfHwwfHx8MA%3D%3D") center / cover no-repeat;
 }
 
 .about-hero-bg-img {
@@ -399,22 +399,51 @@ body.standalone {
     
 }
 
-/* GSAP targets start hidden */
-/* .fade-up {
+/* GSAP targets start hidden to prevent FOUC */
+/* Only hide elements if JavaScript is active */
+/* GSAP targets start hidden to prevent FOUC */
+/* Only hide elements if JavaScript is active and they have specific reveal classes */
+.js-enabled .reveal-up,
+.js-enabled .mission-card,
+.js-enabled .service-card-item,
+.js-enabled .hp-reveal,
+.js-enabled .hp-reveal-late,
+.js-enabled .hp-word,
+.js-enabled .hp-doctor-img,
+.js-enabled .hp-glass-badge,
+.js-enabled .hp-feature-card,
+.js-enabled .benefit-item,
+.js-enabled .stats-item
+{
   opacity: 0;
-  transform: translateY(28px);
-} */
-
-/* @keyframes fadeUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  visibility: hidden;
+  will-change: transform, opacity;
 }
 
-.fade-up.animate {
-  animation: fadeUp 0.8s ease 0.5s forwards;
-} */
+.js-enabled .about-hero-text {
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* Keep visible after GSAP clears props */
+.js-enabled .revealed {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.js-enabled .reveal-up {
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.js-enabled .mission-card {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(30px); /* Matches your mission-card starting point */
+  will-change: transform, opacity;
+}
 
 /* Newsletter placeholder */
 .nl-input::placeholder {
@@ -509,6 +538,9 @@ body.standalone {
   display: flex;
   gap: 32px;
   transition: none;
+  opacity: 0;
+  visibility: hidden;
+
 }
 
 #reviewsContainer > div {
@@ -778,6 +810,10 @@ textarea.form-input {
   border-radius: 16px;
   background: #fff;
   padding: 1.25rem;
+}
+
+.service-slug-title{
+  font-size:clamp(1.8rem,5vw,4rem) !important;
 }
 
 .svc-card:hover {
@@ -1652,8 +1688,8 @@ textarea.form-input {
   display: flex;
   width: max-content;
   will-change: transform;
-  padding-left: 4vw;
-  padding-right: 4vw;
+  padding-left: 4rem;
+  padding-right: 4rem;
 }
 
 .review-card-premium {

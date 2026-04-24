@@ -17,38 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  playHero();
+  initHeroAnimations();
   initScrollAnimations();
-  initMagneticButtons();
+  initMagneticBadge();
 });
 
 function initScrollAnimations() {
-  gsap.registerPlugin(ScrollTrigger);
 
-  // 1. Parallax Hero Effect (Mouse Move)
-  const hero = document.querySelector("#hero");
-  if (hero) {
-    hero.addEventListener("mousemove", (e) => {
-      const { clientX, clientY } = e;
-      const xPos = (clientX / window.innerWidth - 0.5) * 30;
-      const yPos = (clientY / window.innerHeight - 0.5) * 30;
-      
-      gsap.to("#heroContent", {
-        x: xPos,
-        y: yPos,
-        duration: 1.5,
-        ease: "power2.out"
-      });
-      
-      gsap.to("#heroBg", {
-        x: -xPos * 0.5,
-        y: -yPos * 0.5,
-        scale: 1.05,
-        duration: 2,
-        ease: "power2.out"
-      });
-    });
-  }
 
   // 2. Count-up Animation for Stats
   const stats = document.querySelector(".hero-reveal-late div .font-body");
@@ -71,33 +46,48 @@ function initScrollAnimations() {
     });
   }
 
-  // 3. Reveal features (Staggered cards)
-  gsap.from(".feature-card", {
-    scrollTrigger: {
-      trigger: "#features",
-      start: "top 80%",
-      once: true
-    },
-    opacity: 0,
-    y: 60,
-    rotateY: 15,
-    duration: 1,
-    stagger: 0.2,
-    ease: "expo.out",
-    clearProps: "all"
-  });
+  // 3. Reveal feature cards
+  gsap.fromTo(".hp-feature-card", 
+    { autoAlpha: 0, y: 60, rotateY: 15 },
+    {
+      scrollTrigger: {
+        trigger: "#features",
+        start: "top 80%",
+        once: true
+      },
+      autoAlpha: 1,
+      y: 0,
+      rotateY: 0,
+      duration: 1,
+      stagger: 0.2,
+      ease: "expo.out",
+      onComplete: function() {
+        this.targets().forEach(el => el.classList.add('revealed'));
+        gsap.set(this.targets(), { clearProps: "all" });
+      }
+    }
+  );
 
-  // 4. Reveal reviews header
-  gsap.from("#reviews h2", {
-    scrollTrigger: {
-      trigger: "#reviews h2",
-      start: "top 90%",
-      once: true
-    },
-    opacity: 0,
-    x: -50,
-    duration: 1.2,
-    ease: "power4.out"
+  // 4. Generic Fade-Up Reveal (For reviews header, location items, etc.)
+  gsap.utils.toArray(".reveal-up").forEach((el) => {
+    gsap.fromTo(el, 
+      { autoAlpha: 0, y: 40 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          once: true,
+        },
+        onComplete: function() {
+          el.classList.add('revealed');
+          gsap.set(el, { clearProps: "all" });
+        }
+      }
+    );
   });
 
   // 5. Section Background Reveal
@@ -111,51 +101,56 @@ function initScrollAnimations() {
   });
 }
 
-function playHero() {
+function initHeroAnimations() {
   const tl = gsap.timeline({
     defaults: { ease: "expo.out" }
   });
 
-  tl.fromTo(".hero-reveal",
-    { opacity: 0, y: 40, skewY: 5 },
-    { opacity: 1, y: 0, skewY: 0, duration: 1.2, stagger: 0.2 }
+  // 1. Initial set for FOUC elements (just in case)
+  gsap.set(".hp-reveal, .hp-reveal-late, .hp-word, .hp-doctor-img, .hp-glass-badge", { autoAlpha: 0 });
+
+  tl.fromTo(".hp-reveal",
+    { autoAlpha: 0, y: 40, skewY: 5 },
+    { autoAlpha: 1, y: 0, skewY: 0, duration: 1.2, stagger: 0.2 }
   )
-    .fromTo(".word",
-      { opacity: 0, y: 60, rotateX: -60 },
+    .fromTo(".hp-word",
+      { autoAlpha: 0, y: 60, rotateX: -60 },
       {
-        opacity: 1, y: 0, rotateX: 0,
+        autoAlpha: 1,
+        y: 0,
+        rotateX: 0,
         duration: 1.5,
         stagger: 0.08,
         ease: "expo.out"
       },
       "-=0.8"
     )
-    .fromTo(".hero-reveal-late",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1, stagger: 0.2 },
+    .fromTo(".hp-reveal-late",
+      { autoAlpha: 0, y: 30 },
+      { autoAlpha: 1, y: 0, duration: 1, stagger: 0.2 },
       "-=1"
     )
-    .fromTo(".hero-doctor-img",
-      { opacity: 0, scale: 0.8, x: 40, filter: "brightness(0.5) blur(10px)" },
-      { opacity: 1, scale: 1, x: 0, filter: "brightness(1.05) blur(0px)", duration: 2, ease: "expo.out" },
+    .fromTo(".hp-doctor-img",
+      { autoAlpha: 0, scale: 0.8, x: 40, filter: "brightness(0.5) blur(10px)" },
+      { autoAlpha: 1, scale: 1, x: 0, filter: "brightness(1.05) blur(0px)", duration: 2, ease: "expo.out" },
       "-=1.2"
     )
-    .fromTo(".glass-pill",
-      { opacity: 0, x: -30, scale: 0.8 },
-      { opacity: 1, x: 0, scale: 1, duration: 1.2, ease: "back.out(1.7)" },
+    .fromTo(".hp-glass-badge",
+      { autoAlpha: 0, x: -30, scale: 0.8 },
+      { autoAlpha: 1, x: 0, scale: 1, duration: 1.2, ease: "back.out(1.7)" },
       "-=1"
     );
 }
 
-function initMagneticButtons() {
-    const buttons = document.querySelectorAll('a[href="/Appointments"], a[href="/Services"]');
-    buttons.forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            const rect = btn.getBoundingClientRect();
+function initMagneticBadge() {
+    const badge = document.querySelector('.hp-glass-badge');
+    if (badge) {
+        badge.addEventListener('mousemove', (e) => {
+            const rect = badge.getBoundingClientRect();
             const x = e.clientX - rect.left - rect.width / 2;
             const y = e.clientY - rect.top - rect.height / 2;
             
-            gsap.to(btn, {
+            gsap.to(badge, {
                 x: x * 0.3,
                 y: y * 0.3,
                 duration: 0.4,
@@ -163,15 +158,15 @@ function initMagneticButtons() {
             });
         });
         
-        btn.addEventListener('mouseleave', () => {
-            gsap.to(btn, {
+        badge.addEventListener('mouseleave', () => {
+            gsap.to(badge, {
                 x: 0,
                 y: 0,
                 duration: 0.6,
                 ease: "elastic.out(1, 0.3)"
             });
         });
-    });
+    }
 }
 
 /* ── Reviews Scroll Trigger Logic ── */
@@ -276,6 +271,9 @@ function initReviewsScroll() {
   const cards = gsap.utils.toArray(".review-card-premium");
   const dots = dotsContainer ? dotsContainer.querySelectorAll(".review-dot") : [];
 
+  // Set starting horizontal position before paint
+  gsap.set(container, { x: 0 });
+
   function setActiveCard(index) {
     cards.forEach((card, i) => {
       card.classList.toggle("review-active", i === index);
@@ -289,15 +287,26 @@ function initReviewsScroll() {
   setTimeout(() => {
     ScrollTrigger.refresh();
 
+    gsap.to(container, {
+      scrollTrigger: {
+        trigger: "#reviewsPin",
+        start: "top 80%",
+        once: true
+      },
+      autoAlpha: 1,
+      duration: 1,
+      ease: "power2.out"
+    });
+
     const totalWidth = container.scrollWidth;
     const viewportWidth = section.offsetWidth;
+    // Add extra padding to the end of scroll to account for the centered layout
     const travelDistance = totalWidth - viewportWidth;
 
     if (travelDistance > 0) {
       const snapPoints = cards.map((card) => {
-        const cardOffset = card.offsetLeft;
-        const cardWidth = card.offsetWidth;
-        const targetX = cardOffset - viewportWidth / 2 + cardWidth / 2;
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const targetX = cardCenter - viewportWidth / 2;
         return gsap.utils.clamp(0, 1, targetX / travelDistance);
       });
 

@@ -1,55 +1,127 @@
-gsap.registerPlugin(ScrollTrigger);
-
 // ── Entrance Animations ──
 function initEntranceAnimations() {
-  // 1. General Fade-Up (Filter out info-cards so they don't double-animate)
-  gsap.utils.toArray(".fade-up:not(.info-card)").forEach((el) => {
-    gsap.from(el, {
-      opacity: 0,
-      y: 40,
+  // 1. Hero Text (Top of Page - No ScrollTrigger needed)
+ // Create a master timeline for the page entrance
+const mainTl = gsap.timeline();
+
+// 1. SEQUENCE PART ONE: Hero Entrance (Immediate)
+const heroElements = document.querySelectorAll(".about-hero-text");
+if (heroElements.length > 0) {
+
+   mainTl.set(heroElements, { y: 30, autoAlpha: 0 });
+  mainTl.to(heroElements, {
+    autoAlpha: 1,
+    y: 0,
+    duration: 1.2,
+    stagger: 0.2,
+    ease: "expo.out",
+    onComplete: function() {
+      this.targets().forEach(el => {
+        el.classList.add('revealed');
+        gsap.set(el, { clearProps: "all" });
+      });
+    }
+  });
+}
+
+// 2. SEQUENCE PART TWO: Scroll Reveals (Initialized after/with Hero)
+const revealElements = gsap.utils.toArray(".reveal-up:not(.mission-card)");
+
+if (revealElements.length > 0) {
+  // Use 'set' to lock the starting position immediately
+  gsap.set(revealElements, { y: 40, autoAlpha: 0 });
+
+  revealElements.forEach((el) => {
+    gsap.to(el, {
+      autoAlpha: 1,
+      y: 0,
       duration: 1,
       ease: "power2.out",
       scrollTrigger: {
         trigger: el,
-        start: "top 92%", // Trigger slightly later to ensure it's in view
+        start: "top 92%", 
         once: true,
       },
-    });
-  });
-
-  // 2. Parallax: Optimized for the container
-  const storyTrigger = document.querySelector(".fade-up.relative.group");
-  if (storyTrigger) {
-    const storyTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: storyTrigger,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true
+      onComplete: function() {
+        el.classList.add('revealed');
+        gsap.set(el, { clearProps: "all" });
       }
     });
-    storyTl.to("#aboutimg1", { yPercent: 15, scale: 1.1, ease: "none" }, 0);
-    storyTl.to("#aboutimg", { yPercent: -10, ease: "none" }, 0);
-  }
+  });
+}
 
-  // 3. Info Cards: Using the PARENT as the trigger
-  // This ensures that as soon as the section appears, all 3 cards stagger in.
-  const infoSection = document.querySelector(".grid-cols-1.md\\:grid-cols-3");
+  const storyTrigger = document.querySelector(".reveal-up.relative.group"); // Fixed selector
+if (storyTrigger) {
+  // Lock the initial state to prevent jump on scrub start
+  gsap.set("#aboutimg1", { scale: 1.1 }); 
+
+  const storyTl = gsap.timeline({
+    scrollTrigger: {
+      trigger: storyTrigger,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 1 // Adding a small smoothing value helps with "jumpy" scrolls
+    }
+  });
+  storyTl.to("#aboutimg1", { yPercent: 15, scale: 1.2, ease: "none" }, 0);
+  storyTl.to("#aboutimg", { yPercent: -10, ease: "none" }, 0);
+}
+
+
+  // 3. Mission Section (Staggered Group)
+  const infoSection = document.querySelector(".mission-section");
   if (infoSection) {
-    gsap.from(".info-card", {
+    const cards = document.querySelectorAll(".mission-card");
+    // Lock start state
+    gsap.set(cards, { y: 30, autoAlpha: 0 });
+
+    gsap.to(cards, {
       scrollTrigger: {
-        trigger: infoSection, 
-        start: "top 85%",      
-        once: true
+        trigger: infoSection,
+        start: "top 85%",
+        once: true,
       },
-      opacity: 0,
-      y: 30,
+      autoAlpha: 1,
+      y: 0,
       stagger: 0.15,
       duration: 0.8,
       ease: "power2.out",
-      clearProps: "all" 
+      onComplete: function() {
+        this.targets().forEach(el => el.classList.add('revealed'));
+        gsap.set(this.targets(), { clearProps: "all" });
+      }
     });
   }
+  // 4. Stats Animation (Jump Effect)
+ const statsItems = gsap.utils.toArray(".stats-item");
+const statsSection = document.querySelector(".grid.grid-cols-3.gap-4.mt-10"); // Select the parent container
+
+if (statsItems.length > 0 && statsSection) {
+  // 1. Lock the initial state immediately
+  gsap.set(statsItems, { y: 30, autoAlpha: 0 });
+
+  // 2. Animate as a group using the parent as the trigger
+  gsap.to(statsItems, {
+    scrollTrigger: {
+      trigger: statsSection,
+      start: "top 85%", // Triggers when the top of the stats grid hits 85% of viewport
+      once: true
+    },
+    y: 0,
+    autoAlpha: 1,
+    duration: 0.8,
+    stagger: 0.15, // The magic sauce: 0.15s delay between each card
+    ease: "back.out(1.5)", 
+    onComplete: function() {
+      // Apply cleanup to each item in the group
+      this.targets().forEach(el => {
+        el.classList.add('revealed');
+        gsap.set(el, { clearProps: "all" });
+      });
+    }
+  });
+}
+
 }
 
 initEntranceAnimations();

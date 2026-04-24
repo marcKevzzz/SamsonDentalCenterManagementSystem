@@ -305,10 +305,10 @@ async function handleSignIn() {
       Toast.show("Welcome back!", "success");
       setTimeout(() => {
         const staffRoles = ["admin", "doctor", "receptionist"];
-        if (result.user && staffRoles.includes(result.user.role)) {
-          if (result.user.role === "doctor") {
+        if (result?.user && staffRoles.includes(result.user.role)) {
+          if (result?.user.role === "doctor") {
             window.location.href = "/Doctor/Dashboard";
-          } else if (result.user.role === "receptionist") {
+          } else if (result?.user.role === "receptionist") {
             window.location.href = "/Receptionist/Dashboard";
           } else {
             window.location.href = "/Admin/Dashboard";

@@ -16,16 +16,22 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initAnimations() {
-  gsap.registerPlugin(ScrollTrigger);
 
   // Hero section reveal
-  gsap.from(".bg-brand h1, .bg-brand p", {
-    opacity: 0,
-    y: 30,
-    duration: 1,
-    stagger: 0.2,
-    ease: "expo.out"
-  });
+  gsap.fromTo(".service-reveal h1, .service-reveal p", 
+    { autoAlpha: 0, y: 30 },
+    {
+      autoAlpha: 1,
+      y: 0,
+      duration: 1,
+      stagger: 0.2,
+      ease: "expo.out",
+      onComplete: function() {
+        this.targets().forEach(el => el.classList.add('revealed'));
+        gsap.set(this.targets(), { clearProps: "all" });
+      }
+    }
+  );
 
   // Reveal Category Sections
   ["#section-general", "#section-cosmetic", "#section-specialized"].forEach((id) => {
@@ -33,31 +39,48 @@ function initAnimations() {
     if (!section) return;
 
     // Header reveal
-    gsap.from(section.querySelector(".flex.items-center"), {
-      opacity: 0,
-      x: -30,
-      duration: 1,
-      ease: "expo.out",
-      scrollTrigger: {
-        trigger: section,
-        start: "top 85%",
-        once: true
+    gsap.fromTo(section.querySelector(".reveal-up"), 
+      { autoAlpha: 0, x: -30 },
+      {
+        autoAlpha: 1,
+        x: 0,
+        duration: 1,
+        ease: "expo.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 85%",
+          once: true
+        },
+        onComplete: function() {
+          const el = section.querySelector(".reveal-up");
+          if (el) {
+            el.classList.add('revealed');
+            gsap.set(el, { clearProps: "all" });
+          }
+        }
       }
-    });
+    );
 
     // Cards reveal (staggered)
-    gsap.from(section.querySelectorAll(".asvc-item"), {
-      opacity: 0,
-      y: 30,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: "power2.out",
-      scrollTrigger: {
-        trigger: section,
-        start: "top 75%",
-        once: true
+    gsap.fromTo(section.querySelectorAll(".service-card-item"), 
+      { autoAlpha: 0, y: 30 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 75%",
+          once: true
+        },
+        onComplete: function() {
+          this.targets().forEach(el => el.classList.add('revealed'));
+          gsap.set(this.targets(), { clearProps: "all" });
+        }
       }
-    });
+    );
   });
 }
 
@@ -94,7 +117,7 @@ function filterServices(cat) {
     sectionList.forEach((key) => (sections[key].style.display = ""));
     // Reset hidden cards
     document
-      .querySelectorAll(".asvc-item")
+      .querySelectorAll(".service-card-item")
       .forEach((el) => el.classList.remove("hidden-card"));
   } else {
     sectionList.forEach((key) => {
@@ -120,7 +143,7 @@ function filterServices(cat) {
 /* ── Search Logic ── */
 function searchServices(val) {
   const query = val.toLowerCase().trim();
-  const allItems = document.querySelectorAll(".asvc-item");
+  const allItems = document.querySelectorAll(".service-card-item");
   const allSections = document.querySelectorAll(".service-section");
   const noResults = document.getElementById("noResults");
 
@@ -150,7 +173,7 @@ function searchServices(val) {
   // 3. Hide/Show entire sections based on if they have visible children
   allSections.forEach((section) => {
     const visibleInThisSection = [
-      ...section.querySelectorAll(".asvc-item"),
+      ...section.querySelectorAll(".service-card-item"),
     ].some((card) => !card.classList.contains("hidden"));
 
     section.style.display = visibleInThisSection || query === "" ? "" : "none";

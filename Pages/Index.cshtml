@@ -39,37 +39,38 @@ ViewData["Title"] = "Home page";
     <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div>
 
     <!-- Content -->
-    <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-0 w-full flex flex-col lg:flex-row lg:items-center justify-between gap-12 sm:pt-0 pt-8">
+    <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-0 w-full flex flex-col lg:flex-row lg:items-center justify-between gap-12 pb-12">
         <div class="max-w-3xl xl:w-1/2">
-            <span class="hero-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full sm:mb-6 mb-2 border border-white/5">
+            <span class="hp-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6 border border-white/5">
                 Welcome to Samson Dental Center
             </span>
 
-            <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.9] text-white sm:mb-6 mb-3 flex flex-col"
+            <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.9] text-white mb-6 flex flex-col"
                 style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
                 <span class="line flex flex-wrap gap-x-[0.3em] overflow-hidden">
-                    <span class="word inline-block">Your</span>
-                    <span class="word inline-block">Smile</span>
-                    <span class="word inline-block">Is</span>
-                    <span class="word inline-block">Our</span>
+                    <span class="hp-word inline-block">Your</span>
+                    <span class="hp-word inline-block text-brand-light">Perfect</span>
+                    <span class="hp-word inline-block">Smile</span>
                 </span>
-                <span class="line text-[var(--primary)] brightness-125 flex flex-wrap gap-x-[0.3em] overflow-hidden">
-                    <span class="word inline-block">First</span>
-                    <span class="word inline-block">Priority.</span>
+                <span class="line flex flex-wrap gap-x-[0.3em] overflow-hidden">
+                    <span class="hp-word inline-block">Starts</span>
+                    <span class="hp-word inline-block">Right</span>
+                    <span class="hp-word inline-block">Here.</span>
                 </span>
             </h1>
 
-            <p class="hero-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed sm:mb-10 mb-4">
+            <p class="hp-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed sm:mb-10 mb-6">
                 Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and aesthetic goals.
             </p>
 
-            <div class="hero-reveal-late flex flex-wrap sm:gap-4 gap-2">
+            <div class="hp-reveal-late flex flex-wrap gap-2">
                 <a href="/Appointments"
-                    class="brand-font font-bold text-sm bg-[var(--primary)] text-white px-8 py-3.5 rounded-full hover:brightness-90 transition-all duration-150 no-underline">
+                    class="brand-font font-bold text-sm bg-[var(--primary)] text-white px-8 py-3.5 rounded-full hover:scale-105 hover:shadow-[0_10px_20px_rgba(30,64,175,0.3)] transition-all duration-300 no-underline flex items-center gap-2 group">
                     Make an Appointment
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
                 <a href="/Services"
-                    class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-[var(--brand-dark)] transition-all duration-150 no-underline">
+                    class="brand-font font-bold text-sm border-2 border-white text-white px-8 py-3.5 rounded-full hover:bg-white hover:text-[var(--brand-dark)] hover:scale-105 hover:shadow-[0_10px_20px_rgba(255,255,255,0.2)] transition-all duration-300 no-underline">
                     Explore Services
                 </a>
             </div>
@@ -81,12 +82,10 @@ ViewData["Title"] = "Home page";
                 <!-- Soft glow behind the doctor -->
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[100px] rounded-full -z-10 animate-pulse"></div>
                 
-                <img src="~/images/hero_doc1-remove.png" alt="Samson Dental Specialist" 
-                     class="hero-doctor-img w-full max-w-[550px] xl:max-w-[750px] 2xl:max-w-[900px] h-auto object-contain hero-reveal-late opacity-0" 
-                     style="filter: brightness(1.05); margin-bottom: -40px;"/>
-
-                <!-- Floating info badge -->
-                <div class="absolute bottom-20 -left-12 glass-pill px-6 py-4 rounded-3xl flex items-center gap-4 hero-reveal-late opacity-0 scale-90 shadow-2xl border border-white/10 backdrop-blur-4xl">
+                <img src="~/images/hero_doc1-remove.png" alt="Dentist" class="hp-doctor-img h-full w-auto object-contain object-bottom" />
+                
+                <!-- Glassmorphism Badge -->
+                <div class="hp-glass-badge absolute top-3/4 -left-6 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-2xl flex items-center gap-3">
                     <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
                         <i class="fa-solid fa-award text-white text-lg"></i>
                     </div>
@@ -123,10 +122,9 @@ ViewData["Title"] = "Home page";
     </div>
 
     <!-- Feature grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-
-      <!-- Feature 1: Expertise -->
-      <div class="feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
+    <div class="reveal-up grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div class="hp-feature-card group bg-white p-8 rounded-[2.5rem] border border-blue-50 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden">
         <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
         <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
           <i class="fa-solid fa-user-doctor text-white text-xl"></i>
@@ -138,7 +136,7 @@ ViewData["Title"] = "Home page";
       </div>
 
       <!-- Feature 2: Technology -->
-      <div class="feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
+      <div class="hp-feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
         <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
         <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
           <i class="fa-solid fa-microscope text-white text-xl"></i>
@@ -150,7 +148,7 @@ ViewData["Title"] = "Home page";
       </div>
 
       <!-- Feature 3: Safety -->
-      <div class="feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
+      <div class="hp-feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
         <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
         <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
           <i class="fa-solid fa-shield-virus text-white text-xl"></i>
@@ -171,43 +169,45 @@ ViewData["Title"] = "Home page";
      Pinned section that scrolls horizontally
 ------------------------------------- -->
 <section id="reviews" class="bg-[var(--brand-dark)] py-4 overflow-hidden">
-  <div id="reviewsPin" class="h-screen flex items-center">
-    <div class="max-w mx-auto px-8 lg:px-12 w-full flex md:flex-row flex-col md:gap-16 gap-8 items-center">
-
-      <div class="fade-up md:w-[400px] w-full shrink-0 flex flex-col items-center md:items-start text-center md:text-left">
-        <div class="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-[0.6rem] font-bold tracking-widest uppercase md:mb-4">
-          Patient Testimonials
-        </div>
-        <h2 class="brand-font font-extrabold text-white leading-[1.1] mb-6" style="font-size:clamp(2.5rem,5vw,4rem);">
-          What makes<br><span class="text-primary font-extrabold italic">us smile?</span>
-        </h2>
-        <p class="text-white/60 text-sm mb-8 max-w-sm">
-          Join thousands of happy patients who have experienced the Samson Dental standard of care.
-        </p>
-        <div class="flex gap-4 mb-8">
-          <div class="flex flex-col">
-            <span class="text-white font-bold text-2xl">4.9/5</span>
-            <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Google Rating</span>
+    <div id="reviewsPin" class="h-screen flex items-center">
+      <div class="max-w mx-auto px-8 w-full flex md:flex-row flex-col items-center gap-12">
+        
+        <!-- Left Side: Header -->
+        <div class="reveal-up md:w-[400px] w-full shrink-0 flex flex-col items-center md:items-start text-center md:text-left">
+          <div class="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-[0.6rem] font-bold tracking-widest uppercase md:mb-4">
+            Patient Testimonials
           </div>
-          <div class="w-px h-10 bg-white/10"></div>
-          <div class="flex flex-col">
-            <span class="text-white font-bold text-2xl">2k+</span>
-            <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Happy Patients</span>
+          <h2 class="brand-font font-extrabold text-white leading-[1.1] mb-6" style="font-size:clamp(2.5rem,5vw,4rem);">
+            What makes<br><span class="text-primary font-extrabold italic">us smile?</span>
+          </h2>
+          <p class="text-white/60 text-sm mb-8 max-w-sm">
+            Join thousands of happy patients who have experienced the Samson Dental standard of care.
+          </p>
+          <div class="flex gap-4 mb-8">
+            <div class="flex flex-col">
+              <span class="text-white font-bold text-2xl">4.9/5</span>
+              <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Google Rating</span>
+            </div>
+            <div class="w-px h-10 bg-white/10"></div>
+            <div class="flex flex-col">
+              <span class="text-white font-bold text-2xl">2k+</span>
+              <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Happy Patients</span>
+            </div>
           </div>
+          <!-- Progress dots -->
+          <div id="reviewDots" class="flex gap-2 md:flex hidden"></div>
         </div>
-        <!-- Progress dots -->
-        <div id="reviewDots" class="flex gap-2 md:flex hidden"></div>
-      </div>
 
-      <div class="horizontal-scroll-section w-full relative">
-        <!-- Fade masks -->
-        <div class="scroll-fade-left"></div>
-        <div class="scroll-fade-right"></div>
-        <div id="reviewsContainer" class="horizontal-scroll-wrapper"></div>
-      </div>
+        <!-- Right Side: Cards Slider -->
+        <div class="horizontal-scroll-section w-full relative">
+          <!-- Fade masks -->
+          <div class="scroll-fade-left"></div>
+          <div class="scroll-fade-right"></div>
+          <div id="reviewsContainer" class="horizontal-scroll-wrapper"></div>
+        </div>
 
+      </div>
     </div>
-  </div>
 </section>
 
 
@@ -234,44 +234,45 @@ ViewData["Title"] = "Home page";
 <!-- ------------------------------------
      OPERATING HOURS + MAP
 ------------------------------------- -->
-<section id="location" class="bg-white">
-  <div class="max-w mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+<section id="location" class="bg-white py-24">
+    <div class="max-w mx-auto px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16">
+      
 
     <!-- Left -->
-    <div class="fade-up">
-      <h2 class="brand-font font-extrabold text-[1.8rem] mb-7">Operating Hours</h2>
+      <div class="fade-up">
+        <h2 class="brand-font font-extrabold text-[1.8rem] mb-7">Operating Hours</h2>
 
-      <div class="bg-[var(--bg-soft)] rounded-2xl overflow-hidden">
-        <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
-          <span class="font-body text-[0.9rem] text-muted">Monday � Friday</span>
-          <span class="brand-font font-bold text-[0.9rem]">9:00 AM � 6:00 PM</span>
+        <div class="bg-[var(--bg-soft)] rounded-2xl overflow-hidden">
+          <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
+            <span class="font-body text-[0.9rem] text-muted">Monday  Friday</span>
+            <span class="brand-font font-bold text-[0.9rem]">9:00 AM  6:00 PM</span>
+          </div>
+          <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
+            <span class="font-body text-[0.9rem] text-muted">Saturday</span>
+            <span class="brand-font font-bold text-[0.9rem]">8:00 AM  5:00 PM</span>
+          </div>
+          <div class="flex justify-between items-center px-7 py-5">
+            <span class="font-body text-[0.9rem] text-muted">Sunday</span>
+            <span class="font-body text-[0.9rem] text-muted italic">Closed (By Appointment)</span>
+          </div>
         </div>
-        <div class="flex justify-between items-center px-7 py-5 border-b border-[#e5e7eb]">
-          <span class="font-body text-[0.9rem] text-muted">Saturday</span>
-          <span class="brand-font font-bold text-[0.9rem]">8:00 AM � 5:00 PM</span>
-        </div>
-        <div class="flex justify-between items-center px-7 py-5">
-          <span class="font-body text-[0.9rem] text-muted">Sunday</span>
-          <span class="font-body text-[0.9rem] text-muted italic">Closed (By Appointment)</span>
-        </div>
+
+        <h3 class="brand-font font-extrabold text-[1.5rem] mt-10 mb-2">Visit Us</h3>
+        <p class="brand-font font-semibold text-[0.92rem] mb-2">
+          7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila
+        </p>
+        <p class="font-body text-[0.84rem] text-muted leading-relaxed mb-5">
+          Located near Tandang Sora Market, easily accessible via Commonwealth Avenue. We have ample parking space
+          available for our patients.
+        </p>
+        <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
+          class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-[var(--brand-dark)] border-b-2 border-[var(--primary)] pb-0.5 hover:text-[var(--primary)] transition-colors no-underline">
+          GET DIRECTIONS ?
+        </a>
       </div>
 
-      <h3 class="brand-font font-extrabold text-[1.5rem] mt-10 mb-2">Visit Us</h3>
-      <p class="brand-font font-semibold text-[0.92rem] mb-2">
-        7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila
-      </p>
-      <p class="font-body text-[0.84rem] text-muted leading-relaxed mb-5">
-        Located near Tandang Sora Market, easily accessible via Commonwealth Avenue. We have ample parking space
-        available for our patients.
-      </p>
-      <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
-        class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-[var(--brand-dark)] border-b-2 border-[var(--primary)] pb-0.5 hover:text-[var(--primary)] transition-colors no-underline">
-        GET DIRECTIONS ?
-      </a>
-    </div>
-
     <!-- Right: Map -->
-    <div class="fade-up rounded-2xl overflow-hidden shadow-xl h-[400px]">
+    <div class="reveal-up relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 group h-[500px]">
       <iframe class="w-full h-full border-0"
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.4!2d121.057!3d14.694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b17b7b8a5e9d%3A0x8e3e6f6d8d1f8b5e!2sTandang%20Sora%20Ave%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1710000000000"
         allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">

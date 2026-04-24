@@ -6,35 +6,56 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function playEntranceAnimations() {
-  gsap.registerPlugin(ScrollTrigger);
 
   // 1. Hero Content & Stats Entrance
   const heroTimeline = gsap.timeline({ defaults: { ease: "expo.out" } });
 
   heroTimeline
-    .from(".hero-title", { opacity: 0, y: 50, duration: 1.5 })
-    .from(".hero-description", { opacity: 0, y: 30, duration: 1.2 }, "-=1")
-    .from(
+    .fromTo(".service-reveal h1", { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: 1.5 })
+    .fromTo(".service-reveal p", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.2, onComplete: function() {
+        const parent = document.querySelector('.service-reveal');
+        if (parent) {
+          parent.querySelectorAll('h1, p').forEach(el => el.classList.add('revealed'));
+          gsap.set(parent.querySelectorAll('h1, p'), { clearProps: "all" });
+        }
+    } }, "-=1")
+    .fromTo(
       ".hero-actions a",
       {
-        opacity: 0,
+        autoAlpha: 0,
         scale: 0.8,
-        y: 20, 
+        y: 20
+      },
+      {
+        autoAlpha: 1,
+        scale: 1,
+        y: 0, 
         duration: 1,
         stagger: 0.15, 
         ease: "back.out(1.7)",
-        clearProps: "all"
+        onComplete: function() {
+          this.targets().forEach(el => el.classList.add('revealed'));
+          gsap.set(this.targets(), { clearProps: "all" });
+        }
       },
       "-=0.6",
     )
-    .from(
-      ".service-stats-item",
+    .fromTo(
+      ".stats-item",
       {
-        opacity: 0,
-        y: 40,
+        autoAlpha: 0,
+        y: 40
+      },
+      {
+        autoAlpha: 1,
+        y: 0,
         duration: 1,
         stagger: 0.15,
         ease: "back.out(1.4)",
+        onComplete: function() {
+          this.targets().forEach(el => el.classList.add('revealed'));
+          gsap.set(this.targets(), { clearProps: "all" });
+        }
       },
       "-=0.4",
     );
@@ -52,34 +73,48 @@ function playEntranceAnimations() {
   });
 
   // 3. Scroll-triggered Reveal (Generic Fade Ups)
-  gsap.utils.toArray(".reveal-on-scroll").forEach((element) => {
-    gsap.from(element, {
-      opacity: 0,
-      y: 40,
-      duration: 1.2,
-      ease: "expo.out",
-      scrollTrigger: {
-        trigger: element,
-        start: "top 90%",
-        once: true,
-      },
-    });
+  gsap.utils.toArray(".reveal-up").forEach((element) => {
+    gsap.fromTo(element, 
+      { autoAlpha: 0, y: 40 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 1.2,
+        ease: "expo.out",
+        scrollTrigger: {
+          trigger: element,
+          start: "top 90%",
+          once: true,
+        },
+        onComplete: function() {
+          element.classList.add('revealed');
+          gsap.set(element, { clearProps: "all" });
+        }
+      }
+    );
   });
 
   // 4. Benefits List Stagger
-  gsap.from(".benefit-list-item", {
-    opacity: 0,
-    x: -30,
-    scale: 0.95,
-    duration: 1,
-    stagger: 0.12,
-    ease: "expo.out",
-    scrollTrigger: {
-      trigger: ".benefits-container",
-      start: "top 85%",
-      once: true,
-    },
-  });
+  gsap.fromTo(".benefit-item", 
+    { autoAlpha: 0, x: -30, scale: 0.95 },
+    {
+      autoAlpha: 1,
+      x: 0,
+      scale: 1,
+      duration: 1,
+      stagger: 0.12,
+      ease: "expo.out",
+      scrollTrigger: {
+        trigger: ".benefits-container",
+        start: "top 85%",
+        once: true,
+      },
+      onComplete: function() {
+        this.targets().forEach(el => el.classList.add('revealed'));
+        gsap.set(this.targets(), { clearProps: "all" });
+      }
+    }
+  );
 }
 
 function setupFaqInteractions() {

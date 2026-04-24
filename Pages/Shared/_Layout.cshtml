@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -19,12 +19,14 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>gsap.registerPlugin(ScrollTrigger);</script>
   <script src="~/js/config.js" asp-append-version="true"></script>
 </head>
 
 <body>
 
   <script>
+  document.documentElement.classList.add('js-enabled');
     // Fast check before the big JS files load
     if (localStorage.getItem("sb_user")) {
       document.documentElement.classList.add("is-signed-in");
@@ -32,7 +34,7 @@
 
     const savedUser = localStorage.getItem("sb_user");
     const user = JSON.parse(savedUser);
-    if (user.role === "admin") {
+    if (user?.role === "admin") {
       window.location.replace("/admin/dashboard");
     }
   </script>
