@@ -1,0 +1,68 @@
+<!-- ─── STEP 4: Review & Confirm ─── -->
+@* <!-- In ASP.NET: @await Html.PartialAsync(partialViewName: partialViewName: "_Step4Confirmation", Model) --> *@
+<div id="step-4" class="step-panel">
+    <div class="mb-8">
+        <div
+            class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 4 of 4
+        </div>
+        <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Review & Confirm</h1>
+        <p class="font-body text-[.9rem] text-muted" id="s4Subtitle">Please review your appointment details before
+            submitting.</p>
+    </div>
+
+    <!-- Summary card -->
+    <div id="s4Summary" class="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] overflow-hidden mb-6"></div>
+
+    <!-- Waitlist notice -->
+    <div id="s4WLNotice"
+        class="hidden bg-[#fef3c7] border border-[#fde68a] rounded-2xl p-4 mb-6 flex items-start gap-3">
+        <svg class="w-5 h-5 text-[#b45309] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p class="font-body text-[.82rem] text-[#92400e] leading-relaxed">This is a <strong>waitlist
+                registration</strong>, not a confirmed appointment. You'll receive a notification once a slot opens on
+            your requested date.</p>
+    </div>
+
+    <!-- Reminders -->
+    <div class="bg-offwhite rounded-2xl p-5 mb-8">
+        <div class="brand-font font-bold text-[.85rem] text-brand mb-3">Before Your Visit</div>
+        <div class="space-y-2">
+            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span
+                    class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg
+                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg></span>Arrive 10–15 minutes early to complete any intake forms.</div>
+            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span
+                    class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg
+                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg></span>Bring a valid ID and your HMO/insurance card if applicable.</div>
+            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span
+                    class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg
+                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg></span>Inform us of any medications you are currently taking.</div>
+            <div class="flex items-start gap-2.5 font-body text-[.82rem] text-muted"><span
+                    class="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><svg
+                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg></span>Eat before your appointment unless advised otherwise by your doctor.</div>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <button id="confirmBtn" onclick="confirmBooking()"
+            class="brand-font font-bold text-[.88rem] tracking-wider uppercase bg-primary text-white px-10 py-4 rounded-xl hover:bg-brand transition-colors cursor-pointer">
+            Confirm Appointment ✓
+        </button>
+    </div>
+</div>

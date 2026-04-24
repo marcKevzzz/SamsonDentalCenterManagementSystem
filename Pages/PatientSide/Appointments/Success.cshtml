@@ -1,0 +1,62 @@
+    <!-- ─── STEP 5: Success ─── -->
+    <div id="step-5" class="step-panel">
+        <div class="text-center py-2 sm:py-4 max-w-lg mx-auto">
+
+            <!-- Icon -->
+            <div id="successIcon"
+                class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <svg width="28" height="28" class="sm:w-[36px] sm:h-[36px]" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </div>
+
+            <!-- Title + message -->
+            <h2 class="brand-font font-extrabold text-brand text-[1.4rem] sm:text-[1.8rem] mb-2" id="successTitle">
+                Appointment Confirmed!
+            </h2>
+            <p class="font-body text-[.82rem] sm:text-[.92rem] text-muted max-w-md mx-auto mb-2" id="successMsg"></p>
+
+            <!-- Ref number -->
+            <div
+                class="inline-flex items-center gap-2 bg-offwhite border border-[#e5e7eb] rounded-full px-4 py-2 sm:px-5 sm:py-2.5 my-4 sm:my-6">
+                <span class="font-body text-[.65rem] font-semibold uppercase tracking-wider text-muted">Ref No.</span>
+                <span id="refNumber" class="brand-font font-bold text-brand text-[.8rem] sm:text-[.9rem] tracking-widest"></span>
+            </div>
+
+            <!-- Guest email notice -->
+            <div id="guestEmailNotice"
+                class="hidden mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left flex sm:flex-row flex-col items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-envelope text-amber-600 text-sm"></i>
+                </div>
+                <div>
+                    <div class="brand-font font-bold text-amber-800 text-[.8rem] mb-1">Check Your Email</div>
+                    <p class="font-body text-[.78rem] text-amber-700 leading-relaxed">
+                        We sent a confirmation link to <strong  class="truncate"><span id="guestEmailAddr"></span></strong>.
+                        Click the link to finalize your appointment — it expires in 24 hours.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Summary card -->
+            <div id="successCard"
+                class="bg-white rounded-2xl border border-[#e5e7eb] p-4 sm:p-6 text-left mb-6 shadow-sm">
+            </div>
+
+            <!-- Next steps -->
+            <div id="nextSteps" class="bg-offwhite rounded-2xl p-4 sm:p-5 text-left mb-6 sm:mb-8"></div>
+
+            <!-- Actions -->
+            <div id="successActions" class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="/"
+                    class="brand-font flex-1 font-bold text-[.75rem] sm:text-[.82rem] tracking-wider uppercase bg-brand text-white px-7 py-3.5 sm:py-4 rounded-xl hover:bg-primary transition-all shadow-md no-underline">
+                    Back to Home
+                </a>
+                <button onclick="resetBooking()"
+                    class="brand-font flex-1 font-bold text-[.75rem] sm:text-[.82rem] tracking-wider uppercase bg-white text-brand border border-[#e5e7eb] px-7 py-3.5 sm:py-4 rounded-xl hover:bg-gray-50 transition-all cursor-pointer shadow-sm">
+                    Book Another
+                </button>
+            </div>
+        </div>
+    </div>

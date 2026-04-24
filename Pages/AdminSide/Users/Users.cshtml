@@ -1,0 +1,216 @@
+@page "/Admin/Users"
+@model AdminUsersModel
+@{
+Layout = "AdminSide/_StaffLayout";
+var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Profile>();
+    }
+
+    <div id="page-users" class="page p-4 md:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <div>
+                <h2 class="font-display text-xl font-extrabold text-brand-900">
+                    Users
+                </h2>
+                <p class="text-[12px] text-brand-500 mt-0.5">
+                    Manage all account users
+                </p>
+            </div>
+            <button id="addUserBtn"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>Add User
+            </button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100">
+                <div class="relative flex-1 min-w-[140px] max-w-[260px]">
+                    <svg class="absolute left-2.5 top-1/2 translate-half text-slate-400" width="12" height="12"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input name=" q" id="searchInput" type="search" placeholder="Search users…"
+                        autocomplete="new-password"
+                        class="w-full pl-7 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary/40" />
+                    <input type="text" name="search" class="absolute -top-[200%] opacity-0 pointer-events-none" />
+                </div>
+                <select id="roleFilter"
+                    class="px-8 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-brand-500 outline-none">
+                    <option value="">All Roles</option>
+                    <option value="patient">Patient</option>
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                </select>
+                <span class="ml-auto text-[11px] text-slate-400" id="userCount">
+                    @users.Count user@(users.Count != 1 ? "s" : "")
+                </span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[700px] table-fixed">
+                    <colgroup>
+                        <col class="w-[22%]" />
+                        <col class="w-[9%]" />
+                        <col class="w-[16%]" />
+                        <col class="w-[12%]" />
+                        <col class="w-[14%]" />
+                        <col class="w-[8%]" />
+                        <col class="w-[9%]" />
+                    </colgroup>
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                User</th>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Age / Sex</th>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Email</th>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Contact No.</th>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Address</th>
+                            
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Role</th>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-slate-50">
+                        @foreach (var u in users)
+                        {
+                        var initials = (u.FirstName?.Length > 0 ? u.FirstName[0].ToString() : "") +
+                        (u.LastName?.Length > 0 ? u.LastName[0].ToString() : "");
+                        var age = u.DateOfBirth.HasValue
+                        ? (DateTime.Today.Year - u.DateOfBirth.Value.Year -
+                        (DateTime.Today.DayOfYear < u.DateOfBirth.Value.DayOfYear ? 1 : 0)).ToString() : "—" ; var
+                            sexShort=u.Sex switch { "Male"=> "M", "Female" => "F", _ => "—" };
+
+                            <tr class="user-row hover:bg-slate-50/60 transition-colors"
+                                data-name="@((u.FirstName + " " + u.LastName).ToLower())" data-role="@u.Role?.ToLower()"
+                                data-id="@u.Id">
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[10px] font-bold font-display flex-shrink-0 overflow-hidden">
+                                            @if (!string.IsNullOrEmpty(u.AvatarUrl))
+                                            {
+                                            <img src="@u.AvatarUrl" class="w-full h-full object-cover" alt="avatar" />
+                                            }
+                                            else
+                                            {
+                                            @initials.ToUpper()
+                                            }
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-[13px] font-medium truncate">@u.FirstName @u.LastName</div>
+                                            <div class="text-[10px] text-brand-400 truncate">@u.Id[..12]…</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap">@age / @sexShort
+                                </td>
+                                <td class="px-4 py-3 text-[12.5px] text-brand-500 truncate max-w-0">
+                                    <span class="truncate block" title="@u.Email">@u.Email</span>
+                                </td>
+                                <td class="px-4 py-3 text-[12.5px] truncate max-w-0">
+                                    <span class="truncate block" title="@u.PhoneNumber">@(u.PhoneNumber ?? "—")</span>
+                                </td>
+                                <td class="px-4 py-3 text-[12.5px] truncate max-w-0">
+                                    <span class="truncate block" title="@u.Address">@(string.IsNullOrEmpty(u.Address) ?
+                                        "—" : u.Address)</span>
+                                </td>
+                                <td class="px-4 py-3 text-[12.5px] capitalize">@u.Role</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="openEditModal('@u.Id')"
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors"
+                                            title="Edit">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                            </svg>
+                                        </button>
+                                        <button onclick="confirmDelete('@u.Id', '@u.FirstName @u.LastName')"
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                            title="Delete">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6" />
+                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                                <path d="M10 11v6M14 11v6" />
+                                                <path d="M9 6V4h6v2" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                    </tbody>
+                </table>
+                <div id="emptyState" class="hidden py-16 text-center">
+                    <div class="text-slate-300 text-4xl mb-3">👤</div>
+                    <p class="text-[13px] text-slate-400 font-medium">No users found</p>
+                    <p class="text-[11px] text-slate-300 mt-1">Try adjusting your search or filters</p>
+                </div>
+            </div>
+            <div id="paginationBar"
+                class="hidden flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100">
+                <span class="text-[10.5px] text-brand-400" id="paginationInfo"></span>
+                <div class="flex gap-1.5" id="paginationBtns"></div>
+            </div>
+            <!-- <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100">
+            <span class="text-[10.5px] text-brand-400">Showing 5 of 248 users</span>
+            <div class="flex gap-1.5">
+                <button
+                    class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50">
+                    ← Prev
+                </button>
+                <button class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg bg-primary text-white">
+                    1
+                </button>
+                <button
+                    class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50">
+                    2
+                </button>
+                <button
+                    class="px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50">
+                    Next →
+                </button>
+            </div>
+        </div> -->
+        </div>
+    </div>
+    <partial name="Components/UserModal" />
+
+    <script id="users-data" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        users.Select(u => new {
+            id          = u.Id,
+            firstName   = u.FirstName,
+            lastName    = u.LastName,
+            email       = u.Email ?? "",
+            phone       = u.PhoneNumber ?? "",
+            address     = u.Address ?? "",
+            dob         = u.DateOfBirth?.ToString("yyyy-MM-dd") ?? "",
+            sex         = u.Sex ?? "",
+            role        = u.Role ?? "patient",
+            avatarUrl   = u.AvatarUrl ?? ""
+        })
+    ))
+</script>
+
+    <script type="module" src="~/js/AdminSide/adminUsers.js"></script>

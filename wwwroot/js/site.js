@@ -1,6 +1,4 @@
-﻿// ─────────────────────────────────────────────
-// navbar.js  —  ES Module
-// ─────────────────────────────────────────────
+
 
 import { initProfile } from "./profile.js";
 
@@ -9,42 +7,95 @@ let isNavScrollDisabled = false;
 // ── Navbar scroll behavior ────────────────────
 
 export function toggleNavbar(isActive) {
-  const { primary, dark, white, textMuted, offwhite, text } = window.COLORS;
-
   const navbar = document.getElementById("navbar");
-  if (!navbar) return; // Exit early if the navbar isn't on this page
+  if (!navbar) return;
   const logo = document.getElementById("logo");
-  const bookBtn = document.getElementById("bookBtn");
-  const guestAvatar = document.getElementById("guestAvatar");
+  const navLinks = document.querySelectorAll(".nav-link");
+  const profileChevron = document.getElementById("profileChevron");
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
 
   if (isActive) {
-    navbar.style.background = white;
-    navbar.style.backdropFilter = "blur(18px)";
-    navbar.style.webkitBackdropFilter = "blur(18px)";
-    navbar.style.boxShadow = "0 2px 24px rgba(0,0,0,0.25)";
-    navbar.style.color = text;
-    logo.style.color = text;
-    bookBtn.style.borderColor = dark;
-    guestAvatar.style.borderColor = textMuted;
+    navbar.classList.add("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
+    navbar.classList.remove("border-transparent");
+    logo?.classList.add("text-brand");
+    logo?.classList.remove("text-white");
+    hamburgerBtn?.classList.add("text-brand");
+    hamburgerBtn?.classList.remove("text-white");
+    navLinks.forEach(link => {
+        link.classList.add("text-brand");
+        link.classList.remove("text-white");
+    });
+    profileChevron?.classList.add("text-brand");
+    profileChevron?.classList.remove("text-white");
+    const guestAvatar = document.getElementById("guestAvatar");
+    guestAvatar?.classList.add("text-brand");
+    guestAvatar?.classList.remove("text-white");
   } else {
-    navbar.style.background = "transparent";
-    navbar.style.backdropFilter = "none";
-    navbar.style.boxShadow = "none";
-    navbar.style.color = white;
-    logo.style.color = white;
-    bookBtn.style.borderColor = white;
-    guestAvatar.style.borderColor = offwhite;
+    navbar.classList.remove("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
+    navbar.classList.add("border-transparent");
+    
+    // Only turn white if we're on a page with a dark hero (like Home or About)
+    const hasDarkHero = document.querySelector(".bg-brand, #hero");
+    if (hasDarkHero) {
+        logo?.classList.add("text-white");
+        logo?.classList.remove("text-brand");
+        hamburgerBtn?.classList.add("text-white");
+        hamburgerBtn?.classList.remove("text-brand");
+        navLinks.forEach(link => {
+            link.classList.add("text-white");
+            link.classList.remove("text-brand");
+        });
+        profileChevron?.classList.add("text-white");
+        profileChevron?.classList.remove("text-brand");
+        const guestAvatar = document.getElementById("guestAvatar");
+        guestAvatar?.classList.add("text-white");
+        guestAvatar?.classList.remove("text-brand");
+    } else {
+        logo?.classList.add("text-brand");
+        hamburgerBtn?.classList.add("text-brand");
+        navLinks.forEach(link => link.classList.add("text-brand"));
+        profileChevron?.classList.add("text-brand");
+        const guestAvatar = document.getElementById("guestAvatar");
+        guestAvatar?.classList.add("text-brand");
+    }
   }
 }
 
 // ── Active nav link ───────────────────────────
 
 function setActive(id) {
-  document.getElementById(id)?.classList.add("active");
+  const el = document.getElementById(id);
+  const mel = document.getElementById(`m-${id}`);
+  if (el) {
+      el.classList.add("active", "text-primary");
+  }
+  if (mel) {
+      mel.classList.add("active", "text-primary");
+  }
+}
+
+function syncProfileLinks() {
+  const path = window.location.pathname.toLowerCase();
+  const allProfileLinks = document.querySelectorAll(".side-link, .menu-link");
+  
+  allProfileLinks.forEach(link => {
+    link.classList.remove("active", "bg-primary/10", "text-primary");
+    const href = link.getAttribute("href")?.toLowerCase();
+    if (!href) return;
+
+    if (path.includes("dashboard") && href.includes("dashboard")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("myappointments") && href.includes("myappointments")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("records") && href.includes("records")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("notifications") && href.includes("notifications")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("settings") && href.includes("settings")) link.classList.add("active", "bg-primary/10", "text-primary");
+  });
 }
 
 export function syncActiveLink() {
   const path = window.location.pathname.toLowerCase();
+  
+  // Clear previous actives
+  document.querySelectorAll(".nav-link, .mobile-nav-link").forEach(l => l.classList.remove("active", "text-primary"));
 
   if (path === "/" || path === "") {
     setActive("nav-home");
@@ -54,31 +105,10 @@ export function syncActiveLink() {
     setActive("servicesBtn");
   } else if (path.startsWith("/contacts")) {
     setActive("nav-contacts");
-  } else if (path.startsWith("/profile/dashboard")) {
-    setActive("side-dashboard");
-    setActive("nav-dashboard");
+  } else if (path.startsWith("/profile")) {
     isNavScrollDisabled = true;
     toggleNavbar(true);
-  } else if (path.startsWith("/profile/myappointments")) {
-    setActive("side-myappointments");
-    setActive("nav-myappointments");
-    isNavScrollDisabled = true;
-    toggleNavbar(true);
-  } else if (path.startsWith("/profile/settings")) {
-    setActive("side-settings");
-    setActive("nav-settings");
-    isNavScrollDisabled = true;
-    toggleNavbar(true);
-  } else if (path.startsWith("/profile/notifications")) {
-    setActive("side-notifications");
-    setActive("nav-notifications");
-    isNavScrollDisabled = true;
-    toggleNavbar(true);
-  } else if (path.startsWith("/profile/records")) {
-    setActive("side-records");
-    setActive("nav-records");
-    isNavScrollDisabled = true;
-    toggleNavbar(true);
+    syncProfileLinks();
   }
 }
 
@@ -88,23 +118,37 @@ export function initServicesMenu() {
   const servicesBtn = document.getElementById("servicesBtn");
   const servicesMega = document.getElementById("servicesMega");
   const chevronIcon = document.getElementById("chevronIcon");
+  const panel = document.getElementById("megaPanel");
 
-  servicesBtn?.addEventListener("click", () => {
-    servicesMega.classList.toggle("hidden");
-    chevronIcon.classList.toggle("rotate-180");
+  servicesBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isHidden = servicesMega.classList.contains("servicesMega-hidden");
+    
+    if (isHidden) {
+        servicesMega.classList.remove("servicesMega-hidden");
+        chevronIcon.classList.add("rotate-180");
+        gsap.fromTo(panel, 
+            { opacity: 0, y: -20, scale: 0.95 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.2)" }
+        );
+    } else {
+        closeMega();
+    }
   });
 
-  document.addEventListener("click", (e) => {
-    const insideWrapper = document
-      .getElementById("servicesWrapper")
-      ?.contains(e.target);
-    const insidePanel = document
-      .getElementById("megaPanel")
-      ?.contains(e.target);
+  function closeMega() {
+      gsap.to(panel, {
+          opacity: 0, y: -10, scale: 0.98, duration: 0.2, 
+          onComplete: () => {
+              servicesMega.classList.add("servicesMega-hidden");
+              chevronIcon.classList.remove("rotate-180");
+          }
+      });
+  }
 
-    if (!insideWrapper && !insidePanel) {
-      servicesMega?.classList.add("hidden");
-      chevronIcon?.classList.remove("rotate-180");
+  document.addEventListener("click", (e) => {
+    if (!servicesMega?.contains(e.target) && !servicesBtn?.contains(e.target)) {
+      closeMega();
     }
   });
 }
@@ -114,21 +158,55 @@ export function initServicesMenu() {
 export function initMobileMenu() {
   const hamburgerBtn = document.getElementById("hamburgerBtn");
   const mobileMenu = document.getElementById("mobileMenu");
-  const navIconPath = document.getElementById("navIconPath");
-  const servicesMega = document.getElementById("servicesMega");
-
-  const hamburgerPath = "M4 7h16M4 12h16M4 17h16";
-  const closePath = "M6 18L18 6M6 6l12 12";
+  const burgerTop = document.getElementById("burger-top");
+  const burgerMid = document.getElementById("burger-mid");
+  const burgerBot = document.getElementById("burger-bot");
 
   hamburgerBtn?.addEventListener("click", () => {
-    const isMenuOpening = mobileMenu.classList.contains("hidden");
+    const isOpening = mobileMenu.classList.contains("invisible");
 
-    if (window.scrollY < 50 && !isNavScrollDisabled)
-      toggleNavbar(isMenuOpening);
+    if (isOpening) {
+        // Open
+        mobileMenu.classList.remove("invisible");
+        document.body.style.overflow = "hidden";
+        
+        // Force navbar to "active" style so burger is visible against white bg
+        toggleNavbar(true);
+        
+        gsap.to(mobileMenu, { opacity: 1, duration: 0.5, ease: "power2.out" });
 
-    mobileMenu.classList.toggle("hidden");
-    servicesMega?.classList.add("hidden");
-    navIconPath?.setAttribute("d", isMenuOpening ? closePath : hamburgerPath);
+        // Burger Transform
+        gsap.to(burgerTop, { y: 8, rotation: 45, duration: 0.3 });
+        gsap.to(burgerMid, { opacity: 0, x: -10, duration: 0.3 });
+        gsap.to(burgerBot, { y: -8, rotation: -45, duration: 0.3 });
+        
+        // Links Entrance
+        gsap.fromTo(".mobile-nav-link", 
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out", delay: 0.2 }
+        );
+    } else {
+        // Close
+        gsap.to(mobileMenu, { 
+            opacity: 0, 
+            duration: 0.4, 
+            onComplete: () => {
+                mobileMenu.classList.add("invisible");
+                document.body.style.overflow = "";
+                
+                // Revert navbar style based on scroll
+                if (!isNavScrollDisabled) {
+                    const isScrolled = window.scrollY > 60;
+                    toggleNavbar(isScrolled);
+                }
+            }
+        });
+        
+        // Burger Reset
+        gsap.to(burgerTop, { y: 0, rotation: 0, duration: 0.3 });
+        gsap.to(burgerMid, { opacity: 1, x: 0, duration: 0.3 });
+        gsap.to(burgerBot, { y: 0, rotation: 0, duration: 0.3 });
+    }
   });
 
   const mobileServicesBtn = document.getElementById("mobileServicesBtn");
@@ -140,8 +218,7 @@ export function initMobileMenu() {
       mobileServicesMenu.style.maxHeight = null;
       mobileChevron?.classList.remove("rotate-180");
     } else {
-      mobileServicesMenu.style.maxHeight =
-        mobileServicesMenu.scrollHeight + "px";
+      mobileServicesMenu.style.maxHeight = mobileServicesMenu.scrollHeight + "px";
       mobileChevron?.classList.add("rotate-180");
     }
   });
@@ -192,9 +269,64 @@ export function initScrollAnimations() {
   });
 }
 
+async function loadDynamicServices() {
+  try {
+    const response = await fetch("/api/services");
+    if (!response.ok) return;
+
+    const services = await response.json();
+
+    // Containers for Desktop
+    const containers = {
+      "General Dentistry": document.getElementById("cat-general-desktop"),
+      Cosmetic: document.getElementById("cat-cosmetic-desktop"),
+      Specialized: document.getElementById("cat-specialized-desktop"),
+      // Containers for Mobile
+      "General Dentistry-m": document.getElementById("cat-general-mobile"),
+      "Cosmetic-m": document.getElementById("cat-cosmetic-mobile"),
+      "Specialized-m": document.getElementById("cat-specialized-mobile"),
+    };
+
+    services.forEach((service) => {
+      if (!service.isActive) return;
+
+      const cat = service.category;
+
+      // 1. Desktop Logic
+      if (containers[cat]) {
+        const desktopLink = document.createElement("a");
+        desktopLink.href = `/Services/${service.slug}`;
+        desktopLink.className =
+          "block py-1.5 text-[0.85rem] hover:text-primary";
+        desktopLink.textContent = service.name;
+        containers[cat].appendChild(desktopLink);
+      }
+
+      // 2. Mobile Logic - FIX IS HERE
+      const mobileKey = `${cat}-m`;
+      if (containers[mobileKey]) {
+        const mobileLink = document.createElement("a");
+        mobileLink.href = `/Services/${service.slug}`;
+        mobileLink.className =
+          "block py-2 pl-3 text-sm text-gray-600 hover:text-primary";
+        mobileLink.textContent = service.name;
+
+        // You previously had containers[cat].appendChild(mobileLink)
+        containers[mobileKey].appendChild(mobileLink);
+      }
+    });
+  } catch (err) {
+    console.error("Failed to load services:", err);
+  }
+}
+
 // ── Entry point ───────────────────────────────
 
 export function initNavbar() {
+  if (window.__navbarInitialized) return;
+  window.__navbarInitialized = true;
+
+  loadDynamicServices();
   toggleNavbar(false);
   syncActiveLink();
   initServicesMenu();

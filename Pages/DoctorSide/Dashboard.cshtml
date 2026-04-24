@@ -1,0 +1,457 @@
+@page "/doctor/dashboard"
+@namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide
+@model DoctorDashboardModel
+@{
+    ViewData["Title"] = "Doctor Dashboard";
+}
+
+<div id="page-doctor-dashboard" class="page active p-4 md:p-6">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div>
+            <h2 class="font-display text-[clamp(18px,3vw,24px)] font-extrabold text-brand">
+                Welcome back, @ViewData["UserName"] 👋
+            </h2>
+            <p class="text-[12.5px] text-brand-500 mt-1">Here is your schedule and patient overview for today.</p>
+        </div>
+        <div class="flex gap-2">
+            <div class="px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">Status</span>
+                <span class="text-[13px] font-bold text-emerald-700">On Duty</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Treatment Center (Conditional) -->
+    @if (Model.ArrivedPatients.Any())
+    {
+        <div class="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <h3 class="text-[14px] font-bold uppercase tracking-wider text-brand-900">Treatment Center — Patients in Waiting Room</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                @foreach (var appt in Model.ArrivedPatients)
+                {
+                    <div class="bg-white rounded-2xl border-2 border-amber-100 p-5 shadow-lg shadow-amber-900/5 relative group hover:border-amber-300 transition-all">
+                        <div class="absolute top-4 right-4 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">Arrived</div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg">
+                                @(appt.PatientName?[0].ToString() ?? "P")
+                            </div>
+                            <div>
+                                <h4 class="text-[15px] font-bold text-brand-900">@appt.PatientName</h4>
+                                <p class="text-[11px] text-brand-400 font-medium">@appt.ServiceName</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-5">
+                            <div class="flex items-center gap-2 text-[12px] text-brand-600">
+                                <i class="fa-solid fa-clock opacity-40 w-4"></i>
+                                Scheduled: @appt.AppointmentTime
+                            </div>
+                            <div class="flex items-center gap-2 text-[12px] text-brand-600">
+                                <i class="fa-solid fa-file-invoice opacity-40 w-4"></i>
+                                Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span>
+                            </div>
+                        </div>
+                        <button onclick='openTreatmentModal(@Json.Serialize(new { 
+                            id = appt.Id, 
+                            patientName = appt.PatientName, 
+                            patientId = appt.PatientId,
+                            doctorId = appt.DoctorId,
+                            serviceName = appt.ServiceName,
+                            serviceId = appt.ServiceId,
+                            basePrice = Model.AllServices.FirstOrDefault(s => s.Id == appt.ServiceId)?.Price ?? 0
+                        }))'
+                        class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all">
+                            Start Treatment & Invoice
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Doctor Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
+                    <i class="fa-solid fa-calendar-day text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-brand">@Model.TodayAppointmentsCount</div>
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Today's Patients</div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-brand">@Model.PendingReviewsCount</div>
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Pending Confirm</div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600">
+                    <i class="fa-solid fa-notes-medical text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-brand">@Model.TotalInvoicesCount</div>
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Total Invoices</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Schedule (2/3) -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+                    <h3 class="font-display font-bold text-brand text-[15px]">Your Upcoming Appointments</h3>
+                    <a href="/Admin/Appointments" class="text-[11px] font-bold text-primary hover:underline uppercase tracking-wider">View Full Schedule</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50/50">
+                            <tr>
+                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Patient</th>
+                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Service</th>
+                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Time</th>
+                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @if (!Model.MyAppointments.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center text-slate-400 text-[13px]">
+                                        <i class="fa-solid fa-calendar-xmark text-2xl mb-2 block opacity-20"></i>
+                                        No appointments scheduled for today.
+                                    </td>
+                                </tr>
+                            }
+                            @foreach (var appt in Model.MyAppointments)
+                            {
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
+                                                @(appt.PatientName?[0].ToString() ?? "P")
+                                            </div>
+                                            <div>
+                                                <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
+                                                <div class="text-[10px] text-brand-400">@appt.PatientEmail</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-[12px] text-brand-700 font-medium">@appt.ServiceName</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentTime</div>
+                                        <div class="text-[10px] text-brand-400">@appt.AppointmentDate.ToString("MMM dd, yyyy")</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @{
+                                            var badge = appt.Status.ToLower() switch {
+                                                "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
+                                                "pending" => "bg-blue-50 text-blue-600 border-blue-100",
+                                                _ => "bg-slate-50 text-slate-500 border-slate-100"
+                                            };
+                                        }
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border @badge uppercase tracking-wider">@appt.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info (1/3) -->
+        <div class="space-y-6">
+            <!-- Recent Invoices (Minimal) -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400">Recent Invoices</h4>
+                    <a href="/Admin/Invoices" class="text-[10px] font-bold text-primary hover:underline uppercase">View All</a>
+                </div>
+                <div class="space-y-3">
+                    @if (!Model.RecentInvoices.Any())
+                    {
+                        <p class="text-[12px] text-slate-400 text-center py-4 italic">No invoices yet.</p>
+                    }
+                    @foreach (var inv in Model.RecentInvoices)
+                    {
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50">
+                            <div class="min-w-0">
+                                <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
+                                <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd")</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
+                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Patient Health Tips / Reminders (Moved down) -->
+            <div class="bg-[#0F172A] rounded-2xl p-6 text-white relative overflow-hidden shadow-xl">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                <h4 class="font-display font-bold text-[14px] mb-4 relative z-10 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-amber-400"></i> Daily Reminder
+                </h4>
+                <p class="text-white/70 text-[12.5px] leading-relaxed mb-4 relative z-10">
+                    Don't forget to review and sign the electronic health records for yesterday's surgery patients.
+                </p>
+                <button class="w-full py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-[11px] font-bold transition-all">
+                    Open Records →
+                </button>
+            </div>
+
+            <!-- Mini Calendar or Stats -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400 mb-4">Patient Demographics</h4>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-[11px] font-bold mb-1.5">
+                            <span class="text-brand-600">Returning Patients</span>
+                            <span class="text-primary">85%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] font-bold mb-1.5">
+                            <span class="text-brand-600">New Consultations</span>
+                            <span class="text-emerald-500">15%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full" style="width: 15%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- TREATMENT & INVOICING MODAL                                               -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="treatment-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-brand-900/60 backdrop-blur-sm" onclick="closeTreatmentModal()"></div>
+    <div class="absolute inset-y-0 right-0 w-full max-w-lg bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+        
+        <!-- Header -->
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+                <h3 class="font-display font-extrabold text-xl text-brand-900">Treatment & Invoicing</h3>
+                <p class="text-[11px] text-brand-400 font-bold uppercase tracking-wider mt-1" id="treatment-patient-name">Patient Name</p>
+            </div>
+            <button onclick="closeTreatmentModal()" class="text-slate-400 hover:text-brand-900 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            <!-- Services Selection -->
+            <div>
+                <label class="block text-[11px] font-bold text-brand-500 mb-3 uppercase tracking-wider">Performed Services</label>
+                <div id="invoice-items-list" class="space-y-3 mb-4">
+                    <!-- Items will be added here -->
+                </div>
+                
+                <div class="flex gap-2">
+                    <select id="add-service-select" class="flex-1 text-[13px] px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 outline-none">
+                        <option value="">Add another service…</option>
+                        @foreach(var svc in Model.AllServices) {
+                            <option value="@svc.Id" data-price="@svc.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-name="@svc.Name">@svc.Name — ₱@svc.Price.ToString("N0")</option>
+                        }
+                    </select>
+                    <button onclick="addServiceToInvoice()" class="px-4 py-2.5 bg-brand text-white rounded-xl hover:bg-brand/90 transition-colors">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-slate-100" />
+
+            <!-- Summary -->
+            <div class="bg-slate-50 rounded-2xl p-5 space-y-3">
+                <div class="flex justify-between text-[13px] text-brand-600">
+                    <span>Subtotal</span>
+                    <span id="invoice-subtotal">₱0.00</span>
+                </div>
+                <div class="flex justify-between items-center text-[13px] text-brand-600">
+                    <span>Discount</span>
+                    <div class="relative w-24">
+                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">₱</span>
+                        <input type="number" id="invoice-discount" value="0" oninput="calculateInvoiceTotal()" class="w-full pl-5 pr-2 py-1 text-right rounded-lg border border-slate-200 outline-none" />
+                    </div>
+                </div>
+                <div class="flex justify-between text-[16px] font-extrabold text-brand-900 pt-2 border-t border-slate-200">
+                    <span>Total Amount</span>
+                    <span id="invoice-total" class="text-primary">₱0.00</span>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label class="block text-[11px] font-bold text-brand-500 mb-2 uppercase tracking-wider">Clinical Notes / Recommendations</label>
+                <textarea id="invoice-notes" rows="3" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-primary/20 outline-none resize-none" placeholder="Enter findings or post-treatment advice…"></textarea>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-slate-100 bg-slate-50/50">
+            <button onclick="submitInvoice()" id="btn-submit-invoice" class="w-full py-4 bg-brand text-white rounded-2xl text-[14px] font-bold shadow-xl shadow-brand-900/20 hover:bg-black transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+                Generate & Send to Front Desk
+            </button>
+            <p class="text-[10px] text-center text-brand-400 mt-3 italic">
+                The patient will proceed to checkout once they leave the treatment room.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentAppt = null;
+    let invoiceItems = [];
+
+    function openTreatmentModal(appt) {
+        currentAppt = appt;
+        document.getElementById('treatment-patient-name').textContent = appt.patientName;
+        document.getElementById('treatment-modal').classList.remove('hidden');
+        
+        // Initialize with the scheduled service
+        invoiceItems = [{
+            serviceId: appt.serviceId,
+            description: appt.serviceName,
+            unitPrice: parseFloat(String(appt.basePrice).replace(/,/g, '')),
+            quantity: 1,
+            totalPrice: parseFloat(String(appt.basePrice).replace(/,/g, ''))
+        }];
+        
+        renderInvoiceItems();
+    }
+
+    function closeTreatmentModal() {
+        document.getElementById('treatment-modal').classList.add('hidden');
+        currentAppt = null;
+    }
+
+    function addServiceToInvoice() {
+        const select = document.getElementById('add-service-select');
+        const option = select.options[select.selectedIndex];
+        
+        if (!option.value) return;
+        
+        const priceVal = option.getAttribute('data-price');
+        const price = parseFloat(priceVal.replace(/,/g, ''));
+        const name = option.getAttribute('data-name');
+        
+        invoiceItems.push({
+            serviceId: option.value,
+            description: name,
+            unitPrice: price,
+            quantity: 1,
+            totalPrice: price
+        });
+        
+        select.selectedIndex = 0;
+        renderInvoiceItems();
+    }
+
+    function removeInvoiceItem(index) {
+        invoiceItems.splice(index, 1);
+        renderInvoiceItems();
+    }
+
+    function renderInvoiceItems() {
+        const container = document.getElementById('invoice-items-list');
+        container.innerHTML = invoiceItems.map((item, idx) => `
+            <div class="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
+                <div>
+                    <div class="text-[13px] font-bold text-brand-900">${item.description}</div>
+                    <div class="text-[10px] text-brand-400">₱${item.unitPrice.toLocaleString()}</div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[13px] font-bold text-brand-900">₱${item.totalPrice.toLocaleString()}</span>
+                    <button onclick="removeInvoiceItem(${idx})" class="text-red-300 hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        calculateInvoiceTotal();
+    }
+
+    function calculateInvoiceTotal() {
+        const subtotal = invoiceItems.reduce((acc, item) => acc + item.totalPrice, 0);
+        const discount = parseFloat(document.getElementById('invoice-discount').value) || 0;
+        const total = subtotal - discount;
+        
+        document.getElementById('invoice-subtotal').textContent = `₱${subtotal.toLocaleString()}`;
+        document.getElementById('invoice-total').textContent = `₱${total.toLocaleString()}`;
+    }
+
+    async function submitInvoice() {
+        const btn = document.getElementById('btn-submit-invoice');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing…';
+
+        const subtotal = invoiceItems.reduce((acc, item) => acc + item.totalPrice, 0);
+        const discount = parseFloat(document.getElementById('invoice-discount').value) || 0;
+        const total = subtotal - discount;
+
+        const payload = {
+            appointmentId: currentAppt.id,
+            patientId: currentAppt.patientId,
+            doctorId: currentAppt.doctorId,
+            totalAmount: subtotal,
+            discountAmount: discount,
+            finalAmount: total,
+            notes: document.getElementById('invoice-notes').value,
+            items: invoiceItems
+        };
+
+        try {
+            const res = await fetch('?handler=GenerateInvoice', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+            if (result.ok) {
+                alert('Invoice sent successfully to the front desk!');
+                location.reload();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i> Generate & Send to Front Desk';
+        }
+    }
+</script>

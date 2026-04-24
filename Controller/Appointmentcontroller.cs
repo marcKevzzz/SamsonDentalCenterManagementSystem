@@ -1,230 +1,185 @@
-// Controllers/AppointmentController.cs
-// ─────────────────────────────────────────────────────────
-// Manages the multi-step booking flow.
-// State flows as a ViewModel through TempData (JSON).
-// Each POST advances or retreats a step; each GET renders the view.
-
+// ── Controllers/AppointmentsController.cs ────────────────────────────────────
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SamsonDental.ViewModels;
-using System.Text.Json;
+using SamsonDentalCenterManagementSystem.Services;
 
-namespace SamsonDental.Controllers
+namespace SamsonDentalCenterManagementSystem.Controllers;
+
+[ApiController]
+[Route("api/appointments")]
+[IgnoreAntiforgeryToken]
+public class AppointmentsController : ControllerBase
 {
-    public class AppointmentController : Controller
+    private readonly AppointmentService _apptService;
+
+    public AppointmentsController(AppointmentService apptService)
     {
-        // ── TempData key ──────────────────────────────────
-        private const string STATE_KEY = "AppointmentState";
+        _apptService = apptService;
+    }
 
-        // ─────────────────────────────────────────────────
-        // HELPERS
-        // ─────────────────────────────────────────────────
+    // GET /api/appointments/doctors?category=Cosmetic
+    [HttpGet("doctors")]
+    public async Task<IActionResult> GetDoctors([FromQuery] string? category)
+    {
+        var doctors = string.IsNullOrEmpty(category)
+            ? await _apptService.GetDoctors()
+            : await _apptService.GetDoctorsForService(category);
 
-        private AppointmentViewModel GetState()
+        return Ok(doctors.Select(d => new
         {
-            var json = TempData.Peek(STATE_KEY) as string;
-            if (string.IsNullOrEmpty(json)) return new AppointmentViewModel();
-            return JsonSerializer.Deserialize<AppointmentViewModel>(json) ?? new();
+            id          = d.Id,
+            doctorName  = d.Profile != null ? $"{d.Title} {d.Profile.FirstName} {d.Profile.LastName}" : "Unknown",
+            title       = d.Title,
+            specialties = d.Specialties,
+            bio         = d.Bio
+        }));
+    }
+
+    // GET /api/appointments/availability?serviceId=xxx&category=Cosmetic&date=2026-04-20
+    [HttpGet("availability")]
+    public async Task<IActionResult> GetAvailability(
+        [FromQuery] string category,
+        [FromQuery] string date)
+    {
+
+        if (!DateTime.TryParse(date, out var parsedDate))
+            return BadRequest(new { ok = false, error = "Invalid date format." });
+
+        var availability = await _apptService.GetAvailability(category, parsedDate);
+        return Ok(availability);
+    }
+
+    // POST /api/appointments
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] AppointmentPayload p)
+    {
+        // Basic validation
+        if (string.IsNullOrWhiteSpace(p.PatientName) ||
+            string.IsNullOrWhiteSpace(p.PatientEmail) ||
+            string.IsNullOrWhiteSpace(p.PatientPhone))
+            return BadRequest(new { ok = false, error = "Patient name, email, and phone are required." });
+
+        if (!p.IsWaitlist && string.IsNullOrWhiteSpace(p.AppointmentTime))
+            return BadRequest(new { ok = false, error = "Appointment time is required." });
+
+        // FIX Bug 2: Only check double-booking when the logged-in user IS the patient
+        // (isForOther=false). When booking for someone else, allow it — the logged-in
+        // user is just the contact person, not the patient being treated.
+        if (!p.IsGuest && !p.IsWaitlist && !p.IsForOther && !string.IsNullOrEmpty(p.PatientId))
+        {
+            var hasBooking = await _apptService.HasExistingBookingAsPatient(p.PatientId, p.AppointmentDate);
+            if (hasBooking)
+                return Conflict(new
+                {
+                    ok    = false,
+                    error = "You already have an appointment on this date. To book for someone else, use the 'Someone Else' tab."
+                });
         }
 
-        private void SaveState(AppointmentViewModel model)
+        try
         {
-            TempData[STATE_KEY] = JsonSerializer.Serialize(model);
-        }
+            var appt = await _apptService.Create(p);
 
-        // ─────────────────────────────────────────────────
-        // GET /Appointment  →  current step
-        // ─────────────────────────────────────────────────
-        [HttpGet]
-        public IActionResult Index()
-        {
-            var model = GetState();
-            SaveState(model); // keep alive
-            return View(model);
-        }
-
-        // ─────────────────────────────────────────────────
-        // STEP 1 — POST: service selected
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult SelectService(string serviceSlug)
-        {
-            if (string.IsNullOrEmpty(serviceSlug))
+            // FIX Bug 4: surface the actual status to the client
+            return Ok(new
             {
-                ModelState.AddModelError("", "Please select a service.");
-                var cur = GetState();
-                cur.CurrentStep = 1;
-                SaveState(cur);
-                return RedirectToAction(nameof(Index));
+                ok                = true,
+                id                = appt.Id,
+                emailStatus            = appt.EmailStatus,   // "confirmed" | "pending" | "waitlist"
+                status            = appt.Status,   // "confirmed" | "pending" | "waitlist"
+                isGuest           = appt.IsGuest,
+                isWaitlist        = appt.IsWaitlist,
+                needsConfirmation = appt.IsGuest && !appt.IsWaitlist,  // guest non-waitlist needs email confirm
+                refNumber         = $"SDC-{appt.Id[..8].ToUpper()}"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Appointments.Create] {ex.Message}");
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    // GET /appointments/confirm?token=xxx  — guest email confirmation link
+    [HttpGet("/appointments/confirm")]
+    public async Task<IActionResult> ConfirmGuest([FromQuery] string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return Redirect("/appointments/invalid-token");
+
+        var appt = await _apptService.ConfirmByToken(token);
+        if (appt == null)
+            return Redirect("/appointments/invalid-token");
+
+        return Redirect($"/appointments/confirmed?id={appt.Id}");
+    }
+
+    // DELETE /api/appointments/{id}/cancel
+    [HttpDelete("{id}/cancel")]
+    [Authorize]
+    public async Task<IActionResult> Cancel(string id)
+    {
+        try
+        {
+            await _apptService.Cancel(id);
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    // GET /api/appointments/my
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<IActionResult> GetMine()
+    {
+        var patientId = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrEmpty(patientId)) return Unauthorized();
+
+        var appts = await _apptService.GetByPatient(patientId);
+        return Ok(appts.Select(a => new
+        {
+            id          = a.Id,
+            serviceName = a.ServiceName,
+            doctorName  = a.Doctor?.Profile != null ? $"{a.Doctor.Title} {a.Doctor.Profile.FirstName} {a.Doctor.Profile.LastName}" : null,
+            date        = a.AppointmentDate.ToString("yyyy-MM-dd"),
+            time        = a.AppointmentTime,
+            emailStatus      = a.EmailStatus,
+            status      = a.Status,
+            isWaitlist  = a.IsWaitlist,
+            isForOther  = a.IsForOther,
+            otherName   = a.OtherName,
+            patientName = a.PatientName
+        }));
+    }
+
+    // GET /api/appointments/{id}
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(string id)
+    {
+        var appt = await _apptService.GetById(id);
+        if (appt == null) return NotFound(new { ok = false, error = "Appointment not found." });
+        return Ok(new
+        {
+            ok = true,
+            appointment = new
+            {
+                id          = appt.Id,
+                serviceName = appt.ServiceName,
+                doctorName  = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
+                date        = appt.AppointmentDate.ToString("yyyy-MM-dd"),
+                time        = appt.AppointmentTime,
+                emailStatus      = appt.EmailStatus,
+                status      = appt.Status,
+                isWaitlist  = appt.IsWaitlist,
+                isForOther  = appt.IsForOther,
+                otherName   = appt.OtherName,
+                patientName = appt.PatientName,
+                patientEmail = appt.PatientEmail,
+                refNumber   = $"SDC-{appt.Id[..8].ToUpper()}"
             }
-
-            var service = ServicesData.FindBySlug(serviceSlug);
-            if (service == null) return BadRequest("Unknown service.");
-
-            var model = GetState();
-            model.CurrentStep              = 2;
-            model.SelectedServiceSlug      = service.Slug;
-            model.SelectedServiceName      = service.Name;
-            model.SelectedServiceCategory  = service.Category;
-            model.SelectedServiceTagline   = service.Tagline;
-            model.SelectedServicePrice     = service.Price;
-            model.SelectedServiceDuration  = service.Duration;
-            model.SelectedServiceRecovery  = service.Recovery;
-            model.SelectedServiceSummary   = service.Summary;
-            model.SelectedServiceBenefits  = service.Benefits;
-            // Reset downstream
-            model.SelectedDate = null;
-            model.SelectedTime = null;
-            model.IsWaitlist   = false;
-
-            SaveState(model);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ─────────────────────────────────────────────────
-        // STEP 2 — POST: date + time selected
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult SelectSchedule(string selectedDate, string selectedTime)
-        {
-            var model = GetState();
-
-            if (string.IsNullOrEmpty(selectedDate))
-            {
-                TempData["ScheduleError"] = "Please select a date.";
-                model.CurrentStep = 2;
-                SaveState(model);
-                return RedirectToAction(nameof(Index));
-            }
-
-            model.SelectedDate = selectedDate;
-            model.SelectedTime = selectedTime;
-
-            // Check if fully booked → waitlist
-            if (ServicesData.IsFullyBooked(selectedDate))
-            {
-                model.IsWaitlist   = true;
-                model.CurrentStep  = 3; // step 2B maps to step 3 in flow; waitlist flag differentiates
-                // Use a sub-step marker
-                model.CurrentStep  = 25; // 25 = step "2B" (waitlist)
-            }
-            else if (string.IsNullOrEmpty(selectedTime))
-            {
-                TempData["ScheduleError"] = "Please select a time slot.";
-                model.CurrentStep = 2;
-                SaveState(model);
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                model.IsWaitlist  = false;
-                model.CurrentStep = 3;
-            }
-
-            SaveState(model);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ─────────────────────────────────────────────────
-        // STEP 2B — POST: confirm waitlist → go to details
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ConfirmWaitlist()
-        {
-            var model = GetState();
-            model.CurrentStep = 3;
-            SaveState(model);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ─────────────────────────────────────────────────
-        // STEP 3 — POST: patient details submitted
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult SubmitDetails(AppointmentViewModel form)
-        {
-            var model = GetState();
-
-            // Copy form fields into state
-            model.FirstName    = form.FirstName;
-            model.LastName     = form.LastName;
-            model.Email        = form.Email;
-            model.Phone        = form.Phone;
-            model.PatientType  = form.PatientType ?? "New Patient";
-            model.Notes        = form.Notes;
-            model.ConsentGiven = form.ConsentGiven;
-
-            // Validate required fields
-            if (string.IsNullOrWhiteSpace(model.FirstName) ||
-                string.IsNullOrWhiteSpace(model.LastName)  ||
-                string.IsNullOrWhiteSpace(model.Email)     ||
-                string.IsNullOrWhiteSpace(model.Phone)     ||
-                !model.ConsentGiven)
-            {
-                model.CurrentStep = 3;
-                SaveState(model);
-                TempData["DetailsError"] = "Please fill in all required fields and accept the privacy policy.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            model.CurrentStep = 4;
-            SaveState(model);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ─────────────────────────────────────────────────
-        // STEP 4 — POST: final confirm → success
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ConfirmBooking()
-        {
-            var model = GetState();
-
-            // Generate reference number
-            model.ReferenceNumber = "SDC-" + Guid.NewGuid().ToString("N")[..6].ToUpper();
-            model.CurrentStep     = 5; // 5 = success
-
-            // TODO: persist to DB, send confirmation email/SMS here
-
-            SaveState(model);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ─────────────────────────────────────────────────
-        // BACK navigation
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult GoBack()
-        {
-            var model = GetState();
-
-            model.CurrentStep = model.CurrentStep switch
-            {
-                25 => 2,   // waitlist → back to schedule
-                2  => 1,
-                3  => model.IsWaitlist ? 25 : 2,
-                4  => 3,
-                _  => 1,
-            };
-
-            SaveState(model);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ─────────────────────────────────────────────────
-        // CANCEL — clear state
-        // ─────────────────────────────────────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Cancel()
-        {
-            TempData.Remove(STATE_KEY);
-            return Redirect("/");
-        }
+        });
     }
 }

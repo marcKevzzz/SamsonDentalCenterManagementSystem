@@ -1,0 +1,269 @@
+@page "/Admin/Staff"
+@namespace SamsonDentalCenterManagementSystem.Pages.Admin
+@model AdminStaffModel
+@using SamsonDentalCenterManagementSystem.Services
+@{
+    
+}
+@Html.AntiForgeryToken()
+
+<div id="page-doctors" class="page p-4 md:p-6">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h2 class="font-display text-xl font-extrabold text-brand-900">Staff</h2>
+      <p class="text-[12px] text-brand-500 mt-0.5">
+        @Model.Doctors.Count(d => d.IsActive) active ·
+        @Model.Doctors.Count total staff
+      </p>
+    </div>
+    <button onclick="openDoctorModal()"
+      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold
+             text-white bg-primary shadow-md shadow-primary/25 hover:opacity-90 transition-opacity">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Staff
+    </button>
+  </div>
+
+  <!-- ── Doctor cards ────────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" id="doctors-container">
+
+    @if (!Model.Doctors.Any())
+    {
+      <div class="col-span-full py-16 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center
+                    mx-auto mb-4 text-slate-400">
+          <i class="fa-solid fa-user-doctor text-xl"></i>
+        </div>
+        <p class="text-[13px] text-brand-400">No doctors added yet.</p>
+        <button onclick="openDoctorModal()"
+          class="mt-3 text-[12px] font-semibold text-primary hover:underline">
+          Add the first doctor
+        </button>
+      </div>
+    }
+
+    @foreach (var doc in Model.Doctors)
+    {
+      var firstName = doc.Profile?.FirstName ?? "";
+      var lastName  = doc.Profile?.LastName  ?? "";
+      var initials  = (firstName.Length > 0 ? firstName[..1].ToUpper() : "?") +
+                      (lastName.Length  > 0 ? lastName[..1].ToUpper()  : "");
+      var fullName  = doc.Profile != null
+          ? $"{doc.Title} {firstName} {lastName}".Trim()
+          : $"{doc.Title} (No Profile)";
+
+      var specStr = doc.Specialties?.Length > 0
+          ? string.Join(", ", doc.Specialties)
+          : "";
+
+      // Unique active days, sorted Mon–Sun (Mon=1→0, Sun=0→6)
+      var availDays = (doc.Availability ?? new())
+          .Where(a => a.IsActive)
+          .GroupBy(a => a.DayOfWeek)
+          .OrderBy(g => (g.Key + 6) % 7)
+          .ToList();
+
+      var docJson = System.Text.Json.JsonSerializer.Serialize(new {
+        id           = doc.Id,
+        profileId    = doc.ProfileId,
+        title        = doc.Title,
+        specialties  = specStr,
+        bio          = doc.Bio,
+        isActive     = doc.IsActive,
+        availability = (doc.Availability ?? new()).Select(a => new {
+          id        = a.Id,
+          dayOfWeek = a.DayOfWeek,
+          startTime = a.StartTime,
+          endTime   = a.EndTime
+        })
+      });
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden
+                  hover:shadow-lg hover:border-primary/20 transition-all
+                  @(doc.IsActive ? "" : "opacity-60")">
+
+        <!-- Colour strip -->
+        <div class="h-1.5 w-full @(doc.IsActive ? "bg-primary" : "bg-slate-300")"></div>
+
+        <div class="p-5">
+
+          <!-- Avatar + name + edit -->
+          <div class="flex items-start gap-3 mb-4">
+
+            @if (!string.IsNullOrEmpty(doc.Profile?.AvatarUrl))
+            {
+              <img src="@doc.Profile.AvatarUrl" alt="@fullName"
+                class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />
+            }
+            else
+            {
+              <div class="w-12 h-12 rounded-xl bg-primary
+                          flex items-center justify-center text-white text-[15px]
+                          font-bold font-display shrink-0 shadow-sm">
+                @initials
+              </div>
+            }
+
+            <div class="flex-1 min-w-0">
+              <div class="font-display font-bold text-brand-900 text-[14px] leading-tight truncate">
+                @fullName
+              </div>
+              @if (!string.IsNullOrEmpty(doc.Profile?.Email))
+              {
+                <div class="text-[11px] text-brand-400 truncate mt-0.5">
+                  @doc.Profile!.Email
+                </div>
+              }
+            </div>
+
+            <button onclick='openDoctorModal(@Html.Raw(docJson))'
+              class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center
+                     text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors shrink-0">
+              <i class="fa-solid fa-pen text-[10px]"></i>
+            </button>
+          </div>
+
+          <!-- Status + specialty pills -->
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full font-display
+                         @(doc.IsActive
+                             ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                             : "bg-slate-100 text-slate-500")">
+              @(doc.IsActive ? "Active" : "Inactive")
+            </span>
+
+            @foreach (var spec in (doc.Specialties ?? Array.Empty<string>()).Take(2))
+            {
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-primary font-semibold">
+                @spec
+              </span>
+            }
+            @if ((doc.Specialties?.Length ?? 0) > 2)
+            {
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                +@(doc.Specialties!.Length - 2) more
+              </span>
+            }
+          </div>
+
+          <!-- Bio -->
+          @if (!string.IsNullOrEmpty(doc.Bio))
+          {
+            <p class="text-[11.5px] text-slate-500 leading-tight tracking-tight line-clamp-2">@doc.Bio</p>
+          }
+
+          <!-- Availability section -->
+          <div class="border-t border-slate-100 pt-2 mt-2">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-brand-400 mb-1">
+              Availability
+            </p>
+
+            @if (!doc.Availability.Any())
+            {
+              <p class="text-[11px] text-brand-300 italic">No schedule set.</p>
+            }
+            else
+            {
+               <div class="flex flex-row gap-1">
+              <!-- Group rows by day -->
+              @foreach (var group in doc.Availability.GroupBy(a => a.DayOfWeek))
+              {
+                var slots = group.ToList();
+                var dayLabel = slots.First().DayAbbr;
+                
+                  <div class="flex flex-wrap gap-1">
+                    @foreach (var slot in slots)
+                    {
+                      <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-50
+                                   border border-slate-200 text-brand-600 font-medium">
+                        @dayLabel
+                      </span>
+                    }
+                  </div>
+              }
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+    }
+
+    @foreach (var rec in Model.Receptionists)
+    {
+      var firstName = rec.Profile?.FirstName ?? "";
+      var lastName  = rec.Profile?.LastName  ?? "";
+      var initials  = (firstName.Length > 0 ? firstName[..1].ToUpper() : "?") +
+                      (lastName.Length  > 0 ? lastName[..1].ToUpper()  : "");
+      var fullName  = rec.Profile != null
+          ? $"{firstName} {lastName}".Trim()
+          : $"(No Profile)";
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden
+                  hover:shadow-lg hover:border-primary/20 transition-all
+                  @(rec.IsActive ? "" : "opacity-60")">
+
+        <div class="h-1.5 w-full @(rec.IsActive ? "bg-primary" : "bg-slate-300")"></div>
+
+        <div class="p-5">
+          <div class="flex items-start gap-3 mb-4">
+            @if (!string.IsNullOrEmpty(rec.Profile?.AvatarUrl))
+            {
+              <img src="@rec.Profile.AvatarUrl" alt="@fullName" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />
+            }
+            else
+            {
+              <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white text-[15px] font-bold font-display shrink-0 shadow-sm">
+                @initials
+              </div>
+            }
+
+            <div class="flex-1 min-w-0">
+              <div class="font-display font-bold text-brand-900 text-[14px] leading-tight truncate">
+                @fullName
+              </div>
+              @if (!string.IsNullOrEmpty(rec.Profile?.Email))
+              {
+                <div class="text-[11px] text-brand-400 truncate mt-0.5">
+                  @rec.Profile!.Email
+                </div>
+              }
+            </div>
+
+            <button
+              class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center
+                     text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors shrink-0">
+              <i class="fa-solid fa-pen text-[10px]"></i>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full font-display
+                         @(rec.IsActive ? "bg-emerald-50 text-emerald-700 border border-emerald-100" : "bg-slate-100 text-slate-500")">
+              @(rec.IsActive ? "Active" : "Inactive")
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-primary font-semibold">
+              Receptionist
+            </span>
+            @if (!string.IsNullOrEmpty(rec.DeskLocation))
+            {
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 font-semibold">
+                Desk: @rec.DeskLocation
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<partial name="Components/DoctorModal" />
+
+<script type="module" src="~/js/AdminSide/adminDoctors.js"></script>

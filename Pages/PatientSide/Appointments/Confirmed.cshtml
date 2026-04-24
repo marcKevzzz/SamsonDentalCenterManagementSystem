@@ -1,0 +1,139 @@
+@page "/appointments/confirmed"
+@model SamsonDentalCenterManagementSystem.Pages.PatientSide.Appointments.ConfirmedModel
+@{
+    ViewData["Title"] = "Appointment Confirmed";
+    var appt = Model.AppointmentDetails;
+}
+
+<style>
+    /* Hide progress bar and back button from _AppointmentLayout */
+    #progressWrap, #backBtn {
+        display: none !important;
+    }
+</style>
+
+<div class="min-h-[calc(100vh-70px)] flex flex-col items-center justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <div class="max-w-xl w-full space-y-4 sm:space-y-6 bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-3xl shadow-xl border border-gray-100">
+        
+        @if (appt == null)
+        {
+            <div class="text-center py-4 sm:py-6">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-calendar-xmark text-red-500 text-2xl sm:text-3xl"></i>
+                </div>
+                <h2 class="brand-font font-extrabold text-brand text-[1.25rem] sm:text-[1.5rem] mb-3">
+                    Appointment Not Found
+                </h2>
+                <p class="font-body text-[.82rem] sm:text-[.88rem] text-muted mb-8 leading-relaxed">
+                    We couldn't find the appointment details. The link may have expired or is invalid.
+                </p>
+                <a href="/Appointments" class="inline-block w-full brand-font font-bold text-[.75rem] sm:text-[.82rem] tracking-wider uppercase bg-brand text-white px-7 py-4 rounded-xl hover:bg-primary transition-all shadow-md active:scale-95 no-underline">
+                    Book a New Appointment
+                </a>
+            </div>
+
+            <script type="module">
+                import { Toast } from "/js/ui.js";
+                document.addEventListener("DOMContentLoaded", () => {
+                    Toast.show("Appointment details could not be retrieved.", "danger");
+                });
+            </script>
+        }
+        else
+        {
+            <div class="text-center">
+                <!-- Icon -->
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <svg width="28" height="28" class="sm:w-[36px] sm:h-[36px]" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                </div>
+
+                <!-- Title + message -->
+                <h2 class="brand-font font-extrabold text-brand text-[1.4rem] sm:text-[1.8rem] mb-2">
+                    Confirmed!
+                </h2>
+                <p class="font-body text-[.82rem] sm:text-[.92rem] text-muted max-w-md mx-auto mb-2 leading-relaxed">
+                    Your appointment for <strong class="text-brand text-[.85rem] sm:text-[.92rem]">@appt.ServiceName</strong> is secured.
+                </p>
+
+                <!-- Ref number -->
+                <div class="inline-flex items-center gap-2 bg-offwhite border border-[#e5e7eb] rounded-full px-4 py-2 sm:px-5 sm:py-2.5 my-4 sm:my-6">
+                    <span class="font-body text-[.65rem] font-bold uppercase tracking-widest text-muted">Ref No.</span>
+                    <span class="brand-font font-black text-brand text-[.8rem] sm:text-[.9rem] tracking-widest">SDC-@appt.Id.Substring(0, 8).ToUpper()</span>
+                </div>
+
+                <!-- Summary card -->
+                <div class="bg-white rounded-2xl border border-[#e5e7eb] p-4 sm:p-6 text-left mb-6 shadow-sm">
+                    <div class="space-y-3 sm:space-y-3.5">
+                        <div class="flex justify-between items-start gap-4">
+                            <span class="font-body text-[.72rem] sm:text-[.78rem] text-muted shrink-0">Patient</span>
+                            <span class="font-body text-[.78rem] sm:text-[.85rem] font-bold text-brand text-right">
+                                @(appt.IsForOther && !string.IsNullOrEmpty(appt.OtherName) ? appt.OtherName : appt.PatientName)
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-start gap-4">
+                            <span class="font-body text-[.72rem] sm:text-[.78rem] text-muted shrink-0">Service</span>
+                            <span class="font-body text-[.78rem] sm:text-[.85rem] font-bold text-brand text-right">@appt.ServiceName</span>
+                        </div>
+                        <div class="flex justify-between items-start gap-4">
+                            <span class="font-body text-[.72rem] sm:text-[.78rem] text-muted shrink-0">Date</span>
+                            <span class="font-body text-[.78rem] sm:text-[.85rem] font-bold text-brand text-right">@appt.AppointmentDate.ToString("MMMM dd, yyyy")</span>
+                        </div>
+                        <div class="flex justify-between items-start gap-4">
+                            <span class="font-body text-[.72rem] sm:text-[.78rem] text-muted shrink-0">Time</span>
+                            <span class="font-body text-[.78rem] sm:text-[.85rem] font-bold text-brand text-right">@appt.AppointmentTime</span>
+                        </div>
+                        <div class="pt-3 border-t border-dashed border-[#e5e7eb]">
+                            <div class="flex justify-between items-center">
+                                <span class="font-body text-[.72rem] sm:text-[.78rem] text-muted">Status</span>
+                                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-green-100 text-green-700 rounded-lg font-bold text-[.65rem] sm:text-[.7rem] uppercase tracking-wider">Confirmed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next steps -->
+                <div class="bg-blue-50/50 rounded-2xl p-4 sm:p-5 text-left mb-6 sm:mb-8 border border-blue-100">
+                    <div class="brand-font font-bold text-[.75rem] sm:text-[.82rem] text-primary mb-3 uppercase tracking-wider">Next Steps</div>
+                    <div class="space-y-2.5 sm:space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white flex items-center justify-center shrink-0 mt-0.5 border border-blue-100 shadow-sm">
+                                <i class="fa-solid fa-check text-blue-600 text-[.6rem] sm:text-[.65rem]"></i>
+                            </div>
+                            <p class="font-body text-[.75rem] sm:text-[.82rem] text-slate-600 leading-relaxed  truncate">
+                                Confirmation sent to <strong class="text-brand ">@appt.PatientEmail</strong>.
+                            </p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white flex items-center justify-center shrink-0 mt-0.5 border border-blue-100 shadow-sm">
+                                <i class="fa-solid fa-check text-blue-600 text-[.6rem] sm:text-[.65rem]"></i>
+                            </div>
+                            <p class="font-body text-[.75rem] sm:text-[.82rem] text-slate-600 leading-relaxed">
+                                Arrive 15 minutes before your scheduled time.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="/" class="brand-font flex-1 font-bold text-[.75rem] sm:text-[.82rem] tracking-wider uppercase bg-brand text-white px-7 py-3.5 sm:py-4 rounded-xl hover:bg-primary transition-all shadow-md active:scale-95 no-underline">
+                        Back to Home
+                    </a>
+                    <a href="/Appointments" class="brand-font flex-1 font-bold text-[.75rem] sm:text-[.82rem] tracking-wider uppercase bg-white text-brand border border-[#e5e7eb] px-7 py-3.5 sm:py-4 rounded-xl hover:bg-gray-100 transition-all active:scale-95 no-underline">
+                        Book Another
+                    </a>
+                </div>
+            </div>
+
+            <script type="module">
+                import { Toast } from "/js/ui.js";
+                document.addEventListener("DOMContentLoaded", () => {
+                    Toast.show("Appointment confirmed successfully!", "success");
+                });
+            </script>
+        }
+    </div>
+</div>

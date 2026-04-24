@@ -1,0 +1,30 @@
+<!-- ─── STEP 1: Select Service ─── -->
+@* <!-- In ASP.NET: @await Html.PartialAsync("_Step1Service", Model) --> *@
+<div id="step-1" class="step-panel active">
+    <!-- Partial: Partials/_Step1Service.html -->
+    <div class="mb-8">
+        <div
+            class="flex items-center gap-2 font-body text-[.67rem] font-semibold tracking-[.15em] uppercase text-muted mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Step 1 of 4
+        </div>
+        <h1 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-2">Select a Service</h1>
+        <p class="font-body text-[.9rem] text-muted">Choose the treatment you'd like to book. You can only book one
+            service per appointment.</p>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="flex gap-2 mb-6 flex-wrap" id="catTabs"></div>
+
+    <!-- Service list -->
+    <div id="svcList" class="space-y-3 mb-8"></div>
+
+    <!-- Service detail panel -->
+    <div id="svcDetail" class="hidden mb-8"></div>
+
+    <div class="flex justify-end">
+        <button id="step1Btn" onclick="goToStep(2)" disabled
+            class="brand-font font-bold text-[.85rem] tracking-wider uppercase bg-brand text-white px-8 py-3.5 rounded-xl hover:bg-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+            Continue to Schedule →
+        </button>
+    </div>
+</div>

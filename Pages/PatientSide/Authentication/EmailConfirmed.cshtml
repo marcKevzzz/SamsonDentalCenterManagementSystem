@@ -1,0 +1,170 @@
+@page "/email-confirmed"
+@model EmailConfirmedModel
+@{
+Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Confirmed — Samson Dental Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1E40AF",
+                        brand: "#0F172A",
+                        muted: "#6B7280",
+                    },
+                    fontFamily: {
+                        display: ["Roboto", "sans-serif"],
+                        body: ["DM Sans", "sans-serif"],
+                    }
+                }
+            }
+        };
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md">
+
+        <div id="stateLoading" class="text-center fade-in">
+            <div class="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary spin mx-auto mb-5"></div>
+            <h2 class="font-display font-bold text-xl text-brand mb-1">Confirming your email…</h2>
+            <p class="text-muted text-sm">Please wait a moment.</p>
+        </div>
+
+        <div id="stateSuccess" class="hidden text-center fade-in">
+            <div class="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
+                <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="font-display font-bold text-2xl text-brand mb-2">Email Confirmed!</h2>
+            <p class="text-muted text-sm mb-6">
+                Your account has been verified. You can now sign in to Samson Dental Center.
+            </p>
+            <!-- <a href="/sign-in"
+                class="inline-block px-8 py-3 bg-primary text-white font-display font-bold text-sm rounded-xl hover:bg-primary/90 transition-colors shadow-md shadow-primary/25">
+                Sign In Now
+            </a> -->
+            <p class="text-xs text-muted mt-4">Redirecting automatically in <span id="countdown">5</span>s…</p>
+        </div>
+
+        <div id="stateError" class="hidden text-center fade-in">
+            <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-5">
+                <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <h2 class="font-display font-bold text-2xl text-brand mb-2">Confirmation Failed</h2>
+            <p class="text-muted text-sm mb-2" id="errorMessage">
+                The confirmation link may have expired or already been used.
+            </p>
+            <p class="text-muted text-sm mb-6">Please sign up again or contact support.</p>
+            <div class="flex gap-3 justify-center">
+                <a href="/sign-in"
+                    class="px-6 py-2.5 border border-slate-200 text-brand font-semibold text-sm rounded-xl hover:bg-slate-100 transition-colors">
+                    Sign In
+                </a>
+                <a href="/sign-up"
+                    class="px-6 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:bg-primary/90 transition-colors">
+                    Sign Up Again
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Supabase appends token info as URL fragment: #access_token=...&type=signup
+        // Fragments are never sent to the server — we must handle them client-side.
+
+        (async function () {
+            const hash = window.location.hash.substring(1); // strip #
+            const params = new URLSearchParams(hash);
+
+            const accessToken = params.get("access_token");
+            const type = params.get("type");
+            const error = params.get("error_description");
+
+            console.log("Email confirmation params:", { accessToken, type, error });
+
+            // Handle error from Supabase (e.g. expired link)
+            if (error) {
+                showError(decodeURIComponent(error));
+                return;
+            }
+
+            // Must be a signup confirmation
+            if (!accessToken || type !== "signup") {
+                // Could be arriving without a fragment — show error
+                showError("No confirmation token found. The link may be invalid.");
+                return;
+            }
+
+            try {
+                // Store the access token as a cookie via our backend
+                const res = await fetch("/api/auth/confirm-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ accessToken })
+                });
+
+                const result = await res.json();
+
+                if (result.ok) {
+                    showSuccess(result.user);
+                } else {
+                    showError(result.error ?? "Confirmation failed.");
+                }
+            } catch (err) {
+                showError("An unexpected error occurred.");
+            }
+        })();
+
+        function showSuccess(user) {
+            document.getElementById("stateLoading").classList.add("hidden");
+            document.getElementById("stateSuccess").classList.remove("hidden");
+
+            // Save user to localStorage if returned
+            if (user) {
+                localStorage.setItem("sb_user", JSON.stringify(user));
+            }
+
+            // Countdown redirect
+            let secs = 5;
+            const cd = document.getElementById("countdown");
+            const interval = setInterval(() => {
+                secs--;
+                cd.textContent = secs;
+                if (secs <= 0) {
+                    clearInterval(interval);
+                    window.location.href = "/";
+                }
+            }, 1000);
+        }
+
+        function showError(msg) {
+            document.getElementById("stateLoading").classList.add("hidden");
+            document.getElementById("stateError").classList.remove("hidden");
+            document.getElementById("errorMessage").textContent = msg;
+        }
+    </script>
+
+</body>
+
+</html>

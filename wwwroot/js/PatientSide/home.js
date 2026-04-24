@@ -4,188 +4,338 @@ document.addEventListener("DOMContentLoaded", () => {
   // Animate fade-up elements
   document.getElementById("nextReview")?.addEventListener("click", nextReview);
   document.getElementById("prevReview")?.addEventListener("click", prevReview);
+
+  // Background reveal logic
+  const bg = document.getElementById("heroBg");
+  if (bg) {
+    bg.classList.add("opacity-100");
+    bg.classList.remove("scale-105");
+    const skeleton = document.getElementById("heroSkeleton");
+    if (skeleton) {
+      skeleton.classList.add("opacity-0");
+      setTimeout(() => skeleton.remove(), 1000);
+    }
+  }
+
+  playHero();
+  initScrollAnimations();
+  initMagneticButtons();
 });
 
+function initScrollAnimations() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // 1. Parallax Hero Effect (Mouse Move)
+  const hero = document.querySelector("#hero");
+  if (hero) {
+    hero.addEventListener("mousemove", (e) => {
+      const { clientX, clientY } = e;
+      const xPos = (clientX / window.innerWidth - 0.5) * 30;
+      const yPos = (clientY / window.innerHeight - 0.5) * 30;
+      
+      gsap.to("#heroContent", {
+        x: xPos,
+        y: yPos,
+        duration: 1.5,
+        ease: "power2.out"
+      });
+      
+      gsap.to("#heroBg", {
+        x: -xPos * 0.5,
+        y: -yPos * 0.5,
+        scale: 1.05,
+        duration: 2,
+        ease: "power2.out"
+      });
+    });
+  }
+
+  // 2. Count-up Animation for Stats
+  const stats = document.querySelector(".hero-reveal-late div .font-body");
+  if (stats) {
+    ScrollTrigger.create({
+        trigger: stats,
+        start: "top 95%",
+        onEnter: () => {
+            const countTarget = { val: 0 };
+            gsap.to(countTarget, {
+                val: 2000,
+                duration: 2.5,
+                ease: "power3.out",
+                onUpdate: () => {
+                    const el = document.querySelector(".hero-reveal-late .text-muted");
+                    if (el) el.innerHTML = `Trusted by ${Math.floor(countTarget.val).toLocaleString()}+ Happy Patients`;
+                }
+            });
+        }
+    });
+  }
+
+  // 3. Reveal features (Staggered cards)
+  gsap.from(".feature-card", {
+    scrollTrigger: {
+      trigger: "#features",
+      start: "top 80%",
+      once: true
+    },
+    opacity: 0,
+    y: 60,
+    rotateY: 15,
+    duration: 1,
+    stagger: 0.2,
+    ease: "expo.out",
+    clearProps: "all"
+  });
+
+  // 4. Reveal reviews header
+  gsap.from("#reviews h2", {
+    scrollTrigger: {
+      trigger: "#reviews h2",
+      start: "top 90%",
+      once: true
+    },
+    opacity: 0,
+    x: -50,
+    duration: 1.2,
+    ease: "power4.out"
+  });
+
+  // 5. Section Background Reveal
+  gsap.from("#location", {
+    scrollTrigger: {
+        trigger: "#location",
+        start: "top 80%"
+    },
+    backgroundColor: "#fff",
+    duration: 1.5
+  });
+}
+
 function playHero() {
-  const tl = gsap.timeline();
+  const tl = gsap.timeline({
+    defaults: { ease: "expo.out" }
+  });
 
-  // 1. Reveal the container
-  gsap.set("#heroContent", { opacity: 1 });
-
-  // 2. The Stagger Timeline
-  tl.fromTo(
-    ".hero-reveal", // Animate other reveals first (like the welcome badge)
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.6 },
+  tl.fromTo(".hero-reveal",
+    { opacity: 0, y: 40, skewY: 5 },
+    { opacity: 1, y: 0, skewY: 0, duration: 1.2, stagger: 0.2 }
   )
-    .fromTo(
-      ".word",
+    .fromTo(".word",
+      { opacity: 0, y: 60, rotateX: -60 },
       {
-        opacity: 0,
-        y: 40, // Start lower
-        rotateX: -40, // Adds a 3D "leaning" effect as they come up
+        opacity: 1, y: 0, rotateX: 0,
+        duration: 1.5,
+        stagger: 0.08,
+        ease: "expo.out"
       },
-      {
-        opacity: 1,
-        y: 0,
-        rotateX: 0,
-        duration: 0.8,
-        ease: "back.out(1.7)", // Gives it a slight "bounce"
-        stagger: 0.1, // 100ms delay between each word
-      },
-      "-=0.4", // Start this animation slightly before the previous one finishes
+      "-=0.8"
     )
-    .fromTo(
-      ".hero-reveal-late", // Animate buttons and social proof last
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, stagger: 0.2 },
-      "-=0.5",
+    .fromTo(".hero-reveal-late",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 1, stagger: 0.2 },
+      "-=1"
+    )
+    .fromTo(".hero-doctor-img",
+      { opacity: 0, scale: 0.8, x: 40, filter: "brightness(0.5) blur(10px)" },
+      { opacity: 1, scale: 1, x: 0, filter: "brightness(1.05) blur(0px)", duration: 2, ease: "expo.out" },
+      "-=1.2"
+    )
+    .fromTo(".glass-pill",
+      { opacity: 0, x: -30, scale: 0.8 },
+      { opacity: 1, x: 0, scale: 1, duration: 1.2, ease: "back.out(1.7)" },
+      "-=1"
     );
 }
 
-playHero();
+function initMagneticButtons() {
+    const buttons = document.querySelectorAll('a[href="/Appointments"], a[href="/Services"]');
+    buttons.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            gsap.to(btn, {
+                x: x * 0.3,
+                y: y * 0.3,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            gsap.to(btn, {
+                x: 0,
+                y: 0,
+                duration: 0.6,
+                ease: "elastic.out(1, 0.3)"
+            });
+        });
+    });
+}
 
-/* ── Reviews carousel ── */
+/* ── Reviews Scroll Trigger Logic ── */
 const reviewsData = [
   {
     name: "Marieme",
     date: "2024-05-15",
     img: "https://randomuser.me/api/portraits/women/25.jpg",
-    text: "10/10 would recommend. I've never met a doctor who cares about patients as much as this clinic takes care of its patients. The attention to detail is unmatched.",
+    text: "10/10 would recommend. I've never met a doctor who cares about patients as much as this clinic takes care of its patients. The attention to detail is unmatched and the results are truly life-changing.",
   },
   {
     name: "Alexandria Sadang",
     date: "2023-10-02",
     img: "https://randomuser.me/api/portraits/women/55.jpg",
-    text: "Samson Dental Center has been my family's go-to clinic ever since we found them. It's definitely the best decision we made for our oral health.",
+    text: "Samson Dental Center has been my family's go-to clinic ever since we found them. It's definitely the best decision we made for our oral health. Every visit feels like visiting family.",
   },
   {
     name: "Carlos Reyes",
     date: "2024-01-20",
     img: "https://randomuser.me/api/portraits/men/41.jpg",
-    text: "Professional staff and painless procedures. I was nervous but they made me feel completely at ease. Highly recommend to anyone anxious about dentist visits!",
+    text: "Professional staff and painless procedures. I was nervous but they made me feel completely at ease. Highly recommend to anyone anxious about dentist visits! The technology they use is top-notch.",
   },
   {
     name: "Maria Santos",
     date: "2024-03-05",
     img: "https://randomuser.me/api/portraits/women/30.jpg",
-    text: "Absolutely world-class service. The team is warm and truly cares. My kids actually look forward to dental appointments now — I never thought that'd happen!",
+    text: "Absolutely world-class service. The team is warm and truly cares. My kids actually look forward to dental appointments now! I never thought I'd see the day they'd be excited for a checkup.",
+  },
+  {
+    name: "John Doe",
+    date: "2024-04-10",
+    img: "https://randomuser.me/api/portraits/men/12.jpg",
+    text: "The best dental experience I've ever had. Clean, modern, and very professional. The results are amazing! I've been to many clinics but this one stands out for its excellence.",
+  },
+  {
+    name: "Sarah Jenkins",
+    date: "2024-02-28",
+    img: "https://randomuser.me/api/portraits/women/15.jpg",
+    text: "I was always afraid of dentists, but the team here made me feel so comfortable. I'm actually excited for my next cleaning! They explain everything so clearly and really listen to your concerns.",
+  },
+  {
+    name: "Michael Chen",
+    date: "2024-06-12",
+    img: "https://randomuser.me/api/portraits/men/65.jpg",
+    text: "Exceptional care and very friendly environment. The doctors are highly skilled and take the time to ensure you are comfortable. My veneers look incredibly natural!",
+  },
+  {
+    name: "Elena Rodriguez",
+    date: "2024-05-20",
+    img: "https://randomuser.me/api/portraits/women/42.jpg",
+    text: "Fast, efficient, and high-quality work. I came in for an emergency and they handled it with such grace and expertise. I'm definitely making this my regular clinic.",
   },
 ];
-const track = document.getElementById("reviewsContainer");
-let currentIndex = 0;
-let isAnimating = false;
-let autoPlayInterval;
 
-// --- CONFIGURATION ---
-const AUTO_PLAY_SPEED = 4000; // 4 seconds per slide
+function initReviewsScroll() {
+  const container = document.getElementById("reviewsContainer");
+  const section = document.querySelector(".horizontal-scroll-section");
+  const dotsContainer = document.getElementById("reviewDots");
+  if (!container || !section) return;
 
-function initCarousel() {
-  const items = [...reviewsData, ...reviewsData, ...reviewsData];
-
-  track.innerHTML = items
+  container.innerHTML = reviewsData
     .map(
-      (r) => `
-    <div class="review-card bg-white rounded-2xl p-7 flex-shrink-0 w-full sm:w-[400px] shadow-sm">
-      <div class="flex justify-between items-start mb-3">
-        <div class="flex items-center gap-3">
-          <img src="${r.img}" class="w-12 h-12 rounded-full object-cover" alt="${r.name}"/>
+      (r, i) => `
+    <div class="review-card-premium${i === 0 ? ' review-active' : ''}">
+      <div class="review-quote-mark">"</div>
+      <div>
+        <p class="review-text">"${r.text}"</p>
+      </div>
+      <div class="review-footer">
+        <div class="review-author">
+          <img src="${r.img}" class="review-avatar" alt="${r.name}"/>
           <div>
-            <div class="font-bold text-sm text-[#1a1a2e]">${r.name}</div>
-            <div class="text-xs text-gray-400">${r.date}</div>
+            <div class="review-name">${r.name}</div>
+            <div class="review-date">${r.date}</div>
           </div>
         </div>
-        <span class="font-bold text-lg text-blue-600">G</span>
+        <div class="review-meta">
+          <div class="flex gap-0.5 text-[#f59e0b] mb-1 justify-end">
+            ${Array(5).fill('<i class="fa-solid fa-star text-[9px]"></i>').join('')}
+          </div>
+          <div class="review-verified">
+            <span>Verified</span>
+            <i class="fa-brands fa-google"></i>
+          </div>
+        </div>
       </div>
-      <div class="text-yellow-500 mb-3 text-xs">★★★★★</div>
-      <p class="text-sm text-gray-600 leading-relaxed">${r.text}</p>
     </div>
-  `,
+  `
     )
     .join("");
 
-  currentIndex = reviewsData.length;
-
-  requestAnimationFrame(() => {
-    updatePosition(false);
-    startAutoPlay(); // Start the loop
-  });
-}
-
-function getMoveDistance() {
-  const card = track.querySelector(".review-card");
-  if (!card) return 0;
-  const style = window.getComputedStyle(track);
-  const gap = parseFloat(style.columnGap) || 0;
-  return card.offsetWidth + gap;
-}
-
-function updatePosition(animate = true) {
-  const xPos = -currentIndex * getMoveDistance();
-
-  if (animate) {
-    isAnimating = true;
-    gsap.to(track, {
-      x: xPos,
-      duration: 0.8,
-      ease: "power3.inOut", // Slightly smoother ease for auto-scrolling
-      onComplete: () => {
-        isAnimating = false;
-        checkLoop();
-      },
+  // Build dots
+  if (dotsContainer) {
+    reviewsData.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.className = `review-dot${i === 0 ? " review-dot-active" : ""}`;
+      dot.setAttribute("aria-label", `Review ${i + 1}`);
+      dotsContainer.appendChild(dot);
     });
-  } else {
-    gsap.set(track, { x: xPos });
   }
-}
 
-function checkLoop() {
-  if (currentIndex >= reviewsData.length * 2) {
-    currentIndex = reviewsData.length;
-    updatePosition(false);
-  } else if (currentIndex < reviewsData.length) {
-    currentIndex = reviewsData.length * 2 - 1;
-    updatePosition(false);
+  const cards = gsap.utils.toArray(".review-card-premium");
+  const dots = dotsContainer ? dotsContainer.querySelectorAll(".review-dot") : [];
+
+  function setActiveCard(index) {
+    cards.forEach((card, i) => {
+      card.classList.toggle("review-active", i === index);
+      card.classList.toggle("review-dim", i !== index);
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("review-dot-active", i === index);
+    });
   }
+
+  setTimeout(() => {
+    ScrollTrigger.refresh();
+
+    const totalWidth = container.scrollWidth;
+    const viewportWidth = section.offsetWidth;
+    const travelDistance = totalWidth - viewportWidth;
+
+    if (travelDistance > 0) {
+      const snapPoints = cards.map((card) => {
+        const cardOffset = card.offsetLeft;
+        const cardWidth = card.offsetWidth;
+        const targetX = cardOffset - viewportWidth / 2 + cardWidth / 2;
+        return gsap.utils.clamp(0, 1, targetX / travelDistance);
+      });
+
+      gsap.to(container, {
+        x: () => -travelDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#reviewsPin",
+          start: "top top",
+          end: () => `+=${travelDistance * 1.5}`,
+          pin: true,
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+          snap: {
+            snapTo: snapPoints,
+            duration: { min: 0.25, max: 0.5 },
+            delay: 0.08,
+            ease: "power3.inOut",
+          },
+          onUpdate: (self) => {
+            const currentX = -gsap.getProperty(container, "x");
+            let closestIndex = 0;
+            let minDiff = Infinity;
+            cards.forEach((card, i) => {
+              const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+              const diff = Math.abs(currentX + viewportWidth / 2 - cardCenter);
+              if (diff < minDiff) { minDiff = diff; closestIndex = i; }
+            });
+            setActiveCard(closestIndex);
+          },
+        },
+      });
+    }
+  }, 100);
 }
-
-// --- CONTROLS ---
-
-function nextReview() {
-  if (isAnimating) return;
-  currentIndex++;
-  updatePosition();
-}
-
-function prevReview() {
-  if (isAnimating) return;
-  currentIndex--;
-  updatePosition();
-}
-
-// --- AUTO-PLAY LOGIC ---
-
-function startAutoPlay() {
-  stopAutoPlay(); // Clear any existing intervals
-  autoPlayInterval = setInterval(() => {
-    nextReview();
-  }, AUTO_PLAY_SPEED);
-}
-
-function stopAutoPlay() {
-  clearInterval(autoPlayInterval);
-}
-
-// --- EVENT LISTENERS ---
-
-// Pause when mouse enters, resume when it leaves
-track.addEventListener("mouseenter", stopAutoPlay);
-track.addEventListener("mouseleave", startAutoPlay);
-
-window.addEventListener("resize", () => updatePosition(false));
 
 window.addEventListener("load", () => {
-  initCarousel();
+  initReviewsScroll();
 });
 
 /* ── FAQ data ── */

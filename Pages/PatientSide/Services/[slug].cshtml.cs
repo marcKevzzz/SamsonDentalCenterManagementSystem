@@ -3,15 +3,22 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Services;
 using SamsonDentalCenterManagementSystem.Models;
 
-namespace SamsonDentalCenterManagementSystem.Pages.Services
+namespace SamsonDentalCenterManagementSystem.Pages.PatientSide.Services
 {
     public class SlugModel : PageModel
     {
-        public required DentalService Service { get; set; }
+        private readonly DentalServiceService _svcService;
 
-        public IActionResult OnGet(string slug)
+        public DentalService? Service { get; set; }  // ← singular, nullable
+
+        public SlugModel(DentalServiceService svcService)
         {
-            Service = ServiceRepository.GetBySlug(slug);
+            _svcService = svcService;
+        }
+
+        public async Task<IActionResult> OnGetAsync(string slug)
+        {
+            Service = await _svcService.GetBySlug(slug);
 
             if (Service == null)
                 return NotFound();

@@ -1,17 +1,90 @@
 gsap.registerPlugin(ScrollTrigger);
-gsap.utils.toArray(".fade-up").forEach((el) => {
-  gsap.to(el, {
-    opacity: 1,
-    y: 0,
-    duration: 0.75,
-    ease: "power2.out",
-    scrollTrigger: {
-      trigger: el,
-      start: "top 88%",
-      toggleActions: "play none none none",
-    },
+
+// ── Entrance Animations ──
+function initEntranceAnimations() {
+  // 1. General Fade-Up (Filter out info-cards so they don't double-animate)
+  gsap.utils.toArray(".fade-up:not(.info-card)").forEach((el) => {
+    gsap.from(el, {
+      opacity: 0,
+      y: 40,
+      duration: 1,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: el,
+        start: "top 92%", // Trigger slightly later to ensure it's in view
+        once: true,
+      },
+    });
   });
-});
+
+  // 2. Parallax: Optimized for the container
+  const storyTrigger = document.querySelector(".fade-up.relative.group");
+  if (storyTrigger) {
+    const storyTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: storyTrigger,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true
+      }
+    });
+    storyTl.to("#aboutimg1", { yPercent: 15, scale: 1.1, ease: "none" }, 0);
+    storyTl.to("#aboutimg", { yPercent: -10, ease: "none" }, 0);
+  }
+
+  // 3. Info Cards: Using the PARENT as the trigger
+  // This ensures that as soon as the section appears, all 3 cards stagger in.
+  const infoSection = document.querySelector(".grid-cols-1.md\\:grid-cols-3");
+  if (infoSection) {
+    gsap.from(".info-card", {
+      scrollTrigger: {
+        trigger: infoSection, 
+        start: "top 85%",      
+        once: true
+      },
+      opacity: 0,
+      y: 30,
+      stagger: 0.15,
+      duration: 0.8,
+      ease: "power2.out",
+      clearProps: "all" 
+    });
+  }
+}
+
+initEntranceAnimations();
+initMagneticFacilityCards();
+
+function initMagneticFacilityCards() {
+    const cards = document.querySelectorAll(".fac-card");
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            gsap.to(card, {
+                x: x * 0.1,
+                y: y * 0.1,
+                rotationX: -y * 0.05,
+                rotationY: x * 0.05,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            gsap.to(card, {
+                x: 0,
+                y: 0,
+                rotationX: 0,
+                rotationY: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.3)"
+            });
+        });
+    });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Team Thumbs

@@ -4,6 +4,8 @@
 
 // ── Cookie helper ─────────────────────────────
 
+import { Modal, Toast } from "./ui.js";
+
 export function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -24,70 +26,61 @@ export function stringToColor(str) {
 
 // ── UI helpers ────────────────────────────────
 
-export function setupUserDisplay(name, email, initials) {
+export function setupUserDisplay(name, email, initials, avatarUrl = null) {
   if (!name) return;
-
-  const nameParts = name.trim().split(" ");
 
   // ── Grab Elements ──
   const navInit = document.getElementById("navInitials");
   const modalInit = document.getElementById("modalInitials");
   const modalName = document.getElementById("modalName");
   const modalEmail = document.getElementById("modalEmail");
+  const navAvatarContainer = document.querySelector("#signedInAvatar > div");
+  const modalAvatarContainer = document.getElementById("modalAvatar");
 
-  // ── Only set if they exist ──
+  // 1. Set Text Data
   if (navInit) navInit.innerText = initials;
   if (modalInit) modalInit.innerText = initials;
   if (modalName) modalName.innerText = name;
   if (modalEmail) modalEmail.innerText = email;
 
-  // Handle Avatars safely
-  const navAvatar = document.querySelector("#signedInAvatar > div");
-  const modalAvatar = document.getElementById("modalAvatar");
+  // 2. Handle Image Reflection
+  const containers = [navAvatarContainer, modalAvatarContainer];
 
-  if (navAvatar)
-    navAvatar.style.backgroundColor = window.COLORS?.primary || "#c0392b";
-  if (modalAvatar)
-    modalAvatar.style.backgroundColor = window.COLORS?.primary || "#c0392b";
+  containers.forEach((container) => {
+    if (!container) return;
+
+    if (avatarUrl) {
+      // Clear initials and set image
+      container.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full" alt="profile" />`;
+      container.style.backgroundColor = "transparent"; // Remove background color if image exists
+    } else {
+      // Fallback: Show initials with background color
+      // container.innerHTML = initials;
+    }
+  });
 }
 
 export function updateProfileState() {
-  // 1. Check localStorage first
   const savedUser = localStorage.getItem("sb_user");
+  if (!savedUser) return;
 
-  // 2. If we have saved data, show the signed-in UI immediately
-  if (savedUser) {
-    try {
-      const user = JSON.parse(savedUser);
+  try {
+    const user = JSON.parse(savedUser);
 
-      // Safety checks for elements
-      const guestAvatar = document.getElementById("guestAvatar");
-      const signedInAvatar = document.getElementById("signedInAvatar");
-      const guestState = document.getElementById("guestState");
-      const signedInState = document.getElementById("signedInState");
+    document.getElementById("guestAvatar")?.classList.add("hidden");
+    document.getElementById("signedInAvatar")?.classList.remove("hidden");
+    document.getElementById("guestState")?.classList.add("hidden");
+    document.getElementById("signedInState")?.classList.remove("hidden");
 
-      // UI Swaps
-      guestAvatar?.classList.add("hidden");
-      signedInAvatar?.classList.remove("hidden");
-      guestState?.classList.add("hidden");
-      signedInState?.classList.remove("hidden");
-
-      // Fill the data
-      setupUserDisplay(
-        `${user.firstName} ${user.lastName}`,
-        user.email,
-        user.initials,
-      );
-    } catch (e) {
-      console.error("Error parsing saved user", e);
-      localStorage.removeItem("sb_user");
-    }
-  } else {
-    // Show Guest Mode
-    document.getElementById("guestAvatar")?.classList.remove("hidden");
-    document.getElementById("signedInAvatar")?.classList.add("hidden");
-    document.getElementById("guestState")?.classList.remove("hidden");
-    document.getElementById("signedInState")?.classList.add("hidden");
+    setupUserDisplay(
+      `${user.firstName} ${user.lastName}`,
+      user.email,
+      user.initials,
+      user.avatarUrl ?? null,
+    );
+  } catch (e) {
+    console.error("Error parsing saved user", e);
+    localStorage.removeItem("sb_user");
   }
 }
 
@@ -116,28 +109,37 @@ export function closeProfile() {
 // ── Auth actions ──────────────────────────────
 
 export function signIn(user) {
-  // 1. Store the user object so it's available on the next page load
+  // Always ensure avatarUrl key exists even if null
+  user.avatarUrl = user.avatarUrl ?? null;
+
   localStorage.setItem("sb_user", JSON.stringify(user));
 
-  // 2. Update the UI parts
   document.getElementById("guestAvatar")?.classList.add("hidden");
   document.getElementById("signedInAvatar")?.classList.remove("hidden");
+  document.getElementById("guestState")?.classList.add("hidden");
+  document.getElementById("signedInState")?.classList.remove("hidden");
 
-  // 3. Use the helper to fill name/initials/colors
   setupUserDisplay(
     `${user.firstName} ${user.lastName}`,
     user.email,
     user.initials,
+    user.avatarUrl,
   );
-
-  // 4. Swap states in the dropdown
-  document.getElementById("guestState")?.classList.add("hidden");
-  document.getElementById("signedInState")?.classList.remove("hidden");
 }
 
 export function signOut(e) {
-  localStorage.removeItem("sb_user");
-  window.location.href = "/signout"; // Use an absolute path for reliability
+  e?.preventDefault();
+  Modal.open({
+    title: "Confirm Sign Out",
+    message: "Are you sure you want to sign out?",
+    type: "danger",
+    confirmText: "Sign Out",
+    cancelText: "Cancel",
+    onConfirm: () => {
+      localStorage.removeItem("sb_user");
+      window.location.href = "/signout"; // Use an absolute path for reliability
+    },
+  });
 }
 
 // ── Event bindings ────────────────────────────
@@ -154,7 +156,7 @@ export function initProfile() {
   // Sign out button
   document
     .getElementById("signOutBtn")
-    ?.addEventListener("click", () => signOut());
+    ?.addEventListener("click", (e) => signOut(e));
 
   // Close on outside click
   window.addEventListener("click", (e) => {

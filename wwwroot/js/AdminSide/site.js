@@ -1,3 +1,30 @@
+import { Modal, Toast } from "../ui.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const signoutBtn = document.getElementById("signoutBtn");
+  signoutBtn.addEventListener("click", () =>
+    Modal.open({
+      title: "Confirm Sign Out",
+      message: "Are you sure you want to sign out?",
+      confirmText: "Sign Out",
+      type: "danger",
+      cancelText: "Cancel",
+      onConfirm: () => {
+        signout();
+      },
+    }),
+  );
+
+  // Close sidebar on outside click (mobile)
+  document.getElementById("overlay").addEventListener("click", closeSidebar);
+
+  const toggleBtn = document.getElementById("toggle-btn");
+  if (toggleBtn) toggleBtn.addEventListener("click", toggleSidebar);
+
+  const openSidebarBtn = document.getElementById("openSidebarBtn");
+  if (openSidebarBtn) openSidebarBtn.addEventListener("click", openSidebar);
+});
+
 document.getElementById("cur-date").textContent = new Date().toLocaleDateString(
   "en-PH",
   { month: "short", day: "numeric", year: "numeric" },
@@ -12,11 +39,13 @@ const pageTitles = {
   dashboard: ["Dashboard", "Overview · Today"],
   patients: ["Patients", "People · Registry"],
   doctors: ["Doctors", "People · Staff Directory"],
+  users: ["Users", "People · User Management"],
   appointments: ["Appointments", "Operations · Schedule"],
   services: ["Services", "Operations · Catalog"],
+  transactions: ["Transactions", "Operations · Billing"],
   reports: ["Reports", "Analytics · Insights"],
   inquiries: ["Inquiries", "Analytics · Messages"],
-  activitylogs: ["Activity Logs", "Analytics · Audit Trail"], // Match the URL slug
+  activitylogs: ["Activity Logs", "Analytics · Audit Trail"],
 };
 
 function UpdateSidebar() {
@@ -28,27 +57,34 @@ function UpdateSidebar() {
     document.getElementById(id)?.classList.add("active");
   }
 
-  if (currentPath === "/admin" || currentPath === "/admin/dashboard") {
+  if (currentPath === "/admin" || currentPath === "/admin/dashboard" || currentPath === "/doctor/dashboard") {
     setActive("admin-dashboard");
   } else if (currentPath.startsWith("/admin/patients")) {
     setActive("admin-patients");
   } else if (currentPath.startsWith("/admin/doctors")) {
     setActive("admin-doctors");
+  } else if (currentPath.startsWith("/admin/users")) {
+    setActive("admin-users");
   } else if (currentPath.startsWith("/admin/appointments")) {
     setActive("admin-appointments");
   } else if (currentPath.startsWith("/admin/services")) {
-    setActive("admin-services");
+    setActive("admin-services-link");
+  } else if (currentPath.startsWith("/admin/transactions")) {
+    setActive("admin-transactions");
   } else if (currentPath.startsWith("/admin/reports")) {
     setActive("admin-reports");
   } else if (currentPath.startsWith("/admin/inquiries")) {
     setActive("admin-inquiries");
-  } else if (currentPath.startsWith("/admin/activitylogs")) {
+  } else if (currentPath.startsWith("/admin/activitylogs") || currentPath.startsWith("/receptionist/activitylogs")) {
     setActive("admin-activitylogs");
+  } else if (currentPath.startsWith("/admin/staff")) {
+    setActive("admin-doctors"); // Keep ID for active state matching
   }
   updateHeader(currentPath.split("/").pop() || "dashboard");
 }
 
 UpdateSidebar();
+
 
 function updateHeader(pageId) {
   const t = pageTitles[pageId] || [
@@ -118,3 +154,8 @@ window.addEventListener("resize", () => {
     closeSidebar();
   }
 });
+
+function signout() {
+  localStorage.removeItem("sb_user");
+  window.location.href = "/signout"; // Use an absolute path for reliability
+}
