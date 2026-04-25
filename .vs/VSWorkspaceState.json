@@ -1,10 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Logs",
-    "\\Pages",
-    "\\publish\\wwwroot"
+    "\\Pages"
   ],
-  "SelectedNode": "\\SamsonDentalCenterManagementSystem.sln",
+  "SelectedNode": "\\SamsonDentalCenterManagementSystem.csproj",
   "PreviewInSolutionExplorer": false
 }

@@ -130,3 +130,19 @@ CREATE TABLE public.invoice_items (
   CONSTRAINT invoice_items_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT invoice_items_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
+
+CREATE TABLE public.treatments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  invoice_id uuid NOT NULL,
+  service_id uuid,
+  service_name text NOT NULL,
+  tooth_numbers text,
+  procedure_details text,
+  diagnosis text,
+  status text NOT NULL DEFAULT 'completed' CHECK (status = ANY (ARRAY['completed'::text, 'in-progress'::text, 'planned'::text])),
+  notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT treatments_pkey PRIMARY KEY (id),
+  CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id) ON DELETE CASCADE,
+  CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
+);

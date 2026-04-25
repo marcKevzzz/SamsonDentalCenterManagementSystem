@@ -50,6 +50,12 @@ namespace SamsonDentalCenterManagementSystem.Services
             return createdInvoice;
         }
 
+        public async Task CreateTreatmentsAsync(List<Treatment> treatments)
+        {
+            if (treatments.Count == 0) return;
+            await _supabase.From<Treatment>().Insert(treatments);
+        }
+
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)
         {
             var res = await _supabase.From<Invoice>()

@@ -34,7 +34,7 @@
 
 <body>
   <!-- Overlay for mobile sidebar -->
-  <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[150] hidden"></div>
+  <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[49] hidden"></div>
 
   <div class="flex min-h-screen">
     <!-- ══════════════════════════════════════ -->
@@ -325,10 +325,10 @@
   </div>
 
   <!-- Toast Container -->
-  <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-[11000]"></div>
+  <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-[10000]"></div>
 
   <!-- Modal Root -->
-  <div id="modal-root"></div>
+  <div id="modal-root" ></div>
 
   <!-- Hidden role data for JS -->
   <input type="hidden" id="currentUserRole" value="@(ViewData["UserRole"] ?? "")" />
