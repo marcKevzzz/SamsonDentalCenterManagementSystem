@@ -1,2 +1,20 @@
 @page "/signout"
 @model SignoutModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head><title>Signing out…</title></head>
+<body>
+<script>
+    // Clear all auth-related localStorage keys
+    localStorage.removeItem("sb_user");
+    localStorage.removeItem("returnUrl");
+
+    // Redirect to sign-in
+    window.location.replace("/sign-in");
+</script>
+</body>
+</html>

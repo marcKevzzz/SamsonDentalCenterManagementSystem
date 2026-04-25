@@ -33,7 +33,7 @@ export const Toast = (() => {
       flex items-center gap-3 ${bg}
       text-white px-4 py-2 rounded-xl shadow-lg
       transform transition-all duration-300
-      opacity-0 translate-y-[-10px]
+      opacity-0 mo-y-[-10px]
     `;
 
     toast.innerHTML = `
@@ -99,7 +99,7 @@ export const Modal = (() => {
 
     root.innerHTML = `
       <div id="modal-overlay"
-           class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+           class="fixed inset-0 bg-black/50 flex items-center justify-center z-[250]">
 
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6
                     transform scale-95 opacity-0 transition-all duration-300">

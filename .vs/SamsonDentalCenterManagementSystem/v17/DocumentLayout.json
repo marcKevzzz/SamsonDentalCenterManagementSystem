@@ -1,19 +1,59 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\SamsonDentalCenterManagementSystem\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{722DDEFA-9C9F-3A2E-ED94-210C5B0E3C40}|SamsonDentalCenterManagementSystem.csproj|c:\\users\\chris\\onedrive\\desktop\\samsondentalcentermanagementsystem\\samsondentalcentermanagementsystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{722DDEFA-9C9F-3A2E-ED94-210C5B0E3C40}|SamsonDentalCenterManagementSystem.csproj|solutionrelative:samsondentalcentermanagementsystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 109,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
+          "DockedWidth": 346,
           "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{26341fe2-71dd-46fd-bb1b-2e51a92a0d64}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            },
+            {
+              "$type": "Bookmark",
               "Name": "ST:1:0:{f2bd8fb8-fc94-3dae-a733-fd993c73cc87}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 54,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SamsonDentalCenterManagementSystem.csproj",
+              "DocumentMoniker": "C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
+              "RelativeDocumentMoniker": "SamsonDentalCenterManagementSystem.csproj",
+              "ToolTip": "C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
+              "RelativeToolTip": "SamsonDentalCenterManagementSystem.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-04-25T00:10:27.776Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             }
           ]
         }

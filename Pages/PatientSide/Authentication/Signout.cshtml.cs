@@ -27,20 +27,19 @@ public class SignoutModel : PageModel
     {
         try { await _supabase.Auth.SignOut(); } catch { }
 
-        // Set options to match exactly how the cookie was created
+        // Options MUST match exactly how the cookie was created in SigninModel
         var cookieOptions = new CookieOptions
         {
-            Path = "/", // Crucial: Must match the path used in SigninModel
-            Secure = true,
+            Path = "/",
+            Secure = false,
             HttpOnly = true,
-            SameSite = SameSiteMode.Strict
+            SameSite = SameSiteMode.Lax
         };
 
         Response.Cookies.Delete("sb-access-token", cookieOptions);
         Response.Cookies.Delete("sb-refresh-token", cookieOptions);
 
-
-
-        return Redirect("/sign-in");
+        // Return the page so JS can clear localStorage before redirecting
+        return Page();
     }
 }
