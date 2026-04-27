@@ -33,7 +33,7 @@ Layout = "AdminSide/_StaffLayout";
         {
             <div class="bg-white rounded-2xl border-2 border-amber-100 p-5 shadow-lg shadow-amber-900/5 relative group hover:border-amber-300 transition-all cursor-pointer"
                  onclick="openCreateInvoiceWithPreselect('@appt.Id')">
-                <div class="absolute top-4 right-4 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">Arrived</div>
+                <div class="absolute top-2 right-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">Arrived</div>
                 <div class="flex items-center gap-4 mb-4">
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg">
                         @(appt.PatientName?[0].ToString() ?? "P")

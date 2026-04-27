@@ -152,5 +152,36 @@ namespace SamsonDentalCenterManagementSystem.Services
             var json = await res.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<Invoice>>(json, _json) ?? new();
         }
+
+        public async Task RecordPaymentAsync(Payment payment)
+        {
+            await _supabase.From<Payment>().Insert(payment);
+
+            // Optional: Check if invoice is fully paid and update status
+            var res = await _supabase.From<Payment>()
+                .Where(x => x.InvoiceId == payment.InvoiceId)
+                .Get();
+            
+            var totalPaid = res.Models.Sum(p => p.Amount);
+
+            var invRes = await _supabase.From<Invoice>()
+                .Where(x => x.Id == payment.InvoiceId)
+                .Get();
+            
+            var invoice = invRes.Models.FirstOrDefault();
+            if (invoice != null)
+            {
+                if (totalPaid >= invoice.FinalAmount)
+                {
+                    invoice.Status = "paid";
+                    await _supabase.From<Invoice>().Upsert(invoice);
+                }
+                else if (totalPaid > 0)
+                {
+                    invoice.Status = "partial";
+                    await _supabase.From<Invoice>().Upsert(invoice);
+                }
+            }
+        }
     }
 }

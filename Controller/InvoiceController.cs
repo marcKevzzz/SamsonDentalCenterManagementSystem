@@ -110,12 +110,19 @@ public class InvoiceController : ControllerBase
             var finalAmount = totalAmount - req.DiscountAmount;
             if (finalAmount < 0) finalAmount = 0;
 
+            if (string.IsNullOrEmpty(req.AppointmentId) || !Guid.TryParse(req.AppointmentId, out _))
+                return BadRequest(new { ok = false, error = "A valid Appointment ID is required." });
+            if (string.IsNullOrEmpty(req.PatientId) || !Guid.TryParse(req.PatientId, out _))
+                return BadRequest(new { ok = false, error = "A valid Patient ID is required." });
+            if (string.IsNullOrEmpty(req.DoctorId) || !Guid.TryParse(req.DoctorId, out _))
+                return BadRequest(new { ok = false, error = "A valid Doctor ID is required." });
+
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid().ToString(),
-                AppointmentId = string.IsNullOrEmpty(req.AppointmentId) ? null : req.AppointmentId,
-                PatientId = string.IsNullOrEmpty(req.PatientId) ? null : req.PatientId,
-                DoctorId = string.IsNullOrEmpty(req.DoctorId) ? null : req.DoctorId,
+                AppointmentId = req.AppointmentId,
+                PatientId = req.PatientId,
+                DoctorId = req.DoctorId,
                 TotalAmount = totalAmount,
                 DiscountAmount = req.DiscountAmount,
                 FinalAmount = finalAmount,
@@ -157,5 +164,54 @@ public class InvoiceController : ControllerBase
             Console.WriteLine($"[InvoiceController] Create error: {ex.Message}");
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
+    }
+    // ── POST /api/invoice/pay ─────────────────────────────────────────────
+    [HttpPost("pay")]
+    public async Task<IActionResult> Pay([FromBody] PaymentRequest req)
+    {
+        if (string.IsNullOrEmpty(req.InvoiceId))
+            return BadRequest(new { ok = false, error = "Invoice ID is required." });
+        if (req.Amount <= 0)
+            return BadRequest(new { ok = false, error = "Payment amount must be greater than zero." });
+
+        try
+        {
+            var payment = new Payment
+            {
+                Id = Guid.NewGuid().ToString(),
+                InvoiceId = req.InvoiceId,
+                Amount = req.Amount,
+                PaymentMethod = req.PaymentMethod ?? "Cash",
+                ReferenceNumber = req.ReferenceNumber,
+                Notes = req.Notes,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _invoiceService.RecordPaymentAsync(payment);
+
+            return Ok(new { ok = true, message = "Payment recorded successfully." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    public class PaymentRequest
+    {
+        [JsonPropertyName("invoiceId")]
+        public string? InvoiceId { get; set; }
+
+        [JsonPropertyName("amount")]
+        public decimal Amount { get; set; }
+
+        [JsonPropertyName("paymentMethod")]
+        public string? PaymentMethod { get; set; }
+
+        [JsonPropertyName("referenceNumber")]
+        public string? ReferenceNumber { get; set; }
+
+        [JsonPropertyName("notes")]
+        public string? Notes { get; set; }
     }
 }

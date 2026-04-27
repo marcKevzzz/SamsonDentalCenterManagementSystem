@@ -184,16 +184,21 @@ var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-l
     </div>
   </div>
 
-  <div class="flex justify-end gap-2 mt-6" id="grpBtn">
+  <div class="flex justify-end gap-2 mt-6 " id="grpBtn">
     <button
       class="border-[1.5px] border-gray-200 text-muted font-semibold text-xs px-5 py-2.5 rounded-lg hover:border-gray-400 hover:text-brand transition-all"
       style="font-family:'Syne',sans-serif">
       Cancel
     </button>
     <button id="saveAllInfo"
-      class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
+      class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95 hidden"
       style="font-family:'Syne',sans-serif">
       Save Changes
+    </button>
+    <button id="nextTab"
+      class="bg-brand text-white font-bold text-xs tracking-widest px-6 py-2.5 rounded-lg hover:bg-primary transition-all active:scale-95"
+      style="font-family:'Syne',sans-serif">
+      Next <i class="fa-solid fa-arrow-right ml-2"></i>
     </button>
   </div>
 

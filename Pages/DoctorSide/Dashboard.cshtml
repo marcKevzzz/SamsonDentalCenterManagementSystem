@@ -2,7 +2,7 @@
 @namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide
 @model DoctorDashboardModel
 @{
-    ViewData["Title"] = "Doctor Dashboard";
+ViewData["Title"] = "Doctor Dashboard";
 }
 
 <div id="page-doctor-dashboard" class="page active p-4 md:p-6">
@@ -24,43 +24,48 @@
     <!-- Treatment Center (Conditional) -->
     @if (Model.ArrivedPatients.Any())
     {
-        <div class="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <h3 class="text-[14px] font-bold uppercase tracking-wider text-brand-900">Treatment Center — Patients in Waiting Room</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                @foreach (var appt in Model.ArrivedPatients)
-                {
-                    <div class="bg-white rounded-2xl border-2 border-amber-100 p-5 shadow-lg shadow-amber-900/5 relative group hover:border-amber-300 transition-all">
-                        <div class="absolute top-4 right-4 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">Arrived</div>
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg">
-                                @(appt.PatientName?[0].ToString() ?? "P")
-                            </div>
-                            <div>
-                                <h4 class="text-[15px] font-bold text-brand-900">@appt.PatientName</h4>
-                                <p class="text-[11px] text-brand-400 font-medium">@appt.ServiceName</p>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-5">
-                            <div class="flex items-center gap-2 text-[12px] text-brand-600">
-                                <i class="fa-solid fa-clock opacity-40 w-4"></i>
-                                Scheduled: @appt.AppointmentTime
-                            </div>
-                            <div class="flex items-center gap-2 text-[12px] text-brand-600">
-                                <i class="fa-solid fa-file-invoice opacity-40 w-4"></i>
-                                Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span>
-                            </div>
-                        </div>
-                        <a href="/Doctor/Invoices?appt=@appt.Id"
-                           class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">
-                            Start Treatment & Invoice
-                        </a>
-                    </div>
-                }
-            </div>
+    <div class="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <h3 class="text-[14px] font-bold uppercase tracking-wider text-brand-900">Treatment Center — Patients in
+                Waiting Room</h3>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            @foreach (var appt in Model.ArrivedPatients)
+            {
+            <div
+                class="bg-white rounded-2xl border-2 border-amber-100 p-5 shadow-lg shadow-amber-900/5 relative group hover:border-amber-300 transition-all">
+                <div
+                    class="absolute top-2 right-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">
+                    Arrived</div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg">
+                        @(appt.PatientName?[0].ToString() ?? "P")
+                    </div>
+                    <div>
+                        <h4 class="text-[15px] font-bold text-brand-900">@appt.PatientName</h4>
+                        <p class="text-[11px] text-brand-400 font-medium">@appt.ServiceName</p>
+                    </div>
+                </div>
+                <div class="space-y-3 mb-5">
+                    <div class="flex items-center gap-2 text-[12px] text-brand-600">
+                        <i class="fa-solid fa-clock opacity-40 w-4"></i>
+                        Scheduled: @appt.AppointmentTime
+                    </div>
+                    <div class="flex items-center gap-2 text-[12px] text-brand-600">
+                        <i class="fa-solid fa-file-invoice opacity-40 w-4"></i>
+                        Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span>
+                    </div>
+                </div>
+                <a href="/Doctor/Invoices?appt=@appt.Id"
+                    class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">
+                    Start Treatment & Invoice
+                </a>
+            </div>
+            }
+        </div>
+    </div>
     }
 
     <!-- Doctor Stats -->
@@ -106,60 +111,74 @@
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/30">
                     <h3 class="font-display font-bold text-brand text-[15px]">Your Upcoming Appointments</h3>
-                    <a href="/Admin/Appointments" class="text-[11px] font-bold text-primary hover:underline uppercase tracking-wider">View Full Schedule</a>
+                    <a href="/Admin/Appointments"
+                        class="text-[11px] font-bold text-primary hover:underline uppercase tracking-wider">View Full
+                        Schedule</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-slate-50/50">
                             <tr>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Patient</th>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Service</th>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Time</th>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Status</th>
+                                <th
+                                    class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">
+                                    Patient</th>
+                                <th
+                                    class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">
+                                    Service</th>
+                                <th
+                                    class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">
+                                    Time</th>
+                                <th
+                                    class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">
+                                    Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @if (!Model.MyAppointments.Any())
                             {
-                                <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-slate-400 text-[13px]">
-                                        <i class="fa-solid fa-calendar-xmark text-2xl mb-2 block opacity-20"></i>
-                                        No appointments scheduled for today.
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="4" class="px-6 py-10 text-center text-slate-400 text-[13px]">
+                                    <i class="fa-solid fa-calendar-xmark text-2xl mb-2 block opacity-20"></i>
+                                    No appointments scheduled for today.
+                                </td>
+                            </tr>
                             }
                             @foreach (var appt in Model.MyAppointments)
                             {
-                                <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
-                                                @(appt.PatientName?[0].ToString() ?? "P")
-                                            </div>
-                                            <div>
-                                                <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
-                                                <div class="text-[10px] text-brand-400">@appt.PatientEmail</div>
-                                            </div>
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
+                                            @(appt.PatientName?[0].ToString() ?? "P")
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="text-[12px] text-brand-700 font-medium">@appt.ServiceName</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentTime</div>
-                                        <div class="text-[10px] text-brand-400">@appt.AppointmentDate.ToString("MMM dd, yyyy")</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        @{
-                                            var badge = appt.Status.ToLower() switch {
-                                                "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
-                                                "pending" => "bg-blue-50 text-blue-600 border-blue-100",
-                                                _ => "bg-slate-50 text-slate-500 border-slate-100"
-                                            };
-                                        }
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border @badge uppercase tracking-wider">@appt.Status</span>
-                                    </td>
-                                </tr>
+                                        <div>
+                                            <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">
+                                                @appt.PatientName</div>
+                                            <div class="text-[10px] text-brand-400">@appt.PatientEmail</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-[12px] text-brand-700 font-medium">@appt.ServiceName</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentTime</div>
+                                    <div class="text-[10px] text-brand-400">@appt.AppointmentDate.ToString("MMM dd,
+                                        yyyy")</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @{
+                                    var badge = appt.Status.ToLower() switch {
+                                    "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
+                                    "pending" => "bg-blue-50 text-blue-600 border-blue-100",
+                                    _ => "bg-slate-50 text-slate-500 border-slate-100"
+                                    };
+                                    }
+                                    <span
+                                        class="text-[10px] font-bold px-2 py-0.5 rounded-full border @badge uppercase tracking-wider">@appt.Status</span>
+                                </td>
+                            </tr>
                             }
                         </tbody>
                     </table>
@@ -173,25 +192,31 @@
             <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400">Recent Invoices</h4>
-                    <a href="/Admin/Invoices" class="text-[10px] font-bold text-primary hover:underline uppercase">View All</a>
+                    <a href="/Admin/Invoices" class="text-[10px] font-bold text-primary hover:underline uppercase">View
+                        All</a>
                 </div>
                 <div class="space-y-3">
                     @if (!Model.RecentInvoices.Any())
                     {
-                        <p class="text-[12px] text-slate-400 text-center py-4 italic">No invoices yet.</p>
+                    <p class="text-[12px] text-slate-400 text-center py-4 italic">No invoices yet.</p>
                     }
                     @foreach (var inv in Model.RecentInvoices)
                     {
-                        <a href="/Doctor/Invoices?invId=@inv.Id" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
-                            <div class="min-w-0">
-                                <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
-                                <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd")</div>
+                    <a href="/Doctor/Invoices?invId=@inv.Id"
+                        class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
+                        <div class="min-w-0">
+                            <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ??
+                                "Unknown")</div>
+                            <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd")</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")
                             </div>
-                            <div class="text-right">
-                                <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
-                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
-                            </div>
-                        </a>
+                            <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "
+                                paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                                )">@inv.Status</span>
+                        </div>
+                    </a>
                     }
                 </div>
             </div>
@@ -205,14 +230,16 @@
                 <p class="text-white/70 text-[12.5px] leading-relaxed mb-4 relative z-10">
                     Don't forget to review and sign the electronic health records for yesterday's surgery patients.
                 </p>
-                <button class="w-full py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-[11px] font-bold transition-all">
+                <button
+                    class="w-full py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-[11px] font-bold transition-all">
                     Open Records →
                 </button>
             </div>
 
             <!-- Mini Calendar or Stats -->
             <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400 mb-4">Patient Demographics</h4>
+                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400 mb-4">Patient Demographics
+                </h4>
                 <div class="space-y-4">
                     <div>
                         <div class="flex justify-between text-[11px] font-bold mb-1.5">
@@ -237,5 +264,3 @@
         </div>
     </div>
 </div>
-
-

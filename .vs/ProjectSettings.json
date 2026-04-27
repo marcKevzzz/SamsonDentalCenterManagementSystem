@@ -1,3 +1,5 @@
 {
-  "CurrentProjectSetting": null
+  "[cshtml]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    }
 }

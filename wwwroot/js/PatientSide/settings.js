@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("savePassword")
     ?.addEventListener("click", savePasswordHandler);
+  document
+    .getElementById("nextTab")
+    ?.addEventListener("click", () => switchTab("contact"));
 });
 
 function initProfileData() {
@@ -65,10 +68,11 @@ function initTabs() {
 }
 
 function switchTab(name) {
+  const nextTabBtn = document.getElementById("nextTab");
+  const saveBtn = document.getElementById("saveAllInfo");
   ["personal", "contact", "security"].forEach((t) => {
     const panel = document.getElementById("tab-" + t);
     const btn = document.getElementById("tab-btn-" + t);
-    const grpBtn = document.getElementById("grpBtn");
     if (t === name) {
       panel.classList.remove("hidden");
       btn.classList.remove("text-muted", "border-transparent");
@@ -79,10 +83,12 @@ function switchTab(name) {
       btn.classList.add("text-muted", "border-transparent");
     }
   });
-  if (name === "security") {
-    grpBtn.classList.add("hidden");
+  if (name === "contact") {
+    nextTabBtn.classList.add("hidden");
+    saveBtn.classList.remove("hidden");
   } else {
-    grpBtn.classList.remove("hidden");
+    nextTabBtn.classList.remove("hidden");
+    saveBtn.classList.add("hidden");
   }
 }
 

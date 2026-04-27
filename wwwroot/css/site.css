@@ -1,5 +1,5 @@
 :root {
-  --primary: #1E40AF;
+  --primary: #1e40af;
   --primary-hover: #1d4ed8;
   --primary-light: rgba(30, 64, 175, 0.1);
   --brand-dark: #0f172a;
@@ -12,14 +12,13 @@
   --glass-border: rgba(255, 255, 255, 0.3);
 }
 
-@import url('https://fonts.cdnfonts.com/css/optima');
+@import url("https://fonts.cdnfonts.com/css/optima");
 
 body {
   font-family: "Syne", sans-serif;
   color: var(--text-main);
   background-color: var(--bg-soft);
 }
-
 
 h1,
 h2,
@@ -44,11 +43,13 @@ html {
 }
 
 .home-hero-bg-img {
-  background: url("https://images.unsplash.com/photo-1629909613654-28e377c37b09?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWVkaWNhbCUyMGNsaW5pY3xlbnwwfHwwfHx8MA%3D%3D") center / cover no-repeat;
+  background: url("https://images.unsplash.com/photo-1629909613654-28e377c37b09?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWVkaWNhbCUyMGNsaW5pY3xlbnwwfHwwfHx8MA%3D%3D")
+    center / cover no-repeat;
 }
 
 .about-hero-bg-img {
-  background: url("https://scontent.fmnl17-3.fna.fbcdn.net/v/t39.30808-6/503908776_1263894849071969_3493022581600617445_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGx1_nmgxQoegt63_wAXTGERsV2jREbIwVGxXaNERsjBdCIB7ugm5vfqHHE2uODXpFkJPMYkNpnJEqVkGsPJx9U&_nc_ohc=gmXUUCwGQWMQ7kNvwHYnMb2&_nc_oc=AdnUghTac5kDbAUjMBrA21E56a1GTD1QxDQ8P6NJp6a2fuyEN3gsJD0r0LbXlntKcjc&_nc_zt=23&_nc_ht=scontent.fmnl17-3.fna&_nc_gid=3N2OJdonTtj4pUcMvE4vuw&_nc_ss=8&oh=00_AfzF7RKOGA3WU5H7R50pMHpaDG8XeeLLeBfEa8B5ukUOyQ&oe=69B91BC2") center / cover no-repeat;
+  background: url("https://scontent.fmnl17-3.fna.fbcdn.net/v/t39.30808-6/503908776_1263894849071969_3493022581600617445_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGx1_nmgxQoegt63_wAXTGERsV2jREbIwVGxXaNERsjBdCIB7ugm5vfqHHE2uODXpFkJPMYkNpnJEqVkGsPJx9U&_nc_ohc=gmXUUCwGQWMQ7kNvwHYnMb2&_nc_oc=AdnUghTac5kDbAUjMBrA21E56a1GTD1QxDQ8P6NJp6a2fuyEN3gsJD0r0LbXlntKcjc&_nc_zt=23&_nc_ht=scontent.fmnl17-3.fna&_nc_gid=3N2OJdonTtj4pUcMvE4vuw&_nc_ss=8&oh=00_AfzF7RKOGA3WU5H7R50pMHpaDG8XeeLLeBfEa8B5ukUOyQ&oe=69B91BC2")
+    center / cover no-repeat;
 }
 
 .max-w {
@@ -181,7 +182,6 @@ html {
 
 /* Avatar pulse (signed in) */
 @keyframes ring-pulse {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.35);
@@ -194,6 +194,27 @@ html {
 
 .avatar-ring {
   animation: ring-pulse 2.5s ease infinite;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+img.avatar-img, 
+#avatarCircle img, 
+#modalAvatar img, 
+.review-avatar {
+    /* High-quality downscaling for Chrome/Safari */
+    image-rendering: -webkit-optimize-contrast; 
+    
+    /* Standard property for Firefox */
+    image-rendering: crisp-edges; 
+    
+    /* Fallback for modern Chrome/Edge/Opera */
+    image-rendering: pixelated; 
+    
+    object-fit: cover;
+    
+    /* Optional: Ensure the image centers if it's cropped */
+    object-position: center; 
 }
 
 /* Chatbot Pop-up */
@@ -210,7 +231,6 @@ html {
 }
 
 @keyframes bounce-dot {
-
   0%,
   60%,
   100% {
@@ -228,7 +248,6 @@ html {
 }
 
 @keyframes pulse-online {
-
   0%,
   100% {
     opacity: 1;
@@ -357,7 +376,7 @@ body.standalone {
 }
 
 /* Avatar overlap */
-.avatar-stack>img+img {
+.avatar-stack > img + img {
   margin-left: -10px;
 }
 
@@ -388,26 +407,31 @@ body.standalone {
 }
 
 /* GSAP & 3D Enhancement */
-#hero, #features, #location, .feature-card, .info-card, .fac-card {
+#hero,
+#features,
+#location,
+.feature-card,
+.info-card,
+.fac-card {
   perspective: 1000px;
   transition: box-shadow 0.3s ease;
   perspective: 1000px; /* Required for the magnetic 3D rotation */
 }
 
-.feature-card, .info-card, .fac-card {
-    will-change: transform, opacity;
-    transform-style: preserve-3d;
-    
+.feature-card,
+.info-card,
+.fac-card {
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
 }
 
-.bg-ani{
+.bg-ani {
   background-attachment: scroll; /* Better for mobile performance */
   background-size: cover;
 }
 
 .fac-card img {
-    will-change: transform, filter;
-    
+  will-change: transform, filter;
 }
 
 /* GSAP targets start hidden to prevent FOUC */
@@ -424,8 +448,7 @@ body.standalone {
 .js-enabled .hp-glass-badge,
 .js-enabled .hp-feature-card,
 .js-enabled .benefit-item,
-.js-enabled .stats-item
-{
+.js-enabled .stats-item {
   opacity: 0;
   visibility: hidden;
   will-change: transform, opacity;
@@ -551,7 +574,6 @@ body.standalone {
   transition: none;
   opacity: 0;
   visibility: hidden;
-
 }
 
 #reviewsContainer > div {
@@ -583,7 +605,7 @@ body.standalone {
 }
 
 .team-thumb.active {
- border-color: var(--primary);
+  border-color: var(--primary);
   filter: grayscale(0%);
   opacity: 1;
   transform: scale(1.1);
@@ -695,7 +717,6 @@ textarea.form-input {
 
 /* Dot pulse animation for "open now" indicator */
 @keyframes pulse-dot {
-
   0%,
   100% {
     opacity: 1;
@@ -769,7 +790,10 @@ textarea.form-input {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   border-color: rgba(30, 64, 175, 0.1);
-  transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 1, 0.3, 1),
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
 }
 
 .asvc-card .card-img {
@@ -809,9 +833,9 @@ textarea.form-input {
   border-radius: 999px;
 }
 .hero-actions a {
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
 /* --- Service Card --- */
 .svc-card {
@@ -823,8 +847,8 @@ textarea.form-input {
   padding: 1.25rem;
 }
 
-.service-slug-title{
-  font-size:clamp(1.8rem,5vw,4rem) !important;
+.service-slug-title {
+  font-size: clamp(1.8rem, 5vw, 4rem) !important;
 }
 
 .svc-card:hover {
@@ -1366,7 +1390,6 @@ textarea.form-input {
 }
 
 @keyframes pulse-dot {
-
   0%,
   100% {
     opacity: 1;
@@ -1476,6 +1499,29 @@ textarea.form-input {
   }
 }
 
+@keyframes bg-shimmer {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+.hero-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, #1f1f1f 8%, #2a2a2a 18%, #1f1f1f 33%);
+  background-size: 200% 100%;
+  animation: bg-shimmer 1.5s infinite linear;
+  z-index: 5;
+  transition: opacity 0.8s ease-out;
+}
+
+.glass-pill {
+  background: rgba(49, 49, 49, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.57);
+}
+
 .xray-shimmer {
   background: linear-gradient(90deg, #1c2030 25%, #2a3048 50%, #1c2030 75%);
   background-size: 400px 100%;
@@ -1484,7 +1530,6 @@ textarea.form-input {
 
 /* Print-ready PDF button pulse */
 @keyframes pulse-btn {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.4);
@@ -1608,57 +1653,59 @@ textarea.form-input {
 
 /* Navbar Burger & Mobile Nav */
 #hamburgerBtn span {
-    transform-origin: center;
+  transform-origin: center;
 }
 
 .mobile-nav-link {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mobile-nav-link:hover, .mobile-nav-link.active {
-    letter-spacing: 0.12em;
-    color: var(--primary) !important;
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+  letter-spacing: 0.12em;
+  color: var(--primary) !important;
 }
 
 #mobileMenu {
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-    -webkit-overflow-scrolling: touch;
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s ease;
+  -webkit-overflow-scrolling: touch;
 }
 
 #mobileServicesMenu {
-    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #mobileServicesMenu a {
-    position: relative;
-    padding-left: 1rem;
-    transition: all 0.3s ease;
+  position: relative;
+  padding-left: 1rem;
+  transition: all 0.3s ease;
 }
 
 #mobileServicesMenu a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: full;
-    background: var(--primary);
-    opacity: 0.3;
-    transition: all 0.3s ease;
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: full;
+  background: var(--primary);
+  opacity: 0.3;
+  transition: all 0.3s ease;
 }
 
 #mobileServicesMenu a:hover {
-    padding-left: 1.5rem;
-    color: var(--primary) !important;
+  padding-left: 1.5rem;
+  color: var(--primary) !important;
 }
 
 #mobileServicesMenu a:hover::before {
-    opacity: 1;
-    width: 8px;
+  opacity: 1;
+  width: 8px;
 }
-
 
 /* --- Premium Design Utilities --- */
 .glass-card {
@@ -1774,7 +1821,9 @@ textarea.form-input {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   cursor: pointer;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  transition:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.3s ease;
 }
 
 .review-dot-active {
@@ -1810,15 +1859,14 @@ textarea.form-input {
   }
 }
 
-
 /* Hero Doctor Enhancements */
 .hero-doctor-img {
-    mask-image: linear-gradient(to bottom, black 90%, transparent 30%);
-    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 30%);
-    pointer-events: none;
-    z-index: 1;
+  mask-image: linear-gradient(to bottom, black 90%, transparent 30%);
+  -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 30%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .hero-doctor-container {
-    perspective: 1000px;
+  perspective: 1000px;
 }

@@ -2,6 +2,7 @@ import { Toast, Modal } from '../ui.js';
 
 // ── Data & State ─────────────────────────────────────────────────────────────
 const ALL_APPT = JSON.parse(document.getElementById('appointments-data').textContent);
+const getAppt = (x) => typeof x === 'string' ? ALL_APPT.find(a => a.id === x) : x;
 const PAGE_SIZE = 20;
 let currentPage = 1;
 let filtered = [...ALL_APPT];
@@ -71,15 +72,15 @@ function rowHTML(appt) {
   };
   const config = statusConfig[appt.status.toLowerCase()] || { classes: "bg-slate-50 text-slate-600 border-slate-100", label: appt.status };
 
-  const apptJson = JSON.stringify(appt).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-
+  const idStr = `"${appt.id}"`;
+ 
   let workflowBtn = '';
   if (appt.status === "pending") {
-    workflowBtn = `<button onclick='confirmAppt(${apptJson})' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>`;
+    workflowBtn = `<button onclick='confirmAppt(${idStr})' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>`;
   } else if (appt.status === "confirmed") {
-    workflowBtn = `<button onclick='updateStatus(${apptJson}, "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>`;
+    workflowBtn = `<button onclick='updateStatus(${idStr}, "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>`;
   } else if (appt.status === "arrived") {
-    workflowBtn = `<button onclick='updateStatus(${apptJson}, "completed")' class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">Checkout</button>`;
+    workflowBtn = `<button onclick='updateStatus(${idStr}, "completed")' class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">Checkout</button>`;
   }
 
   return `
@@ -123,19 +124,19 @@ function rowHTML(appt) {
             </button>
             <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-50 overflow-hidden">
               <div class="py-1">
-                ${appt.status === "pending" ? `<button onclick='confirmAppt(${apptJson})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ''}
-                ${appt.status === "confirmed" ? `<button onclick='updateStatus(${apptJson}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ''}
+                ${appt.status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ''}
+                ${appt.status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ''}
                 ${appt.status === "confirmed" || appt.status === "arrived" ? `
-                  <button onclick='updateStatus(${apptJson}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
-                  <button onclick='updateStatus(${apptJson}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
+                  <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
+                  <button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
                 ` : ''}
                 <div class="h-px bg-slate-100 my-1"></div>
                 ${['confirmed', 'pending', 'arrived'].includes(appt.status) ? `
-                  <button onclick='openEditModal(${apptJson})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-rotate w-4"></i> Reschedule</button>
-                  <button onclick='cancelAppt(${apptJson})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-ban w-4"></i> Cancel</button>
+                  <button onclick='openEditModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-rotate w-4"></i> Reschedule</button>
+                  <button onclick='cancelAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-ban w-4"></i> Cancel</button>
                 ` : ''}
                 ${['cancelled', 'no-show', 'completed'].includes(appt.status) ? `<button onclick='openBookModal()' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-plus w-4"></i> Book Again</button>` : ''}
-                ${['waitlist', 'no-show', 'cancelled', 'completed'].includes(appt.status) ? `<button onclick='deleteAppt(${apptJson})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ''}
+                ${['waitlist', 'no-show', 'cancelled', 'completed'].includes(appt.status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ''}
               </div>
             </div>
           </div>
@@ -239,7 +240,8 @@ window.submitBook = async () => {
 };
 
 // ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
-window.confirmAppt = (appt) => {
+window.confirmAppt = (apptInput) => {
+  const appt = getAppt(apptInput);
   document.getElementById('confirm-appt-id').value = appt.id;
   document.getElementById('confirm-modal-message').innerHTML = 
     `Confirming appointment for <strong>${appt.patientName}</strong>.<br/><span class="text-[11px] opacity-70">${appt.serviceName} (${appt.serviceCategory})</span>`;
@@ -288,7 +290,8 @@ window.submitConfirm = async () => {
 };
 
 // ── STATUS UPDATES ───────────────────────────────────────────────────────────
-window.updateStatus = (appt, status) => {
+window.updateStatus = (apptInput, status) => {
+  const appt = getAppt(apptInput);
   const statusLabels = {
     arrived: { label: "Arrived", type: "info", msg: "Mark patient as <strong>Arrived</strong>? This will notify the doctor and start the wait-time tracker." },
     completed: { label: "Completed", type: "success", msg: "Mark appointment as <strong>Completed</strong>? Ensure all treatments and payments are finalized." },
@@ -314,7 +317,8 @@ window.updateStatus = (appt, status) => {
 };
 
 // ── CANCEL ────────────────────────────────────────────────────────────────────
-window.cancelAppt = (appt) => {
+window.cancelAppt = (apptInput) => {
+  const appt = getAppt(apptInput);
   Modal.open({
     title: 'Cancel Appointment',
     message: `Cancel appointment for <strong>${appt.patientName}</strong>? A waitlist patient may be promoted automatically.`,
@@ -329,7 +333,8 @@ window.cancelAppt = (appt) => {
 };
 
 // ── DELETE ────────────────────────────────────────────────────────────────────
-window.deleteAppt = (appt) => {
+window.deleteAppt = (apptInput) => {
+    const appt = getAppt(apptInput);
     Modal.open({
         title: 'Remove Appointment',
         message: `Permanently remove appointment for <strong>${appt.patientName}</strong> from the records?`,
@@ -344,12 +349,14 @@ window.deleteAppt = (appt) => {
 };
 
 // ── EDIT / RESCHEDULE MODAL ───────────────────────────────────────────────────
-window.openEditModal = (appt) => {
+window.openEditModal = (apptInput) => {
+  const appt = getAppt(apptInput);
   document.getElementById('edit-modal-title').textContent = 'Edit Appointment';
   _setupEditModal(appt);
 };
 
-window.openRescheduleModal = (appt) => {
+window.openRescheduleModal = (apptInput) => {
+  const appt = getAppt(apptInput);
   document.getElementById('edit-modal-title').textContent = 'Reschedule Appointment';
   _setupEditModal(appt);
 };

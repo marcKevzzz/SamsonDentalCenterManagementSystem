@@ -1,145 +1,275 @@
-<header id="navbar" class="fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 border-b border-transparent">
-    <div class="max-w mx-auto px-4 md:px-6 h-[72px] flex items-center justify-between gap-4 md:gap-6">
-        <a href="/" class="brand-logo flex items-center group transition-transform duration-300 hover:scale-105">
-           <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 brightness-150" />
-            <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex">
-                Samson  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full">Dental  Center</span>
-            </span>
-        </a>
+<header
+  id="navbar"
+  class="fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 border-b border-transparent"
+>
+  <div
+    class="max-w mx-auto px-4 md:px-6 h-[72px] flex items-center justify-between gap-4 md:gap-6"
+  >
+    <a
+      href="/"
+      class="brand-logo flex items-center group transition-transform duration-300 hover:scale-105"
+    >
+      <img
+        src="~/images/logo.svg"
+        alt="logo"
+        class="w-12 h-12 object-cover mt-1 brightness-150"
+      />
+      <span
+        id="logo"
+        class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex"
+      >
+        Samson
+        <span
+          id="logo-last"
+          class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full"
+          >Dental Center</span
+        >
+      </span>
+    </a>
 
-        <nav id="desktopNav" class="hidden md:flex items-center gap-6 lg:gap-10">
-            <a href="/" id="nav-home" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group">
-                Home
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="/about" id="nav-about" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group">
-                About
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <div id="servicesWrapper" class="relative">
-                <button id="servicesBtn" class="nav-link flex items-center gap-1.5 text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all">
-                    Services
-                    <i class="fa-solid fa-caret-down text-[10px] transition-transform duration-300" id="chevronIcon"></i>
-                </button>
-            </div>
-            <a href="/contacts" id="nav-contacts" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group">
-                Contacts
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-        </nav>
+    <nav id="desktopNav" class="hidden md:flex items-center gap-6 lg:gap-10">
+      <a
+        href="/"
+        id="nav-home"
+        class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group"
+      >
+        Home
+        <span
+          class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"
+        ></span>
+      </a>
+      <a
+        href="/about"
+        id="nav-about"
+        class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group"
+      >
+        About
+        <span
+          class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"
+        ></span>
+      </a>
+      <div id="servicesWrapper" class="relative">
+        <button
+          id="servicesBtn"
+          class="nav-link flex items-center gap-1.5 text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all"
+        >
+          Services
+          <i
+            class="fa-solid fa-caret-down text-[10px] transition-transform duration-300"
+            id="chevronIcon"
+          ></i>
+        </button>
+      </div>
+      <a
+        href="/contacts"
+        id="nav-contacts"
+        class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group"
+      >
+        Contacts
+        <span
+          class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"
+        ></span>
+      </a>
+    </nav>
 
-        <div class="flex items-center gap-3 sm:gap-5">
-            <a id="bookBtn" href="/Appointments"
-                class="hidden md:flex items-center text-center text-nowrap text-[0.65rem] text-white font-bold tracking-[0.12em] uppercase px-7 py-2.5 rounded-full bg-primary brightness-110 hover:brightness-100 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300">
-                Book Now
-            </a>
+    <div class="flex items-center gap-3 sm:gap-5">
+      <a
+        id="bookBtn"
+        href="/Appointments"
+        class="hidden md:flex items-center text-center text-nowrap text-[0.65rem] text-white font-bold tracking-[0.12em] uppercase px-7 py-2.5 rounded-full bg-primary brightness-110 hover:brightness-100 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300"
+      >
+        Book Now
+      </a>
 
-            <div class="flex items-center h-full">
-                <partial name="./Profile.cshtml" />
-            </div>
+      <div class="flex items-center h-full">
+        <partial name="./Profile.cshtml" />
+      </div>
 
-            <button id="hamburgerBtn" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-                <div class="w-6 flex flex-col gap-1.5">
-                    <span id="burger-top" class="w-full h-0.5 bg-current transition-all duration-300"></span>
-                    <span id="burger-mid" class="w-full h-0.5 bg-current transition-all duration-300"></span>
-                    <span id="burger-bot" class="w-full h-0.5 bg-current transition-all duration-300"></span>
-                </div>
-            </button>
+      <button
+        id="hamburgerBtn"
+        class="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+      >
+        <div class="w-6 flex flex-col gap-1.5">
+          <span
+            id="burger-top"
+            class="w-full h-0.5 bg-current transition-all duration-300"
+          ></span>
+          <span
+            id="burger-mid"
+            class="w-full h-0.5 bg-current transition-all duration-300"
+          ></span>
+          <span
+            id="burger-bot"
+            class="w-full h-0.5 bg-current transition-all duration-300"
+          ></span>
         </div>
+      </button>
     </div>
+  </div>
 </header>
 
 <!-- MEGA MENU -->
-<div id="servicesMega" class="servicesMega-hidden fixed top-[68px] left-0 right-0 z-[9999] flex justify-center px-4">
-    <div id="megaPanel"
-        class="w-full max-w-[740px] bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 overflow-hidden">
+<div
+  id="servicesMega"
+  class="servicesMega-hidden fixed top-[68px] left-0 right-0 z-[9999] flex justify-center px-4"
+>
+  <div
+    id="megaPanel"
+    class="w-full max-w-[740px] bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 overflow-hidden"
+  >
+    <div class="grid grid-cols-3 px-7 py-6">
+      <div class="pr-6 border-r border-slate-100">
+        <p
+          class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3"
+        >
+          General Dentistry
+        </p>
+        <div id="cat-general-desktop"></div>
+      </div>
 
-        <div class="grid grid-cols-3 px-7 py-6">
+      <div class="px-6 border-r border-slate-100">
+        <p
+          class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3"
+        >
+          Cosmetic
+        </p>
+        <div id="cat-cosmetic-desktop"></div>
+      </div>
 
-            <div class="pr-6 border-r border-slate-100">
-                <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">General Dentistry</p>
-                <div id="cat-general-desktop"></div>
-            </div>
+      <div class="pl-6">
+        <p
+          class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3"
+        >
+          Specialized
+        </p>
 
-            <div class="px-6 border-r border-slate-100">
-                <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Cosmetic</p>
-                <div id="cat-cosmetic-desktop"></div>
-            </div>
-
-            <div class="pl-6">
-                <p class="text-[0.58rem] font-bold tracking-[0.13em] uppercase text-gray-400 mb-3">Specialized</p>
-
-                <!-- <a href="/Services/root-canal" class="block py-1.5 text-[0.85rem] hover:text-primary">Root Canal</a> -->
-                <div id="cat-specialized-desktop"></div>
-            </div>
-        </div>
-
-
-        <div
-            class="mx-7 mb-5 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-between flex-wrap gap-3">
-
-            <div>
-                <p class="text-[0.75rem] font-bold text-primary">Free Consultation</p>
-                <p class="text-[0.78rem] text-primary">For new patients — no obligation</p>
-            </div>
-
-            <a href="/Services"
-                class="text-[0.62rem] font-bold tracking-[0.1em] uppercase bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition">
-                Check All Services
-            </a>
-
-        </div>
-
+        <!-- <a href="/Services/root-canal" class="block py-1.5 text-[0.85rem] hover:text-primary">Root Canal</a> -->
+        <div id="cat-specialized-desktop"></div>
+      </div>
     </div>
+
+    <div
+      class="mx-7 mb-5 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-between flex-wrap gap-3"
+    >
+      <div>
+        <p class="text-[0.75rem] font-bold text-primary">Free Consultation</p>
+        <p class="text-[0.78rem] text-primary">
+          For new patients — no obligation
+        </p>
+      </div>
+
+      <a
+        href="/Services"
+        class="text-[0.62rem] font-bold tracking-[0.1em] uppercase bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition"
+      >
+        Check All Services
+      </a>
+    </div>
+  </div>
 </div>
 
 <!-- MOBILE MENU -->
-<div id="mobileMenu" class="fixed inset-0 z-[998] bg-white opacity-0 invisible transition-all duration-500 overflow-y-auto pb-20">
-    <div class="absolute inset-0 bg-brand/5 backdrop-blur-3xl -z-10"></div>
-    <div class="min-h-full flex flex-col items-center justify-center px-8">
-        <div class="flex flex-col w-full max-w-sm pt-24">
-            <a href="/" id="m-nav-home" class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">Home</a>
-            <a href="/about" id="m-nav-about" class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">About</a>
-            
-            <button id="mobileServicesBtn" class="mobile-nav-link w-full flex justify-center items-center gap-3 text-xl font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">
-                Services
-                <i class="fa-solid fa-chevron-down text-sm transition-transform duration-300" id="mobileChevron"></i>
-            </button>
+<div
+  id="mobileMenu"
+  class="fixed inset-0 z-[998] bg-white opacity-0 invisible transition-all duration-500 overflow-y-auto pb-20"
+>
+  <div class="absolute inset-0 bg-brand/5 backdrop-blur-3xl -z-10"></div>
+  <div class="min-h-full flex flex-col items-center justify-center px-8">
+    <div class="flex flex-col w-full max-w-sm pt-24">
+      <a
+        href="/"
+        id="m-nav-home"
+        class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4"
+        >Home</a
+      >
+      <a
+        href="/about"
+        id="m-nav-about"
+        class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4"
+        >About</a
+      >
 
-            <div id="mobileServicesMenu" class="max-h-0 overflow-hidden transition-all duration-500 bg-slate-50/50 rounded-2xl">
-                <div class="py-6 px-4 space-y-4">
-                    <div>
-                        <div class="flex items-center justify-center gap-2 mb-2">
-                            <i class="fa-solid fa-tooth text-[10px] text-primary/40"></i>
-                            <p class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40">General</p>
-                            <i class="fa-solid fa-tooth text-[10px] text-primary/40"></i>
-                        </div>
-                        <div id="cat-general-mobile" class="flex flex-col text-center"></div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-center gap-2 mb-2">
-                            <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-primary/40"></i>
-                            <p class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40">Cosmetic</p>
-                            <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-primary/40"></i>
-                        </div>
-                        <div id="cat-cosmetic-mobile" class="flex flex-col text-center"></div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-center gap-2 mb-2">
-                            <i class="fa-solid fa-microscope text-[10px] text-primary/40"></i>
-                            <p class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40">Specialized</p>
-                            <i class="fa-solid fa-microscope text-[10px] text-primary/40"></i>
-                        </div>
-                        <div id="cat-specialized-mobile" class="flex flex-col text-center"></div>
-                    </div>
-                </div>
+      <button
+        id="mobileServicesBtn"
+        class="mobile-nav-link w-full flex justify-center items-center gap-3 text-xl font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4"
+      >
+        Services
+        <i
+          class="fa-solid fa-chevron-down text-sm transition-transform duration-300"
+          id="mobileChevron"
+        ></i>
+      </button>
+
+      <div
+        id="mobileServicesMenu"
+        class="max-h-0 overflow-hidden transition-all duration-500 bg-slate-50/50 rounded-2xl"
+      >
+        <div class="py-6 px-4 space-y-4">
+          <div>
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <i class="fa-solid fa-tooth text-[10px] text-primary/40"></i>
+              <p
+                class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40"
+              >
+                General
+              </p>
+              <i class="fa-solid fa-tooth text-[10px] text-primary/40"></i>
             </div>
-
-            <a href="/contacts" id="m-nav-contacts" class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4">Contact</a>
-            
-            <a href="/Appointments" class="mobile-nav-link mt-6 text-center py-4 px-10 rounded-full bg-primary text-white text-[0.75rem] font-bold tracking-[0.15em] uppercase shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
-                Book Appointment
-            </a>
+            <div
+              id="cat-general-mobile"
+              class="flex flex-col text-center"
+            ></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <i
+                class="fa-solid fa-wand-magic-sparkles text-[10px] text-primary/40"
+              ></i>
+              <p
+                class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40"
+              >
+                Cosmetic
+              </p>
+              <i
+                class="fa-solid fa-wand-magic-sparkles text-[10px] text-primary/40"
+              ></i>
+            </div>
+            <div
+              id="cat-cosmetic-mobile"
+              class="flex flex-col text-center"
+            ></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <i class="fa-solid fa-microscope text-[10px] text-primary/40"></i>
+              <p
+                class="text-[0.8rem] font-bold tracking-[0.25em] uppercase text-primary/40"
+              >
+                Specialized
+              </p>
+              <i class="fa-solid fa-microscope text-[10px] text-primary/40"></i>
+            </div>
+            <div
+              id="cat-specialized-mobile"
+              class="flex flex-col text-center"
+            ></div>
+          </div>
         </div>
+      </div>
+
+      <a
+        href="/contacts"
+        id="m-nav-contacts"
+        class="mobile-nav-link text-xl text-center font-extrabold text-brand uppercase tracking-widest hover:text-primary transition-colors py-4"
+        >Contact</a
+      >
+
+      <a
+        href="/Appointments"
+        class="mobile-nav-link mt-6 text-center py-4 px-10 rounded-full bg-primary text-white text-[0.75rem] font-bold tracking-[0.15em] uppercase shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+      >
+        Book Appointment
+      </a>
     </div>
+  </div>
 </div>
