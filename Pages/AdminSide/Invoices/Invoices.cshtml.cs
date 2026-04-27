@@ -4,7 +4,7 @@ using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
 
-namespace SamsonDentalCenterManagementSystem.Pages.AdminSide.Invoices
+namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
 {
     public class InvoicesModel : AdminPageModel
     {

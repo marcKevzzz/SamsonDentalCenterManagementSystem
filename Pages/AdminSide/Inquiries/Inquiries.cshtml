@@ -4,163 +4,270 @@
 Layout = "AdminSide/_StaffLayout";
 }
 
-<div id="page-inquiries" class="page p-4 md:p-6">
-  <div class="mb-5">
-    <h2 class="font-display text-xl font-extrabold text-brand">Inquiries</h2>
-    <p class="text-[12px] text-brand-500 mt-0.5">
-      Patient messages and support requests
-    </p>
-  </div>
-  <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="dtable w-full min-w-[440px]">
-        <thead class="bg-slate-50">
-          <tr>
-            <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display"
-            >
-              From
-            </th>
-            <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display"
-            >
-              Subject
-            </th>
-            <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display"
-            >
-              Date
-            </th>
-            <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display"
-            >
-              Status
-            </th>
-            <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display"
-            >
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-50">
-          <tr>
-            <td class="px-4 py-3">
-              <div class="text-[13px] font-medium">Maria Lim</div>
-              <div class="text-[10px] text-brand">maria.lim@email.com</div>
-            </td>
-            <td class="px-4 py-3 text-[12.5px]">Schedule change request</td>
-            <td class="px-4 py-3 text-[11px] text-brand whitespace-nowrap">
-              Mar 23, 9:02 AM
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display"
-                >Open</span
-              >
-            </td>
-            <td class="px-4 py-3">
-              <button
-                class="text-[11px] font-semibold text-primary hover:underline"
-              >
-                Reply
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3">
-              <div class="text-[13px] font-medium">Juan Reyes</div>
-              <div class="text-[10px] text-brand">juan.r@email.com</div>
-            </td>
-            <td class="px-4 py-3 text-[12.5px]">Lab results inquiry</td>
-            <td class="px-4 py-3 text-[11px] text-brand whitespace-nowrap">
-              Mar 22, 3:45 PM
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
-                >Resolved</span
-              >
-            </td>
-            <td class="px-4 py-3">
-              <button
-                class="text-[11px] font-semibold text-primary hover:underline"
-              >
-                View
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3">
-              <div class="text-[13px] font-medium">Ana Cruz</div>
-              <div class="text-[10px] text-brand">ana.c@email.com</div>
-            </td>
-            <td class="px-4 py-3 text-[12.5px]">Billing concern</td>
-            <td class="px-4 py-3 text-[11px] text-brand whitespace-nowrap">
-              Mar 22, 11:20 AM
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display"
-                >Open</span
-              >
-            </td>
-            <td class="px-4 py-3">
-              <button
-                class="text-[11px] font-semibold text-primary hover:underline"
-              >
-                Reply
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3">
-              <div class="text-[13px] font-medium">Ben Marcos</div>
-              <div class="text-[10px] text-brand">bmarcos@email.com</div>
-            </td>
-            <td class="px-4 py-3 text-[12.5px]">Prescription refill</td>
-            <td class="px-4 py-3 text-[11px] text-brand whitespace-nowrap">
-              Mar 21, 8:00 AM
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display"
-                >Open</span
-              >
-            </td>
-            <td class="px-4 py-3">
-              <button
-                class="text-[11px] font-semibold text-primary hover:underline"
-              >
-                Reply
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3">
-              <div class="text-[13px] font-medium">Lina Castillo</div>
-              <div class="text-[10px] text-brand">lcastillo@email.com</div>
-            </td>
-            <td class="px-4 py-3 text-[12.5px]">Feedback on service</td>
-            <td class="px-4 py-3 text-[11px] text-brand whitespace-nowrap">
-              Mar 20, 4:15 PM
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display"
-                >Resolved</span
-              >
-            </td>
-            <td class="px-4 py-3">
-              <button
-                class="text-[11px] font-semibold text-primary hover:underline"
-              >
-                View
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<div id="page-inquiries" class="h-full flex flex-col md:flex-row gap-0 md:gap-6 p-0 md:p-6 overflow-hidden">
+    <!-- ── LEFT: INQUIRY LIST ────────────────────────────────────────── -->
+    <div id="inquiry-sidebar" class="w-full md:w-80 flex flex-col bg-white md:rounded-3xl border-b md:border border-slate-200 shadow-sm overflow-hidden shrink-0 transition-all duration-300">
+        <div class="p-4 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <div>
+                <h3 class="font-display font-extrabold text-brand text-lg">Inquiries</h3>
+                <p class="text-[11px] text-brand-400 font-medium uppercase tracking-wider mt-1">Patient Requests</p>
+            </div>
+            <button class="md:hidden w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                <i class="fa-solid fa-filter text-xs"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="inquiry-list">
+            @if (!Model.Inquiries.Any())
+            {
+                <div class="p-8 text-center">
+                    <i class="fa-solid fa-inbox text-slate-200 text-3xl mb-3 block"></i>
+                    <p class="text-[12px] text-brand-400 font-medium">No inquiries found</p>
+                </div>
+            }
+            @foreach (var inq in Model.Inquiries)
+            {
+                var p = inq.Patient;
+                // Fallback logic: Try FullName, then manual concat, then Guest fields
+                var displayName = p != null && !string.IsNullOrWhiteSpace(p.FullName) 
+                    ? p.FullName 
+                    : (p != null ? $"{p.FirstName} {p.LastName}".Trim() : "");
+
+                if (string.IsNullOrWhiteSpace(displayName))
+                {
+                    displayName = $"{inq.GuestFirstName} {inq.GuestLastName}".Trim();
+                }
+
+                if (string.IsNullOrWhiteSpace(displayName)) displayName = "Guest User";
+
+                var avatarUrl = p?.AvatarUrl ?? "";
+                var initials = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "G";
+
+                <div class="p-4 hover:bg-slate-50 cursor-pointer transition-all border-l-4 @(inq.Status == "pending" ? "border-amber-400 bg-amber-50/30" : "border-transparent")"
+                    onclick="loadInquiry('@inq.Id', '@(displayName.Replace("'", "\\'"))', '@inq.Subject', '@avatarUrl', this)">
+                    <div class="flex items-center gap-3 mb-1">
+                        @if(!string.IsNullOrEmpty(avatarUrl)) {
+                            <img src="@avatarUrl" class="w-8 h-8 rounded-full object-cover border border-slate-200" onerror="this.style.display='none'" />
+                        } else {
+                            <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-[11px] font-bold">@initials</div>
+                        }
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[13px] font-bold text-slate-900 truncate">@displayName</span>
+                                    @if(inq.Status == "pending") {
+                                        <span class="unread-dot w-2 h-2 rounded-full bg-amber-500"></span>
+                                    }
+                                </div>
+                                <span class="text-[10px] text-slate-400">@inq.CreatedAt.ToString("MMM dd")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
-  </div>
+
+    <!-- ── RIGHT: CHAT INTERFACE ──────────────────────────────────────── -->
+    <div id="chat-main" class="hidden md:flex flex-1 flex flex-col bg-white md:rounded-3xl md:border border-slate-200 shadow-sm overflow-hidden relative transition-all duration-300">
+        <input type="hidden" id="admin-id" value="@Model.CurrentUserId" />
+        <!-- Empty State (No Chat Selected) -->
+        <div id="chat-empty" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-10 transition-opacity duration-300">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                <i class="fa-solid fa-comments text-slate-200 text-3xl"></i>
+            </div>
+            <h4 class="text-brand font-bold">Select an inquiry</h4>
+            <p class="text-[12px] text-brand-400 mt-1">Select a message from the list to start chatting</p>
+        </div>
+
+        <!-- Chat Header -->
+        <div id="chat-header" class="p-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+            <div class="flex items-center gap-4">
+                <button onclick="backToList()" class="md:hidden w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-brand hover:text-white transition-all cursor-pointer">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </button>
+                <div id="chat-avatar" class="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center font-bold text-sm">P</div>
+                <div>
+                    <h3 id="chat-patient-name" class="font-bold text-brand text-[15px]">Select Patient</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <p id="chat-subject" class="text-[11px] text-brand-400 font-medium truncate max-w-[150px] md:max-w-none">No subject selected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/30">
+            <!-- Messages load here -->
+        </div>
+
+        <!-- Predefined Answers Row -->
+        <div class="px-4 py-2 border-t border-slate-100 bg-white flex-wrap whitespace-nowrap scrollbar-hide flex gap-2">
+            <button onclick="usePredefined('schedule')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">📅 Reschedule</button>
+            <button onclick="usePredefined('billing')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">💰 Billing Info</button>
+            <button onclick="usePredefined('followup')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">✅ Follow-up</button>
+            <button onclick="usePredefined('thankyou')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">🙏 Thank You</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-slate-100 bg-white shrink-0">
+            <div class="relative flex items-end gap-3">
+                <textarea id="chat-input" placeholder="Type your reply here..." rows="1"
+                       class="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all shadow-inner resize-none overflow-y-auto max-h-32"></textarea>
+                <button onclick="sendMessage()" id="send-btn" class="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-[1.05] active:scale-95 transition-all shrink-0">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    let activeInquiryId = null;
+    const adminId = document.getElementById('admin-id').value;
+    const sidebar = document.getElementById('inquiry-sidebar');
+    const chatMain = document.getElementById('chat-main');
+    const chatInput = document.getElementById('chat-input');
+
+    const predefined = {
+        schedule: "We can help with that. Please let us know your preferred new date and time so we can check our availability.",
+        billing: "Our billing department has been notified of your concern. We will review your account and get back to you within 24 hours.",
+        followup: "Thank you for the update. We have noted this in your records. Would you like to schedule a follow-up consultation?",
+        thankyou: "You're very welcome! If you have any more questions, feel free to reach out. Have a great day!"
+    };
+
+    // Auto-resize textarea
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    function backToList() {
+        sidebar.classList.remove('hidden');
+        chatMain.classList.add('hidden');
+        chatMain.classList.remove('flex');
+    }
+
+    async function loadInquiry(id, name, subject, avatarUrl, element) {
+        activeInquiryId = id;
+        
+        // Mobile visibility
+        if (window.innerWidth < 768) {
+            sidebar.classList.add('hidden');
+            chatMain.classList.remove('hidden');
+            chatMain.classList.add('flex');
+        }
+
+        // Highlight active item
+        document.querySelectorAll('#inquiry-list > div').forEach(el => {
+            el.classList.remove('bg-slate-100', 'border-primary');
+            el.classList.add('border-transparent');
+        });
+        if (element) {
+            element.classList.add('bg-slate-100', 'border-primary');
+            element.classList.remove('border-transparent');
+            // Remove unread indicator if present
+            const dot = element.querySelector('.unread-dot');
+            if (dot) dot.remove();
+        }
+
+        document.getElementById('chat-empty').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('chat-patient-name').innerText = name;
+        document.getElementById('chat-subject').innerText = subject;
+        
+        const avatarBox = document.getElementById('chat-avatar');
+        if (avatarUrl && avatarUrl !== '') {
+            avatarBox.innerHTML = `<img src="${avatarUrl}" class="w-full h-full rounded-full object-cover" />`;
+            avatarBox.classList.remove('bg-brand');
+        } else {
+            avatarBox.innerText = name[0].toUpperCase();
+            avatarBox.classList.add('bg-brand');
+        }
+        
+        await fetchMessages();
+    }
+
+    async function fetchMessages() {
+        if (!activeInquiryId) return;
+        const res = await fetch(`/api/inquiry/messages/${activeInquiryId}`);
+        const data = await res.json();
+        
+        const container = document.getElementById('chat-messages');
+        const wasAtBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100;
+
+        container.innerHTML = '';
+        
+        data.messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `flex ${msg.is_from_staff ? 'justify-end' : 'justify-start'}`;
+            div.innerHTML = `
+                <div class="max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-[12.5px] ${msg.is_from_staff ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/20' : 'bg-slate-100 border border-slate-200 text-brand rounded-tl-none shadow-sm shadow-slate-900/15'}">
+                    <p class="leading-relaxed font-medium whitespace-pre-wrap">${msg.message}</p>
+                    <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        if (wasAtBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function usePredefined(key) {
+        chatInput.value = predefined[key];
+        chatInput.style.height = 'auto';
+        chatInput.style.height = (chatInput.scrollHeight) + 'px';
+        chatInput.focus();
+    }
+
+    async function sendMessage() {
+        const msg = chatInput.value.trim();
+        if (!msg || !activeInquiryId) return;
+
+        chatInput.disabled = true;
+        
+        try {
+            const res = await fetch('/api/inquiry/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    inquiryId: activeInquiryId,
+                    senderId: adminId,
+                    message: msg,
+                    isFromStaff: true
+                })
+            });
+
+            if (res.ok) {
+                chatInput.value = '';
+                chatInput.style.height = 'auto';
+                await fetchMessages();
+                document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+            }
+        } finally {
+            chatInput.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Auto-refresh messages every 10 seconds
+    setInterval(() => {
+        if (activeInquiryId) fetchMessages();
+    }, 10000);
+
+    // Initial selection
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstInquiry = document.querySelector('#inquiry-list > div');
+        if (firstInquiry && window.innerWidth >= 768) {
+            firstInquiry.click();
+        }
+    });
+</script>

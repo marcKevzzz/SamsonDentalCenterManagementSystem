@@ -1,20 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Helpers;
+using SamsonDentalCenterManagementSystem.Models;
+using SamsonDentalCenterManagementSystem.Services;
 
-namespace SamsonDentalCenterManagementSystem.Pages;
-
-public class AdminInquiriesModel : AdminPageModel
+namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
 {
-    private readonly ILogger<AdminInquiriesModel> _logger;
-
-    public AdminInquiriesModel(ILogger<AdminInquiriesModel> logger, ProfileService profileService)
-        : base(profileService)
+    public class AdminInquiriesModel : AdminPageModel
     {
-        _logger = logger;
-    }
+        private readonly InquiryService _inquiryService;
 
-    public void OnGet()
-    {
+        public AdminInquiriesModel(ProfileService profileService, InquiryService inquiryService)
+            : base(profileService)
+        {
+            _inquiryService = inquiryService;
+        }
+
+        public List<Inquiry> Inquiries { get; set; } = new();
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            Inquiries = await _inquiryService.GetAllInquiriesAsync();
+            return Page();
+        }
     }
 }

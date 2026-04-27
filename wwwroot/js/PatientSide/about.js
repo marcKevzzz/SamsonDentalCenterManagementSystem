@@ -125,38 +125,38 @@ if (statsItems.length > 0 && statsSection) {
 }
 
 initEntranceAnimations();
-initMagneticFacilityCards();
+// initMagneticFacilityCards();
 
-function initMagneticFacilityCards() {
-    const cards = document.querySelectorAll(".fac-card");
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
+// function initMagneticFacilityCards() {
+//     const cards = document.querySelectorAll(".fac-card");
+//     cards.forEach(card => {
+//         card.addEventListener('mousemove', (e) => {
+//             const rect = card.getBoundingClientRect();
+//             const x = e.clientX - rect.left - rect.width / 2;
+//             const y = e.clientY - rect.top - rect.height / 2;
             
-            gsap.to(card, {
-                x: x * 0.1,
-                y: y * 0.1,
-                rotationX: -y * 0.05,
-                rotationY: x * 0.05,
-                duration: 0.5,
-                ease: "power2.out"
-            });
-        });
+//             gsap.to(card, {
+//                 x: x * 0.1,
+//                 y: y * 0.1,
+//                 rotationX: -y * 0.05,
+//                 rotationY: x * 0.05,
+//                 duration: 0.5,
+//                 ease: "power2.out"
+//             });
+//         });
         
-        card.addEventListener('mouseleave', () => {
-            gsap.to(card, {
-                x: 0,
-                y: 0,
-                rotationX: 0,
-                rotationY: 0,
-                duration: 0.8,
-                ease: "elastic.out(1, 0.3)"
-            });
-        });
-    });
-}
+//         card.addEventListener('mouseleave', () => {
+//             gsap.to(card, {
+//                 x: 0,
+//                 y: 0,
+//                 rotationX: 0,
+//                 rotationY: 0,
+//                 duration: 0.8,
+//                 ease: "elastic.out(1, 0.3)"
+//             });
+//         });
+//     });
+// }
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Team Thumbs

@@ -76,9 +76,12 @@ Layout = "_AuthLayout";
         class="w-8 h-8 rounded-full border-2 border-brand object-cover" alt="" />
     </div>
     <div>
-      <div class="text-[#f59e0b] text-sm leading-none">★★★★★</div>
+      <div class="text-[#f59e0b] text-sm font-bold flex items-center gap-1">
+        <i class="fa-solid fa-star"></i>
+        <span>@ViewData["ReviewAvg"] / 5.0</span>
+      </div>
       <div class="font-body text-[0.7rem] text-white/50 mt-0.5">
-        Trusted by 2,000+ patients
+        Trusted by @ViewData["ReviewCount"] patients
       </div>
     </div>
   </div>

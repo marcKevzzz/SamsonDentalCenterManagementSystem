@@ -77,6 +77,31 @@ CREATE TABLE public.doctors (
   CONSTRAINT doctors_pkey PRIMARY KEY (id),
   CONSTRAINT doctors_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.inquiries (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  patient_id uuid,
+  subject text NOT NULL,
+  status text NOT NULL DEFAULT 'pending'::text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  guest_email text,
+  guest_first_name text,
+  guest_last_name text,
+  guest_phone text,
+  CONSTRAINT inquiries_pkey PRIMARY KEY (id),
+  CONSTRAINT inquiries_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.inquiry_messages (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  inquiry_id uuid NOT NULL,
+  sender_id uuid,
+  message text NOT NULL,
+  is_from_staff boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT inquiry_messages_pkey PRIMARY KEY (id),
+  CONSTRAINT inquiry_messages_inquiry_id_fkey FOREIGN KEY (inquiry_id) REFERENCES public.inquiries(id),
+  CONSTRAINT inquiry_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.invoice_items (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   invoice_id uuid NOT NULL,
@@ -105,6 +130,19 @@ CREATE TABLE public.invoices (
   CONSTRAINT invoices_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id),
   CONSTRAINT invoices_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT invoices_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
+);
+CREATE TABLE public.payments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  invoice_id uuid NOT NULL,
+  amount numeric NOT NULL DEFAULT 0 CHECK (amount >= 0::numeric),
+  payment_method text NOT NULL,
+  status text NOT NULL DEFAULT 'completed'::text,
+  reference_number text,
+  notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT payments_pkey PRIMARY KEY (id),
+  CONSTRAINT payments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -146,14 +184,17 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
-CREATE TABLE public.payments (
+CREATE TABLE public.reviews (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  invoice_id uuid NOT NULL,
-  amount numeric NOT NULL DEFAULT 0,
-  payment_method text NOT NULL,
-  reference_number text,
-  notes text,
+  author_name text NOT NULL,
+  author_avatar text,
+  rating integer NOT NULL,
+  review_text text NOT NULL,
+  platform text NOT NULL DEFAULT 'Manual'::text,
+  platform_review_id text,
+  external_link text,
+  is_visible boolean NOT NULL DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT payments_pkey PRIMARY KEY (id),
-  CONSTRAINT payments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id)
+  CONSTRAINT reviews_pkey PRIMARY KEY (id),
+  CONSTRAINT reviews_platform_review_id_key UNIQUE (platform_review_id)
 );

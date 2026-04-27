@@ -27,6 +27,7 @@ var supabaseProjectRef = new Uri(supabaseUrl).Host.Split('.')[0];
 var jwtKid = builder.Configuration["Supabase:JwtKid"];
 var resendAPIToken = builder.Configuration["Resend:ApiToken"];
 var appBaseUrl = builder.Configuration["App:BaseUrl"];
+var outscraperKey = builder.Configuration["Outscraper:ApiKey"];
 
 
 var ecKey = ECDsa.Create();
@@ -55,8 +56,7 @@ await anonClient.InitializeAsync();
 builder.Services.AddScoped(_ => anonClient);  // ← this is what SigninModel needs
 
 // ── Service role client — for DB queries, bypasses RLS ───────────────────────
-var supabaseServiceKey = builder.Configuration["Supabase:ServiceKey"]
-    ?? throw new Exception("Supabase:ServiceKey missing");
+var supabaseServiceKey = builder.Configuration["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey missing");
 
 var serviceClient = new Supabase.Client(supabaseUrl, supabaseServiceKey, new SupabaseOptions
 {
@@ -70,6 +70,13 @@ builder.Services.AddScoped<SessionHelper>();
 // ── RBAC: Claims Transformer — injects app_role from profiles table ──────────
 builder.Services.AddScoped<IClaimsTransformation, SamsonDentalCenterManagementSystem.Helpers.RoleClaimsTransformer>();
 
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>( options =>
+{
+    options.ApiToken = resendAPIToken ?? throw new Exception("Resend API Token is missing");
+} );
+builder.Services.AddTransient<IResend, ResendClient>();
+
 builder.Services.AddSingleton<ProfileService>(_ =>
     new ProfileService(serviceClient, supabaseServiceKey, supabaseUrl)
 );
@@ -77,14 +84,6 @@ builder.Services.AddSingleton<ProfileService>(_ =>
 builder.Services.AddSingleton<DentalServiceService>(_ =>
     new DentalServiceService(serviceClient)
 );
-
-builder.Services.AddOptions();
-builder.Services.AddHttpClient<ResendClient>();
-builder.Services.Configure<ResendClientOptions>( options =>
-{
-    options.ApiToken = resendAPIToken ?? throw new Exception("Resend API Token is missing");
-} );
-builder.Services.AddTransient<IResend, ResendClient>();
 
 // ── Setup IHttpClientFactory to prevent socket exhaustion ─────────────────────
 builder.Services.AddHttpClient("SupabaseClient");
@@ -128,6 +127,31 @@ builder.Services.AddScoped<InvoiceService>(provider =>
     );
 });
 
+builder.Services.AddScoped<InquiryService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new InquiryService(
+        serviceClient,
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey
+    );
+});
+
+var apifyKey = builder.Configuration["Apify:Token"];
+
+// ... (other registrations)
+
+builder.Services.AddScoped<ReviewService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new ReviewService(
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey,
+        apifyKey 
+    );
+});
 
 // ── EF Core ───────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>

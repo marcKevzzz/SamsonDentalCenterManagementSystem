@@ -23,7 +23,25 @@
   - Refactored Patient Settings to hide "Save Changes" on the first tab, moving update logic to the "Contact & Address" tab.
   - Fixed blurry avatar images using CSS `image-rendering` optimizations.
   - Added UUID validation to `InvoiceController` to prevent 400 Bad Request errors.
-* **Current Blockers**: None.
-
-- Fixed fetching issues: Added missing System.Text using directive in InvoiceService for Encoding.
-- Refactored Appointments: Removed obsolete `service_name` column, migrating to join with `dental_services` via a new SQL migration and updated AppointmentService DTOs.
+  - Added client-side filtering (search and status) to Admin Invoices and Transactions pages.
+  - Implemented "Confirm Payment" modal in Transactions page to record payments to the `payments` table.
+  - Fixed horizontal overflow on invoice tables to ensure "Amount" column is visible.
+  - Connected "Confirm Payment" button to `/api/invoice/pay` endpoint.
+  - Implemented Inquiries feature with support for both registered patients and guests.
+  - Implemented chat-like UI for inquiries in Admin and Patient (Contacts) portals.
+  - Enhanced Admin Inquiries UI: added active conversation highlighting, initial selection on load, unread indicators, mobile-responsive layout (sidebar toggle), and multi-line auto-resizing input.
+  - Improved Patient Contacts UI: added multi-line auto-resizing chat input, whitespace preservation in messages, and mobile keyboard focus scrolling fixes.
+  - Fixed bug where Admin sender_id was not being saved in inquiry messages.
+  - Fixed chat persistence on Patient side by fetching existing inquiries on page load.
+  - Resolved profile join issues on Admin side by adding explicit JsonPropertyName mapping for Patient and Sender references.
+  - Implemented patient avatars and full name display in Admin inquiries list.
+  - Implemented predefined answers for staff to quickly reply to common inquiries.
+  - Added polling mechanism to simulate real-time message updates.
+  - Updated database schema with `inquiries` and `inquiry_messages` tables including guest contact fields.
+  - Fixed 500 Internal Server Error in InquiryController by projecting messages to DTOs, avoiding serialization issues with Supabase BaseModel metadata.
+  - Implemented Review Management System:
+    - Created `Review` model and `ReviewService` for managing patient testimonials.
+    - Added Admin Reviews management page with visibility toggles and manual review entry.
+    - Integrated dynamic reviews into Home page with horizontal scrolling and platform icons (Google/Facebook).
+    - Added dynamic rating/count stats to Home and Patient Signin pages.
+    - Implemented real Apify Yelp Scraper integration with manual trigger and caching in Supabase.

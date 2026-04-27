@@ -15,6 +15,12 @@ appsettings.Production.json
 .vscode/
 
 
-*.user
+
 *.pubxml
 *.pubxml.user
+
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

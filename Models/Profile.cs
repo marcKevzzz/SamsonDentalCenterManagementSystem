@@ -1,6 +1,6 @@
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace SamsonDentalCenterManagementSystem.Models
 {
@@ -13,9 +13,11 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string Id { get; set; } = string.Empty;
 
         [Column("first_name")]
+        [JsonPropertyName("first_name")]
         public string FirstName { get; set; } = string.Empty;
 
         [Column("last_name")]
+        [JsonPropertyName("last_name")]
         public string LastName { get; set; } = string.Empty;
 
         [Column("date_of_birth")]
@@ -37,6 +39,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? Role { get; set; }
 
         [Column("avatar_url")]
+        [JsonPropertyName("avatar_url")]
         public string? AvatarUrl { get; set; }
 
 

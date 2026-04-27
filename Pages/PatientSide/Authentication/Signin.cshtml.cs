@@ -1,6 +1,8 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using SamsonDentalCenterManagementSystem.Models; // Ensure your Profile model is here
+    using SamsonDentalCenterManagementSystem.Services;  // ← Add this line
+    using SamsonDentalCenterManagementSystem.Helpers;  // ← Add this line if not already present
 
     namespace SamsonDentalCenterManagementSystem.Pages;
 
@@ -8,28 +10,28 @@
     {
         private readonly Supabase.Client _supabase;
         private readonly ProfileService _profileService;
+        private readonly ReviewService _reviewService;
 
-        public SigninModel(Supabase.Client supabase, ProfileService profileService)
+        public SigninModel(Supabase.Client supabase, ProfileService profileService, ReviewService reviewService)
         {
             _supabase = supabase;
             _profileService = profileService;
+            _reviewService = reviewService;
         }
 
         [BindProperty]
         public Profile Input { get; set; } = new();
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
+            var stats = await _reviewService.GetReviewStatsAsync();
+            ViewData["ReviewAvg"] = stats.average.ToString("0.0");
+            ViewData["ReviewCount"] = stats.count.ToString("N0");
+
             // 1. Check if the "Remember Me" or Session cookie exists
             var token = Request.Cookies["sb-access-token"];
+            if (!string.IsNullOrEmpty(token)) return RedirectToPage("/Admin/Dashboard");
 
-            if (!string.IsNullOrEmpty(token))
-            {
-                // 2. If the user is already logged in, redirect them to the Index (Dashboard)
-                return RedirectToPage("/Index");
-            }
-
-            // 3. Otherwise, show the sign-in page as usual
             return Page();
         }
 

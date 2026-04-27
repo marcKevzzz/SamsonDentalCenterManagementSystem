@@ -475,7 +475,6 @@ body.standalone {
 .js-enabled .mission-card {
   opacity: 0;
   visibility: hidden;
-  transform: translateY(30px); /* Matches your mission-card starting point */
   will-change: transform, opacity;
 }
 
@@ -564,7 +563,6 @@ body.standalone {
 }
 
 .review-verified i {
-  color: #d1d5db;
   font-size: 11px;
 }
 

@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     initContactsAnimations();
     initFormInteractions();
+    
+    if (window.activeInquiryId && window.activeInquiryId !== '') {
+        fetchChatMessages();
+        startChatPolling();
+    }
 });
 
 function initContactsAnimations() {
@@ -113,6 +118,10 @@ function initFormInteractions() {
                 backgroundColor: "#fff",
                 duration: 0.3
             });
+            // Mobile: scroll into view
+            if (window.innerWidth < 768) {
+                setTimeout(() => input.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+            }
         });
         input.addEventListener("blur", () => {
             if (!input.value) {
@@ -124,34 +133,158 @@ function initFormInteractions() {
             }
         });
     });
-}
 
-window.handleSubmit = function(event) {
-    event.preventDefault();
-    const btn = event.target.querySelector("button[type='submit']");
-    const successMsg = document.getElementById("successMsg");
+    // Chat auto-resize and focus scroll
+    const chatReply = document.getElementById("chatReply");
+    if (chatReply) {
+        chatReply.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
-    // Disable button and show loading state
-    btn.disabled = true;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...`;
-
-    // Simulate network delay
-    setTimeout(() => {
-        gsap.to(event.target, {
-            opacity: 0,
-            y: -20,
-            duration: 0.5,
-            onComplete: () => {
-                event.target.style.display = "none";
-                successMsg.style.display = "flex";
-                gsap.to(successMsg, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    ease: "back.out(1.7)"
-                });
+        chatReply.addEventListener('focus', () => {
+            if (window.innerWidth < 768) {
+                setTimeout(() => {
+                    chatReply.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 300);
             }
         });
-    }, 1500);
+
+        chatReply.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendFollowup();
+            }
+        });
+    }
+}
+
+window.handleSubmit = async function(event) {
+    event.preventDefault();
+    const btn = document.getElementById("submitBtn");
+    const successMsg = document.getElementById("successMsg");
+    const contactForm = document.getElementById("contactForm");
+    const chatContainer = document.getElementById("chatContainer");
+
+    const patientId = document.getElementById("patientId").value;
+    const firstName = document.getElementById("firstName").value;
+    const lastName = document.getElementById("lastName").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const subject = document.getElementById("subject").value;
+    const message = document.getElementById("message").value;
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...`;
+
+    try {
+        const res = await fetch('/api/inquiry/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                patientId: patientId || null,
+                subject: subject,
+                message: message,
+                guestEmail: email,
+                guestFirstName: firstName,
+                guestLastName: lastName,
+                guestPhone: phone
+            })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+            window.activeInquiryId = data.inquiryId;
+            
+            gsap.to(contactForm, {
+                opacity: 0, y: -20, duration: 0.5,
+                onComplete: () => {
+                    contactForm.classList.add('hidden');
+                    successMsg.classList.remove('hidden');
+                    chatContainer.classList.remove('hidden');
+                    
+                    gsap.fromTo([successMsg, chatContainer], 
+                        { opacity: 0, y: 20 }, 
+                        { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "back.out(1.7)" }
+                    );
+                    
+                    fetchChatMessages();
+                    startChatPolling();
+                }
+            });
+        } else {
+            alert(data.error || "Failed to send inquiry.");
+            btn.disabled = false;
+            btn.innerHTML = "Send Message";
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Network error. Please try again.");
+        btn.disabled = false;
+        btn.innerHTML = "Send Message";
+    }
 };
+
+window.fetchChatMessages = async function() {
+    if (!window.activeInquiryId) return;
+    try {
+        const res = await fetch(`/api/inquiry/messages/${window.activeInquiryId}`);
+        const data = await res.json();
+        if (data.ok) {
+            const container = document.getElementById("chatMessages");
+            const wasAtBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100;
+            
+            container.innerHTML = '';
+            data.messages.forEach(msg => {
+                const isMe = !msg.is_from_staff;
+                const div = document.createElement('div');
+                div.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                div.innerHTML = `
+                    <div class="max-w-[85%] md:max-w-[80%] px-4 py-3 rounded-2xl text-[12px] ${isMe ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/10' : 'bg-white border border-slate-100 text-brand rounded-tl-none shadow-sm'}">
+                        <p class="leading-relaxed font-medium whitespace-pre-wrap">${msg.message}</p>
+                        <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            if (wasAtBottom) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+    } catch (err) { console.error("Fetch error:", err); }
+};
+
+window.sendFollowup = async function() {
+    const input = document.getElementById("chatReply");
+    const msg = input.value.trim();
+    if (!msg || !window.activeInquiryId) return;
+
+    input.disabled = true;
+    try {
+        const res = await fetch('/api/inquiry/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                inquiryId: window.activeInquiryId,
+                message: msg,
+                isFromStaff: false
+            })
+        });
+        if (res.ok) {
+            input.value = '';
+            input.style.height = 'auto';
+            await fetchChatMessages();
+            document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+        }
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+};
+
+function startChatPolling() {
+    setInterval(() => {
+        fetchChatMessages();
+    }, 5000); // Poll every 5s
+}

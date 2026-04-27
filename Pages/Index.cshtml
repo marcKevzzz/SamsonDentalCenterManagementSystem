@@ -3,7 +3,19 @@
 @{
 ViewData["Title"] = "Home page";
 }
-
+<script>
+    window.reviewsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Reviews.Select(r => new {
+        id = r.Id,
+        author_name = r.AuthorName,
+        author_avatar = r.AuthorAvatar,
+        rating = r.Rating,
+        review_text = r.ReviewText,
+        platform = r.Platform,
+        external_link = r.ExternalLink,
+        review_date = r.ReviewDate ?? r.CreatedAt,
+        created_at = r.CreatedAt
+    })));
+</script>
 
 <section id="hero" class="relative h-screen max-h-[900px] flex items-center overflow-hidden bg-[var(--brand-dark)]">
     <!-- Skeleton Loader -->
@@ -167,12 +179,12 @@ ViewData["Title"] = "Home page";
           </p>
           <div class="flex gap-4 mb-8">
             <div class="flex flex-col">
-              <span class="text-white font-bold text-2xl">4.9/5</span>
+              <span class="text-white font-bold text-2xl">@Model.AverageRating.ToString("0.0")/5</span>
               <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Google Rating</span>
             </div>
             <div class="w-px h-10 bg-white/10"></div>
             <div class="flex flex-col">
-              <span class="text-white font-bold text-2xl">2k+</span>
+              <span class="text-white font-bold text-2xl">@(Model.TotalReviews / 1000)k+</span>
               <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Happy Patients</span>
             </div>
           </div>

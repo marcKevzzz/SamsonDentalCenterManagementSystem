@@ -5,6 +5,7 @@
 ViewData["Title"] = "Doctor Dashboard";
 }
 
+
 <div id="page-doctor-dashboard" class="page active p-4 md:p-6">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
@@ -20,6 +21,7 @@ ViewData["Title"] = "Doctor Dashboard";
             </div>
         </div>
     </div>
+
 
     <!-- Treatment Center (Conditional) -->
     @if (Model.ArrivedPatients.Any())
@@ -68,6 +70,7 @@ ViewData["Title"] = "Doctor Dashboard";
     </div>
     }
 
+
     <!-- Doctor Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
@@ -104,6 +107,7 @@ ViewData["Title"] = "Doctor Dashboard";
             </div>
         </div>
     </div>
+
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Schedule (2/3) -->
@@ -164,15 +168,13 @@ ViewData["Title"] = "Doctor Dashboard";
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentTime</div>
-                                    <div class="text-[10px] text-brand-400">@appt.AppointmentDate.ToString("MMM dd,
-                                        yyyy")</div>
+                                    <div class="text-[10px] text-brand-400">@appt.AppointmentDate.ToString("MMM dd,yyyy")</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     @{
                                     var badge = appt.Status.ToLower() switch {
                                     "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
-                                    "pending" => "bg-blue-50 text-blue-600 border-blue-100",
-                                    _ => "bg-slate-50 text-slate-500 border-slate-100"
+                                    "pending" => "bg-blue-50 text-blue-600 border-blue-100",_ => "bg-slate-50 text-slate-500 border-slate-100"
                                     };
                                     }
                                     <span
@@ -185,6 +187,7 @@ ViewData["Title"] = "Doctor Dashboard";
                 </div>
             </div>
         </div>
+
 
         <!-- Sidebar Info (1/3) -->
         <div class="space-y-6">
@@ -202,24 +205,20 @@ ViewData["Title"] = "Doctor Dashboard";
                     }
                     @foreach (var inv in Model.RecentInvoices)
                     {
-                    <a href="/Doctor/Invoices?invId=@inv.Id"
-                        class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
+                    <a href='/Doctor/Invoices?invId=@inv.Id' class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
                         <div class="min-w-0">
-                            <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ??
-                                "Unknown")</div>
+                            <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
                             <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd")</div>
                         </div>
                         <div class="text-right">
-                            <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")
-                            </div>
-                            <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "
-                                paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
-                                )">@inv.Status</span>
+                            <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
+                            <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
                         </div>
                     </a>
                     }
                 </div>
             </div>
+
 
             <!-- Patient Health Tips / Reminders (Moved down) -->
             <div class="bg-[#0F172A] rounded-2xl p-6 text-white relative overflow-hidden shadow-xl">
@@ -235,6 +234,7 @@ ViewData["Title"] = "Doctor Dashboard";
                     Open Records →
                 </button>
             </div>
+
 
             <!-- Mini Calendar or Stats -->
             <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
@@ -264,3 +264,4 @@ ViewData["Title"] = "Doctor Dashboard";
         </div>
     </div>
 </div>
+
