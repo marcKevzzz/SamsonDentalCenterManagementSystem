@@ -4,18 +4,18 @@
 
 <section class="relative bg-brand pt-[68px] overflow-hidden hero-section">
   <div class="absolute inset-0 ">
-    <img src="@Model.Service.Hero" alt="@Model.Service.Name" class="w-full h-full object-cover opacity-40 hero-parallax-bg" />
-    <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-transparent"></div>
+    <img src="@(Model?.Service?.Hero ?? "")" alt="@(Model?.Service?.Name ?? "")" class="w-full h-full object-cover opacity-70 hero-parallax-bg" />
+    <div class="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/70 to-transparent"></div>
   </div>
   <div class="relative z-10 max-w mx-auto px-8 lg:px-12 py-20 service-reveal">
     <div
-      class="flex items-center gap-3 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-primary mb-4">
-      <i class="@Model.Service.Icon text-[1rem]"></i> @Model.Service.Category
+      class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-primary mb-4">
+      <i class="fa-solid @(Model?.Service?.Icon ?? "") text-[0.8rem]"></i> @(Model?.Service?.Category ?? "")
     </div>
     <h1 class="brand-font font-extrabold text-white leading-[1.05] mb-4 line-clamp-3 service-slug-title"
       >
-      @Model.Service.Name</h1>
-    <p class="font-body text-[1rem] text-white/55 max-w-md leading-relaxed mb-8">@Model.Service.Tagline</p>
+      @(Model?.Service?.Name ?? "")</h1>
+    <p class="font-body text-[1rem] text-white/55 max-w-md leading-relaxed mb-8">@(Model?.Service?.Tagline ?? "")</p>
     <div class="flex gap-2 sm:gap-4 hero-actions">
       <a href="/Appointments?service=@Model.Service.Slug"
         class="brand-font flex items-center font-bold text-[0.82rem] tracking-wider uppercase bg-primary text-white px-4 sm:px-7 py-3 sm:py-3.5 rounded-xl hover:opacity-90 transition-opacity no-underline">
@@ -39,7 +39,7 @@
         <div
           class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">
           Duration</div>
-        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@Model.Service.Duration
+        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@(Model?.Service?.Duration ?? "")
         </div>
       </div>
     </div>
@@ -51,7 +51,7 @@
         <div
           class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">
           Recovery</div>
-        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@Model.Service.Recovery
+        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">@(Model?.Service?.Recovery ?? "")
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@
         <div
           class="font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted text-center md:text-left">
           Starting Price</div>
-        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">₱@Model.Service.Price.ToString("N0")
+        <div class="brand-font font-bold text-sm sm:text-lg text-brand text-center md:text-left">₱@(Model?.Service?.Price.ToString("N0") ?? "")
         </div>
       </div>
     </div>
@@ -74,67 +74,85 @@
   <div class="max-w mx-auto px-8 lg:px-12 py-20 flex flex-col lg:flex-row gap-14">
 
     <div class="flex-1 min-w-0">
-
+      @* Overview *@
       <div class="reveal-up mb-14">
-        <div
-          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
-          <i class="fa-solid fa-circle-info text-primary text-[8px]"></i>
-          Overview
+        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+           Overview
         </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-5 "
-          style="font-size:clamp(1.6rem,3vw,2.2rem);">
-          What is @Model.Service.Name?</h2>
-        <p class="font-body text-[0.95rem] text-muted leading-relaxed">@Model.Service.Summary</p>
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-5" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          What is @(Model?.Service?.Name ?? "")?
+        </h2>
+        <p class="font-body text-[0.95rem] text-muted leading-relaxed">@(Model?.Service?.Summary ?? "")</p>
       </div>
 
+      @* Steps UI (New Section) *@
       <div class="reveal-up mb-14">
-        <div
-          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
-          <i class="fa-solid fa-sparkles text-primary text-[8px]"></i>
-          What to Expect
+        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+           The Process
         </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-6"
-          style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Benefits of This Treatment</h2>
-        <ul class="benefits-container space-y-3.5">
-          @foreach (var benefit in Model.Service.Benefits)
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-8" style="font-size:clamp(1.4rem,2.5vw,1.9rem);">How It Works</h2>
+        
+        <div class="steps-container relative pl-8 border-l-2 border-primary/10 space-y-4 ml-2">
+          @for (int j = 0; j < (Model?.Service?.Steps?.Count ?? 0); j++)
           {
-          <li class="benefit-item flex items-start gap-3 font-body text-[0.9rem] text-[#6b7280]">
-            <span class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-              <i class="fa-solid fa-check text-primary text-[9px]"></i>
-            </span>
-            @benefit
-          </li>
+            <div class="step-item relative">
+              <div class="absolute -left-[43px] top-0 w-5 h-5 rounded-full bg-white border-4 border-primary z-10"></div>
+              <div class="flex flex-col">
+                <span class="font-body text-[0.65rem] font-bold text-primary uppercase tracking-widest mb-1">Step @(j + 1)</span>
+                <h3 class="brand-font font-medium text-[0.9rem] text-brand mb-2">@Model.Service.Steps[j]</h3>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      @* Benefits *@
+      <div class="reveal-up mb-14">
+        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+           What to Expect
+        </div>
+        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-6" style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Benefits of This Treatment</h2>
+        <ul class="benefits-container space-y-3.5">
+          @foreach (var benefit in Model?.Service?.Benefits ?? Enumerable.Empty<string>())
+          {
+            <li class="benefit-item flex items-start gap-3 font-body text-[0.9rem] text-[#6b7280]">
+              <span class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <i class="fa-solid fa-check text-primary text-[9px]"></i>
+              </span>
+              @benefit
+            </li>
           }
         </ul>
       </div>
 
       <div class="reveal-up">
-        <div
-          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
-          <i class="fa-solid fa-circle-question text-primary text-[8px]"></i>
-          FAQ
-        </div>
-        <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-7"
-          style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Common Questions</h2>
-        <div class="space-y-3">
-          @for (int i = 0; i < Model.Service.Faqs.Count; i++) { var faq=Model.Service.Faqs[i]; <div
-            class="border border-[#e5e7eb] rounded-2xl overflow-hidden">
-            <button id="toggleFaq@i"
-              class="faq-toggle w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-[#f5f5f7] transition-colors">
-              <span class="brand-font font-semibold text-[0.9rem] text-[#0f1117]"> @faq.Q</span>
-              <i id="chevron-@i"
-                class="fa-solid fa-chevron-down faq-chevron text-[#6b7280] text-[10px] transition-transform duration-300"></i>
-            </button>
-            <div id="faq-@i" class="faq-answer bg-white px-6 ">
-              <p class="font-body text-[0.86rem] text-[#6b7280] leading-relaxed pb-5 pt-1">@faq.A</p>
+    <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+         FAQ
+    </div>
+    <h2 class="brand-font font-extrabold text-brand leading-[1.1] mb-7" style="font-size:clamp(1.4rem,2.5vw,1.9rem);">Common Questions</h2>
+    
+    <div class="space-y-3">
+        @for (int i = 0; i < (Model?.Service?.Faqs?.Count ?? 0); i++) 
+        { 
+            var faq = Model?.Service?.Faqs?[i]; 
+            <div class="border border-[#e5e7eb] rounded-2xl overflow-hidden">
+                <button id="toggleFaq@i" 
+                        data-index="@i"
+                        class="faq-toggle w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-[#f5f5f7] transition-colors">
+                    <span class="brand-font text-[0.9rem] font-semibold text-[#0f1117]">@faq?.Question</span>
+                    <i id="chevron-@i"
+                       class="fa-solid fa-chevron-down faq-chevron text-[#6b7280] text-[10px] transition-transform duration-300"></i>
+                </button>
+                
+                <div id="faq-@i" class="faq-answer max-h-0 overflow-hidden bg-white px-6 transition-all duration-300 ease-in-out">
+                    <p class="font-body text-[0.86rem] text-[#6b7280] leading-relaxed pb-5 pt-1">@faq?.Answer</p>
+                </div>
             </div>
-        </div>
         }
-      </div>
+    </div>
+</div>
     </div>
   </div>
-
-
 </section>
 
 

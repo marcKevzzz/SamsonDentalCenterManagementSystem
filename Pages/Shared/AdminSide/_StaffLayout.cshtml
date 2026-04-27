@@ -44,16 +44,13 @@
       class="w-[256px] bg-brand fixed left-0 top-0 h-dvh z-[200] transition-all duration-300 -translate-x-full lg:translate-x-0">
       <div class="flex flex-col relative h-full w-full">
         <div class="flex items-center gap-3 px-4 py-5 border-b border-white/[0.07] flex-shrink-0 overflow-hidden">
-          <div class="w-9 h-9 rounded-[10px] bg-primary flex items-center justify-center flex-shrink-0">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </div>
-          <div class="sidebar-text flex flex-col transition-opacity duration-300">
-            <span class="sidebar-text font-display text-white font-bold text-[15px] leading-tight">MediCore</span>
-            <span class="sidebar-text text-[10px] text-white whitespace-nowrap">Health Management</span>
-          </div>
+          <div class="brand-logo flex items-center -ml-2">
+           <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 brightness-150" />
+            <span id="logo" class="logo-font sidebar-text text-white font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex">
+                Samson  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full">Dental  Center</span>
+            </span>
+        </div>
+         
 
           <button id="toggle-btn"
             class="absolute -right-3 top-5 p-1 rounded-full bg-[#1f2c4b] text-white transition-colors hidden lg:flex items-center justify-center flex-shrink-0">
@@ -94,7 +91,7 @@
           </div>
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="@basePath/Patients" id="admin-patients">
-            <svg class="pl-0.5 flex" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            <svg class="pl-0.5 flex" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
@@ -108,22 +105,23 @@
           @if(r == "admin") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="/Admin/Staff" id="admin-doctors">
-            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 7h-9" />
-              <path d="M14 17H5" />
-              <circle cx="17" cy="17" r="3" />
-              <circle cx="7" cy="7" r="3" />
-            </svg>
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+  <circle cx="9" cy="7" r="4" />
+  <path d="M19 11l2 2 4-4" />
+</svg>
+
             <span class="sidebar-text transition-opacity duration-300">Staff</span>
           </a>
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="/Admin/Users" id="admin-users">
-            <svg class="pl-0.5 flex" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-            </svg>
+          <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+  <circle cx="9" cy="7" r="4" />
+  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+</svg>
+
             <span class="sidebar-text transition-opacity duration-300">Users</span>
             <span
               class="nav-badge sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">248</span>
@@ -181,14 +179,14 @@
           @if(r == "admin" || r == "receptionist") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="@basePath/Transactions" id="admin-transactions">
-            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2a5 5 0 0 1 5 5v3H7V7a5 5 0 0 1 5-5z" />
-              <rect x="2" y="10" width="20" height="12" rx="2" />
-              <path d="M12 14v4" />
-              <path d="M10 16h4" />
-            </svg>
-            <span class="sidebar-text transition-opacity duration-300">Transactions</span>
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z" />
+  <path d="M16 8h-6" />
+  <path d="M16 12H8" />
+  <path d="M13 16H8" />
+</svg>
+
+            <span class="sidebar-text transition-opacity duration-300">Billing</span>
           </a>
 
           <div class="px-7 py-2.5 mt-1">
@@ -229,6 +227,33 @@
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Activity Logs</span>
+          </a>
+          <div class="px-7 py-2.5 mt-1">
+            <span
+              class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">Controls</span>
+          </div>
+          }
+          @if(r == "admin") {
+          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
+            href="@basePath/Reviews" id="admin-reviews">
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  <path d="M12 7l1.25 2.5 2.75.5-2 2 .5 2.75L12 13l-2.5 1.25.5-2.75-2-2 2.75-.5L12 7z" />
+</svg>
+
+            <span class="sidebar-text transition-opacity duration-300">Reviews</span>
+            <span
+              class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display">5</span>
+          </a>
+
+          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
+            href="@basePath/Settings" id="admin-settings">
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+  <circle cx="12" cy="12" r="3" />
+</svg>
+
+            <span class="sidebar-text transition-opacity duration-300">Settings</span>
           </a>
           }
         </nav>

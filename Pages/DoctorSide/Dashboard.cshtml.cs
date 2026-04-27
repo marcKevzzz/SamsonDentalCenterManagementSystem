@@ -49,6 +49,15 @@ public class DoctorDashboardModel : AdminPageModel
         // 2. Fetch all appointments & services
         var allAppointments = await _appointmentService.GetAllAsync();
         AllServices = await _dentalService.GetAll();
+
+        // Auto mark no_show for past appointments (> 24 hours of said date)
+        var now = DateTime.Now;
+        foreach(var appt in allAppointments) {
+            if ((appt.Status == "confirmed" || appt.Status == "pending") && appt.AppointmentDate.Date.AddDays(1) < now.Date) {
+                await _appointmentService.UpdateStatus(appt.Id, "no_show");
+                appt.Status = "no_show";
+            }
+        }
         
         // 3. Filter by this doctor's ID
         var doctorId = doctorRecord?.Id;
@@ -60,7 +69,13 @@ public class DoctorDashboardModel : AdminPageModel
                 .ToList();
 
             ArrivedPatients = myToday.Where(a => a.Status == "arrived").ToList();
-            MyAppointments = myToday.OrderBy(a => a.AppointmentTime).Take(10).ToList();
+            
+            // Upcoming: confirmed and within 24 hours (Today and Tomorrow)
+            MyAppointments = allAppointments
+                .Where(a => a.DoctorId == doctorId && a.Status == "confirmed" && a.AppointmentDate.Date >= DateTime.Today && a.AppointmentDate.Date <= DateTime.Today.AddDays(1))
+                .OrderBy(a => a.AppointmentDate)
+                .ThenBy(a => a.AppointmentTime)
+                .Take(10).ToList();
 
             TodayAppointmentsCount = myToday.Count;
             PendingReviewsCount = allAppointments.Count(a => a.DoctorId == doctorId && a.Status == "pending");
@@ -73,8 +88,9 @@ public class DoctorDashboardModel : AdminPageModel
         {
             ArrivedPatients = allAppointments.Where(a => a.Status == "arrived").ToList();
             MyAppointments = allAppointments
-                .Where(a => a.AppointmentDate.Date == DateTime.Today)
-                .OrderBy(a => a.AppointmentTime)
+                .Where(a => a.Status == "confirmed" && a.AppointmentDate.Date >= DateTime.Today && a.AppointmentDate.Date <= DateTime.Today.AddDays(1))
+                .OrderBy(a => a.AppointmentDate)
+                .ThenBy(a => a.AppointmentTime)
                 .Take(10)
                 .ToList();
             

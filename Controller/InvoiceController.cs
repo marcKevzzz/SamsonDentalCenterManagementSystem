@@ -113,9 +113,9 @@ public class InvoiceController : ControllerBase
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid().ToString(),
-                AppointmentId = req.AppointmentId,
-                PatientId = req.PatientId,
-                DoctorId = req.DoctorId,
+                AppointmentId = string.IsNullOrEmpty(req.AppointmentId) ? null : req.AppointmentId,
+                PatientId = string.IsNullOrEmpty(req.PatientId) ? null : req.PatientId,
+                DoctorId = string.IsNullOrEmpty(req.DoctorId) ? null : req.DoctorId,
                 TotalAmount = totalAmount,
                 DiscountAmount = req.DiscountAmount,
                 FinalAmount = finalAmount,

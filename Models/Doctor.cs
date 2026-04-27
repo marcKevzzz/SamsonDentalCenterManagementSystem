@@ -64,6 +64,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         public bool IsActive { get; set; } = true;
 
         // ── Helper: short day abbreviation ────────────────────────────────────
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string DayAbbr => DayOfWeek switch
         {
             0 => "Sun", 1 => "Mon", 2 => "Tue", 3 => "Wed",

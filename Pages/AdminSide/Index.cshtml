@@ -9,7 +9,7 @@ Layout = "AdminSide/_StaffLayout";
 <div id="page-dashboard" class="page active p-4 md:p-6">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
-            <h2 class="font-display text-[clamp(17px,3vw,22px)] font-extrabold text-brand">Good morning, Dr. Ana 👋
+            <h2 class="font-display text-[clamp(17px,3vw,22px)] font-extrabold text-brand">Good morning, @Model.CurrentUserName 👋
             </h2>
             <p class="text-[12px] text-brand-500 mt-0.5">Here's what's happening at your clinic today.</p>
         </div>
@@ -39,7 +39,7 @@ Layout = "AdminSide/_StaffLayout";
                     </svg></div>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-blue-50 text-primary">+12%</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">1,248</div>
+            <div class="font-display text-3xl font-extrabold text-brand">@Model.TotalPatientsCount</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Total Patients</div>
             <div class="text-[11px] text-emerald-600 mt-1.5">↑ 24 new this week</div>
         </div>
@@ -57,7 +57,7 @@ Layout = "AdminSide/_StaffLayout";
                 <span
                     class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">Active</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">38</div>
+            <div class="font-display text-3xl font-extrabold text-brand">@Model.DoctorsCount</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Doctors on Staff</div>
             <div class="text-[11px] text-emerald-600 mt-1.5">↑ 5 specialists</div>
         </div>
@@ -74,8 +74,8 @@ Layout = "AdminSide/_StaffLayout";
                     </svg></div>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-red-50 text-red-700">Today</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">74</div>
-            <div class="text-[12px] text-brand-500 mt-0.5">Appointments</div>
+            <div class="font-display text-3xl font-extrabold text-brand">@Model.TodayAppointmentsCount</div>
+            <div class="text-[12px] text-brand-500 mt-0.5">Appointments Today</div>
             <div class="text-[11px] text-red-500 mt-1.5">↓ 12 pending confirm</div>
         </div>
         <div
@@ -89,8 +89,8 @@ Layout = "AdminSide/_StaffLayout";
                     </svg></div>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700">+8%</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">₱2.4M</div>
-            <div class="text-[12px] text-brand-500 mt-0.5">Monthly Revenue</div>
+            <div class="font-display text-3xl font-extrabold text-brand">₱@Model.MonthlyRevenue.ToString("N1")</div>
+            <div class="text-[12px] text-brand-500 mt-0.5">This Month Revenue</div>
             <div class="text-[11px] text-emerald-600 mt-1.5">↑ ₱180K vs last month</div>
         </div>
     </div>
@@ -233,81 +233,40 @@ Layout = "AdminSide/_StaffLayout";
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
-                        <tr>
-                            <td class="px-4 py-3 text-[13px]">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[9.5px] font-bold font-display flex-shrink-0">
-                                        ML</div>Maria L.
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Santos</td>
-                            <td class="px-4 py-3 text-[12.5px]">General Checkup</td>
-                            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">9:00 AM</td>
-                            <td class="px-4 py-3"><span
-                                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display">Confirmed</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-3 text-[13px]">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-[9.5px] font-bold font-display flex-shrink-0">
-                                        JR</div>Juan R.
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Cruz</td>
-                            <td class="px-4 py-3 text-[12.5px]">Cardiology</td>
-                            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">10:30 AM</td>
-                            <td class="px-4 py-3"><span
-                                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display">Pending</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-3 text-[13px]">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-violet-50 flex items-center justify-center text-violet-700 text-[9.5px] font-bold font-display flex-shrink-0">
-                                        AC</div>Ana C.
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Reyes</td>
-                            <td class="px-4 py-3 text-[12.5px]">Pediatrics</td>
-                            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">11:00 AM</td>
-                            <td class="px-4 py-3"><span
-                                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-display">Confirmed</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-3 text-[13px]">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-[9.5px] font-bold font-display flex-shrink-0">
-                                        BM</div>Ben M.
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Garcia</td>
-                            <td class="px-4 py-3 text-[12.5px]">Orthopedics</td>
-                            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">2:00 PM</td>
-                            <td class="px-4 py-3"><span
-                                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-display">Cancelled</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-3 text-[13px]">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-amber-50 flex items-center justify-center text-amber-700 text-[9.5px] font-bold font-display flex-shrink-0">
-                                        LC</div>Lina C.
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-[12.5px] text-brand-500">Dr. Santos</td>
-                            <td class="px-4 py-3 text-[12.5px]">Dermatology</td>
-                            <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">3:30 PM</td>
-                            <td class="px-4 py-3"><span
-                                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-display">Pending</span>
-                            </td>
-                        </tr>
+                        @if (!Model.UpcomingAppointments.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-slate-400 text-[13px]">
+                                    No upcoming appointments.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var appt in Model.UpcomingAppointments)
+                        {
+                            <!-- Console.WriteLine($"Upcoming Appointment: {appt.Doctor.Profile}"); -->
+                            <tr>
+                                <td class="px-4 py-3 text-[13px]">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[9.5px] font-bold flex-shrink-0">
+                                            @(appt.PatientName?[0].ToString() ?? "P")
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(appt.PatientId)) {
+                                            <a href="/Admin/Patients/Details?id=@appt.PatientId" class="hover:text-primary transition-colors">@appt.PatientName</a>
+                                        } else {
+                                            <span>@appt.PatientName</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-[12.5px] text-brand-500">@appt.Doctor.Profile.FirstName @appt.Doctor.Profile.LastName</td>
+                                <td class="px-4 py-3 text-[12.5px]">@appt.ServiceName</td>
+                                <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">@appt.AppointmentTime</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border @(appt.Status == "confirmed" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-amber-50 text-amber-600 border-amber-100") uppercase tracking-wider">
+                                        @appt.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -315,47 +274,29 @@ Layout = "AdminSide/_StaffLayout";
 
         <!-- Activity -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200">
-            <h3 class="font-display text-[13.5px] font-bold text-brand mb-4">Recent Activity</h3>
-            <div class="space-y-3">
-                <div class="flex gap-2.5">
-                    <div class="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5"></div>
-                    <div>
-                        <p class="text-[12.5px] font-medium text-brand">New patient registered</p>
-                        <p class="text-[10.5px] text-brand">Maria L. · 8 mins ago</p>
-                    </div>
-                </div>
-                <div class="flex gap-2.5">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 mt-1.5"></div>
-                    <div>
-                        <p class="text-[12.5px] font-medium text-brand">Appointment confirmed</p>
-                        <p class="text-[10.5px] text-brand">Dr. Cruz — 10:30AM · 15 mins ago</p>
-                    </div>
-                </div>
-                <div class="flex gap-2.5">
-                    <div class="w-2 h-2 rounded-full bg-orange-600 flex-shrink-0 mt-1.5"></div>
-                    <div>
-                        <p class="text-[12.5px] font-medium text-brand">Emergency admission</p>
-                        <p class="text-[10.5px] text-brand">Room 204 · 32 mins ago</p>
-                    </div>
-                </div>
-                <div class="flex gap-2.5">
-                    <div class="w-2 h-2 rounded-full bg-violet-600 flex-shrink-0 mt-1.5"></div>
-                    <div>
-                        <p class="text-[12.5px] font-medium text-brand">Lab results uploaded</p>
-                        <p class="text-[10.5px] text-brand">Patient #1031 · 1 hr ago</p>
-                    </div>
-                </div>
-                <div class="flex gap-2.5">
-                    <div class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 mt-1.5"></div>
-                    <div>
-                        <p class="text-[12.5px] font-medium text-brand">Invoice generated</p>
-                        <p class="text-[10.5px] text-brand">₱3,500 · Ben M. · 2 hrs ago</p>
-                    </div>
-                </div>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-display text-[13.5px] font-bold text-brand">Recent Invoices</h3>
+                <a href="/Admin/Invoices" class="text-[10.5px] font-semibold text-primary hover:underline">View All →</a>
             </div>
-            <button
-                class="w-full mt-4 py-2 text-[10.5px] font-semibold rounded-xl border border-slate-200 text-brand-500 hover:bg-slate-50 transition-colors">View
-                all logs</button>
+            <div class="space-y-3">
+                @if (!Model.RecentInvoices.Any())
+                {
+                    <p class="text-[12px] text-slate-400 text-center py-4 italic">No invoices generated yet.</p>
+                }
+                @foreach (var inv in Model.RecentInvoices)
+                {
+                        <a href="/Admin/Patients/Details?id=@inv.PatientId" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
+                        <div class="min-w-0">
+                            <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
+                            <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd, hh:mm tt")</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[12.5px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
+                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
+                        </div>
+                    </a>
+                }
+            </div>
         </div>
     </div>
 </div>

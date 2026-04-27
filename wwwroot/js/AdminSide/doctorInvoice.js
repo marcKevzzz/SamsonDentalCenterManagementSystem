@@ -1,7 +1,5 @@
-/**
- * Doctor Invoice System - Modular Script
- * Handles: Tab switching, dynamic calculations, service management, and API submission.
- */
+
+import { Toast } from "../ui.js";
 
 let addedItems = [];
 
@@ -10,17 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for pre-selected appointment from dashboard
     const preselectApptId = document.getElementById('inv-preselect-appt')?.value;
     if (preselectApptId) {
-        // Wait a bit for the modal to be ready if we're going to auto-open it
         setTimeout(() => {
             const patientSelect = document.getElementById('inv-patient');
             if (patientSelect) {
-                patientSelect.value = preselectApptId;
-                // Trigger change to auto-load service
-                const event = new Event('change');
-                patientSelect.dispatchEvent(event);
-                
-                // Open the modal
-                openCreateInvoice();
+                // Try to find the option with this value
+                const exists = Array.from(patientSelect.options).some(opt => opt.value === preselectApptId);
+                if (exists) {
+                    patientSelect.value = preselectApptId;
+                    const event = new Event('change');
+                    patientSelect.dispatchEvent(event);
+                    openCreateInvoice();
+                } else {
+                    console.warn(`[Invoice] Pre-selected appointment ${preselectApptId} not found in dropdown.`);
+                }
             }
         }, 300);
     }
@@ -69,9 +69,21 @@ window.closeCreateInvoice = function() {
     box.classList.add('scale-95', 'opacity-0');
     setTimeout(() => {
         modal.classList.add('hidden');
-        // Optional: clear form
-        // resetInvoiceForm();
+        resetInvoiceForm();
     }, 300);
+}
+
+function resetInvoiceForm() {
+    addedItems = [];
+    renderItemsTable();
+    calculateTotals();
+    const patientSelect = document.getElementById('inv-patient');
+    if (patientSelect) patientSelect.selectedIndex = 0;
+    const notes = document.getElementById('inv-notes');
+    if (notes) notes.value = '';
+    const discount = document.getElementById('inv-discount-input');
+    if (discount) discount.value = '0';
+    switchTab('billing');
 }
 
 window.switchTab = function(tab) {
@@ -308,7 +320,9 @@ window.submitInvoice = async function() {
 /** ── HELPERS ───────────────────────────────────────────────────────────── */
 
 function showToast(msg, type) {
-    if (window.Toast) {
+    if (Toast) {
+        Toast.show(msg, type === 'danger' ? 'danger' : type);
+    } else if (window.Toast) {
         window.Toast.show(msg, type);
     } else {
         alert(msg);

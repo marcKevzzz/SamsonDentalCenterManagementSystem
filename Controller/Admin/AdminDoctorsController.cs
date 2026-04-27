@@ -60,15 +60,16 @@ public class AdminDoctorsController : ControllerBase
 
     // ── POST /api/admin/doctors ───────────────────────────────────────────────
     [HttpPost]
-    public async Task<IActionResult> CreateDoctor([FromBody] Doctor d)
+    public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorRequest d)
     {
         if (string.IsNullOrWhiteSpace(d.ProfileId))
             return BadRequest(new { ok = false, error = "User profile must be selected." });
 
         try
         {
-            var res = await _supabase.From<Doctor>().Insert(d);
-            return Ok(new { ok = true, data = res.Models.FirstOrDefault() });
+            var result = await _doctorService.CreateAsync(
+                d.ProfileId, d.Title ?? "Dr.", d.Specialties, d.Bio, d.IsActive);
+            return Ok(new { ok = true, data = result });
         }
         catch (Exception ex)
         {
@@ -79,20 +80,13 @@ public class AdminDoctorsController : ControllerBase
 
     // ── PUT /api/admin/doctors/{id} ───────────────────────────────────────────
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDoctor(string id, [FromBody] Doctor d)
+    public async Task<IActionResult> UpdateDoctor(string id, [FromBody] UpdateDoctorRequest d)
     {
         try
         {
-            var res = await _supabase
-                .From<Doctor>()
-                .Where(x => x.Id == id)
-                .Set(x => x.Title,       d.Title)
-                .Set(x => x.Specialties, d.Specialties)
-                .Set(x => x.Bio,         d.Bio)
-                .Set(x => x.IsActive,    d.IsActive)
-                .Update();
-
-            return Ok(new { ok = true, data = res.Models.FirstOrDefault() });
+            var result = await _doctorService.UpdateAsync(
+                id, d.Title ?? "Dr.", d.Specialties, d.Bio, d.IsActive);
+            return Ok(new { ok = true, data = result });
         }
         catch (Exception ex)
         {
@@ -107,12 +101,7 @@ public class AdminDoctorsController : ControllerBase
     {
         try
         {
-            await _supabase
-                .From<Doctor>()
-                .Where(x => x.Id == id)
-                .Set(x => x.IsActive, false)
-                .Update();
-
+            await _doctorService.SoftDeleteAsync(id);
             return Ok(new { ok = true });
         }
         catch (Exception ex)
@@ -122,28 +111,13 @@ public class AdminDoctorsController : ControllerBase
         }
     }
 
-    // ── POST /api/admin/doctors/{id}/availability ─────────────────────────────
     [HttpPost("{id}/availability")]
     public async Task<IActionResult> SetAvailability(
         string id, [FromBody] List<DoctorAvailability> slots)
     {
         try
         {
-            await _supabase
-                .From<DoctorAvailability>()
-                .Where(a => a.DoctorId == id)
-                .Delete();
-
-            if (slots.Any())
-            {
-                foreach (var s in slots)
-                {
-                    s.Id       = Guid.NewGuid().ToString();
-                    s.DoctorId = id;
-                }
-                await _supabase.From<DoctorAvailability>().Insert(slots);
-            }
-
+            await _doctorService.SetAvailabilityAsync(id, slots);
             return Ok(new { ok = true });
         }
         catch (Exception ex)
@@ -153,3 +127,9 @@ public class AdminDoctorsController : ControllerBase
         }
     }
 }
+
+// ── Request DTOs ─────────────────────────────────────────────────────────────
+public record CreateDoctorRequest(
+    string ProfileId, string? Title, string[]? Specialties, string? Bio, bool IsActive = true);
+public record UpdateDoctorRequest(
+    string? Title, string[]? Specialties, string? Bio, bool IsActive = true);

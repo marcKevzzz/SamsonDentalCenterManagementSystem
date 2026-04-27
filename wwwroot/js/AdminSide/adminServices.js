@@ -54,6 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("cancelDeleteBtn")?.addEventListener("click", closeDeleteModal);
   document
     .getElementById("addBenefitBtn")?.addEventListener("click", () => addBenefitRow(""));
+  document
+    .getElementById("addStepBtn")?.addEventListener("click", () => addStepRow(""));
+  document
+    .getElementById("addFaqBtn")?.addEventListener("click", () => addFaqRow("", ""));
 
   document.getElementById("svcModal")?.addEventListener("click", (e) => {
     if (e.target.id === "svcModal") closeModal();
@@ -139,85 +143,49 @@ function renderGrid() {
 }
 
 function cardHTML(s) {
-  const c = CAT[s.category] ?? {
-    bg: "bg-slate-50",
-    text: "text-brand-500",
-    border: "border-slate-100",
-    dot: "#64748b",
-  };
-
-  const benefitChips = (s.benefits ?? [])
-    .slice(0, 2)
-    .map(
-      (b) =>
-        `<span class="text-[11px]  text-brand-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg truncate max-w-[100px]">${b}</span>`,
-    )
-    .join("");
-
-  const extra = s.benefits?.length > 2 ? `<span class="text-[11px] text-brand-300 ml-1">+${s.benefits.length - 2}</span>` : "";
+  const statusBadge = s.isActive
+    ? `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-bold uppercase tracking-wider">Active</span>`
+    : `<span class="px-2 py-0.5 rounded-md bg-slate-50 text-slate-400 border border-slate-100 text-[10px] font-bold uppercase tracking-wider">Inactive</span>`;
 
   return `
-  <div class="asvc-card group bg-white rounded-[28px] border border-slate-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col overflow-hidden">
+  <div class="asvc-card group bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col transition-colors hover:border-primary">
     
-    <!-- Header with Category & Status -->
-    <div class="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full" style="background-color: ${c.dot}"></div>
-        <span class="text-[12px] font-medium ${c.text}">${s.category}</span>
-      </div>
-      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full ${s.isActive ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-slate-50 text-slate-400 border border-slate-100"}">
-        <span class="w-1 h-1 rounded-full ${s.isActive ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}"></span>
-        <span class="text-[11px] font-medium ">${s.isActive ? "Active" : "Inactive"}</span>
+    <!-- Hero Image (Matching Patient Side) -->
+    <div class="h-40 bg-slate-50 overflow-hidden relative">
+      <img src="${s.hero || '/img/placeholder-service.jpg'}" alt="${s.name}" class="w-full h-full object-cover" />
+      <div class="absolute top-3 right-3">
+        ${statusBadge}
       </div>
     </div>
 
-    <!-- Content -->
-    <div class="px-6 pb-6 flex-1 flex flex-col">
-      <div class="flex items-start gap-4 mb-4">
-        <div class="w-12 h-12 rounded-2xl ${c.bg} flex items-center justify-center shrink-0 border ${c.border}">
-          <i class="fa-solid ${s.category === 'Cosmetic' ? 'fa-gem' : s.category === 'Specialized' ? 'fa-microscope' : 'fa-hand-holding-heart'} text-lg" style="color: ${c.dot}"></i>
+    <div class="p-4 flex-1 flex flex-col">
+      <!-- Category & Price -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          ${s.icon ? `<i class="fa-solid ${s.icon} text-primary text-[10px]"></i>` : ''}
+          <span class="px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold border border-slate-100">${s.category}</span>
         </div>
-        <div class="min-w-0">
-          <h4 class="font-display text-brand-900 text-[15px] leading-tight group-hover:text-primary transition-colors truncate font-bold">${s.name}</h4>
-          <p class="text-[11.5px] text-brand-400 mt-1 line-clamp-2 leading-relaxed italic">"${s.tagline}"</p>
-        </div>
+        <span class="text-[12px] font-bold text-brand-900">₱${Number(s.price).toLocaleString()}</span>
       </div>
 
-      <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
-        <div>
-           <span class="text-[10px]  text-brand-300  block mb-0.5">Price starts at</span>
-           <span class="font-display font-extrabold text-[18px] text-brand-900">₱${Number(s.price).toLocaleString()}</span>
-        </div>
-        <div class="flex flex-col items-end gap-1">
-          ${s.duration ? `
-          <div class="flex items-center gap-1.5 text-[12px] text-brand-400">
-            <i class="fa-regular fa-clock text-primary/60"></i>
-            <span>${s.duration}</span>
-          </div>` : ''}
-          ${s.recovery ? `
-          <div class="flex items-center gap-1.5 text-[12px]  text-brand-400">
-            <i class="fa-solid fa-bolt-lightning text-primary/60"></i>
-            <span>${s.recovery}</span>
-          </div>` : ''}
+      <h4 class="text-[14px] font-bold text-brand-900 mb-1 truncate">${s.name}</h4>
+      <p class="text-[11.5px] text-brand-400 line-clamp-2 leading-relaxed mb-4 flex-1">${s.tagline}</p>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+        <span class="text-[11px] text-slate-400 flex items-center gap-1.5">
+          <i class="fa-regular fa-clock"></i> ${s.duration || '—'}
+        </span>
+        <div class="flex items-center gap-2">
+          <button data-edit="${s.id}" 
+            class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-colors" title="Edit">
+            <i class="fa-solid fa-pen-to-square text-xs"></i>
+          </button>
+          <button data-delete="${s.id}" data-name="${s.name}"
+            class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors" title="Delete">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+          </button>
         </div>
       </div>
-
-      ${s.benefits?.length ? `
-      <div class="mt-4 flex items-center gap-1 overflow-hidden">
-        ${benefitChips}${extra}
-      </div>` : ""}
-    </div>
-
-    <!-- Actions -->
-    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center gap-2 mt-auto">
-      <button data-edit="${s.id}" 
-        class="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl text-[11px]  text-brand-600 hover:border-primary hover:text-primary hover:shadow-md hover:shadow-primary/5 transition-all flex items-center justify-center gap-2">
-        <i class="fa-solid fa-pen-to-square"></i> Edit
-      </button>
-      <button data-delete="${s.id}" data-name="${s.name}"
-        class="w-10 h-10 bg-white border border-slate-200 rounded-xl text-red-400 hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all flex items-center justify-center">
-        <i class="fa-solid fa-trash-can text-xs"></i>
-      </button>
     </div>
   </div>`;
 }
@@ -248,9 +216,16 @@ function openEditModal(id) {
   document.getElementById("mRecovery").value = s.recovery ?? "";
   document.getElementById("mIsActive").checked = s.isActive;
   document.getElementById("mHero").value = s.hero ?? "";
+  document.getElementById("mIcon").value = s.icon ?? "";
 
   document.getElementById("benefitsList").innerHTML = "";
   (s.benefits ?? []).forEach((b) => addBenefitRow(b));
+
+  document.getElementById("stepsList").innerHTML = "";
+  (s.steps ?? []).forEach((st) => addStepRow(st));
+
+  document.getElementById("faqsList").innerHTML = "";
+  (s.faqs ?? []).forEach((f) => addFaqRow(f.question, f.answer));
 
   // Add after setting other fields in openEditModal:
   if (s.hero) {
@@ -316,7 +291,10 @@ async function saveService() {
       duration: document.getElementById("mDuration").value.trim(),
       recovery: document.getElementById("mRecovery").value.trim(),
       isActive: document.getElementById("mIsActive").checked,
+      icon: document.getElementById("mIcon").value.trim(),
       benefits: getBenefits(),
+      steps: getSteps(),
+      faqs: getFaqs(),
     };
 
     const res = await fetch(`/api/services${isEdit ? `/${id}` : ""}`, {
@@ -426,10 +404,76 @@ function addBenefitRow(value = "") {
   row.querySelector(".benefit-input").focus();
 }
 
+function addStepRow(value = "") {
+  const list = document.getElementById("stepsList");
+  const row = document.createElement("div");
+  row.className = "flex items-center gap-2 group/step";
+  row.innerHTML = `
+    <div class="relative flex-1">
+      <i class="fa-solid fa-arrow-right absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-[12px]"></i>
+      <input type="text" value="${value.replace(/"/g, "&quot;")}"
+        placeholder="e.g. Initial Consultation"
+        class="step-input w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[12px] outline-none
+               focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all" />
+    </div>
+    <button type="button"
+      class="remove-step w-10 h-10 flex items-center justify-center rounded-xl text-slate-300
+             hover:text-red-500 hover:bg-red-50 transition-all shrink-0">
+      <i class="fa-solid fa-trash-can text-xs"></i>
+    </button>`;
+  row
+    .querySelector(".remove-step")
+    .addEventListener("click", () => row.remove());
+  list.appendChild(row);
+  row.querySelector(".step-input").focus();
+}
+
+function addFaqRow(q = "", a = "") {
+  const list = document.getElementById("faqsList");
+  const row = document.createElement("div");
+  row.className = "faq-item space-y-2 p-4 bg-slate-50/50 border border-slate-100 rounded-2xl relative group/faq";
+  row.innerHTML = `
+    <button type="button" class="remove-faq absolute -right-2 -top-2 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-300 hover:text-red-500 hover:border-red-200 hover:shadow-sm transition-all opacity-0 group-hover/faq:opacity-100 z-10">
+       <i class="fa-solid fa-xmark text-[10px]"></i>
+    </button>
+    <div class="space-y-2">
+      <div class="relative">
+        <span class="absolute left-3 top-2.5 text-[10px] font-bold text-primary/40">Q</span>
+        <input type="text" value="${q.replace(/"/g, "&quot;")}"
+          placeholder="Question"
+          class="faq-q-input w-full pl-7 pr-4 py-2 bg-white border border-slate-100 rounded-xl text-[12px] font-bold outline-none
+                 focus:border-primary transition-all" />
+      </div>
+      <div class="relative">
+        <span class="absolute left-3 top-2.5 text-[10px] font-bold text-emerald-400/40">A</span>
+        <textarea placeholder="Answer" rows="2"
+          class="faq-a-input w-full pl-7 pr-4 py-2 bg-white border border-slate-100 rounded-xl text-[12px] outline-none
+                 focus:border-emerald-400 transition-all resize-none">${a}</textarea>
+      </div>
+    </div>`;
+  row
+    .querySelector(".remove-faq")
+    .addEventListener("click", () => row.remove());
+  list.appendChild(row);
+}
+
 function getBenefits() {
   return [...document.querySelectorAll(".benefit-input")]
     .map((i) => i.value.trim())
     .filter(Boolean);
+}
+
+function getSteps() {
+  return [...document.querySelectorAll(".step-input")]
+    .map((i) => i.value.trim())
+    .filter(Boolean);
+}
+
+function getFaqs() {
+  return [...document.querySelectorAll(".faq-item")].map((row) => ({
+    question: row.querySelector(".faq-q-input").value.trim(),
+    answer: row.querySelector(".faq-a-input").value.trim(),
+  })).filter(f => f.question && f.answer);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -460,12 +504,14 @@ function closeModal() {
   });
 }
 function clearModalFields() {
-  ["mName", "mTagline", "mSummary", "mPrice", "mDuration", "mRecovery"].forEach(
+  ["mName", "mTagline", "mSummary", "mPrice", "mDuration", "mRecovery", "mIcon"].forEach(
     (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("mCategory").value = "General Dentistry";
   document.getElementById("mIsActive").checked = true;
   document.getElementById("benefitsList").innerHTML = "";
+  document.getElementById("stepsList").innerHTML = "";
+  document.getElementById("faqsList").innerHTML = "";
   resetHeroPreview();
 }
 

@@ -1,6 +1,8 @@
 // ── Models/Appointment.cs ─────────────────────────────────────────────────────
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace SamsonDentalCenterManagementSystem.Models
 {
@@ -28,15 +30,23 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("patient_dob")]
         public DateTime? PatientDob { get; set; }
 
-
         [Column("is_guest")]
         public bool IsGuest { get; set; }
 
         [Column("is_for_other")]
         public bool IsForOther { get; set; }
 
-        [Column("other_name")]
-        public string? OtherName { get; set; }
+        [Column("other_first_name")]
+        public string? OtherFirstName { get; set; }
+
+        [Column("other_last_name")]
+        public string? OtherLastName { get; set; }
+
+        [Column("other_email")]
+        public string? OtherEmail { get; set; }
+
+        [Column("other_phone")]
+        public string? OtherPhone { get; set; }
 
         [Column("other_sex")]
         public string? OtherSex { get; set; }
@@ -47,14 +57,20 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("service_id")]
         public string ServiceId { get; set; } = string.Empty;
 
-        [Column("service_name")]
-        public string ServiceName { get; set; } = string.Empty;
+        // ── service_name is a real column in your DB (confirmed by the JSON) ──
+        // It must be a stored column, not computed from the join, because your
+        // appointment JSON has "service_name": "Dental Fillings" at the top level.
+         [JsonPropertyName("dental_services")]
+        [JsonProperty("dental_services")]
+        public DentalService? Service { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string ServiceName => Service?.Name ?? string.Empty;
+    
 
         [Column("doctor_id")]
         public string? DoctorId { get; set; }
-
-        [Reference(typeof(Doctor))]
-        public Doctor? Doctor { get; set; }
 
         [Column("appointment_date")]
         public DateTime AppointmentDate { get; set; }
@@ -88,5 +104,13 @@ namespace SamsonDentalCenterManagementSystem.Models
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
+
+        // ── Navigation properties — populated only by direct HTTP joins ────────
+        // NOT mapped as [Column] — these come from embedded PostgREST selects.
+        // Use both JsonProperty and JsonPropertyName so both Newtonsoft and STJ
+        // can deserialize them from the HTTP response.
+        [JsonPropertyName("doctors")]
+        [JsonProperty("doctors")]
+        public Doctor? Doctor { get; set; }
     }
 }

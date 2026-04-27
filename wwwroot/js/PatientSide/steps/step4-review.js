@@ -19,8 +19,8 @@ export function renderStep4() {
         ? formatDate(STATE.date, { weekday: "long", month: "long", day: "numeric", year: "numeric" })
         : "—";
 
-    const patientDisplay = d.isForOther && d.otherName
-        ? `${d.otherName} <span class="text-[10px] text-muted ml-1">(booked by ${d.firstName} ${d.lastName})</span>`
+    const patientDisplay = d.isForOther && d.otherFirstName
+        ? `${d.otherFirstName} ${d.otherLastName} <span class="text-[10px] text-muted ml-1">(booked by ${d.firstName} ${d.lastName})</span>`
         : `${d.firstName} ${d.lastName}`;
 
     const s4sum = document.getElementById("s4Summary");
@@ -98,9 +98,9 @@ export function renderStep4() {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
             ${[
                 ["Patient",      patientDisplay],
-                ["Email",        d.email],
-                ["Phone",        d.phone],
-                ["Birthday",     d.dob]
+                ["Email",        d.isForOther ? d.otherEmail : d.email],
+                ["Phone",        d.isForOther ? d.otherPhone : d.phone],
+                ["Birthday",     d.isForOther ? d.otherDob : d.dob]
             ].map(([l, v]) => `
             <div>
                 <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-0.5">${l}</div>
@@ -158,7 +158,10 @@ export async function confirmBooking() {
             patientType:     d.patientType ?? "New Patient",
             isGuest:         !loggedIn,
             isForOther:      d.isForOther,
-            otherName:       d.otherName || null,
+            otherFirstName:  d.otherFirstName || null,
+            otherLastName:   d.otherLastName || null,
+            otherEmail:      d.otherEmail || null,
+            otherPhone:      d.otherPhone || null,
             otherSex:        d.otherSex  || null,
             otherDob:        d.otherDob  ? new Date(d.otherDob + "T00:00:00").toISOString() : null,
             serviceId:       STATE.service?.id   ?? "",

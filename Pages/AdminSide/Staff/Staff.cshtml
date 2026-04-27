@@ -7,18 +7,19 @@
 }
 @Html.AntiForgeryToken()
 
-<div id="page-doctors" class="page p-4 md:p-6">
+<div id="page-staff" class="page p-4 md:p-6">
 
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div>
       <h2 class="font-display text-xl font-extrabold text-brand-900">Staff</h2>
       <p class="text-[12px] text-brand-500 mt-0.5">
-        @Model.Doctors.Count(d => d.IsActive) active ·
-        @Model.Doctors.Count total staff
+        @Model.Doctors.Count(d => d.IsActive) doctors ·
+        @Model.Receptionists.Count(r => r.IsActive) receptionists ·
+        @(Model.Doctors.Count + Model.Receptionists.Count) total
       </p>
     </div>
-    <button onclick="openDoctorModal()"
+    <button onclick="openStaffModal()"
       class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold
              text-white bg-primary shadow-md shadow-primary/25 hover:opacity-90 transition-opacity">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -29,24 +30,44 @@
     </button>
   </div>
 
-  <!-- ── Doctor cards ────────────────────────────────────────────────────── -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" id="doctors-container">
+  <!-- ── Filter pills ────────────────────────────────────────────────────── -->
+  <div class="flex gap-2 mb-5">
+    <button data-filter-btn="all" onclick="filterStaff('all')"
+      class="px-3.5 py-1.5 rounded-lg text-[11.5px] font-semibold border border-slate-200 transition-all
+             bg-primary text-white shadow-sm">
+      All
+    </button>
+    <button data-filter-btn="doctor" onclick="filterStaff('doctor')"
+      class="px-3.5 py-1.5 rounded-lg text-[11.5px] font-semibold border border-slate-200 transition-all
+             bg-white text-slate-600 hover:border-slate-300">
+      <i class="fa-solid fa-user-doctor mr-1 text-[10px]"></i> Doctors
+    </button>
+    <button data-filter-btn="receptionist" onclick="filterStaff('receptionist')"
+      class="px-3.5 py-1.5 rounded-lg text-[11.5px] font-semibold border border-slate-200 transition-all
+             bg-white text-slate-600 hover:border-slate-300">
+      <i class="fa-solid fa-headset mr-1 text-[10px]"></i> Receptionists
+    </button>
+  </div>
 
-    @if (!Model.Doctors.Any())
+  <!-- ── Staff cards ─────────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" id="staff-container">
+
+    @if (!Model.Doctors.Any() && !Model.Receptionists.Any())
     {
       <div class="col-span-full py-16 text-center">
         <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center
                     mx-auto mb-4 text-slate-400">
-          <i class="fa-solid fa-user-doctor text-xl"></i>
+          <i class="fa-solid fa-users text-xl"></i>
         </div>
-        <p class="text-[13px] text-brand-400">No doctors added yet.</p>
-        <button onclick="openDoctorModal()"
+        <p class="text-[13px] text-brand-400">No staff added yet.</p>
+        <button onclick="openStaffModal()"
           class="mt-3 text-[12px] font-semibold text-primary hover:underline">
-          Add the first doctor
+          Add the first staff member
         </button>
       </div>
     }
 
+    @* ── Doctor cards ──────────────────────────────────────────────────── *@
     @foreach (var doc in Model.Doctors)
     {
       var firstName = doc.Profile?.FirstName ?? "";
@@ -60,13 +81,6 @@
       var specStr = doc.Specialties?.Length > 0
           ? string.Join(", ", doc.Specialties)
           : "";
-
-      // Unique active days, sorted Mon–Sun (Mon=1→0, Sun=0→6)
-      var availDays = (doc.Availability ?? new())
-          .Where(a => a.IsActive)
-          .GroupBy(a => a.DayOfWeek)
-          .OrderBy(g => (g.Key + 6) % 7)
-          .ToList();
 
       var docJson = System.Text.Json.JsonSerializer.Serialize(new {
         id           = doc.Id,
@@ -83,12 +97,25 @@
         })
       });
 
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden
+      <div data-role="doctor"
+           class="bg-white rounded-2xl border border-slate-200 overflow-hidden
                   hover:shadow-lg hover:border-primary/20 transition-all
                   @(doc.IsActive ? "" : "opacity-60")">
 
-        <!-- Colour strip -->
-        <div class="h-1.5 w-full @(doc.IsActive ? "bg-primary" : "bg-slate-300")"></div>
+        <!-- Role label strip -->
+        <div class="flex items-center justify-between px-4 py-1.5
+                    @(doc.IsActive ? "bg-blue-50" : "bg-slate-100")">
+          <span class="text-[10px] font-bold uppercase tracking-wider
+                       @(doc.IsActive ? "text-primary" : "text-slate-400")">
+            <i class="fa-solid fa-user-doctor mr-1"></i> Doctor
+          </span>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full
+                       @(doc.IsActive
+                           ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                           : "bg-slate-200 text-slate-500")">
+            @(doc.IsActive ? "Active" : "Inactive")
+          </span>
+        </div>
 
         <div class="p-5">
 
@@ -121,35 +148,31 @@
               }
             </div>
 
-            <button onclick='openDoctorModal(@Html.Raw(docJson))'
+            <button onclick='openStaffModal(@Html.Raw(docJson))'
               class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center
                      text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors shrink-0">
               <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
           </div>
 
-          <!-- Status + specialty pills -->
-          <div class="flex flex-wrap gap-1.5 mb-4">
-            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full font-display
-                         @(doc.IsActive
-                             ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                             : "bg-slate-100 text-slate-500")">
-              @(doc.IsActive ? "Active" : "Inactive")
-            </span>
-
-            @foreach (var spec in (doc.Specialties ?? Array.Empty<string>()).Take(2))
-            {
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-primary font-semibold">
-                @spec
-              </span>
-            }
-            @if ((doc.Specialties?.Length ?? 0) > 2)
-            {
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                +@(doc.Specialties!.Length - 2) more
-              </span>
-            }
-          </div>
+          <!-- Specialty pills -->
+          @if (doc.Specialties?.Length > 0)
+          {
+            <div class="flex flex-wrap gap-1.5 mb-3">
+              @foreach (var spec in doc.Specialties.Take(3))
+              {
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 font-semibold">
+                  @spec
+                </span>
+              }
+              @if (doc.Specialties.Length > 3)
+              {
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                  +@(doc.Specialties.Length - 3) more
+                </span>
+              }
+            </div>
+          }
 
           <!-- Bio -->
           @if (!string.IsNullOrEmpty(doc.Bio))
@@ -163,14 +186,13 @@
               Availability
             </p>
 
-            @if (!doc.Availability.Any())
+            @if (doc.Availability == null || !doc.Availability.Any())
             {
               <p class="text-[11px] text-brand-300 italic">No schedule set.</p>
             }
             else
             {
                <div class="flex flex-row gap-1">
-              <!-- Group rows by day -->
               @foreach (var group in doc.Availability.GroupBy(a => a.DayOfWeek))
               {
                 var slots = group.ToList();
@@ -194,6 +216,7 @@
       </div>
     }
 
+    @* ── Receptionist cards ────────────────────────────────────────────── *@
     @foreach (var rec in Model.Receptionists)
     {
       var firstName = rec.Profile?.FirstName ?? "";
@@ -204,11 +227,32 @@
           ? $"{firstName} {lastName}".Trim()
           : $"(No Profile)";
 
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden
+      var recJson = System.Text.Json.JsonSerializer.Serialize(new {
+        id           = rec.Id,
+        profileId    = rec.ProfileId,
+        deskLocation = rec.DeskLocation,
+        isActive     = rec.IsActive
+      });
+
+      <div data-role="receptionist"
+           class="bg-white rounded-2xl border border-slate-200 overflow-hidden
                   hover:shadow-lg hover:border-primary/20 transition-all
                   @(rec.IsActive ? "" : "opacity-60")">
 
-        <div class="h-1.5 w-full @(rec.IsActive ? "bg-primary" : "bg-slate-300")"></div>
+        <!-- Role label strip -->
+        <div class="flex items-center justify-between px-4 py-1.5
+                    @(rec.IsActive ? "bg-purple-50" : "bg-slate-100")">
+          <span class="text-[10px] font-bold uppercase tracking-wider
+                       @(rec.IsActive ? "text-purple-600" : "text-slate-400")">
+            <i class="fa-solid fa-headset mr-1"></i> Receptionist
+          </span>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full
+                       @(rec.IsActive
+                           ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                           : "bg-slate-200 text-slate-500")">
+            @(rec.IsActive ? "Active" : "Inactive")
+          </span>
+        </div>
 
         <div class="p-5">
           <div class="flex items-start gap-3 mb-4">
@@ -235,28 +279,21 @@
               }
             </div>
 
-            <button
+            <button onclick='openStaffModal(null, @Html.Raw(recJson))'
               class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center
                      text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors shrink-0">
               <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
           </div>
 
-          <div class="flex flex-wrap gap-1.5 mb-4">
-            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full font-display
-                         @(rec.IsActive ? "bg-emerald-50 text-emerald-700 border border-emerald-100" : "bg-slate-100 text-slate-500")">
-              @(rec.IsActive ? "Active" : "Inactive")
-            </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-primary font-semibold">
-              Receptionist
-            </span>
-            @if (!string.IsNullOrEmpty(rec.DeskLocation))
-            {
+          @if (!string.IsNullOrEmpty(rec.DeskLocation))
+          {
+            <div class="flex flex-wrap gap-1.5">
               <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 font-semibold">
-                Desk: @rec.DeskLocation
+                <i class="fa-solid fa-location-dot mr-1 text-[8px]"></i> Desk: @rec.DeskLocation
               </span>
-            }
-          </div>
+            </div>
+          }
         </div>
       </div>
     }
@@ -264,6 +301,6 @@
   </div>
 </div>
 
-<partial name="Components/DoctorModal" />
+<partial name="Components/StaffModal" />
 
-<script type="module" src="~/js/AdminSide/adminDoctors.js"></script>
+<script type="module" src="~/js/AdminSide/adminStaff.js"></script>

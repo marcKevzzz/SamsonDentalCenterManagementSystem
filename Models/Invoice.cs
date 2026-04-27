@@ -1,6 +1,7 @@
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace SamsonDentalCenterManagementSystem.Models
 {
@@ -29,7 +30,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public decimal FinalAmount { get; set; }
 
         [Column("status")]
-        public string Status { get; set; } = "pending"; // pending, paid, cancelled
+        public string Status { get; set; } = "pending";
 
         [Column("notes")]
         public string? Notes { get; set; }
@@ -37,16 +38,20 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // ── Relations ────────────────────────────────────────────────────────
-        [Reference(typeof(Appointment))]
-        public Appointment? Appointment { get; set; }
+        // ── Relations — use STJ attributes so direct HTTP deserialization works ──
 
-        [Reference(typeof(Profile))]
+        // Matches the "patient:profiles!patient_id" alias in the query
+        [JsonPropertyName("patient")]
+        [JsonProperty("patient")]
         public Profile? Patient { get; set; }
 
-        [Reference(typeof(Doctor))]
+        // Matches the "doctor:doctors!doctor_id" alias in the query  
+        [JsonPropertyName("doctor")]
+        [JsonProperty("doctor")]
         public Doctor? Doctor { get; set; }
 
+        // Matches "invoice_items(*)" — remove [JsonIgnore], it was killing this
+        [JsonPropertyName("invoice_items")]
         [JsonProperty("invoice_items")]
         public List<InvoiceItem>? Items { get; set; }
     }

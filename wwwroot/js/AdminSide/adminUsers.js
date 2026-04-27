@@ -4,7 +4,7 @@ import { Toast, Modal } from "../ui.js";
 const ALL_USERS = JSON.parse(document.getElementById("users-data").textContent);
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 let currentPage = 1;
 let filtered = [...ALL_USERS];
 

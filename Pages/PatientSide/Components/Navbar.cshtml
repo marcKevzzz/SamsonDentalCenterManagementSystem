@@ -1,18 +1,13 @@
 <header id="navbar" class="fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 border-b border-transparent">
     <div class="max-w mx-auto px-4 md:px-6 h-[72px] flex items-center justify-between gap-4 md:gap-6">
-        <a href="/" class="flex items-center gap-2.5 group transition-transform duration-300 hover:scale-105">
-            <div class="w-10 h-10 rounded-full border-2 border-primary/30 group-hover:border-primary flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="9" />
-                    <circle cx="12" cy="12" r="3" />
-                </svg>
-            </div>
-            <span id="logo" class="text-[0.8rem] font-extrabold tracking-[0.08em] uppercase sm:block flex flex-col leading-tight transition-colors">
-                Samson Dental <span class="text-primary brightness-125 sm:text-[0.8rem] text-[0.62rem]">Center</span>
+        <a href="/" class="brand-logo flex items-center group transition-transform duration-300 hover:scale-105">
+           <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 brightness-150" />
+            <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex">
+                Samson  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full">Dental  Center</span>
             </span>
         </a>
 
-        <nav id="desktopNav" class="hidden md:flex items-center gap-10">
+        <nav id="desktopNav" class="hidden md:flex items-center gap-6 lg:gap-10">
             <a href="/" id="nav-home" class="nav-link text-[0.68rem] font-bold uppercase hover:text-primary hover:brightness-125 transition-all relative group">
                 Home
                 <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>

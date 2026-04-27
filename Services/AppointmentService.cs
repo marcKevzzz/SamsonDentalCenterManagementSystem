@@ -1,14 +1,14 @@
-using Resend;
-using SamsonDentalCenterManagementSystem.Models;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Resend;
+using SamsonDentalCenterManagementSystem.Models;
 
 namespace SamsonDentalCenterManagementSystem.Services
 {
     public class AppointmentService
     {
-       private readonly Supabase.Client _supabase;
+        public readonly Supabase.Client _supabase;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
         private readonly IResend _resend;
@@ -17,16 +17,22 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
-         private const string FROM = "Samson Dental Center <onboarding@resend.dev>";
-
+        private const string FROM = "Samson Dental Center <onboarding@resend.dev>";
 
         public static readonly string[] ALL_SLOTS =
         {
-            "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-            "1:00 PM",  "2:00 PM",  "3:00 PM",  "4:00 PM",  "5:00 PM"
+            "9:00 AM",
+            "10:00 AM",
+            "11:00 AM",
+            "12:00 PM",
+            "1:00 PM",
+            "2:00 PM",
+            "3:00 PM",
+            "4:00 PM",
+            "5:00 PM",
         };
 
         public AppointmentService(
@@ -35,25 +41,25 @@ namespace SamsonDentalCenterManagementSystem.Services
             string supabaseUrl,
             IResend resend,
             string appBaseUrl,
-            HttpClient http)
+            HttpClient http
+        )
         {
-            _supabase       = supabase;
+            _supabase = supabase;
             _serviceRoleKey = serviceRoleKey;
-            _supabaseUrl    = supabaseUrl.TrimEnd('/');
-            _resend         = resend;
-            _appBaseUrl     = appBaseUrl.TrimEnd('/');
-            _http           = http;
+            _supabaseUrl = supabaseUrl.TrimEnd('/');
+            _resend = resend;
+            _appBaseUrl = appBaseUrl.TrimEnd('/');
+            _http = http;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
         {
             var req = new HttpRequestMessage(method, $"{_supabaseUrl}/rest/v1{path}");
-            req.Headers.Add("apikey",        _serviceRoleKey);
+            req.Headers.Add("apikey", _serviceRoleKey);
             req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             return req;
         }
-
 
         // ── Get doctors ───────────────────────────────────────────────────────
         public async Task<List<Doctor>> GetDoctors()
@@ -61,31 +67,35 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path = "/doctors?select=*,profiles(*)&is_active=eq.true&order=title.asc";
-                var req  = BuildRequest(HttpMethod.Get, path);
-                var res  = await _http.SendAsync(req);
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
 
-                var json    = await res.Content.ReadAsStringAsync();
-                var dtos    = JsonSerializer.Deserialize<List<DoctorDto>>(json, _jsonOptions) ?? new();
-                
+                var json = await res.Content.ReadAsStringAsync();
+                var dtos = JsonSerializer.Deserialize<List<DoctorDto>>(json, _jsonOptions) ?? new();
+
                 return dtos.Select(d => new Doctor
-                {
-                    Id = d.Id,
-                    Title = d.Title,
-                    Specialties = d.Specialties,
-                    Bio = d.Bio,
-                    IsActive = d.IsActive,
-                    Profile = d.Profile != null ? new Profile
                     {
-                        Id = d.Profile.Id,
-                        FirstName = d.Profile.FirstName,
-                        LastName = d.Profile.LastName,
-                        Email = d.Profile.Email,
-                        AvatarUrl = d.Profile.AvatarUrl,
-                        PhoneNumber = d.Profile.PhoneNumber,
-                        Role = d.Profile.Role
-                    } : null
-                }).ToList();
+                        Id = d.Id,
+                        Title = d.Title,
+                        Specialties = d.Specialties,
+                        Bio = d.Bio,
+                        IsActive = d.IsActive,
+                        Profile =
+                            d.Profile != null
+                                ? new Profile
+                                {
+                                    Id = d.Profile.Id,
+                                    FirstName = d.Profile.FirstName,
+                                    LastName = d.Profile.LastName,
+                                    Email = d.Profile.Email,
+                                    AvatarUrl = d.Profile.AvatarUrl,
+                                    PhoneNumber = d.Profile.PhoneNumber,
+                                    Role = d.Profile.Role,
+                                }
+                                : null,
+                    })
+                    .ToList();
             }
             catch (Exception ex)
             {
@@ -106,17 +116,18 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-               var res = await _supabase.From<Appointment>()
-                  .Where(a => a.DoctorId  == doctorId)
-                  .Where(a => a.Status    != "cancelled")   // ← was a.EmailStatus
-                  .Where(a => a.IsWaitlist == false)
-                  .Get();
+                var res = await _supabase
+                    .From<Appointment>()
+                    .Where(a => a.DoctorId == doctorId)
+                    .Where(a => a.Status != "cancelled") // ← was a.EmailStatus
+                    .Where(a => a.IsWaitlist == false)
+                    .Get();
 
-              var dateStr = date.ToString("yyyy-MM-dd");
-              return res.Models
-                  .Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr)
-                  .Select(a => a.AppointmentTime)
-                  .ToList();
+                var dateStr = date.ToString("yyyy-MM-dd");
+                return res
+                    .Models.Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr)
+                    .Select(a => a.AppointmentTime)
+                    .ToList();
             }
             catch (Exception ex)
             {
@@ -126,10 +137,13 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Availability per service + date ───────────────────────────────────
-        public async Task<Dictionary<string, object>> GetAvailability(string category, DateTime date)
+        public async Task<Dictionary<string, object>> GetAvailability(
+            string category,
+            DateTime date
+        )
         {
             var doctors = await GetDoctorsForService(category);
-            var result  = new Dictionary<string, object>();
+            var result = new Dictionary<string, object>();
 
             foreach (var slot in ALL_SLOTS)
             {
@@ -144,8 +158,8 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                 result[slot] = new
                 {
-                    available   = availableDoctorIds.Count > 0,
-                    doctorCount = availableDoctorIds.Count
+                    available = availableDoctorIds.Count > 0,
+                    doctorCount = availableDoctorIds.Count,
                 };
             }
 
@@ -155,80 +169,88 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── FIX Bug 2: Double-booking check — only blocks same patient as PATIENT ─
         // If booking for someone else (isForOther=true), the logged-in user is
         // just the contact — a different person is the patient — so allow it.
-       public async Task<bool> HasExistingBookingAsPatient(string patientId, DateTime date)
-{
-    try
-    {
-        var res = await _supabase.From<Appointment>()
-            .Where(a => a.PatientId == patientId)
-            .Where(a => a.IsForOther == false)
-            .Where(a => a.EmailStatus != "cancelled")
-            .Get();
+        public async Task<bool> HasExistingBookingAsPatient(string patientId, DateTime date)
+        {
+            try
+            {
+                var res = await _supabase
+                    .From<Appointment>()
+                    .Where(a => a.PatientId == patientId)
+                    .Where(a => a.IsForOther == false)
+                    .Where(a => a.Status != "cancelled")
+                    .Get();
 
-        return res.Models.Any(a => a.AppointmentDate.Date == date.Date);
-    }
-    catch { return false; }
-}
+                return res.Models.Any(a => a.AppointmentDate.Date == date.Date);
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         // ── FIX Bug 4: Correct status logic ──────────────────────────────────
         // Logged-in patients  → "confirmed"  (they're authenticated, trust them)
         // Guests              → "pending"    (needs email confirmation)
         // Waitlist            → "waitlist"   (regardless of login state)
-       private static string DetermineStatus(AppointmentPayload p)
-{
-    if (p.IsWaitlist) return "waitlist";
-    
-    // If you want EVERY successfull booking to start as pending:
-    return "pending"; 
-}
+        private static string DetermineStatus(AppointmentPayload p)
+        {
+            if (p.IsWaitlist)
+                return "waitlist";
+
+            // If you want EVERY successfull booking to start as pending:
+            return "pending";
+        }
 
         // ── Create appointment ────────────────────────────────────────────────
         public async Task<Appointment> Create(AppointmentPayload p)
         {
             var emailStatus = DetermineStatus(p);
-    
-    // FIX THE DATE BUG: Strip time and offset to keep it on the selected day
-    var fixedDate = DateTime.SpecifyKind(p.AppointmentDate.Date, DateTimeKind.Unspecified);
-    
-            var token  = (p.IsGuest && !p.IsWaitlist)
-                ? Guid.NewGuid().ToString("N")
-                : null;
+
+            // FIX THE DATE BUG: Strip time and offset to keep it on the selected day
+            var fixedDate = DateTime.SpecifyKind(p.AppointmentDate.Date, DateTimeKind.Unspecified);
+
+            var token = (p.IsGuest && !p.IsWaitlist) ? Guid.NewGuid().ToString("N") : null;
 
             var appt = new Appointment
             {
-                Id              = Guid.NewGuid().ToString(),
-                PatientId       = p.PatientId,
-                PatientName     = p.PatientName,
-                PatientEmail    = p.PatientEmail,
-                PatientPhone    = p.PatientPhone,
-                PatientSex      = p.PatientSex,
-                PatientDob      = p.PatientDob,
-                IsGuest         = p.IsGuest,
-                IsForOther      = p.IsForOther,
-                OtherName       = p.OtherName,
-                OtherSex        = p.OtherSex,
-                OtherDob        = p.OtherDob,
-                ServiceId       = p.ServiceId,
-                ServiceName     = p.ServiceName,
-                DoctorId        = p.DoctorId,
+                Id = Guid.NewGuid().ToString(),
+                PatientId = p.PatientId,
+                PatientName = p.PatientName,
+                PatientEmail = p.PatientEmail,
+                PatientPhone = p.PatientPhone,
+                PatientSex = p.PatientSex,
+                PatientDob = p.PatientDob,
+                IsGuest = p.IsGuest,
+                IsForOther = p.IsForOther,
+                OtherFirstName = p.OtherFirstName,
+                OtherLastName = p.OtherLastName,
+                OtherEmail = p.OtherEmail,
+                OtherPhone = p.OtherPhone,
+                OtherSex = p.OtherSex,
+                OtherDob = p.OtherDob,
+                ServiceId = p.ServiceId,
+                DoctorId = p.DoctorId,
                 AppointmentDate = fixedDate,
                 AppointmentTime = p.AppointmentTime,
-                IsWaitlist      = p.IsWaitlist,
-                Status          = "pending",
-                EmailStatus          = emailStatus,
-                Notes           = p.Notes,
-                CreatedAt       = DateTime.UtcNow,
-                ConfirmationToken = token
+                IsWaitlist = p.IsWaitlist,
+                Status = "pending",
+                EmailStatus = DetermineEmailStatus(p),
+                Notes = p.Notes,
+                CreatedAt = DateTime.UtcNow,
+                ConfirmationToken = token,
             };
 
-            var res     = await _supabase.From<Appointment>().Insert(appt);
+            var res = await _supabase.From<Appointment>().Insert(appt);
             var created = res.Models.First();
+            created.Service = new DentalService { Id = p.ServiceId, Name = p.ServiceName };
 
             // Send email for guest non-waitlist bookings
             if (p.IsGuest && !p.IsWaitlist)
                 await SendGuestConfirmationEmail(created);
 
-            Console.WriteLine($"[Appointment] Created {created.Id} emailstatus={emailStatus} guest={p.IsGuest} waitlist={p.IsWaitlist}");
+            Console.WriteLine(
+                $"[Appointment] Created {created.Id} emailstatus={emailStatus} guest={p.IsGuest} waitlist={p.IsWaitlist}"
+            );
             return created;
         }
 
@@ -237,15 +259,18 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var res  = await _supabase.From<Appointment>()
+                var res = await _supabase
+                    .From<Appointment>()
                     .Where(a => a.ConfirmationToken == token)
                     .Get();
                 var appt = res.Models.FirstOrDefault();
-                if (appt == null) return null;
+                if (appt == null)
+                    return null;
 
-                appt.EmailStatus      = "confirmed";
-                appt.Status           = "confirmed";
+                // Only mark the EMAIL as confirmed — staff still needs to confirm the appointment
+                appt.EmailStatus = "confirmed";
                 appt.ConfirmedAt = DateTime.UtcNow;
+                // appt.Status stays "pending" — don't touch it here
                 await _supabase.From<Appointment>().Upsert(appt);
                 return appt;
             }
@@ -256,48 +281,83 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
-
-//         // ── Cancel + promote waitlist ─────────────────────────────────────────
+        //         // ── Cancel + promote waitlist ─────────────────────────────────────────
         public async Task Cancel(string id)
         {
-            var res  = await _supabase.From<Appointment>().Where(a => a.Id == id).Get();
-            var appt = res.Models.FirstOrDefault() ?? throw new Exception("Not found.");
+            var appt = await GetById(id) ?? throw new Exception("Not found.");
 
-            appt.EmailStatus = "cancelled";
-            appt.Status      = "cancelled";
-            await _supabase.From<Appointment>().Upsert(appt);
+            var payload = new Dictionary<string, object> { ["status"] = "cancelled" };
+
+            var req = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(payload),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
 
             await SendCancellationEmail(appt);
-            await PromoteWaitlist(appt.ServiceId, appt.DoctorId, appt.AppointmentDate, appt.AppointmentTime);
+            await PromoteWaitlist(
+                appt.ServiceId,
+                appt.DoctorId,
+                appt.AppointmentDate,
+                appt.AppointmentTime
+            );
         }
 
-        private async Task PromoteWaitlist(string serviceId, string? doctorId, DateTime date, string time)
+        private async Task PromoteWaitlist(
+            string serviceId,
+            string? doctorId,
+            DateTime date,
+            string time
+        )
         {
             try
             {
                 var dateStr = date.ToString("yyyy-MM-dd");
-                var res     = await _supabase.From<Appointment>()
-                    .Where(a => a.ServiceId  == serviceId)
+                var res = await _supabase
+                    .From<Appointment>()
+                    .Where(a => a.ServiceId == serviceId)
                     .Where(a => a.IsWaitlist == true)
-                    .Where(a => a.EmailStatus == "waitlist")
+                    .Where(a => a.Status == "pending")
                     .Get();
 
-                var next = res.Models
-                    .Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr)
+                var next = res
+                    .Models.Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr)
                     .OrderBy(a => a.WaitlistPosition ?? int.MaxValue)
                     .ThenBy(a => a.CreatedAt)
                     .FirstOrDefault();
 
-                if (next == null) return;
+                if (next == null)
+                    return;
 
-                next.IsWaitlist      = false;
-                next.EmailStatus     = next.IsGuest ? "pending" : "confirmed";
-                next.AppointmentTime = time;
-                next.DoctorId        = doctorId;
-                await _supabase.From<Appointment>().Upsert(next);
+                var payload = new Dictionary<string, object?>
+                {
+                    ["is_waitlist"] = false,
+                    ["email_status"] = next.IsGuest ? "pending" : "confirmed",
+                    ["appointment_time"] = time,
+                    ["doctor_id"] = doctorId,
+                };
 
-                await SendWaitlistPromotionEmail(next);
-                Console.WriteLine($"[Waitlist] Promoted {next.Id} to slot {time}");
+                var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{next.Id}");
+                patchReq.Content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+
+                var patchRes = await _http.SendAsync(patchReq);
+                patchRes.EnsureSuccessStatusCode();
+
+                // Re-fetch with joins so ServiceName and Doctor are populated for the email
+                var promoted = await GetById(next.Id);
+                if (promoted != null)
+                {
+                    await SendWaitlistPromotionEmail(promoted);
+                    Console.WriteLine($"[Waitlist] Promoted {next.Id} to slot {time}");
+                }
             }
             catch (Exception ex)
             {
@@ -309,18 +369,18 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task UpdateStatus(string id, string newStatus, string? doctorId = null)
         {
             // 1. Fetch current appointment using direct HttpClient to avoid mapping issues
-            var path = $"/appointments?id=eq.{id}&select=*";
-            var req  = BuildRequest(HttpMethod.Get, path);
-            var res  = await _http.SendAsync(req);
+            var path = $"/appointments?id=eq.{id}&select=*,dental_services(*)";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
             var json = await res.Content.ReadAsStringAsync();
             var dtos = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions);
-            var dto  = dtos?.FirstOrDefault() ?? throw new Exception("Appointment not found.");
+            var dto = dtos?.FirstOrDefault() ?? throw new Exception("Appointment not found.");
 
             // 2. Prepare update payload
             var updateData = new Dictionary<string, object>();
-            
+
             // Handle Waitlist specific logic
             if (newStatus == "waitlist")
             {
@@ -335,7 +395,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             if (newStatus == "confirmed")
             {
-                updateData["email_status"] = "confirmed";
                 updateData["confirmed_at"] = DateTime.UtcNow;
             }
 
@@ -346,18 +405,33 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             // 3. Send PATCH request
             var patchPath = $"/appointments?id=eq.{id}";
-            var patchReq  = BuildRequest(new HttpMethod("PATCH"), patchPath);
-            patchReq.Content = new StringContent(JsonSerializer.Serialize(updateData), System.Text.Encoding.UTF8, "application/json");
-            
+            var patchReq = BuildRequest(new HttpMethod("PATCH"), patchPath);
+            patchReq.Content = new StringContent(
+                JsonSerializer.Serialize(updateData),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
             var patchRes = await _http.SendAsync(patchReq);
             patchRes.EnsureSuccessStatusCode();
+
+            // 3.5 If status is 'arrived', promote guest or 'other' to a patient profile
+            if (newStatus == "arrived")
+            {
+                var fullAppt = await GetById(id);
+                if (fullAppt != null)
+                {
+                    await FindOrCreatePatientProfile(fullAppt);
+                }
+            }
 
             // 4. Notify patient of manual confirmation if applicable
             if (newStatus == "confirmed")
             {
                 // We need the full model for the email
                 var fullAppt = await GetById(id);
-                if (fullAppt != null) await SendBookingConfirmationEmail(fullAppt);
+                if (fullAppt != null)
+                    await SendBookingConfirmationEmail(fullAppt);
             }
         }
 
@@ -365,16 +439,20 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var path = $"/appointments?select=*,doctors(*,profiles(*))&id=eq.{id}&limit=1";
-                var req  = BuildRequest(HttpMethod.Get, path);
-                var res  = await _http.SendAsync(req);
-                if (!res.IsSuccessStatusCode) return null;
+                var path =
+                    $"/appointments?select=*,dental_services(*),doctors(*,profiles(*))&id=eq.{id}&limit=1";
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
+                if (!res.IsSuccessStatusCode)
+                    return null;
 
                 var json = await res.Content.ReadAsStringAsync();
-                var dtos = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
-                var dto  = dtos.FirstOrDefault();
+                var dtos =
+                    JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
+                var dto = dtos.FirstOrDefault();
                 return dto != null ? MapToModel(dto) : null;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine($"[GetById Error]: {ex.Message}");
                 return null;
@@ -384,46 +462,65 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task Delete(string id)
         {
             var path = $"/appointments?id=eq.{id}";
-            var req  = BuildRequest(HttpMethod.Delete, path);
-            var res  = await _http.SendAsync(req);
+            var req = BuildRequest(HttpMethod.Delete, path);
+            var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
         }
 
-// ── Reschedule ────────────────────────────────────────────────────────────────
-public async Task Reschedule(string id, DateTime newDate, string newTime, string? doctorId)
-{
-    var res = await _supabase.From<Appointment>().Where(a => a.Id == id).Get();
-    var appt = res.Models.FirstOrDefault();
-    
-    if (appt == null) throw new Exception("Not found");
+        // ── Reschedule ────────────────────────────────────────────────────────────────
+        public async Task Reschedule(string id, DateTime newDate, string newTime, string? doctorId)
+        {
+            // Step 1: Verify the appointment exists using the same reliable HTTP path
+            // that GetById already uses successfully
+            var existing = await GetById(id);
+            if (existing == null)
+                throw new Exception($"Appointment {id} not found.");
 
-    appt.AppointmentDate = newDate;
-    appt.AppointmentTime = newTime;
-    
-    if (doctorId != null) 
-    {
-        appt.DoctorId = doctorId;
-    }
-    appt.EmailStatus = "confirmed";
-    appt.Status = "confirmed";
-    await _supabase.From<Appointment>().Upsert(appt);
+            // Step 2: Build a minimal PATCH payload — no ORM, no upsert
+            var fixedDate = DateTime.SpecifyKind(newDate.Date, DateTimeKind.Unspecified);
 
-    await SendRescheduleEmail(appt);
-}
+            var payload = new Dictionary<string, object?>
+            {
+                ["appointment_date"] = fixedDate.ToString("yyyy-MM-dd"),
+                ["appointment_time"] = newTime,
+                ["status"] = "confirmed",
+            };
+
+            if (doctorId != null)
+                payload["doctor_id"] = doctorId;
+
+            var req = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(payload),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            // Step 3: Re-fetch with doctor join so the email has the doctor name
+            var updated = await GetById(id) ?? existing;
+            updated.AppointmentDate = fixedDate;
+            updated.AppointmentTime = newTime;
+
+            await SendRescheduleEmail(updated);
+            Console.WriteLine($"[Reschedule] {id} → {fixedDate:yyyy-MM-dd} {newTime}");
+        }
 
         public async Task<List<Appointment>> GetAllAsync()
         {
             try
             {
-                // Using direct HttpClient call to bypass postgrest-csharp mapping issues
-                // with nested objects (doctors/profiles).
-                var path = "/appointments?select=*,doctors(*,profiles(*))&order=appointment_date.desc";
-                var req  = BuildRequest(HttpMethod.Get, path);
-                var res  = await _http.SendAsync(req);
+                var path =
+                    "/appointments?select=*,dental_services(*),doctors(*,profiles(*))&order=appointment_date.desc";
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadAsStringAsync();
-                var dtos = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
+                var dtos =
+                    JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
 
                 return dtos.Select(MapToModel).ToList();
             }
@@ -438,13 +535,15 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
         {
             try
             {
-                var path = $"/appointments?select=*,doctors(*,profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
-                var req  = BuildRequest(HttpMethod.Get, path);
-                var res  = await _http.SendAsync(req);
+                var path =
+                    $"/appointments?select=*,dental_services(*),doctors(*,profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadAsStringAsync();
-                var dtos = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
+                var dtos =
+                    JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
 
                 return dtos.Select(MapToModel).ToList();
             }
@@ -459,46 +558,71 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
         {
             return new Appointment
             {
-                Id              = dto.Id,
-                PatientId       = dto.PatientId,
-                PatientName     = dto.PatientName,
-                PatientEmail    = dto.PatientEmail,
-                PatientPhone    = dto.PatientPhone,
-                PatientSex      = dto.PatientSex,
-                PatientDob      = dto.PatientDob,
-                IsGuest         = dto.IsGuest,
-                IsForOther      = dto.IsForOther,
-                OtherName       = dto.OtherName,
-                OtherSex        = dto.OtherSex,
-                OtherDob        = dto.OtherDob,
-                ServiceId       = dto.ServiceId,
-                ServiceName     = dto.ServiceName,
-                DoctorId        = dto.DoctorId,
+                Id = dto.Id,
+                PatientId = dto.PatientId,
+                PatientName = dto.PatientName,
+                PatientEmail = dto.PatientEmail,
+                PatientPhone = dto.PatientPhone,
+                PatientSex = dto.PatientSex,
+                PatientDob = dto.PatientDob,
+                IsGuest = dto.IsGuest,
+                IsForOther = dto.IsForOther,
+                OtherFirstName = dto.OtherFirstName,
+                OtherLastName = dto.OtherLastName,
+                OtherEmail = dto.OtherEmail,
+                OtherPhone = dto.OtherPhone,
+                OtherSex = dto.OtherSex,
+                OtherDob = dto.OtherDob,
+                ServiceId = dto.ServiceId,
+                DoctorId = dto.DoctorId,
                 AppointmentDate = dto.AppointmentDate,
                 AppointmentTime = dto.AppointmentTime,
-                Status          = dto.Status,
-                EmailStatus     = dto.EmailStatus,
-                IsWaitlist      = dto.IsWaitlist,
-                Notes           = dto.Notes,
-                CreatedAt       = dto.CreatedAt,
-                Doctor = dto.Doctor != null ? new Doctor
-                {
-                    Id = dto.Doctor.Id,
-                    Title = dto.Doctor.Title,
-                    Specialties = dto.Doctor.Specialties,
-                    Bio = dto.Doctor.Bio,
-                    IsActive = dto.Doctor.IsActive,
-                    Profile = dto.Doctor.Profile != null ? new Profile
-                    {
-                        Id = dto.Doctor.Profile.Id,
-                        FirstName = dto.Doctor.Profile.FirstName,
-                        LastName = dto.Doctor.Profile.LastName,
-                        Email = dto.Doctor.Profile.Email,
-                        AvatarUrl = dto.Doctor.Profile.AvatarUrl,
-                        PhoneNumber = dto.Doctor.Profile.PhoneNumber,
-                        Role = dto.Doctor.Profile.Role
-                    } : null
-                } : null
+                Status = dto.Status,
+                EmailStatus = dto.EmailStatus,
+                IsWaitlist = dto.IsWaitlist,
+                WaitlistPosition = dto.WaitlistPosition,
+                ConfirmationToken = dto.ConfirmationToken,
+                ConfirmedAt = dto.ConfirmedAt,
+                Notes = dto.Notes,
+                CreatedAt = dto.CreatedAt,
+                // Map the joined service
+                Service =
+                    dto.DentalService != null
+                        ? new DentalService
+                        {
+                            Id = dto.DentalService.Id,
+                            Name = dto.DentalService.Name,
+                            Price = dto.DentalService.Price,
+                            Category = dto.DentalService.Category,
+                            Duration = dto.DentalService.Duration,
+                        }
+                        : null,
+
+                // Map the joined doctor
+                Doctor =
+                    dto.Doctor != null
+                        ? new Doctor
+                        {
+                            Id = dto.Doctor.Id,
+                            Title = dto.Doctor.Title,
+                            Specialties = dto.Doctor.Specialties,
+                            Bio = dto.Doctor.Bio,
+                            IsActive = dto.Doctor.IsActive,
+                            Profile =
+                                dto.Doctor.Profile != null
+                                    ? new Profile
+                                    {
+                                        Id = dto.Doctor.Profile.Id,
+                                        FirstName = dto.Doctor.Profile.FirstName,
+                                        LastName = dto.Doctor.Profile.LastName,
+                                        Email = dto.Doctor.Profile.Email,
+                                        AvatarUrl = dto.Doctor.Profile.AvatarUrl,
+                                        PhoneNumber = dto.Doctor.Profile.PhoneNumber,
+                                        Role = dto.Doctor.Profile.Role,
+                                    }
+                                    : null,
+                        }
+                        : null,
             };
         }
 
@@ -516,22 +640,97 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
         //         var dtos = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
 
         //         return dtos.Select(MapToModel).FirstOrDefault();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         Console.WriteLine($"[GetById Error]: {ex.Message}");
-        //         return null;
-        //     }
         // }
 
-  // ── 1. Guest booking — requires email confirmation to finalize ─────────
+        // ── Promotion Logic (Identity Bridge) ──────────────────────────────────
+        private async Task FindOrCreatePatientProfile(Appointment appt)
+        {
+            try
+            {
+                string targetEmail = appt.IsForOther ? appt.OtherEmail! : appt.PatientEmail;
+                string targetPhone = appt.IsForOther ? appt.OtherPhone! : appt.PatientPhone;
+                string targetFirst = appt.IsForOther
+                    ? appt.OtherFirstName!
+                    : (appt.PatientName.Split(' ').FirstOrDefault() ?? "Patient");
+                string targetLast = appt.IsForOther
+                    ? appt.OtherLastName!
+                    : (appt.PatientName.Split(' ').LastOrDefault() ?? "");
+                string? targetSex = appt.IsForOther ? appt.OtherSex : appt.PatientSex;
+                DateTime? targetDob = appt.IsForOther ? appt.OtherDob : appt.PatientDob;
+
+                // 1. Check for existing profile by Email OR Phone
+                var emailResult = await _supabase
+                    .From<Profile>()
+                    .Filter("email", Supabase.Postgrest.Constants.Operator.Equals, targetEmail)
+                    .Get();
+
+                var profile = emailResult.Models.FirstOrDefault();
+
+                if (profile == null)
+                {
+                    var phoneResult = await _supabase
+                        .From<Profile>()
+                        .Filter(
+                            "phone_number",
+                            Supabase.Postgrest.Constants.Operator.Equals,
+                            targetPhone
+                        )
+                        .Get();
+                    profile = phoneResult.Models.FirstOrDefault();
+                }
+
+                if (profile == null) // only create if neither email nor phone matched
+                {
+                    profile = new Profile
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        FirstName = targetFirst,
+                        LastName = targetLast,
+                        Email = targetEmail,
+                        PhoneNumber = targetPhone,
+                        Sex = targetSex,
+                        DateOfBirth = targetDob,
+                        Role = "patient",
+                        CreatedAt = DateTime.UtcNow,
+                    };
+
+                    await _supabase.From<Profile>().Insert(profile);
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"[Promotion] Found existing profile {profile.Id} for {targetEmail}/{targetPhone}"
+                    );
+                }
+
+                // 3. Link appointment to this profile
+                if (appt.PatientId != profile.Id)
+                {
+                    await _supabase
+                        .From<Appointment>()
+                        .Where(a => a.Id == appt.Id)
+                        .Set(a => a.PatientId!, profile.Id)
+                        .Update();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FindOrCreatePatientProfile] Error: {ex.Message}");
+            }
+        }
+
+        // ── 1. Guest booking — requires email confirmation to finalize ─────────
         private async Task SendGuestConfirmationEmail(Appointment appt)
         {
             try
             {
-                var confirmUrl = $"{_appBaseUrl}/appointments/confirm?token={appt.ConfirmationToken}";
+                var confirmUrl =
+                    $"{_appBaseUrl}/appointments/confirm?token={appt.ConfirmationToken}";
                 var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim() : null;
+                var docName =
+                    appt.Doctor?.Profile != null
+                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                        : null;
 
                 var msg = new EmailMessage();
                 msg.From = FROM;
@@ -554,11 +753,15 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
                           </p>
                         </div>
 
-                        <!-- Body -->
                         <div style="padding:28px 32px;">
                           <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
                             Hi <strong>{appt.PatientName}</strong>,
                           </p>
+                          ${(appt.IsForOther ? $"""
+                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 16px;">
+                            You are receiving this because you booked an appointment for <strong>{appt.OtherFirstName} {appt.OtherLastName}</strong>.
+                          </p>
+                          """ : "")}
                           <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
                             You have a pending appointment. Please click the button below to
                             confirm it — the link expires in <strong>24 hours</strong>.
@@ -631,7 +834,10 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
             try
             {
                 var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim() : null;
+                var docName =
+                    appt.Doctor?.Profile != null
+                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                        : null;
 
                 var msg = new EmailMessage();
                 msg.From = FROM;
@@ -657,9 +863,15 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
                           <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
                             Hi <strong>{appt.PatientName}</strong>,
                           </p>
+                          ${(appt.IsForOther ? $"""
+                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 16px;">
+                            Your appointment for <strong>{appt.OtherFirstName} {appt.OtherLastName}</strong> has been confirmed.
+                          </p>
+                          """ : $"""
                           <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
                             Your appointment has been confirmed. We look forward to seeing you!
                           </p>
+                          """)}
 
                           <div style="background:#f1f5f9;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
                             <table style="width:100%;border-collapse:collapse;font-size:13px;">
@@ -803,7 +1015,10 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
             try
             {
                 var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim() : null;
+                var docName =
+                    appt.Doctor?.Profile != null
+                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                        : null;
 
                 var msg = new EmailMessage();
                 msg.From = FROM;
@@ -889,7 +1104,10 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
             try
             {
                 var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim() : null;
+                var docName =
+                    appt.Doctor?.Profile != null
+                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                        : null;
 
                 var msg = new EmailMessage();
                 msg.From = FROM;
@@ -971,58 +1189,149 @@ public async Task Reschedule(string id, DateTime newDate, string newTime, string
                 Console.WriteLine($"[SendWaitlistPromotionEmail] {ex.Message}");
             }
         }
+
+        private static string DetermineEmailStatus(AppointmentPayload p)
+        {
+            if (!p.IsGuest)
+                return "not_applicable"; // logged-in users don't need email confirmation
+            if (p.IsWaitlist)
+                return "not_applicable";
+            return "pending"; // guest non-waitlist → needs email confirmation
+        }
     }
 
     // ── DTOs ──────────────────────────────────────────────────────────────────
+    public class DentalServiceDto
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("price")]
+        public decimal Price { get; set; }
+
+        [JsonPropertyName("category")]
+        public string? Category { get; set; }
+
+        [JsonPropertyName("duration")]
+        public string? Duration { get; set; }
+    }
+
     public class AppointmentDto
     {
-        [JsonPropertyName("id")] public string Id { get; set; } = string.Empty;
-        [JsonPropertyName("patient_id")] public string? PatientId { get; set; }
-        [JsonPropertyName("patient_name")] public string PatientName { get; set; } = string.Empty;
-        [JsonPropertyName("patient_email")] public string PatientEmail { get; set; } = string.Empty;
-        [JsonPropertyName("patient_phone")] public string PatientPhone { get; set; } = string.Empty;
-        [JsonPropertyName("patient_sex")] public string? PatientSex { get; set; }
-        [JsonPropertyName("patient_dob")] public DateTime? PatientDob { get; set; }
-        [JsonPropertyName("is_guest")] public bool IsGuest { get; set; }
-        [JsonPropertyName("is_for_other")] public bool IsForOther { get; set; }
-        [JsonPropertyName("other_name")] public string? OtherName { get; set; }
-        [JsonPropertyName("other_sex")] public string? OtherSex { get; set; }
-        [JsonPropertyName("other_dob")] public DateTime? OtherDob { get; set; }
-        [JsonPropertyName("service_id")] public string ServiceId { get; set; } = string.Empty;
-        [JsonPropertyName("service_name")] public string ServiceName { get; set; } = string.Empty;
-        [JsonPropertyName("doctor_id")] public string? DoctorId { get; set; }
-        [JsonPropertyName("appointment_date")] public DateTime AppointmentDate { get; set; }
-        [JsonPropertyName("appointment_time")] public string AppointmentTime { get; set; } = string.Empty;
-        [JsonPropertyName("status")] public string Status { get; set; } = "pending";
-        [JsonPropertyName("email_status")] public string EmailStatus { get; set; } = "pending";
-        [JsonPropertyName("is_waitlist")] public bool IsWaitlist { get; set; }
-        [JsonPropertyName("notes")] public string? Notes { get; set; }
-        [JsonPropertyName("created_at")] public DateTime CreatedAt { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
 
-        [JsonPropertyName("doctors")] public DoctorDto? Doctor { get; set; }
+        [JsonPropertyName("patient_id")]
+        public string? PatientId { get; set; }
+
+        [JsonPropertyName("patient_name")]
+        public string PatientName { get; set; } = string.Empty;
+
+        [JsonPropertyName("patient_email")]
+        public string PatientEmail { get; set; } = string.Empty;
+
+        [JsonPropertyName("patient_phone")]
+        public string PatientPhone { get; set; } = string.Empty;
+
+        [JsonPropertyName("patient_sex")]
+        public string? PatientSex { get; set; }
+
+        [JsonPropertyName("patient_dob")]
+        public DateTime? PatientDob { get; set; }
+
+        [JsonPropertyName("is_guest")]
+        public bool IsGuest { get; set; }
+
+        [JsonPropertyName("is_for_other")]
+        public bool IsForOther { get; set; }
+
+        [JsonPropertyName("other_first_name")]
+        public string? OtherFirstName { get; set; }
+
+        [JsonPropertyName("other_last_name")]
+        public string? OtherLastName { get; set; }
+
+        [JsonPropertyName("other_email")]
+        public string? OtherEmail { get; set; }
+
+        [JsonPropertyName("other_phone")]
+        public string? OtherPhone { get; set; }
+
+        [JsonPropertyName("other_sex")]
+        public string? OtherSex { get; set; }
+
+        [JsonPropertyName("other_dob")]
+        public DateTime? OtherDob { get; set; }
+
+        [JsonPropertyName("service_id")]
+        public string ServiceId { get; set; } = string.Empty;
+
+        [JsonPropertyName("dental_services")]
+        public DentalServiceDto? DentalService { get; set; }
+
+        [JsonPropertyName("doctor_id")]
+        public string? DoctorId { get; set; }
+
+        [JsonPropertyName("appointment_date")]
+        public DateTime AppointmentDate { get; set; }
+
+        [JsonPropertyName("appointment_time")]
+        public string AppointmentTime { get; set; } = string.Empty;
+
+        [JsonPropertyName("status")]
+        public string Status { get; set; } = "pending";
+
+        [JsonPropertyName("email_status")]
+        public string EmailStatus { get; set; } = "pending";
+
+        [JsonPropertyName("is_waitlist")]
+        public bool IsWaitlist { get; set; }
+
+        [JsonPropertyName("notes")]
+        public string? Notes { get; set; }
+
+        [JsonPropertyName("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [JsonPropertyName("waitlist_position")]
+        public int? WaitlistPosition { get; set; }
+
+        [JsonPropertyName("confirmation_token")]
+        public string? ConfirmationToken { get; set; }
+
+        [JsonPropertyName("confirmed_at")]
+        public DateTime? ConfirmedAt { get; set; }
+
+        [JsonPropertyName("doctors")]
+        public DoctorDto? Doctor { get; set; }
     }
 
     public class AppointmentPayload
     {
-        public string?   PatientId       { get; set; }
-        public string    PatientName     { get; set; } = string.Empty;
-        public string    PatientEmail    { get; set; } = string.Empty;
-        public string    PatientPhone    { get; set; } = string.Empty;
-        public string?   PatientSex      { get; set; }
-        public DateTime? PatientDob      { get; set; }
-        public bool      IsGuest         { get; set; }
-        public bool      IsForOther      { get; set; }
-        public string?   OtherName       { get; set; }
-        public string?   OtherSex        { get; set; }
-        public DateTime? OtherDob        { get; set; }
-        public string    ServiceId       { get; set; } = string.Empty;
-        public string    ServiceName     { get; set; } = string.Empty;
-        public string?   DoctorId        { get; set; }
-        public DateTime  AppointmentDate { get; set; }
-        public string    AppointmentTime { get; set; } = string.Empty;
-        public bool      IsWaitlist      { get; set; }
-        public string    Status          { get; set; } = "pending";
-        public string?   Notes           { get; set; }
+        public string? PatientId { get; set; }
+        public string PatientName { get; set; } = string.Empty;
+        public string PatientEmail { get; set; } = string.Empty;
+        public string PatientPhone { get; set; } = string.Empty;
+        public string? PatientSex { get; set; }
+        public DateTime? PatientDob { get; set; }
+        public bool IsGuest { get; set; }
+        public bool IsForOther { get; set; }
+        public string? OtherFirstName { get; set; }
+        public string? OtherLastName { get; set; }
+        public string? OtherEmail { get; set; }
+        public string? OtherPhone { get; set; }
+        public string? OtherSex { get; set; }
+        public DateTime? OtherDob { get; set; }
+        public string ServiceId { get; set; } = string.Empty;
+        public string ServiceName { get; set; } = string.Empty;
+        public string? DoctorId { get; set; }
+        public DateTime AppointmentDate { get; set; }
+        public string AppointmentTime { get; set; } = string.Empty;
+        public bool IsWaitlist { get; set; }
+        public string Status { get; set; } = "pending";
+        public string? Notes { get; set; }
     }
 }
-

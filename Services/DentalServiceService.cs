@@ -125,19 +125,13 @@ public class ServicePayload
     public string?  Price    { get; set; }
     public bool?    IsActive { get; set; }
 
-    public List<string>      Benefits { get; set; } = new();
-    public List<ServiceStepDto> Steps { get; set; } = new();
-    public List<ServiceFaqDto>  Faqs  { get; set; } = new();
-}
-
-public class ServiceStepDto
-{
-    public string? Title { get; set; }
-    public string? Body  { get; set; }
+    public List<string>         Benefits { get; set; } = new();
+    public List<string>         Steps    { get; set; } = new();
+    public List<ServiceFaqDto>  Faqs     { get; set; } = new();
 }
 
 public class ServiceFaqDto
 {
-    public string? Q { get; set; }
-    public string? A { get; set; }
+    public string? Question { get; set; }
+    public string? Answer   { get; set; }
 }

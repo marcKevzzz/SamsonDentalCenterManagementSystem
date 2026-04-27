@@ -95,14 +95,11 @@ namespace SamsonDentalCenterManagementSystem.Models
 
     public class ServiceFaq
     {
-        public string Q { get; set; } = string.Empty;
-        public string A { get; set; } = string.Empty;
-    }
+        [JsonPropertyName("question")]
+        public string Question { get; set; } = string.Empty;
 
-    public class ServiceStep
-    {
-        public string? Title { get; set; }
-        public string? Body  { get; set; }
+        [JsonPropertyName("answer")]
+        public string Answer { get; set; } = string.Empty;
     }
     [Table("dental_services")]
     public class DentalService : BaseModel
@@ -164,7 +161,7 @@ public List<string> Benefits => DeserializeList<string>(BenefitsRaw);
 
 [System.Text.Json.Serialization.JsonIgnore]
 [Newtonsoft.Json.JsonIgnore]
-public List<ServiceStep> Steps => DeserializeList<ServiceStep>(StepsRaw);
+public List<string> Steps => DeserializeList<string>(StepsRaw);
 
 [System.Text.Json.Serialization.JsonIgnore]
 [Newtonsoft.Json.JsonIgnore]

@@ -5,7 +5,7 @@ trigger: always_on
 SamsonDentalCenterManagementSystemCopilot Instructions
 
 Global Instructions & AI Directives
-Project State Continuity: Before every task, check the projectState.md file. Update it after every significant change (new features, refactors, or bug fixes). This is the primary bridge for continuity across different conversations.
+Project State Continuity: Before every task, check the projectState.md file. Update and add it after every significant change (new features, refactors, or bug fixes). This is the primary bridge for continuity across different conversations.
 
 Caveman Protocol: When writing code, follow the Caveman style: lean, efficient, and direct. Avoid boilerplate, deep nesting, or over-engineered abstractions unless requested.
 
@@ -31,13 +31,6 @@ Project Structure: Standard .NET Web Application / Web API.
 Core Services:
 
 Frontend Portals: Managed as separate apps or project folders (Admin, Patient, Receptionist, Doctor).
-
-Development Workflows
-Backend Workflow: Use standard .NET CLI commands:
-
-dotnet build: To verify compilation and model mapping.
-
-dotnet watch run: For hot-reloading during development.
 
 State Management:
 

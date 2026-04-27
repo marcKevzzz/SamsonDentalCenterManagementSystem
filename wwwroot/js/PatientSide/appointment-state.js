@@ -38,9 +38,12 @@ export const STATE = {
         patientType: "New Patient",
         notes:       "",
         isForOther:  false,
-        otherName:   "",
-        otherSex:    "",
-        otherDob:    ""
+        otherFirstName: "",
+        otherLastName:  "",
+        otherEmail:     "",
+        otherPhone:     "",
+        otherSex:       "",
+        otherDob:       ""
     },
     patient: readServerUser(),  // from server — never from localStorage
     ref:     ""
@@ -71,7 +74,8 @@ export function resetState() {
     STATE.details    = {
         firstName: "", lastName: "", email: "", phone: "",
         sex: "", dob: "", patientType: "New Patient", notes: "",
-        isForOther: false, otherName: "", otherSex: "", otherDob: ""
+        isForOther: false, otherFirstName: "", otherLastName: "", otherEmail: "", otherPhone: "",
+        otherSex: "", otherDob: ""
     };
     // patient stays — it's from the server
 }

@@ -191,13 +191,41 @@ function renderDetailsForm() {
             <p class="font-body text-[.78rem] text-muted mb-4">
                 Your account details will be used as the booking contact. Fill in the patient's info below.
             </p>
-            <div>
-                <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
-                    Full Name <span class="text-primary">*</span>
-                </label>
-                <input id="f_otherName" type="text" class="form-input" placeholder="Patient's full name"
-                    oninput="clearErr('otherName')" />
-                <div id="err_otherName" class="field-error">Name is required.</div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                        First Name <span class="text-primary">*</span>
+                    </label>
+                    <input id="f_otherFirstName" type="text" class="form-input" placeholder="Patient's first name"
+                        oninput="clearErr('otherFirstName')" />
+                    <div id="err_otherFirstName" class="field-error">First name is required.</div>
+                </div>
+                <div>
+                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                        Last Name <span class="text-primary">*</span>
+                    </label>
+                    <input id="f_otherLastName" type="text" class="form-input" placeholder="Patient's last name"
+                        oninput="clearErr('otherLastName')" />
+                    <div id="err_otherLastName" class="field-error">Last name is required.</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                        Email <span class="text-primary">*</span>
+                    </label>
+                    <input id="f_otherEmail" type="email" class="form-input" placeholder="patient@email.com"
+                        oninput="clearErr('otherEmail')" />
+                    <div id="err_otherEmail" class="field-error">Valid email is required.</div>
+                </div>
+                <div>
+                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                        Phone <span class="text-primary">*</span>
+                    </label>
+                    <input id="f_otherPhone" type="tel" class="form-input" placeholder="+63 9XX XXX XXXX"
+                        oninput="clearErr('otherPhone')" />
+                    <div id="err_otherPhone" class="field-error">Phone is required.</div>
+                </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -301,7 +329,10 @@ function restoreFormValues() {
   set("f_email", d.email);
   set("f_phone", d.phone);
   set("f_notes", d.notes);
-  set("f_otherName", d.otherName);
+  set("f_otherFirstName", d.otherFirstName);
+  set("f_otherLastName", d.otherLastName);
+  set("f_otherEmail", d.otherEmail);
+  set("f_otherPhone", d.otherPhone);
   set("f_otherSex", d.otherSex);
   set("f_otherDob", d.otherDob);
 
@@ -389,13 +420,37 @@ function submitDetails() {
       }
     });
   } else {
-    const otherName = document.getElementById("f_otherName");
-    if (!otherName?.value.trim()) {
-      document.getElementById("err_otherName")?.classList.add("show");
-      otherName?.classList.add("error");
-      errors.push("Patient name is required.");
+    const fn = document.getElementById("f_otherFirstName");
+    const ln = document.getElementById("f_otherLastName");
+    const em = document.getElementById("f_otherEmail");
+    const ph = document.getElementById("f_otherPhone");
+
+    if (!fn?.value.trim()) {
+      document.getElementById("err_otherFirstName")?.classList.add("show");
+      fn?.classList.add("error");
       ok = false;
     }
+    if (!ln?.value.trim()) {
+      document.getElementById("err_otherLastName")?.classList.add("show");
+      ln?.classList.add("error");
+      ok = false;
+    }
+
+    const emailVal = em?.value.trim();
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        document.getElementById("err_otherEmail")?.classList.add("show");
+        em?.classList.add("error");
+        ok = false;
+    }
+
+    const phoneVal = ph?.value.trim().replace(/\s+/g, "");
+    if (!phoneVal || !/^(09|\+639|9)\d{9}$/.test(phoneVal)) {
+        document.getElementById("err_otherPhone")?.classList.add("show");
+        ph?.classList.add("error");
+        ok = false;
+    }
+
+    if (!ok) errors.push("Please check the patient details.");
   }
 
   if (!document.getElementById("f_consent")?.checked) {
@@ -423,7 +478,10 @@ function submitDetails() {
   STATE.details.sex = document.getElementById("f_sex").value;
   STATE.details.dob = document.getElementById("f_dob").value;
 
-  STATE.details.otherName = document.getElementById("f_otherName").value;
+  STATE.details.otherFirstName = document.getElementById("f_otherFirstName").value;
+  STATE.details.otherLastName = document.getElementById("f_otherLastName").value;
+  STATE.details.otherEmail = document.getElementById("f_otherEmail").value;
+  STATE.details.otherPhone = document.getElementById("f_otherPhone").value;
   STATE.details.otherSex = document.getElementById("f_otherSex").value;
   STATE.details.otherDob = document.getElementById("f_otherDob").value;
   STATE.details.notes = document.getElementById("f_notes").value;

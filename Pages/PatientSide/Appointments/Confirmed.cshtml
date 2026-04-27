@@ -70,7 +70,7 @@
                         <div class="flex justify-between items-start gap-4">
                             <span class="font-body text-[.72rem] sm:text-[.78rem] text-muted shrink-0">Patient</span>
                             <span class="font-body text-[.78rem] sm:text-[.85rem] font-bold text-brand text-right">
-                                @(appt.IsForOther && !string.IsNullOrEmpty(appt.OtherName) ? appt.OtherName : appt.PatientName)
+                                @(appt.IsForOther && !string.IsNullOrEmpty(appt.OtherFirstName) && !string.IsNullOrEmpty(appt.OtherLastName) ? $"{appt.OtherFirstName} {appt.OtherLastName}" : appt.PatientName)
                             </span>
                         </div>
                         <div class="flex justify-between items-start gap-4">

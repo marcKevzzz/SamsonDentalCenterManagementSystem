@@ -26,7 +26,7 @@ Layout = "AdminSide/_StaffLayout";
 
   <!-- Stats -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card stat-teal relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+    <div class="stat-card stat-teal relative bg-white rounded-xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
       <div class="flex items-center justify-between mb-2">
         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
            <i class="fa-solid fa-calendar-check text-sm"></i>
@@ -36,7 +36,7 @@ Layout = "AdminSide/_StaffLayout";
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Confirmed</div>
     </div>
 
-    <div class="stat-card stat-blue relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+    <div class="stat-card stat-blue relative bg-white rounded-xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
       <div class="flex items-center justify-between mb-2">
         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
            <i class="fa-solid fa-clock text-sm"></i>
@@ -46,7 +46,7 @@ Layout = "AdminSide/_StaffLayout";
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Pending</div>
     </div>
 
-    <div class="stat-card stat-purple relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+    <div class="stat-card stat-purple relative bg-white rounded-xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
       <div class="flex items-center justify-between mb-2">
         <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
            <i class="fa-solid fa-list-ul text-sm"></i>
@@ -56,7 +56,7 @@ Layout = "AdminSide/_StaffLayout";
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Waitlist</div>
     </div>
 
-    <div class="stat-card stat-red relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+    <div class="stat-card stat-red relative bg-white rounded-xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
       <div class="flex items-center justify-between mb-2">
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-accent">
            <i class="fa-solid fa-calendar-xmark text-sm"></i>
@@ -68,7 +68,7 @@ Layout = "AdminSide/_StaffLayout";
   </div>
 
   <!-- Filter bar -->
-  <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 ">
+  <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-xl border border-slate-100 ">
     <div class="relative flex-1 min-w-[240px]">
       <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-brand-300 text-[11px]"></i>
       <input id="search-input" type="text" placeholder="Search by patient name, doctor, or service…"
@@ -98,7 +98,7 @@ Layout = "AdminSide/_StaffLayout";
   </div>
 
   <!-- Table -->
-  <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full min-w-[640px]" id="appointments-table">
         <thead class="bg-slate-50/50">
@@ -292,8 +292,31 @@ Layout = "AdminSide/_StaffLayout";
         </tbody>
       </table>
     </div>
+    <div id="paginationBar" class="hidden flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100">
+      <span class="text-[10.5px] text-brand-400" id="paginationInfo"></span>
+      <div class="flex gap-1.5" id="paginationBtns"></div>
+    </div>
   </div>
 </div>
+
+<script id="appointments-data" type="application/json">
+  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Appointments.Select(appt => new {
+    id              = appt.Id,
+    patientName     = appt.PatientName,
+    patientEmail    = appt.PatientEmail,
+    patientPhone    = appt.PatientPhone,
+    doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
+    doctorId        = appt.DoctorId,
+    serviceName     = appt.ServiceName,
+    serviceId       = appt.ServiceId,
+    serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
+    appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd"),
+    appointmentDateFormatted = appt.AppointmentDate.ToString("MMM dd"),
+    appointmentTime = appt.AppointmentTime,
+    status          = appt.Status,
+    notes           = appt.Notes
+  })))
+</script>
 
 
 <div id="book-modal" class="fixed inset-0 z-50 hidden">
@@ -331,7 +354,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <input id="book-patient-name" type="text" placeholder="e.g. Juan Dela Cruz"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
@@ -339,7 +362,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-envelope absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <input id="book-patient-email" type="email" placeholder="patient@example.com"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
@@ -347,7 +370,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <input id="book-patient-phone" type="tel" placeholder="+63 9XX XXX XXXX"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
           </div>
@@ -366,7 +389,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <select id="book-service"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Choose a service…</option>
                   @foreach (var svc in Model.Services)
                   {
@@ -381,7 +404,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <select id="book-doctor"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Any available specialist</option>
                   @foreach (var doc in Model.Doctors)
                   {
@@ -396,7 +419,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <input id="book-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
@@ -404,7 +427,7 @@ Layout = "AdminSide/_StaffLayout";
               <div class="relative">
                 <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
                 <select id="book-time"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Select slot…</option>
                   @foreach (var slot in SamsonDentalCenterManagementSystem.Services.AppointmentService.ALL_SLOTS)
                   {
@@ -421,7 +444,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="pt-2">
           <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Additional Notes</label>
           <textarea id="book-notes" rows="3" placeholder="Symptoms, preferences, or medical history notes…"
-            class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
+            class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
         </div>
       </div>
 
@@ -464,7 +487,7 @@ Layout = "AdminSide/_StaffLayout";
           <div class="relative">
             <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
             <select id="edit-doctor"
-              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
+              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
               <option value="">Any available specialist</option>
               @foreach (var doc in Model.Doctors)
               {
@@ -478,12 +501,12 @@ Layout = "AdminSide/_StaffLayout";
           <div>
             <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Date *</label>
             <input id="edit-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
-              class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none" />
+              class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none" />
           </div>
           <div>
             <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Time *</label>
             <select id="edit-time"
-              class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
+              class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
               <option value="">Select slot</option>
               @foreach (var slot in SamsonDentalCenterManagementSystem.Services.AppointmentService.ALL_SLOTS)
               {
@@ -524,7 +547,7 @@ Layout = "AdminSide/_StaffLayout";
       </div>
 
       <div class="p-6 space-y-6">
-        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100/50">
+        <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100/50">
             <p id="confirm-modal-message" class="text-[13px] text-emerald-800 leading-relaxed"></p>
         </div>
         
@@ -533,7 +556,7 @@ Layout = "AdminSide/_StaffLayout";
           <div class="relative">
             <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
             <select id="confirm-doctor"
-              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-emerald-500 transition-all outline-none appearance-none">
+              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-emerald-500 transition-all outline-none appearance-none">
               <option value="">Select a doctor…</option>
               @foreach (var doc in Model.Doctors)
               {

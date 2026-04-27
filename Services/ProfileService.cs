@@ -1,13 +1,14 @@
-using Supabase;
-using SamsonDentalCenterManagementSystem.Models;
-using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using SamsonDentalCenterManagementSystem.Models;
+using Supabase;
 
 public class ProfileService
 {
     private readonly Supabase.Client _supabase;
     private readonly string _serviceRoleKey;
     private readonly string _supabaseUrl;
+    private static readonly HttpClient _http = new HttpClient();
 
     public ProfileService(Supabase.Client supabase, string serviceRoleKey, string supabaseUrl)
     {
@@ -20,15 +21,10 @@ public class ProfileService
     {
         try
         {
-
             // Service role client needs to be initialized before use
             await _supabase.InitializeAsync();
 
-            var response = await _supabase
-                .From<Profile>()
-                .Where(x => x.Id == userId)
-                .Get();
-
+            var response = await _supabase.From<Profile>().Where(x => x.Id == userId).Get();
 
             var profile = response.Models.FirstOrDefault();
             if (profile == null)
@@ -58,11 +54,8 @@ public class ProfileService
         try
         {
             await _supabase.InitializeAsync();
-            var response = await _supabase
-                .From<Profile>()
-                .Where(x => x.Email == email)
-                .Get();
-            
+            var response = await _supabase.From<Profile>().Where(x => x.Email == email).Get();
+
             return response.Models.Count > 0;
         }
         catch (Exception ex)
@@ -72,23 +65,26 @@ public class ProfileService
         }
     }
 
-    public async Task<string> UploadAvatar(string userId, byte[] bytes, string ext, string contentType)
+    public async Task<string> UploadAvatar(
+        string userId,
+        byte[] bytes,
+        string ext,
+        string contentType
+    )
     {
         var filePath = $"avatars/{userId}{ext}";
 
         Console.WriteLine($"[ProfileService] Uploading avatar to {filePath}");
 
-        await _supabase.Storage
-            .From("avatars")
-            .Upload(bytes, filePath, new Supabase.Storage.FileOptions
-            {
-                Upsert = true,
-                ContentType = contentType
-            });
+        await _supabase
+            .Storage.From("avatars")
+            .Upload(
+                bytes,
+                filePath,
+                new Supabase.Storage.FileOptions { Upsert = true, ContentType = contentType }
+            );
 
-        var publicUrl = _supabase.Storage
-            .From("avatars")
-            .GetPublicUrl(filePath);
+        var publicUrl = _supabase.Storage.From("avatars").GetPublicUrl(filePath);
 
         Console.WriteLine($"[ProfileService] Public URL: {publicUrl}");
 
@@ -103,23 +99,20 @@ public class ProfileService
 
     public async void RemoveAvatar(string userId)
     {
-        var profile = await _supabase
-            .From<Profile>()
-            .Where(x => x.Id == userId)
-            .Single();
+        var profile = await _supabase.From<Profile>().Where(x => x.Id == userId).Single();
 
-        if (!string.IsNullOrEmpty(profile?.AvatarUrl) &&
-            Uri.TryCreate(profile.AvatarUrl, UriKind.Absolute, out var uri))
+        if (
+            !string.IsNullOrEmpty(profile?.AvatarUrl)
+            && Uri.TryCreate(profile.AvatarUrl, UriKind.Absolute, out var uri)
+        )
         {
-            var filePath = uri.AbsolutePath
-                .Replace("/storage/v1/object/public/", "")
+            var filePath = uri
+                .AbsolutePath.Replace("/storage/v1/object/public/", "")
                 .TrimStart('/');
 
             Console.WriteLine($"[RemoveAvatar] Deleting: {filePath}");
 
-            await _supabase.Storage
-                .From("avatars")
-                .Remove(new List<string> { filePath });
+            await _supabase.Storage.From("avatars").Remove(new List<string> { filePath });
         }
 
         await _supabase
@@ -127,9 +120,7 @@ public class ProfileService
             .Where(x => x.Id == userId)
             .Set(x => x.AvatarUrl!, null)
             .Update();
-
     }
-
 
     public async Task<List<Profile>> GetAllProfiles()
     {
@@ -168,26 +159,37 @@ public class ProfileService
         }
     }
 
+    public async Task CreateProfile(Profile p)
+    {
+        await _supabase.From<Profile>().Insert(p);
+    }
+
     // UPDATE profile fields
     public async Task UpdateProfile(string userId, Profile p)
     {
-        var profile = await _supabase
-            .From<Profile>()
-            .Where(x => x.Id == userId)
-            .Single();
+        var profile = await _supabase.From<Profile>().Where(x => x.Id == userId).Single();
 
-        if (profile == null) throw new Exception("Profile not found.");
+        if (profile == null)
+            throw new Exception("Profile not found.");
 
-        if (!string.IsNullOrWhiteSpace(p.FirstName)) profile.FirstName = p.FirstName;
-        if (!string.IsNullOrWhiteSpace(p.LastName)) profile.LastName = p.LastName;
-        if (!string.IsNullOrWhiteSpace(p.PhoneNumber)) profile.PhoneNumber = p.PhoneNumber;
-        if (!string.IsNullOrWhiteSpace(p.Address)) profile.Address = p.Address;
-        if (!string.IsNullOrWhiteSpace(p.Sex)) profile.Sex = p.Sex;
-        if (!string.IsNullOrWhiteSpace(p.Role)) profile.Role = p.Role;
-        if (!string.IsNullOrWhiteSpace(p.AvatarUrl)) profile.AvatarUrl = p.AvatarUrl;
-        if (!string.IsNullOrWhiteSpace(p.Email)) profile.Email = p.Email;
+        if (!string.IsNullOrWhiteSpace(p.FirstName))
+            profile.FirstName = p.FirstName;
+        if (!string.IsNullOrWhiteSpace(p.LastName))
+            profile.LastName = p.LastName;
+        if (!string.IsNullOrWhiteSpace(p.PhoneNumber))
+            profile.PhoneNumber = p.PhoneNumber;
+        if (!string.IsNullOrWhiteSpace(p.Address))
+            profile.Address = p.Address;
+        if (!string.IsNullOrWhiteSpace(p.Sex))
+            profile.Sex = p.Sex;
+        if (!string.IsNullOrWhiteSpace(p.Role))
+            profile.Role = p.Role;
+        if (!string.IsNullOrWhiteSpace(p.AvatarUrl))
+            profile.AvatarUrl = p.AvatarUrl;
+        if (!string.IsNullOrWhiteSpace(p.Email))
+            profile.Email = p.Email;
 
-        if (!string.IsNullOrWhiteSpace(p.DateOfBirth?.ToString()    ))
+        if (!string.IsNullOrWhiteSpace(p.DateOfBirth?.ToString()))
         {
             profile.DateOfBirth = p.DateOfBirth.Value;
         }
@@ -199,11 +201,7 @@ public class ProfileService
     public async Task DeleteProfile(string userId)
     {
         // Delete from profiles table first
-        await _supabase
-            .From<Profile>()
-            .Where(x => x.Id == userId)
-            .Delete();
-
+        await _supabase.From<Profile>().Where(x => x.Id == userId).Delete();
     }
 
     public async Task UpdateUserEmail(string userId, string newEmail)
@@ -217,9 +215,9 @@ public class ProfileService
         if (string.IsNullOrWhiteSpace(_serviceRoleKey))
             throw new Exception("Service role key is not configured.");
 
-        using var http = new HttpClient();
-        http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
-        http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+        _http.DefaultRequestHeaders.Clear();
+        _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+        _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
 
         var fullUrl = $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users/{userId}";
         Console.WriteLine($"[UpdateUserEmail] Calling: {fullUrl}");
@@ -230,7 +228,7 @@ public class ProfileService
             "application/json"
         );
 
-        var res = await http.PutAsync(fullUrl, payload);
+        var res = await _http.PutAsync(fullUrl, payload);
 
         if (!res.IsSuccessStatusCode)
         {
@@ -244,9 +242,9 @@ public class ProfileService
 
     public async Task UpdateUserPassword(string userId, string newPassword)
     {
-        using var http = new HttpClient();
-        http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
-        http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+        _http.DefaultRequestHeaders.Clear();
+        _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+        _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
 
         var payload = new StringContent(
             System.Text.Json.JsonSerializer.Serialize(new { password = newPassword }),
@@ -254,10 +252,7 @@ public class ProfileService
             "application/json"
         );
 
-        var res = await http.PutAsync(
-            $"{_supabaseUrl}/auth/v1/admin/users/{userId}",
-            payload
-        );
+        var res = await _http.PutAsync($"{_supabaseUrl}/auth/v1/admin/users/{userId}", payload);
 
         if (!res.IsSuccessStatusCode)
         {
@@ -266,19 +261,24 @@ public class ProfileService
         }
     }
 
-    public async Task UploadFileToStorage(string bucket, string path, byte[] bytes, string contentType)
-{
-    await _supabase.Storage
-        .From(bucket)
-        .Upload(bytes, path, new Supabase.Storage.FileOptions
-        {
-            Upsert      = true,
-            ContentType = contentType
-        });
-}
+    public async Task UploadFileToStorage(
+        string bucket,
+        string path,
+        byte[] bytes,
+        string contentType
+    )
+    {
+        await _supabase
+            .Storage.From(bucket)
+            .Upload(
+                bytes,
+                path,
+                new Supabase.Storage.FileOptions { Upsert = true, ContentType = contentType }
+            );
+    }
 
-public string GetPublicUrl(string bucket, string path)
-{
-    return _supabase.Storage.From(bucket).GetPublicUrl(path);
-}
+    public string GetPublicUrl(string bucket, string path)
+    {
+        return _supabase.Storage.From(bucket).GetPublicUrl(path);
+    }
 }

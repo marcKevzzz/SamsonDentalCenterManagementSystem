@@ -17,6 +17,7 @@ public class AdminUsersController : ControllerBase
 
     private readonly string _serviceRoleKey;
     private readonly string _supabaseUrl;
+    private static readonly HttpClient _http = new HttpClient();
 
     public AdminUsersController(ProfileService profileService, Supabase.Client supabase, IConfiguration config)
     {
@@ -46,9 +47,9 @@ public class AdminUsersController : ControllerBase
             if (!string.IsNullOrWhiteSpace(p.AvatarUrl)) data["avatar_url"] = p.AvatarUrl;
             if (!string.IsNullOrWhiteSpace(p.Email)) data["email"] = p.Email;
 
-            using var http = new HttpClient();
-            http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
-            http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+            _http.DefaultRequestHeaders.Clear();
+            _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
             
             var payload = new
 
@@ -68,7 +69,7 @@ public class AdminUsersController : ControllerBase
 
             var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
 
-            var res = await http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users", content);
+            var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users", content);
             
             if (!res.IsSuccessStatusCode)
             {
@@ -108,12 +109,11 @@ public class AdminUsersController : ControllerBase
    public async Task DeleteProfile(string id)
     {
         // 1. Delete auth user FIRST (important)
-        using var http = new HttpClient();
+        _http.DefaultRequestHeaders.Clear();
+        _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+        _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
 
-        http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
-        http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
-
-        var res = await http.DeleteAsync($"{_supabaseUrl}/auth/v1/admin/users/{id}");
+        var res = await _http.DeleteAsync($"{_supabaseUrl}/auth/v1/admin/users/{id}");
 
         if (!res.IsSuccessStatusCode)
         {

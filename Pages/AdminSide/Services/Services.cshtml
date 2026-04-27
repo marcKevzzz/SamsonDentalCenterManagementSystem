@@ -12,12 +12,15 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
             slug     = s.Slug,
             category = s.Category,
             name     = s.Name,
+            price    = s.Price,
+            hero     = s.Hero,
             tagline  = s.Tagline,
             summary  = s.Summary ?? "",
             duration = s.Duration ?? "",
             recovery = s.Recovery ?? "",
-            price    = s.Price,
-            benefits = s.Benefits,
+            icon     = s.Icon ?? "",
+            steps    = s.Steps,
+            faqs     = s.Faqs,
             isActive = s.IsActive
         })
     ))
@@ -42,7 +45,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
     </div>
 
     <!-- Filter bar -->
-    <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+    <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
       <div class="relative flex-1 min-w-[240px]">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-300 text-[11px]"></i>
         <input id="searchInput" type="text" placeholder="Search services by name or description…"
@@ -86,7 +89,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
   <div id="svcModal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" ></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-      <div id="svcModal-box" class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[92vh]">
+      <div id="svcModal-box" class="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[92vh]">
         
         <!-- Modal Header with Banner -->
         <div class="relative bg-brand px-8 py-4 overflow-hidden shrink-0">
@@ -118,7 +121,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="relative">
                   <i class="fa-solid fa-tooth absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
                   <input id="mName" type="text" placeholder="e.g. Teeth Cleaning"
-                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
                 </div>
               </div>
               <div>
@@ -126,7 +129,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="relative">
                   <i class="fa-solid fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
                   <select id="mCategory"
-                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                     <option value="General Dentistry">General Dentistry</option>
                     <option value="Cosmetic">Cosmetic</option>
                     <option value="Specialized">Specialized</option>
@@ -135,12 +138,20 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Status</label>
-                <div class="flex items-center gap-4 py-3 px-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+                <div class="flex items-center gap-4 py-3 px-4 rounded-xl bg-slate-50/50 border border-slate-100">
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="mIsActive" class="sr-only peer" checked>
                     <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                     <span class="ms-3 text-[12px] font-medium text-brand-600">Active</span>
                   </label>
+                </div>
+              </div>
+              <div class="col-span-2">
+                <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Icon (FontAwesome)</label>
+                <div class="relative">
+                  <i class="fa-solid fa-icons absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
+                  <input id="mIcon" type="text" placeholder="e.g. fa-tooth"
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
                 </div>
               </div>
             </div>
@@ -150,14 +161,14 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
               <div class="relative">
                 <i class="fa-solid fa-quote-left absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
                 <input id="mTagline" type="text" placeholder="Short description shown on cards"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
 
             <div class="col-span-2">
               <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Summary</label>
               <textarea id="mSummary" rows="3" placeholder="Detailed description for the service page…" 
-                class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
+                class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
             </div>
           </div>
 
@@ -168,8 +179,8 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
               <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Media & Visuals</h4>
             </div>
 
-            <div class="flex items-center gap-6 p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-              <div id="heroPreview" class="w-24 h-24 rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden flex items-center justify-center shrink-0">
+            <div class="flex items-center gap-6 p-4 rounded-xl bg-slate-50/50 border border-slate-100">
+              <div id="heroPreview" class="w-24 h-24 rounded-xl bg-white border border-slate-100 shadow-sm overflow-hidden flex items-center justify-center shrink-0">
                 <i class="fa-solid fa-image text-brand-100 text-3xl"></i>
               </div>
               <div class="flex-1 space-y-2">
@@ -198,7 +209,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="relative">
                   <i class="fa-solid fa-peso-sign absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
                   <input id="mPrice" type="text" placeholder="e.g. 800"
-                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
                 </div>
               </div>
               <div>
@@ -206,7 +217,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="relative">
                   <i class="fa-solid fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
                   <input id="mDuration" type="text" placeholder="e.g. 45 min"
-                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
                 </div>
               </div>
               <div>
@@ -214,7 +225,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="relative">
                   <i class="fa-solid fa-bed absolute left-4 top-1/2 -translate-y-1/2 text-brand-200 text-xs"></i>
                   <input id="mRecovery" type="text" placeholder="e.g. None"
-                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
                 </div>
               </div>
             </div>
@@ -234,6 +245,34 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
             <div id="benefitsList" class="grid grid-cols-1 gap-2"></div>
           </div>
 
+          <!-- Section: Process Steps -->
+          <div class="space-y-4 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Process Steps</h4>
+              </div>
+              <button id="addStepBtn" type="button" class="text-[11px] font-bold text-primary hover:text-primary-dark flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> Add Step
+              </button>
+            </div>
+            <div id="stepsList" class="grid grid-cols-1 gap-2"></div>
+          </div>
+
+          <!-- Section: FAQ -->
+          <div class="space-y-4 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Frequently Asked Questions</h4>
+              </div>
+              <button id="addFaqBtn" type="button" class="text-[11px] font-bold text-primary hover:text-primary-dark flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> Add FAQ
+              </button>
+            </div>
+            <div id="faqsList" class="grid grid-cols-1 gap-4"></div>
+          </div>
+
           <p id="modalError" class="hidden text-[12px] text-red-500 font-medium bg-red-50 p-3 rounded-xl border border-red-100 text-center"></p>
         </div>
 
@@ -244,7 +283,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
             Discard Changes
           </button>
           <button id="modalSaveBtn" 
-            class="px-8 py-3 bg-primary text-white text-[13px] font-bold rounded-2xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+            class="px-8 py-3 bg-primary text-white text-[13px] font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all">
             Save Service Profile
           </button>
         </div>
@@ -255,9 +294,9 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
   <div id="deleteModal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" ></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-      <div id="deleteModal-box" class="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden pointer-events-auto">
+      <div id="deleteModal-box" class="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden pointer-events-auto">
         <div class="p-8 text-center">
-          <div class="w-16 h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100">
+          <div class="w-16 h-16 rounded-xl bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100">
             <i class="fa-solid fa-trash-can text-2xl"></i>
           </div>
           <h3 class="font-bold text-xl text-brand-900 mb-2">Delete Service?</h3>
@@ -266,7 +305,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
           </p>
           <div class="flex flex-col gap-2">
             <button id="confirmDeleteBtn"
-              class="w-full py-3.5 bg-red-500 text-white text-[13px] font-bold rounded-2xl shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+              class="w-full py-3.5 bg-red-500 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all">
               Yes, Delete Service
             </button>
             <button 

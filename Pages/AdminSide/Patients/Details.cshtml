@@ -1,0 +1,284 @@
+@page "/Admin/Patients/Details"
+@model SamsonDentalCenterManagementSystem.Pages.AdminSide.Patients.PatientDetailsModel
+@{
+    Layout = "AdminSide/_StaffLayout";
+    var p = Model.Patient;
+    var initials = p != null ? $"{(p.FirstName.Length > 0 ? p.FirstName[0] : ' ')}{(p.LastName.Length > 0 ? p.LastName[0] : ' ')}".Trim().ToUpper() : "??";
+    var age = p?.DateOfBirth.HasValue == true ? (DateTime.Today.Year - p.DateOfBirth.Value.Year).ToString() : "N/A";
+}
+
+<div class="page p-4 md:p-6 bg-slate-50 min-h-screen">
+    <!-- Header / Breadcrumbs -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <a href="/Admin/Patients" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-brand-500 hover:bg-slate-50 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </a>
+            <div>
+                <h2 class="text-xl font-extrabold text-brand-900 font-display">Patient Profile</h2>
+                <div class="flex items-center gap-2 text-[11px] text-brand-400">
+                    <span>Admin</span>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Patients</span>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span class="text-brand-600 font-semibold">@p?.FirstName @p?.LastName</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a href="/Admin/Invoices?apptId=@(Model.Appointments.FirstOrDefault(a => a.Status == "arrived")?.Id)" 
+               class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[12.5px] font-bold text-brand-700 shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Create Invoice
+            </a>
+            <button class="px-4 py-2 bg-primary text-white rounded-xl text-[12.5px] font-bold shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New Appointment
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Sidebar: Patient Info -->
+        <div class="lg:col-span-3 space-y-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
+                <div class="flex flex-col items-center text-center mb-6">
+                    <div class="relative mb-4">
+                        @if (!string.IsNullOrEmpty(p?.AvatarUrl)) {
+                            <img src="@p.AvatarUrl" class="w-24 h-24 rounded-3xl object-cover ring-4 ring-slate-50 shadow-lg" />
+                        } else {
+                            <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-3xl font-bold font-display shadow-lg ring-4 ring-slate-50">
+                                @initials
+                            </div>
+                        }
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-4 border-white"></div>
+                    </div>
+                    <h3 class="text-lg font-bold text-brand-900 font-display">@p?.FirstName @p?.LastName</h3>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-brand-400">@p?.Role.ToUpper()</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-brand-500 shadow-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-brand-400 font-bold uppercase">Age / Gender</div>
+                            <div class="text-[13px] font-bold text-brand-800">@age yrs / @(p?.Sex ?? "N/A")</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-brand-500 shadow-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-brand-400 font-bold uppercase">Phone</div>
+                            <div class="text-[13px] font-bold text-brand-800">@p?.PhoneNumber</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-brand-500 shadow-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="text-[10px] text-brand-400 font-bold uppercase">Email</div>
+                            <div class="text-[13px] font-bold text-brand-800 truncate">@p?.Email</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <div class="text-[10px] text-brand-400 font-bold uppercase mb-3">Health Status</div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[11px] font-bold rounded-lg border border-emerald-100">Good Hygiene</span>
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-lg border border-blue-100">Routine Checkup</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="lg:col-span-9 space-y-6">
+            <!-- Stats Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-2 opacity-5 group-hover:scale-110 transition-transform">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shadow-inner">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-brand-400 font-bold uppercase tracking-wider">Outstanding</div>
+                        <div class="text-2xl font-black text-brand-900 font-display">₱@Model.OutstandingBalance.ToString("N0")</div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+                    <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-brand-400 font-bold uppercase tracking-wider">Next Visit</div>
+                        <div class="text-[14px] font-bold text-brand-900">
+                            @(Model.NextAppointment != null ? Model.NextAppointment.AppointmentDate.ToString("MMM dd, yyyy") : "No scheduled")
+                        </div>
+                        @if (Model.NextAppointment != null) {
+                            <div class="text-[10.5px] text-brand-400">@Model.NextAppointment.AppointmentTime</div>
+                        }
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-brand-400 font-bold uppercase tracking-wider">Last Treatment</div>
+                        <div class="text-[14px] font-bold text-brand-900">
+                            @(Model.LastTreatmentDate.HasValue ? Model.LastTreatmentDate.Value.ToString("MMM dd, yyyy") : "None yet")
+                        </div>
+                        @if (Model.ClinicalTimeline.Any()) {
+                            <div class="text-[10.5px] text-brand-400 truncate">@Model.ClinicalTimeline.First().ServiceName</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div x-data="{ tab: 'timeline' }" class="space-y-4">
+                <div class="flex gap-1 bg-white p-1 rounded-2xl border border-slate-200/60 shadow-sm w-fit">
+                    <button @@click="tab = 'timeline'" :class="tab === 'timeline' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Timeline</button>
+                    <button @@click="tab = 'appointments'" :class="tab === 'appointments' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Appointments</button>
+                    <button @@click="tab = 'billing'" :class="tab === 'billing' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Billing</button>
+                    <button @@click="tab = 'notes'" :class="tab === 'notes' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Notes</button>
+                </div>
+
+                <!-- Tab: Timeline -->
+                <div x-show="tab === 'timeline'" class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm min-h-[400px]">
+                    <h4 class="text-md font-bold text-brand-900 mb-6 font-display flex items-center gap-2">
+                        Clinical History
+                        <span class="px-2 py-0.5 bg-slate-100 text-[10px] text-brand-400 rounded-full">@Model.ClinicalTimeline.Count records</span>
+                    </h4>
+
+                    @if (Model.ClinicalTimeline.Any()) {
+                        <div class="relative space-y-8 before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                            @foreach (var t in Model.ClinicalTimeline) {
+                                <div class="relative pl-10">
+                                    <div class="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white border-2 border-primary flex items-center justify-center z-10 shadow-sm">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+                                    </div>
+                                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 hover:shadow-md transition-all">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-[13.5px] font-bold text-brand-900">@t.ServiceName</div>
+                                            <div class="text-[11px] font-bold text-brand-400">@t.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            @if (!string.IsNullOrEmpty(t.ToothNumbers)) {
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-[10px] font-bold uppercase text-brand-400">Teeth:</span>
+                                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-lg">@t.ToothNumbers</span>
+                                                </div>
+                                            }
+                                            <p class="text-[12.5px] text-brand-600 line-clamp-2 italic">"@t.ProcedureDetails"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    } else {
+                        <div class="flex flex-col items-center justify-center py-20 text-center">
+                            <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <p class="text-brand-400 text-[13px]">No clinical treatments recorded yet.</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Tab: Appointments -->
+                <div x-show="tab === 'appointments'" class="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Date & Time</th>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Service</th>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Doctor</th>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @foreach (var a in Model.Appointments) {
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="text-[13px] font-bold text-brand-900">@a.AppointmentDate.ToString("MMM dd, yyyy")</div>
+                                        <div class="text-[11px] text-brand-400">@a.AppointmentTime</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-[13px] text-brand-600 font-medium">@a.ServiceName</td>
+                                    <td class="px-6 py-4 text-[13px] text-brand-600">@a.Doctor?.Profile?.FirstName @a.Doctor?.Profile?.LastName</td>
+                                    <td class="px-6 py-4">
+                                        @{
+                                            var color = a.Status switch {
+                                                "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
+                                                "arrived" => "bg-blue-50 text-blue-600 border-blue-100",
+                                                "completed" => "bg-slate-100 text-slate-600 border-slate-200",
+                                                "cancelled" => "bg-rose-50 text-rose-600 border-rose-100",
+                                                _ => "bg-amber-50 text-amber-600 border-amber-100"
+                                            };
+                                        }
+                                        <span class="px-3 py-1 @color text-[10px] font-bold rounded-full border uppercase tracking-wider">@a.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab: Billing -->
+                <div x-show="tab === 'billing'" class="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Invoice ID</th>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Date</th>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Amount</th>
+                                <th class="px-6 py-4 text-[10.5px] font-bold text-brand-400 uppercase tracking-wider font-display">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @foreach (var i in Model.Invoices) {
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 text-[13px] font-bold text-brand-900 font-display">#INV-@i.Id.Substring(0, 8).ToUpper()</td>
+                                    <td class="px-6 py-4 text-[13px] text-brand-600">@i.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td class="px-6 py-4 text-[13.5px] font-black text-brand-900">₱@i.FinalAmount.ToString("N0")</td>
+                                    <td class="px-6 py-4">
+                                        @if (i.Status == "paid") {
+                                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 border-emerald-100 text-[10px] font-bold rounded-full border uppercase tracking-wider">Paid</span>
+                                        } else {
+                                            <span class="px-3 py-1 bg-amber-50 text-amber-600 border-amber-100 text-[10px] font-bold rounded-full border uppercase tracking-wider">Pending</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab: Notes -->
+                <div x-show="tab === 'notes'" class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-md font-bold text-brand-900 font-display">Clinical Notes</h4>
+                        <button class="text-primary text-[12px] font-bold hover:underline">Save Changes</button>
+                    </div>
+                    <textarea 
+                        class="w-full h-64 p-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:border-primary/40 text-[13.5px] leading-relaxed text-brand-700 resize-none"
+                        placeholder="Enter internal clinical notes, medical history, or allergies here...">Patient is undergoing routine orthodontic treatment. Gum health is stable. No known allergies to local anesthesia.</textarea>
+                    <p class="text-[11px] text-brand-400 mt-3 italic">Last edited: Just now by Dr. Cruz</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    [x-cloak] { display: none !important; }
+    .font-display { font-family: 'Syne', sans-serif; }
+</style>

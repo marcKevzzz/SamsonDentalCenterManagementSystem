@@ -1,0 +1,128 @@
+<!-- ── Staff Modal — unified for Doctor + Receptionist ──────────────────────── -->
+<div id="staffModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <div>
+                <h3 id="staffModalTitle" class="font-display font-bold text-[15px] text-brand-900">Add Staff</h3>
+                <p id="staffModalSubtitle" class="text-[11px] text-brand-500 mt-0.5">Select a role and user profile.</p>
+            </div>
+            <button onclick="closeStaffModal()" class="text-slate-400 hover:text-slate-700 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-4">
+            <input type="hidden" id="staffId" />
+            <input type="hidden" id="staffEditRole" />
+
+            <!-- ── Role Toggle ─────────────────────────────────────────────── -->
+            <div id="roleToggleGroup" class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Staff Role <span class="text-red-400">*</span></label>
+                <div class="flex gap-2">
+                    <button type="button" id="roleBtnDoctor"
+                        onclick="switchStaffRole('doctor')"
+                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all
+                               border-primary bg-primary/5 text-primary">
+                        <i class="fa-solid fa-user-doctor mr-1.5"></i> Doctor
+                    </button>
+                    <button type="button" id="roleBtnReceptionist"
+                        onclick="switchStaffRole('receptionist')"
+                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all
+                               border-slate-200 bg-white text-slate-500 hover:border-slate-300">
+                        <i class="fa-solid fa-headset mr-1.5"></i> Receptionist
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── User Select ─────────────────────────────────────────────── -->
+            <div class="flex flex-col gap-1.5" id="userSelectGroup">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">
+                    Select User <span id="roleHintLabel" class="text-brand-400">(Doctor role)</span>
+                    <span class="text-red-400">*</span>
+                </label>
+                <select id="staffProfileId" class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                    <option value="">Select an available user...</option>
+                </select>
+                <p class="text-[10px] text-brand-400 mt-0.5">Once a profile is selected, it cannot be changed.</p>
+            </div>
+
+            <!-- ── Doctor-only fields ──────────────────────────────────────── -->
+            <div id="doctorFields">
+                <div class="flex flex-col gap-1.5 mb-4">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Title <span class="text-red-400">*</span></label>
+                    <input id="staffTitle" type="text" placeholder="e.g. Dr." value="Dr."
+                           class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+
+                <!-- ── Specialties Multi-select ────────────────────────────── -->
+                <div class="flex flex-col gap-1.5 mb-4">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Specialties</label>
+                    <!-- Selected pills -->
+                    <div id="specialtyPills" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
+                    <!-- Dropdown toggle -->
+                    <div class="relative">
+                        <button type="button" id="specialtyDropdownBtn"
+                            onclick="toggleSpecialtyDropdown()"
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-left
+                                   text-slate-500 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
+                                   flex items-center justify-between">
+                            <span>Select specialties...</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                        </button>
+                        <div id="specialtyDropdown"
+                            class="hidden absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            <!-- Options populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1.5 mb-4">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Bio</label>
+                    <textarea id="staffBio" rows="3" placeholder="Short biography about the doctor..."
+                           class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 resize-none"></textarea>
+                </div>
+
+                <!-- ── Availability Editor ─────────────────────────────────── -->
+                <div id="availabilitySection">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Availability Schedule</label>
+                        <button type="button" onclick="addAvailabilityRow()"
+                            class="text-[11px] font-semibold text-primary hover:text-primary/80 flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[9px]"></i> Add Slot
+                        </button>
+                    </div>
+                    <div id="availabilityRows" class="space-y-2">
+                        <!-- Dynamic rows added by JS -->
+                    </div>
+                    <p id="noAvailabilityMsg" class="text-[10px] text-brand-300 italic mt-1">No schedule set. Click "Add Slot" to create one.</p>
+                </div>
+            </div>
+
+            <!-- ── Receptionist-only fields ────────────────────────────────── -->
+            <div id="receptionistFields" class="hidden">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Desk Location</label>
+                    <input id="staffDeskLocation" type="text" placeholder="e.g. Front Desk, 2nd Floor"
+                           class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+            </div>
+
+            <!-- ── Active status ───────────────────────────────────────────── -->
+            <div class="flex items-center gap-2 mt-2">
+                <input type="checkbox" id="staffIsActive" class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary" checked />
+                <label for="staffIsActive" class="text-[12px] font-medium text-slate-700">Active Status (Check if available)</label>
+            </div>
+
+            <p id="staffModalError" class="hidden text-[12px] text-red-500 font-medium mt-2"></p>
+        </div>
+
+        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
+            <button onclick="closeStaffModal()" class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                Cancel
+            </button>
+            <button onclick="saveStaff()" id="staffSaveBtn" class="px-5 py-2 text-[12.5px] font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2">
+                Save Doctor
+            </button>
+        </div>
+    </div>
+</div>

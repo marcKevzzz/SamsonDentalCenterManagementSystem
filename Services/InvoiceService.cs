@@ -1,5 +1,6 @@
 using SamsonDentalCenterManagementSystem.Models;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -7,7 +8,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 {
     public class InvoiceService
     {
-        private readonly Supabase.Client _supabase;
+        public readonly Supabase.Client _supabase;
         private readonly HttpClient _http;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
@@ -36,18 +37,50 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Invoice> CreateInvoiceAsync(Invoice invoice, List<InvoiceItem> items)
         {
-            // 1. Insert Invoice
-            var res = await _supabase.From<Invoice>().Insert(invoice);
-            var createdInvoice = res.Models.First();
+            // Add Prefer: return=representation so Supabase returns the server-created row
+            var req = BuildRequest(HttpMethod.Post, "/invoices");
+            req.Headers.Add("Prefer", "return=representation");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(new {
+                    appointment_id  = invoice.AppointmentId,
+                    patient_id      = invoice.PatientId,
+                    doctor_id       = invoice.DoctorId,
+                    total_amount    = invoice.TotalAmount,
+                    discount_amount = invoice.DiscountAmount,
+                    final_amount    = invoice.FinalAmount,
+                    status          = invoice.Status,
+                    notes           = invoice.Notes
+                    // omit id — let Supabase generate it
+                }),
+                Encoding.UTF8, "application/json");
 
-            // 2. Set InvoiceId for all items and insert
+            var res  = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            var json        = await res.Content.ReadAsStringAsync();
+            var created     = JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault()
+                            ?? throw new Exception("Invoice creation returned empty.");
+
+            // Now created.Id is the real server-generated UUID
             foreach (var item in items)
-            {
-                item.InvoiceId = createdInvoice.Id;
-            }
-            await _supabase.From<InvoiceItem>().Insert(items);
+                item.InvoiceId = created.Id;
 
-            return createdInvoice;
+            var itemsReq = BuildRequest(HttpMethod.Post, "/invoice_items");
+            itemsReq.Content = new StringContent(
+                JsonSerializer.Serialize(items.Select(i => new {
+                    invoice_id  = i.InvoiceId,
+                    service_id  = i.ServiceId,
+                    description = i.Description,
+                    unit_price  = i.UnitPrice,
+                    quantity    = i.Quantity,
+                    total_price = i.TotalPrice
+                })),
+                Encoding.UTF8, "application/json");
+
+            var itemsRes = await _http.SendAsync(itemsReq);
+            itemsRes.EnsureSuccessStatusCode();
+
+            return created;
         }
 
         public async Task CreateTreatmentsAsync(List<Treatment> treatments)
@@ -100,7 +133,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Invoice>> GetAllInvoicesAsync()
         {
-            var path = "/invoices?select=*,profiles(*),invoice_items(*)&order=created_at.desc";
+            var path = "/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors!doctor_id(*),invoice_items(*)&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -111,7 +144,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Invoice>> GetInvoicesByDoctorIdAsync(string doctorId)
         {
-            var path = $"/invoices?select=*,profiles(*),invoice_items(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
+            var path = $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors!doctor_id(*),invoice_items(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();

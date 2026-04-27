@@ -38,7 +38,7 @@ const SIDEBAR_COLLAPSED = "w-[68px]";
 const pageTitles = {
   dashboard: ["Dashboard", "Overview · Today"],
   patients: ["Patients", "People · Registry"],
-  doctors: ["Doctors", "People · Staff Directory"],
+  staffs: ["Staffs", "People · Staff Directory"],
   users: ["Users", "People · User Management"],
   appointments: ["Appointments", "Operations · Schedule"],
   services: ["Services", "Operations · Catalog"],
@@ -46,6 +46,8 @@ const pageTitles = {
   reports: ["Reports", "Analytics · Insights"],
   inquiries: ["Inquiries", "Analytics · Messages"],
   activitylogs: ["Activity Logs", "Analytics · Audit Trail"],
+  reviews: ["Reviews", "Control · Feedback"],
+  settings: ["Settings", "Control · Settings"],
 };
 
 function UpdateSidebar() {

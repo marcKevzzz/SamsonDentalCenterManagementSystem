@@ -13,15 +13,22 @@
 }
 
 body {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Syne", sans-serif;
+  color: var(--text-main);
 }
+
 h1,
 h2,
 h3,
 h4,
-.font-display {
+.brand-font {
   font-family: "Syne", sans-serif;
 }
+
+.logo-font {
+  font-family: "sans-serif", serif;
+}
+
 
 .sb-collapsed #sidebar .sidebar-text {
   display: none !important;

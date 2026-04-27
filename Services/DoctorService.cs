@@ -6,6 +6,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SamsonDentalCenterManagementSystem.Models;
 
 namespace SamsonDentalCenterManagementSystem.Services
 {
@@ -189,9 +190,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Fetch profiles not yet linked to a doctor (for the Add modal) ─────
         public async Task<List<ProfileDto>> GetAvailableProfilesAsync()
         {
-            // All doctor-role profiles
+            // All doctor-role OR admin-role profiles
             var profileReq = BuildRequest(HttpMethod.Get,
-                "/profiles?select=*&role=eq.doctor&order=first_name.asc");
+                "/profiles?select=*&role=in.(doctor,admin)&order=first_name.asc");
             var profileRes = await _http.SendAsync(profileReq);
             profileRes.EnsureSuccessStatusCode();
 
@@ -211,6 +212,89 @@ namespace SamsonDentalCenterManagementSystem.Services
                 .ToHashSet() ?? new();
 
             return allProfiles.Where(p => !linked.Contains(p.Id)).ToList();
+        }
+
+        // ── Create — direct REST, bypasses ORM nav-property serialization ────
+        public async Task<DoctorDto?> CreateAsync(string profileId, string title, string[]? specialties, string? bio, bool isActive)
+        {
+            var req = BuildRequest(HttpMethod.Post, "/doctors");
+            req.Headers.Add("Prefer", "return=representation");
+            var body = JsonSerializer.Serialize(new
+            {
+                profile_id  = profileId,
+                title       = title,
+                specialties = specialties ?? Array.Empty<string>(),
+                bio         = bio,
+                is_active   = isActive
+            });
+            req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            var json = await res.Content.ReadAsStringAsync();
+            var list = JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new();
+            return list.FirstOrDefault();
+        }
+
+        // ── Update — direct REST ─────────────────────────────────────────────
+        public async Task<DoctorDto?> UpdateAsync(string id, string title, string[]? specialties, string? bio, bool isActive)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/doctors?id=eq.{id}");
+            req.Headers.Add("Prefer", "return=representation");
+            var body = JsonSerializer.Serialize(new
+            {
+                title       = title,
+                specialties = specialties ?? Array.Empty<string>(),
+                bio         = bio,
+                is_active   = isActive
+            });
+            req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            var json = await res.Content.ReadAsStringAsync();
+            var list = JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new();
+            return list.FirstOrDefault();
+        }
+
+        // ── Soft delete ──────────────────────────────────────────────────────
+        public async Task SoftDeleteAsync(string id)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/doctors?id=eq.{id}");
+            var body = JsonSerializer.Serialize(new { is_active = false });
+            req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+        }
+
+        // ── Set availability — bypasses RLS ──────────────────────────────────
+        public async Task SetAvailabilityAsync(string doctorId, List<DoctorAvailability> slots)
+        {
+            // 1. Delete old slots
+            var delReq = BuildRequest(HttpMethod.Delete, $"/doctor_availability?doctor_id=eq.{doctorId}");
+            var delRes = await _http.SendAsync(delReq);
+            delRes.EnsureSuccessStatusCode();
+
+            if (slots == null || !slots.Any()) return;
+
+            // 2. Insert new slots
+            var insReq = BuildRequest(HttpMethod.Post, "/doctor_availability");
+            var payload = slots.Select(s => new
+            {
+                doctor_id   = doctorId,
+                day_of_week = s.DayOfWeek,
+                start_time  = s.StartTime,
+                end_time    = s.EndTime,
+                is_active   = true
+            });
+            var body = JsonSerializer.Serialize(payload);
+            insReq.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var insRes = await _http.SendAsync(insReq);
+            insRes.EnsureSuccessStatusCode();
         }
     }
 }

@@ -9,18 +9,16 @@ Layout = "_AuthLayout";
   <div class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
   <div class="absolute top-20 -right-24 w-64 h-64 rounded-full bg-primary/08 blur-2xl pointer-events-none"></div>
 
-  <a href="../"
-    class="brand-font flex items-center gap-2.5 font-extrabold text-[1rem] tracking-[0.07em] uppercase text-white no-underline relative z-10">
-    <div class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5">
-        <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    </div>
-    Samson Dental <span class="text-primary ml-1">Center</span>
-  </a>
+  <!-- <div
+          class="flex items-center gap-0.5 -ml-8 text-white "
+        >
+          <img src="~/images/logo.svg" alt="logo" class="w-20 h-20 object-cover mt-1 brightness-150" />
+            <span id="logo" class="logo-font font-semibold text-[2.25rem] tracking-[0.12em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-4">
+                Samson  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.22em] text-[0.95rem] p-0.5 pl-1 bg-gray-400/10 rounded-full">Dental  Center</span>
+            </span>
+        </div> -->
 
-  <div class="relative z-10">
+  <div class="relative z-10 my-auto">
     <div
       class="flex items-center gap-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/35 mb-5">
       <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>New
@@ -35,7 +33,7 @@ Layout = "_AuthLayout";
     </p>
 
     <!-- Step progress visual -->
-    <div class="space-y-4">
+    <div class="space-y-1">
       <div class="flex items-center gap-3">
         <div id="lp_step1"
           class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 font-body text-[0.75rem] font-bold text-white step-indicator">
@@ -105,18 +103,12 @@ Layout = "_AuthLayout";
 <div class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto ">
   <form id="signup-form" method="post" class="w-full max-w-[460px] fade-up animate">
     <!-- Mobile logo -->
-    <div class="flex lg:hidden justify-center mb-8">
-      <a href="../"
-        class="brand-font flex items-center gap-2 font-extrabold text-[1rem] tracking-[0.07em] uppercase text-brand no-underline">
-        <div class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5">
-            <circle cx="12" cy="12" r="9" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+    <div  class="brand-logo flex items-center mb-2 -ml-4">
+           <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 " />
+            <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 ">
+                Samson  <span id="logo-last" class="text-gray-600 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/20 rounded-full">Dental  Center</span>
+            </span>
         </div>
-        Samson Dental <span class="text-primary ml-1">Center</span>
-      </a>
-    </div>
 
     <!-- Header -->
     <div class="mb-7">

@@ -182,7 +182,7 @@
                     }
                     @foreach (var inv in Model.RecentInvoices)
                     {
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50">
+                        <a href="/Doctor/Invoices?invId=@inv.Id" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
                             <div class="min-w-0">
                                 <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
                                 <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd")</div>
@@ -191,7 +191,7 @@
                                 <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
                                 <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
                             </div>
-                        </div>
+                        </a>
                     }
                 </div>
             </div>

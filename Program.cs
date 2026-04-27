@@ -86,32 +86,43 @@ builder.Services.Configure<ResendClientOptions>( options =>
 } );
 builder.Services.AddTransient<IResend, ResendClient>();
 
+// ── Setup IHttpClientFactory to prevent socket exhaustion ─────────────────────
+builder.Services.AddHttpClient("SupabaseClient");
+
 // ── Appointment Service Registration ──────────────────────────────────────────
 // We use AddSingleton (or AddScoped) and manually pass the config values 
 // required by the constructor you defined in Services/AppointmentService.cs
 builder.Services.AddScoped<AppointmentService>(provider =>
 {
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
     return new AppointmentService(
         serviceClient, 
         supabaseServiceKey, 
         supabaseUrl, 
         provider.GetRequiredService<IResend>(), 
-        appBaseUrl,
-        new HttpClient()
+        appBaseUrl ?? "http://localhost:5081",
+        httpFactory.CreateClient("SupabaseClient")
     );
 });
 
-builder.Services.AddSingleton<DoctorService>(_ =>
-    new DoctorService(new HttpClient(), supabaseUrl, supabaseServiceKey));
+builder.Services.AddSingleton<DoctorService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new DoctorService(httpFactory.CreateClient("SupabaseClient"), supabaseUrl, supabaseServiceKey);
+});
 
-builder.Services.AddSingleton<ReceptionistService>(_ =>
-    new ReceptionistService(new HttpClient(), supabaseUrl, supabaseServiceKey));
+builder.Services.AddSingleton<ReceptionistService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new ReceptionistService(httpFactory.CreateClient("SupabaseClient"), supabaseUrl, supabaseServiceKey);
+});
 
 builder.Services.AddScoped<InvoiceService>(provider =>
 {
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
     return new InvoiceService(
         serviceClient,
-        new HttpClient(),
+        httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
         supabaseServiceKey
     );

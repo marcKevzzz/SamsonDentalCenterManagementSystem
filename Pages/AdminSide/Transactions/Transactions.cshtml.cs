@@ -1,20 +1,26 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Helpers;
+using SamsonDentalCenterManagementSystem.Models;
+using SamsonDentalCenterManagementSystem.Services;
 
 namespace SamsonDentalCenterManagementSystem.Pages;
 
 public class AdminTransactionsModel : AdminPageModel
 {
-    private readonly ILogger<AdminTransactionsModel> _logger;
+    private readonly InvoiceService _invoiceService;
 
-    public AdminTransactionsModel(ILogger<AdminTransactionsModel> logger, ProfileService profileService)
+    public AdminTransactionsModel(ProfileService profileService, InvoiceService invoiceService)
         : base(profileService)
     {
-        _logger = logger;
+        _invoiceService = invoiceService;
     }
 
-    public void OnGet()
+    public List<Invoice> Invoices { get; set; } = new();
+
+    public async Task<IActionResult> OnGetAsync()
     {
+        Invoices = await _invoiceService.GetAllInvoicesAsync();
+        return Page();
     }
 }

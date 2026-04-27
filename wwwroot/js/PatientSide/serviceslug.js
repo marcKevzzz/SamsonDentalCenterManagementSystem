@@ -115,16 +115,49 @@ function playEntranceAnimations() {
       }
     }
   );
+
+  gsap.fromTo(".step-item", 
+    { autoAlpha: 0, x: -20 },
+    {
+      autoAlpha: 1,
+      x: 0,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ".steps-container",
+        start: "top 80%",
+      }
+    }
+  );
 }
 
 function setupFaqInteractions() {
-  const faqButtons = document.querySelectorAll(".faq-toggle");
+  const toggles = document.querySelectorAll(".faq-toggle");
 
-  faqButtons.forEach((button) => {
+  toggles.forEach((button) => {
     button.addEventListener("click", () => {
-      // Cleaner extraction of the index using dataset or ID replacement
-      const faqIndex = button.id.replace("toggleFaq", "");
-      toggleFaq(faqIndex);
+      const index = button.getAttribute("data-index");
+      const answer = document.getElementById(`faq-${index}`);
+      const icon = document.getElementById(`chevron-${index}`);
+      
+      // Check if this specific item is already open
+      const isOpen = answer?.style.maxHeight !== "0px" && answer?.style.maxHeight !== "";
+
+      // Close ALL open FAQs (Accordion behavior)
+      document.querySelectorAll(".faq-answer").forEach((el) => {
+        el.style.maxHeight = "0px";
+      });
+      document.querySelectorAll(".faq-chevron").forEach((el) => {
+        el.style.transform = "rotate(0deg)";
+      });
+
+      // If it wasn't open, open it now
+      if (!isOpen && answer) {
+        // Set maxHeight to the actual height of the content
+        answer.style.maxHeight = answer.scrollHeight + "px";
+        if (icon) icon.style.transform = "rotate(180deg)";
+      }
     });
   });
 }

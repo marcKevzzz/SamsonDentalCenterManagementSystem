@@ -150,7 +150,10 @@ public class AppointmentsController : ControllerBase
             status      = a.Status,
             isWaitlist  = a.IsWaitlist,
             isForOther  = a.IsForOther,
-            otherName   = a.OtherName,
+            otherFirstName   = a.OtherFirstName,
+            otherLastName   = a.OtherLastName,
+            otherPhone   = a.OtherPhone,
+            otherEmail   = a.OtherEmail,
             patientName = a.PatientName
         }));
     }
@@ -175,7 +178,10 @@ public class AppointmentsController : ControllerBase
                 status      = appt.Status,
                 isWaitlist  = appt.IsWaitlist,
                 isForOther  = appt.IsForOther,
-                otherName   = appt.OtherName,
+                otherFirstName   = appt.OtherFirstName,
+                otherLastName   = appt.OtherLastName,
+                otherPhone   = appt.OtherPhone,
+                otherEmail   = appt.OtherEmail,
                 patientName = appt.PatientName,
                 patientEmail = appt.PatientEmail,
                 refNumber   = $"SDC-{appt.Id[..8].ToUpper()}"

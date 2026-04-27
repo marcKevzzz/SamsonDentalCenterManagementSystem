@@ -37,6 +37,22 @@ namespace SamsonDentalCenterManagementSystem.Controllers
             return Ok(services.Select(ToDto));
         }
 
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetDistinctCategories()
+        {
+            var services = await _svcService.GetAll(activeOnly: true);
+            
+            // Extract unique categories, remove nulls, and sort
+            var categories = services
+                .Select(s => s.Category) 
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
+            return Ok(categories);
+        }
+
         // GET /api/services/all — admin, includes inactive
         [HttpGet("all")]
         [Authorize(Policy = "AdminOnly")]

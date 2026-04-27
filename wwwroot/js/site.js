@@ -13,6 +13,7 @@ export function toggleNavbar(isActive) {
   const navLinks = document.querySelectorAll(".nav-link");
   const profileChevron = document.getElementById("profileChevron");
   const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const logoLast = document.getElementById("logo-last");
 
   if (isActive) {
     navbar.classList.add("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
@@ -30,6 +31,8 @@ export function toggleNavbar(isActive) {
     const guestAvatar = document.getElementById("guestAvatar");
     guestAvatar?.classList.add("text-brand");
     guestAvatar?.classList.remove("text-white");
+    logoLast?.classList.remove("text-gray-400");
+    logoLast?.classList.add("text-gray-600");
   } else {
     navbar.classList.remove("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
     navbar.classList.add("border-transparent");
@@ -39,6 +42,8 @@ export function toggleNavbar(isActive) {
     if (hasDarkHero) {
         logo?.classList.add("text-white");
         logo?.classList.remove("text-brand");
+        logoLast?.classList.remove("text-gray-600");
+        logoLast?.classList.add("text-gray-400");
         hamburgerBtn?.classList.add("text-white");
         hamburgerBtn?.classList.remove("text-brand");
         navLinks.forEach(link => {
@@ -52,6 +57,7 @@ export function toggleNavbar(isActive) {
         guestAvatar?.classList.remove("text-brand");
     } else {
         logo?.classList.add("text-brand");
+        logoLast?.classList.add("text-gray-600");
         hamburgerBtn?.classList.add("text-brand");
         navLinks.forEach(link => link.classList.add("text-brand"));
         profileChevron?.classList.add("text-brand");
@@ -71,6 +77,9 @@ function setActive(id) {
   }
   if (mel) {
       mel.classList.add("active", "text-primary");
+  }
+  if (id === "servicesBtn") {
+      el.classList.add("service");
   }
 }
 
@@ -103,6 +112,7 @@ export function syncActiveLink() {
     setActive("nav-about");
   } else if (path.startsWith("/services")) {
     setActive("servicesBtn");
+  
   } else if (path.startsWith("/contacts")) {
     setActive("nav-contacts");
   } else if (path.startsWith("/profile")) {

@@ -39,6 +39,8 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly HttpClient _http;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
+        
+
 
         private static readonly JsonSerializerOptions _json = new()
         {
@@ -88,6 +90,83 @@ namespace SamsonDentalCenterManagementSystem.Services
             var receptionists = JsonSerializer.Deserialize<List<ReceptionistDto>>(json, _json) ?? new();
             
             return receptionists.FirstOrDefault();
+        }
+
+        // ── Fetch receptionist-role profiles not yet linked ───────────────────
+        public async Task<List<ProfileDto>> GetAvailableProfilesAsync()
+        {
+            var profileReq = BuildRequest(HttpMethod.Get,
+                "/profiles?select=*&role=eq.receptionist&order=first_name.asc");
+            var profileRes = await _http.SendAsync(profileReq);
+            profileRes.EnsureSuccessStatusCode();
+
+            var allProfiles = JsonSerializer.Deserialize<List<ProfileDto>>(
+                await profileRes.Content.ReadAsStringAsync(), _json) ?? new();
+
+            var recReq = BuildRequest(HttpMethod.Get, "/receptionists?select=profile_id");
+            var recRes = await _http.SendAsync(recReq);
+            recRes.EnsureSuccessStatusCode();
+
+            var linked = JsonSerializer
+                .Deserialize<List<JsonElement>>(
+                    await recRes.Content.ReadAsStringAsync(), _json)
+                ?.Select(e => e.TryGetProperty("profile_id", out var v) ? v.GetString() : null)
+                .Where(id => id != null)
+                .ToHashSet() ?? new();
+
+            return allProfiles.Where(p => !linked.Contains(p.Id)).ToList();
+        }
+
+        // ── Create — uses service role key, bypasses RLS ─────────────────────
+        public async Task<ReceptionistDto?> CreateAsync(string profileId, string? deskLocation, bool isActive)
+        {
+            var req = BuildRequest(HttpMethod.Post, "/receptionists");
+            req.Headers.Add("Prefer", "return=representation");
+            var body = JsonSerializer.Serialize(new
+            {
+                profile_id    = profileId,
+                desk_location = deskLocation,
+                is_active     = isActive
+            });
+            req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            var json = await res.Content.ReadAsStringAsync();
+            var list = JsonSerializer.Deserialize<List<ReceptionistDto>>(json, _json) ?? new();
+            return list.FirstOrDefault();
+        }
+
+        // ── Update ───────────────────────────────────────────────────────────
+        public async Task<ReceptionistDto?> UpdateAsync(string id, string? deskLocation, bool isActive)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/receptionists?id=eq.{id}");
+            req.Headers.Add("Prefer", "return=representation");
+            var body = JsonSerializer.Serialize(new
+            {
+                desk_location = deskLocation,
+                is_active     = isActive
+            });
+            req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            var json = await res.Content.ReadAsStringAsync();
+            var list = JsonSerializer.Deserialize<List<ReceptionistDto>>(json, _json) ?? new();
+            return list.FirstOrDefault();
+        }
+
+        // ── Soft delete ──────────────────────────────────────────────────────
+        public async Task SoftDeleteAsync(string id)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/receptionists?id=eq.{id}");
+            var body = JsonSerializer.Serialize(new { is_active = false });
+            req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
         }
     }
 }
