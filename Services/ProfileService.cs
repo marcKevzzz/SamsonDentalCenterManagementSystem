@@ -196,6 +196,16 @@ public class ProfileService
         }
 
         await _supabase.From<Profile>().Upsert(profile);
+
+        // Sync to auth.users metadata
+        try
+        {
+            await UpdateUserMetadata(userId, new { first_name = profile.FirstName, last_name = profile.LastName });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Metadata Sync Warning]: {ex.Message}");
+        }
     }
 
     // DELETE profile (also deletes from auth.users via Supabase Admin API)
@@ -317,6 +327,27 @@ public class ProfileService
             .Update();
 
         Console.WriteLine($"[Service] Profile {userId} set to Active: {isActive}");
+    }
+
+    public async Task UpdateUserMetadata(string userId, object metadata)
+    {
+        _http.DefaultRequestHeaders.Clear();
+        _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+        _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+
+        var payload = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(new { user_metadata = metadata }),
+            System.Text.Encoding.UTF8,
+            "application/json"
+        );
+
+        var res = await _http.PutAsync($"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users/{userId}", payload);
+
+        if (!res.IsSuccessStatusCode)
+        {
+            var error = await res.Content.ReadAsStringAsync();
+            Console.WriteLine($"[UpdateUserMetadata] Failed: {error}");
+        }
     }
 
     public string GetPublicUrl(string bucket, string path)

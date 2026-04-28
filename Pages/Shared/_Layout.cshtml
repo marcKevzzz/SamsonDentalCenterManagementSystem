@@ -1,3 +1,7 @@
+@inject SamsonDentalCenterManagementSystem.Services.ClinicService ClinicService
+@{
+    var settings = await ClinicService.GetSettingsAsync();
+}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,19 +27,40 @@
   <script src="~/js/config.js" asp-append-version="true"></script>
 </head>
 
-<body>
+<body class="bg-white">
+  
+  <!-- Loading Screen -->
+  <div id="page-loader" class="fixed inset-0 z-[20000] bg-white flex flex-col items-center justify-center transition-opacity duration-700">
+    <div class="relative w-20 h-20 mb-4">
+      <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+      <div class="absolute inset-0 border-4 border-brand rounded-full animate-spin border-t-transparent"></div>
+      <img src="~/images/logo.svg" alt="logo" class="absolute inset-4 w-12 h-12 object-contain animate-pulse" />
+    </div>
+    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Samson Dental</span>
+  </div>
 
   <script>
-  document.documentElement.classList.add('js-enabled');
+    document.documentElement.classList.add('js-enabled');
     // Fast check before the big JS files load
-    if (localStorage.getItem("sb_user")) {
-      document.documentElement.classList.add("is-signed-in");
-    }
-
     const savedUser = localStorage.getItem("sb_user");
-    const user = JSON.parse(savedUser);
-    if (user?.role === "admin") {
-      window.location.replace("/admin/dashboard");
+    if (savedUser) {
+      document.documentElement.classList.add("is-signed-in");
+      try {
+        const user = JSON.parse(savedUser);
+        const path = window.location.pathname.toLowerCase();
+        const staffRoles = ["admin", "doctor", "receptionist"];
+
+        if (staffRoles.includes(user?.role)) {
+          // Only redirect if on public pages (Root, Signin, Signup)
+          const publicPages = ["/", "/sign-in", "/sign-up"];
+          if (publicPages.includes(path) || path === "") {
+            const dashboard = user.role === "admin" ? "/Admin/Dashboard" :
+              user.role === "doctor" ? "/Doctor/Dashboard" :
+                "/Receptionist/Dashboard";
+            window.location.replace(dashboard);
+          }
+        }
+      } catch (e) { }
     }
   </script>
 
@@ -67,6 +92,15 @@
 
 
   @await RenderSectionAsync("Scripts", required: false)
+  <script>
+    window.addEventListener('load', () => {
+        const loader = document.getElementById('page-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 700);
+        }
+    });
+  </script>
 </body>
 
 </html>

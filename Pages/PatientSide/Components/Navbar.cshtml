@@ -1,3 +1,7 @@
+@inject SamsonDentalCenterManagementSystem.Services.ClinicService ClinicService
+@{
+    var settings = await ClinicService.GetSettingsAsync();
+}
 <header
   id="navbar"
   class="fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 border-b border-transparent"
@@ -10,7 +14,7 @@
       class="brand-logo flex items-center group transition-transform duration-300 hover:scale-105"
     >
       <img
-        src="~/images/logo.svg"
+        src="@(string.IsNullOrEmpty(settings?.LogoUrl) ? "/images/logo.svg" : settings.LogoUrl)"
         alt="logo"
         class="w-12 h-12 object-cover mt-1 brightness-150"
       />
@@ -18,10 +22,10 @@
         id="logo"
         class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex"
       >
-        Samson
+        @(settings?.ClinicName?.Replace(" Dental Center", "") ?? "Samson")
         <span
           id="logo-last"
-          class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full"
+          class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full text-center"
           >Dental Center</span
         >
       </span>

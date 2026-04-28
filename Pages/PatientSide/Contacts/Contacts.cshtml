@@ -4,6 +4,7 @@
     ViewData["Title"] = "Contacts page";
 }
 
+
 <section class="bg-brand pt-[68px] h-[300px] md:h-[400px] relative overflow-hidden">
   <div class="absolute inset-0 opacity-[0.04]"
          style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
@@ -31,9 +32,8 @@
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.95-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
         </div>
-        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Phone</div>
-        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">+63 2 8888 1234</div>
-        <div class="font-body text-[0.78rem] text-muted">Mon–Sat, 8 AM – 6 PM</div>
+        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">@(Model.ClinicSettings.ContactPhone ?? "+63 2 8888 1234")</div>
+        <div class="font-body text-[0.78rem] text-muted">@(Model.ClinicSettings.Landline ?? "Mon–Sat, 8 AM – 6 PM")</div>
       </div>
  
       <!-- Email -->
@@ -44,9 +44,8 @@
             <polyline points="22,6 12,13 2,6"/>
           </svg>
         </div>
-        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Email</div>
-        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">hello@samsondentalph</div>
-        <div class="font-body text-[0.78rem] text-muted">We reply within 24 hours</div>
+        <div class="brand-font font-bold text-[0.95rem]  text-brand mb-0.5 truncate">@(Model.ClinicSettings.ContactEmail ?? "support@samson.com")</div>
+        <div class="font-body text-[0.78rem] text-muted">Typical reply within 24 hours</div>
       </div>
  
       <!-- Location -->
@@ -56,9 +55,8 @@
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
           </svg>
         </div>
-        <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Address</div>
-        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">7 Himlayan Rd</div>
-        <div class="font-body text-[0.78rem] text-muted">Tandang Sora, Quezon City</div>
+        <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">Samson Dental</div>
+        <div class="font-body text-[0.78rem] text-muted">@(Model.ClinicSettings.LocationAddress ?? "7 Himlayan Rd, Tandang Sora, QC")</div>
       </div>
  
       <!-- Status -->
@@ -69,11 +67,13 @@
           </svg>
         </div>
         <div class="font-body text-[0.65rem] font-semibold tracking-[0.12em] uppercase text-muted mb-1.5">Clinic Status</div>
-        <div class="flex items-center gap-2 mb-0.5">
-          <span class="dot-pulse w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-          <span class="brand-font font-bold text-[0.95rem] text-green-600">Open Now</span>
+        <div id="clinicStatusDisplay">
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block animate-pulse"></span>
+              <span class="brand-font font-bold text-[0.95rem] text-slate-400">Loading Status...</span>
+            </div>
+            <div class="font-body text-[0.78rem] text-muted italic">Syncing with schedule...</div>
         </div>
-        <div class="font-body text-[0.78rem] text-muted">Closes at 6:00 PM today</div>
       </div>
  
     </div>
@@ -142,6 +142,13 @@
         <input type="hidden" id="patientId" value="@Model.CurrentPatientId" />
         <script>
             window.activeInquiryId = '@(Model.ActiveInquiry?.Id)';
+            window.clinicSettings = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+                hours = Model.ClinicSettings.ClinicalHoursRaw,
+                status = new {
+                    isAutomated = Model.ClinicSettings.IsAutomatedStatus,
+                    manual = Model.ClinicSettings.ManualStatus
+                }
+            }));
         </script>
         <!-- Name row -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -203,12 +210,27 @@
     <!-- RIGHT: Map + Hours -->
     <div class="reveal-up space-y-6">
  
-      <!-- Map -->
       <div class="map-wrap shadow-xl h-[340px]">
-        <iframe class="w-full h-full border-0"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.4!2d121.057!3d14.694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b17b7b8a5e9d%3A0x8e3e6f6d8d1f8b5e!2sTandang%20Sora%20Ave%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1710000000000"
-          allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
+        @if (!string.IsNullOrEmpty(Model.ClinicSettings.MapsUrl) && (Model.ClinicSettings.MapsUrl.Contains("google.com/maps/embed") || Model.ClinicSettings.MapsUrl.Contains("pb=")))
+        {
+            <iframe class="w-full h-full border-0"
+              src="@Model.ClinicSettings.MapsUrl"
+              allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        }
+        else
+        {
+            <div class="w-full h-full bg-slate-100 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <i class="fa-solid fa-map-location-dot text-brand text-2xl"></i>
+                </div>
+                <p class="font-body text-[0.78rem] text-slate-500 max-w-[180px] mb-6">Interactive map requires an Embed URL from Google Maps.</p>
+                <a href="@(Model.ClinicSettings.MapsUrl ?? "https://maps.google.com/?q=Samson+Dental+Center")" target="_blank"
+                   class="px-6 py-2 bg-brand text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-md shadow-brand/10">
+                    Open Map Link
+                </a>
+            </div>
+        }
       </div>
  
       <!-- Directions link -->
@@ -222,7 +244,7 @@
           </div>
           <div>
             <div class="brand-font font-bold text-[0.85rem] text-brand">Get Directions</div>
-            <div class="font-body text-[0.74rem] text-muted">7 Himlayan Rd, Tandang Sora, QC</div>
+            <div class="font-body text-[0.74rem] text-muted">@(Model.ClinicSettings.LocationAddress ?? "7 Himlayan Rd, QC")</div>
           </div>
         </div>
         <svg class="w-4 h-4 text-muted group-hover:text-primary transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -240,25 +262,14 @@
           </div>
           <span class="brand-font font-bold text-[0.85rem] text-brand">Operating Hours</span>
         </div>
-        <div class="px-6 pb-2">
-          <div class="flex justify-between items-center py-3 border-b border-[#e5e7eb]">
-            <span class="font-body text-[0.87rem] text-muted">Monday – Friday</span>
-            <span class="brand-font font-bold text-[0.87rem] text-brand">9:00 AM – 6:00 PM</span>
-          </div>
-          <div class="flex justify-between items-center py-3 border-b border-[#e5e7eb]">
-            <span class="font-body text-[0.87rem] text-muted">Saturday</span>
-            <span class="brand-font font-bold text-[0.87rem] text-brand">8:00 AM – 5:00 PM</span>
-          </div>
-          <div class="flex justify-between items-center py-3">
-            <span class="font-body text-[0.87rem] text-muted">Sunday</span>
-            <span class="font-body text-[0.87rem] text-muted italic">By Appointment Only</span>
-          </div>
+        <div id="operatingHoursList" class="px-6 pb-2">
+           <div class="py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest">Loading hours...</div>
         </div>
       </div>
  
       <!-- Social / quick contacts -->
       <div class="grid grid-cols-2 gap-4">
-        <a href="tel:+63288881234"
+        <a href="tel:@(Model.ClinicSettings.ContactPhone)"
            class="mission-card bg-brand text-white rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-3 no-underline hover:bg-primary transition-colors group">
           <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -267,10 +278,10 @@
           </div>
           <div class="max-w-full">
             <div class="brand-font font-bold text-[0.78rem] text-white sm:text-left text-center">Call Us</div>
-            <div class="font-body text-[0.72rem] text-white/60 sm:text-left text-center truncate text-nowrap">+63 2 8888 1234</div>
+            <div class="font-body text-[0.72rem] text-white/60 sm:text-left text-center truncate text-nowrap">@(Model.ClinicSettings.ContactPhone ?? "N/A")</div>
           </div>
         </a>
-        <a href="mailto:hello@samsondentalph"
+        <a href="mailto:@(Model.ClinicSettings.ContactEmail)"
            class="mission-card bg-offwhite rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-3 no-underline hover:bg-red-50 transition-colors group">
           <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -280,7 +291,7 @@
           </div>
           <div class="max-w-full">
             <div class="brand-font font-bold text-[0.78rem] text-brand sm:text-left text-center">Email Us</div>
-            <div class="font-body text-[0.72rem] text-muted sm:text-left text-center truncate w-full">hello@samsondentalph</div>
+            <div class="font-body text-[0.72rem] text-muted sm:text-left text-center truncate w-full">@(Model.ClinicSettings.ContactEmail ?? "support@samson.com")</div>
           </div>
         </a>
       </div>
@@ -288,4 +299,4 @@
     </div>
   </div>
 </section>
-<script src="~/js/PatientSide/contacts.js"></script>
+<script type="module" src="~/js/PatientSide/contacts.js"></script>

@@ -25,33 +25,7 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var appointmentService = HttpContext.RequestServices.GetRequiredService<AppointmentService>();
-            var dentalService = HttpContext.RequestServices.GetRequiredService<DentalServiceService>();
-            
-            Services = await dentalService.GetAll();
-            var allAppts = await appointmentService.GetAllAsync();
-            ArrivedAppointments = allAppts.Where(a => a.Status == "arrived").ToList();
-
-            if (CurrentUserRole == "doctor")
-            {
-                var doctorRecord = await _doctorService.GetDoctorByProfileIdAsync(CurrentUserId);
-                if (doctorRecord != null)
-                {
-                    DoctorRecordId = doctorRecord.Id;
-                    Invoices = await _invoiceService.GetInvoicesByDoctorIdAsync(doctorRecord.Id);
-                    // Filter arrived patients to only this doctor's
-                    ArrivedAppointments = ArrivedAppointments.Where(a => a.DoctorId == doctorRecord.Id).ToList();
-                }
-            }
-            else if (CurrentUserRole == "admin")
-            {
-                Invoices = await _invoiceService.GetAllInvoicesAsync();
-            }
-            else
-            {
-                return RedirectToPage("/AdminSide/Index");
-            }
-
+            // Data handled by AdminStore on the client side
             return Page();
         }
     }

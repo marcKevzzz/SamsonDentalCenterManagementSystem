@@ -23,18 +23,6 @@ public class AdminPatientsModel : AdminPageModel
 
     public async Task OnGetAsync()
     {
-        var all = await _profileService.GetAllProfiles();
-        Patients = all.Where(p => p.Role == "patient").ToList();
-
-          var apptService = HttpContext.RequestServices.GetRequiredService<AppointmentService>();
-    var appts = await apptService.GetAllAsync();
-    
-    LastAppointments = Patients.ToDictionary(
-        p => p.Id,
-        p => appts
-            .Where(a => a.PatientId == p.Id && a.Status == "arrived")
-            .OrderByDescending(a => a.AppointmentDate)
-            .FirstOrDefault()
-    );
+        // No data fetching here; handled by AdminStore on the client side.
     }
 }

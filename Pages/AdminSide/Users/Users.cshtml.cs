@@ -20,8 +20,7 @@ public class AdminUsersModel : AdminPageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var id = User.FindFirst("sub")?.Value;
-        Users = await _profileService.GetAllProfilesExceptSelf(id!);
+        // Data handled by AdminStore on the client side
         return Page();
     }
 }

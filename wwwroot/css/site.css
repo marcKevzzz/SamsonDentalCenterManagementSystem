@@ -570,8 +570,7 @@ body.standalone {
   display: flex;
   gap: 32px;
   transition: none;
-  opacity: 0;
-  visibility: hidden;
+ 
 }
 
 #reviewsContainer > div {

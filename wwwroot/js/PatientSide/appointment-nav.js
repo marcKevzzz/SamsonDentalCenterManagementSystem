@@ -73,18 +73,25 @@ export function updateChrome() {
         const done   = s.id < dispStep;
         const active = s.id === dispStep;
         const last   = i === STEP_META.length - 1;
+        
+        // Only allow clicking to steps already reached or passed
+        const canClick = s.id <= dispStep;
+
         return `
-        <div class="flex items-center ${last ? "" : "flex-1"}">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-full flex items-center justify-center text-[.68rem] font-bold brand-font
-                    ${done ? "bg-primary text-white" : active ? "bg-brand text-white" : "bg-[#e5e7eb] text-muted"}">
+        <div class="flex items-center ${last ? "" : "flex-1"}" 
+             ${canClick ? `onclick="window.goToStep(${s.id})"` : ""}>
+            <div class="flex items-center gap-2 ${canClick ? "cursor-pointer group" : ""}">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-[.68rem] font-bold brand-font transition-all duration-200
+                    ${done ? "bg-primary text-white" : active ? "bg-brand text-white" : "bg-[#e5e7eb] text-muted"}
+                    ${canClick && !active ? "group-hover:bg-brand/80" : ""}">
                     ${done
                         ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
                             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
                         : s.id}
                 </div>
-                <span class="hidden sm:block font-body text-[.72rem] font-medium
-                    ${active ? "text-brand" : done ? "text-primary" : "text-muted"}">${s.label}</span>
+                <span class="hidden sm:block font-body text-[.72rem] font-medium transition-all duration-200
+                    ${active ? "text-brand" : done ? "text-primary" : "text-muted"}
+                    ${canClick && !active ? "group-hover:text-brand" : ""}">${s.label}</span>
             </div>
             ${!last ? `<div class="flex-1 h-px mx-3 ${done ? "bg-primary" : "bg-[#e5e7eb]"}"></div>` : ""}
         </div>`;

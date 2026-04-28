@@ -1,9 +1,59 @@
-const PATIENTS = JSON.parse(
-  document.getElementById("patients-data").textContent,
-);
+import { AdminStore } from './AdminStore.js';
+
+let PATIENTS = [];
+let ALL_APPT = [];
 const PAGE_SIZE = 10;
 let currentPage = 1;
-let filtered = [...PATIENTS];
+let filtered = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const data = await AdminStore.loadData('patients', '/api/admin/data/patients');
+    const appts = await AdminStore.loadData('appointments', '/api/admin/data/appointments');
+    if (data) {
+        initializeWithData({
+            patients: data,
+            appointments: appts
+        });
+    }
+});
+
+function initializeWithData(data) {
+    const rawPatients = data.patients || [];
+    ALL_APPT = data.appointments || [];
+
+    // Map raw profiles to patient view model objects
+    PATIENTS = rawPatients.map(p => {
+        const patientAppts = ALL_APPT.filter(a => a.patientId === p.id);
+        const lastAppt = patientAppts
+            .filter(a => a.status === 'arrived' || a.status === 'completed')
+            .sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate))[0];
+
+        let docName = "No Record";
+        if (lastAppt) {
+            docName = lastAppt.doctorName || (lastAppt.doctor && lastAppt.doctor.profile ? `Dr. ${lastAppt.doctor.profile.lastName}` : "No Record");
+        }
+
+        const dob = p.dateOfBirth ? new Date(p.dateOfBirth) : null;
+        const age = dob ? (new Date().getFullYear() - dob.getFullYear()) : 0;
+
+        return {
+            id: p.id,
+            firstName: p.firstName,
+            lastName: p.lastName,
+            avatarUrl: p.avatarUrl,
+            sex: p.sex,
+            dob: p.dateOfBirth,
+            age: age,
+            initials: `${(p.firstName || p.firstName || "")[0] || ""}${(p.lastName || p.lastName || "")[0] || ""}`.toUpperCase(),
+            lastVisit: lastAppt ? new Date(lastAppt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "--",
+            assignedDoctor: docName,
+            status: "Active"
+        };
+    });
+
+    filtered = [...PATIENTS];
+    renderTable();
+}
 
 /**
  * Renders the patient table rows
@@ -153,4 +203,4 @@ window.filterPatients = () => {
   renderTable();
 };
 
-document.addEventListener("DOMContentLoaded", renderTable);
+// Initial render removed from here as it's now handled by initializeWithData

@@ -5,26 +5,7 @@ Layout = "AdminSide/_StaffLayout";
 var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Models.DentalService>();
   }
 
-  <script id="services-data" type="application/json">
-    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-        services.Select(s => new {
-            id       = s.Id,
-            slug     = s.Slug,
-            category = s.Category,
-            name     = s.Name,
-            price    = s.Price,
-            hero     = s.Hero,
-            tagline  = s.Tagline,
-            summary  = s.Summary ?? "",
-            duration = s.Duration ?? "",
-            recovery = s.Recovery ?? "",
-            icon     = s.Icon ?? "",
-            steps    = s.Steps,
-            faqs     = s.Faqs,
-            isActive = s.IsActive
-        })
-    ))
-</script>
+<!-- Data injected via AdminStore -->
 
   <div id="page-services" class="page p-4 md:p-6">
 
@@ -74,11 +55,18 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
       </div>
       
       <span class="ml-auto text-[11px] font-medium text-brand-400 bg-white px-3 py-1.5 rounded-lg border border-slate-100" id="svcCount">
-        @services.Count services
+        Initializing...
       </span>
     </div>
 
-    <div id="servicesGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    <div id="servicesGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div class="col-span-full py-16 text-center" id="services-loading">
+        <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4 text-primary">
+          <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+        </div>
+        <p class="text-[13px] text-brand-400">Loading services...</p>
+      </div>
+    </div>
 
     <div id="emptyState" class="hidden py-16 text-center">
       <div class="text-slate-300 text-4xl mb-3">🦷</div>

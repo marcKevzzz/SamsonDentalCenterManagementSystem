@@ -1,4 +1,4 @@
-﻿@page "/Admin/Patients"
+@page "/Admin/Patients"
 @model SamsonDentalCenterManagementSystem.Pages.AdminSide.Patients.AdminPatientsModel
 @{
 Layout = "AdminSide/_StaffLayout";
@@ -73,14 +73,11 @@ Layout = "AdminSide/_StaffLayout";
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="patients-body">
-          @if (!Model.Patients.Any())
-          {
-            <tr>
-              <td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">
-                No patients found.
-              </td>
-            </tr>
-          }
+          <tr>
+            <td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">
+              <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Initializing patient data...
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -90,29 +87,5 @@ Layout = "AdminSide/_StaffLayout";
     </div>
   </div>
 </div>
-<script id="patients-data" type="application/json">
-    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Patients.Select(p => {
-        var lastAppt = Model.LastAppointments.ContainsKey(p.Id) ? Model.LastAppointments[p.Id] : null;
-        
-        // Extract doctor name safely
-        // Assuming your Appointment model has a 'Doctor' property with a 'Profile' inside
-        string docName = lastAppt?.Doctor?.Profile != null 
-            ? $"Dr. {lastAppt.Doctor.Profile.LastName}" 
-            : "No Record";
-
-        return new { 
-            id = p.Id, 
-            firstName = p.FirstName, 
-            lastName = p.LastName, 
-            avatarUrl = p.AvatarUrl, 
-            sex = p.Sex, 
-            dob = p.DateOfBirth, 
-            age = p.DateOfBirth.HasValue ? (DateTime.Today.Year - p.DateOfBirth.Value.Year) : 0, 
-            initials = $"{(p.FirstName.Length > 0 ? p.FirstName[0].ToString() : "")}{(p.LastName.Length > 0 ? p.LastName[0].ToString() : "")}".ToUpper(),
-            lastVisit = lastAppt?.AppointmentDate.ToString("MMM dd, yyyy") ?? "--",
-            assignedDoctor = docName, // Added this field
-            status = "Active" 
-        };
-    })))
-</script>
+<!-- Data injected via AdminStore -->
 <script type="module" src="~/js/AdminSide/adminPatient.js"></script>

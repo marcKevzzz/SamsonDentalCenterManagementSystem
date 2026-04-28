@@ -1,12 +1,6 @@
 import { Toast, Modal } from '../ui.js';
 
-// ── Data & State ─────────────────────────────────────────────────────────────
-const ALL_APPT = JSON.parse(document.getElementById('appointments-data').textContent);
-const getAppt = (x) => typeof x === 'string' ? ALL_APPT.find(a => a.id === x) : x;
-const PAGE_SIZE = 20;
-let currentPage = 1;
-let filtered = [...ALL_APPT];
-
+import { AdminStore } from './AdminStore.js';
 const post = (url, body) =>
   fetch(url, {
     method: 'POST',
@@ -24,10 +18,91 @@ const post = (url, body) =>
     return { ok: false, error: err.message };
   });
 
+// ── State ───────────────────────────────────────────────────────────────────
+let ALL_APPT = [];
+let ALL_DOCS = [];
+let ALL_SVCS = [];
+const PAGE_SIZE = 20;
+let currentPage = 1;
+let filtered = [];
+
+const getAppt = (x) => typeof x === 'string' ? ALL_APPT.find(a => a.id === x) : x;
+
 // ── Init ──────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  renderTable();
+document.addEventListener('DOMContentLoaded', async () => {
+  const appts = await AdminStore.loadData('appointments', '/api/admin/data/appointments');
+  const docs = await AdminStore.loadData('doctors', '/api/admin/doctors');
+  const svcs = await AdminStore.loadData('services', '/api/services/all');
+  
+  if (appts) {
+    initializeWithData({
+      appointments: appts,
+      doctors: docs?.data || docs,
+      services: svcs
+    });
+  }
 });
+
+function initializeWithData(data) {
+  ALL_APPT = data.appointments || [];
+  ALL_DOCS = data.doctors || [];
+  ALL_SVCS = data.services || [];
+  
+  // Transform appointments to include formatted fields if missing
+  ALL_APPT.forEach(a => {
+    if (!a.appointmentDateFormatted) {
+      const d = new Date(a.appointmentDate);
+      a.appointmentDateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    if (!a.doctorName && a.doctor && a.doctor.profile) {
+      a.doctorName = `${a.doctor.title} ${a.doctor.profile.firstName} ${a.doctor.profile.lastName}`;
+    }
+    if (!a.serviceName && a.service) {
+      a.serviceName = a.service.name;
+    }
+  });
+
+  filtered = [...ALL_APPT];
+  
+  renderStats(data.stats);
+  hydrateDropdowns();
+  renderTable();
+}
+
+function renderStats(stats) {
+    if (!stats) return;
+    document.getElementById('stat-confirmed').textContent = stats.appointmentsConfirmed || ALL_APPT.filter(a => a.status === 'confirmed').length;
+    document.getElementById('stat-pending').textContent = stats.appointmentsPending || ALL_APPT.filter(a => a.status === 'pending').length;
+    document.getElementById('stat-waitlist').textContent = stats.appointmentsWaitlist || ALL_APPT.filter(a => a.status === 'waitlist').length;
+    document.getElementById('stat-cancelled').textContent = stats.appointmentsCancelled || ALL_APPT.filter(a => a.status === 'cancelled').length;
+}
+
+function hydrateDropdowns() {
+    const svcSelects = ['book-service'];
+    const docSelects = ['book-doctor', 'edit-doctor', 'confirm-doctor'];
+
+    svcSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const val = el.value;
+        el.innerHTML = '<option value="">Choose a service…</option>' + 
+            ALL_SVCS.map(s => `<option value="${s.id}" data-name="${s.name}" data-category="${s.category}">${s.name}</option>`).join('');
+        el.value = val;
+    });
+
+    docSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const val = el.value;
+        el.innerHTML = '<option value="">Any available specialist</option>' + 
+            ALL_DOCS.map(d => {
+                const name = d.profile ? `${d.title} ${d.profile.firstName} ${d.profile.lastName}` : 'Unknown';
+                const specs = d.specialties ? d.specialties.join(',') : '';
+                return `<option value="${d.id}" data-name="${name}" data-specialties="${specs}">${name}</option>`;
+            }).join('');
+        el.value = val;
+    });
+}
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function renderTable() {
@@ -63,10 +138,10 @@ function rowHTML(appt) {
   
   const statusConfig = {
     confirmed: { classes: "bg-emerald-50 text-emerald-600 border-emerald-100", label: "Confirmed" },
-    pending:   { classes: "bg-blue-50 text-blue-600 border-blue-100",  label: "Pending" },
-    arrived:   { classes: "bg-amber-50 text-amber-600 border-amber-100",  label: "Arrived" },
-    completed: { classes: "bg-slate-50 text-slate-600 border-slate-100", label: "Completed" },
-    no_show:   { classes: "bg-red-50 text-red-600 border-red-100",    label: "No-Show" },
+    pending:   { classes: "bg-orange-50 text-orange-600 border-orange-100",  label: "Pending" },
+    arrived:   { classes: "bg-blue-50 text-blue-600 border-blue-100",  label: "Arrived" },
+    completed: { classes: "bg-emerald-50 text-emerald-600 border-emerald-100", label: "Completed" },
+    no_show:   { classes: "bg-slate-50 text-slate-600 border-slate-100", label: "No-Show" },
     cancelled: { classes: "bg-red-50 text-red-600 border-red-100",    label: "Cancelled" },
     waitlist:  { classes: "bg-purple-50 text-purple-600 border-purple-100", label: "Waitlist" }
   };

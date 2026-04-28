@@ -31,7 +31,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
            <i class="fa-solid fa-calendar-check text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountConfirmed</div>
+        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-confirmed">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Confirmed</div>
     </div>
@@ -41,7 +41,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
            <i class="fa-solid fa-clock text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountPending</div>
+        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-pending">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Pending</div>
     </div>
@@ -51,7 +51,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
            <i class="fa-solid fa-list-ul text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountWaitlist</div>
+        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-waitlist">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Waitlist</div>
     </div>
@@ -61,7 +61,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-accent">
            <i class="fa-solid fa-calendar-xmark text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountCancelled</div>
+        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-cancelled">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Cancelled</div>
     </div>
@@ -112,183 +112,11 @@ Layout = "AdminSide/_StaffLayout";
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="appointments-body">
-          @if (!Model.Appointments.Any())
-          {
-            <tr>
-              <td colspan="7" class="px-4 py-10 text-center text-[12px] text-brand-400">
-                No appointments found.
-              </td>
-            </tr>
-          }
-          @foreach (var appt in Model.Appointments)
-          {
-            var shortId = "#APT-" + (appt.Id.Length >= 4 ? appt.Id[..4] : appt.Id).ToUpper();
-            var dateStr = appt.AppointmentDate.ToString("MMM dd") + " · " + appt.AppointmentTime;
-            var (badgeClasses, statusLabel) = appt.Status.ToLower() switch
-            {
-              "confirmed" => ("bg-emerald-50 text-emerald-600 border-emerald-100", "Confirmed"),
-              "pending"   => ("bg-blue-50 text-blue-600 border-blue-100",  "Pending"),
-              "arrived"   => ("bg-amber-50 text-amber-600 border-amber-100",  "Arrived"),
-              "completed" => ("bg-slate-50 text-slate-600 border-slate-100",      "Completed"),
-              "no_show"   => ("bg-red-50 text-red-600 border-red-100",    "No-Show"),
-              "cancelled" => ("bg-red-50 text-red-600 border-red-100",        "Cancelled"),
-              "waitlist"  => ("bg-purple-50 text-purple-600 border-purple-100",    "Waitlist"),
-              _           => ("bg-slate-50 text-slate-600 border-slate-100",    appt.Status)
-            };
-
-            // Serialize appointment to JSON for JS
-            var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
-              id              = appt.Id,
-              patientName     = appt.PatientName,
-              patientEmail    = appt.PatientEmail,
-              patientPhone    = appt.PatientPhone,
-              doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
-              serviceName     = appt.ServiceName,
-              serviceId       = appt.ServiceId,
-              serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
-              appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd"),
-              appointmentTime = appt.AppointmentTime,
-              status          = appt.Status,
-              notes           = appt.Notes
-            });
-
-            <tr class="group hover:bg-slate-50/80 transition-colors" 
-            data-status="@appt.Status" 
-            data-date="@appt.AppointmentDate.ToString("yyyy-MM-dd")"
-            data-search="@(appt.PatientName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
-              <td class="px-4 py-4">
-                <span class="text-[10px] font-bold text-brand-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">@shortId</span>
-              </td>
-              <td class="px-4 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-                    @(!string.IsNullOrEmpty(appt.PatientName) ? appt.PatientName[..1] : "G")
-                  </div>
-                  <div>
-                    <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
-                    <div class="text-[10.5px] text-brand-400">@appt.PatientEmail</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-4 py-4">
-                <div class="text-[12.5px] font-medium text-brand-800">@appt.ServiceName</div>
-                <div class="text-[11px] text-brand-400">
-                  <i class="fa-solid fa-user-doctor text-[9px] mr-1"></i>
-                  @(appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned")
-                </div>
-              </td>
-              <td class="px-4 py-4">
-                <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentDate.ToString("MMM dd")</div>
-                <div class="text-[11px] text-brand-400">@appt.AppointmentTime</div>
-              </td>
-              <td class="px-4 py-4 text-center">
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
-                  @statusLabel
-                </span>
-              </td>
-              <td class="px-4 py-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <!-- Context-Aware Workflow Button -->
-                  @if (appt.Status == "pending")
-                  {
-                    <button onclick='confirmAppt(@Html.Raw(apptJson))' 
-                            class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">
-                      Confirm
-                    </button>
-                  }
-                  else if (appt.Status == "confirmed")
-                  {
-                    <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
-                            class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">
-                      Check-In
-                    </button>
-                  }
-                  else if (appt.Status == "arrived")
-                  {
-                    <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
-                            class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">
-                      Checkout
-                    </button>
-                  }
-                  else if (appt.Status == "waitlist")
-                  {
-                    <button class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-bold hover:bg-purple-700 transition-colors shadow-sm">
-                      Promote
-                    </button>
-                  }
-  <div class=" inline-block text-left action-dropdown ">
-    <button onclick="toggleDropdown(event, this)" 
-            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
-      <i class="fa-solid fa-ellipsis-vertical"></i>
-    </button>
-
-    <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
-      <div class="py-1">
-        @if (string.Equals(appt.Status, "pending", StringComparison.OrdinalIgnoreCase))
-        {
-          <button onclick='confirmAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-check-circle w-4"></i> Confirm Booking
-          </button>
-        }
-
-        @if (string.Equals(appt.Status, "confirmed", StringComparison.OrdinalIgnoreCase))
-        {
-          <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
-          </button>
-        }
-
-        @if (string.Equals(appt.Status, "confirmed", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "arrived", StringComparison.OrdinalIgnoreCase))
-        {
-          <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
-          </button>
-          
-          <button onclick='updateStatus(@Html.Raw(apptJson), "no_show")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
-          </button>
-        }
-        
-        <div class="h-px bg-slate-100 my-1"></div>
-
-        @if (string.Equals(appt.Status, "confirmed", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "pending", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "arrived", StringComparison.OrdinalIgnoreCase))
-        {
-          <button onclick='openEditModal(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-rotate w-4"></i> Reschedule
-          </button>
-          
-          <button onclick='cancelAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-ban w-4"></i> Cancel
-          </button>
-        }
-
-        @if (string.Equals(appt.Status, "cancelled", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no_show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no-show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "completed", StringComparison.OrdinalIgnoreCase))
-        {
-          <button onclick='openBookModal()' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-plus w-4"></i> Book Again
-          </button>
-        }
-
-        @if (string.Equals(appt.Status, "waitlist", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no_show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no-show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "cancelled", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "completed", StringComparison.OrdinalIgnoreCase))
-        {
-          <button onclick='deleteAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-trash-can w-4"></i> Remove Record
-          </button>
-        }
-      </div>
-    </div>
-  </div>
-</td>
-            </tr>
-          }
+          <tr>
+            <td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">
+              <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Initializing data...
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -299,24 +127,7 @@ Layout = "AdminSide/_StaffLayout";
   </div>
 </div>
 
-<script id="appointments-data" type="application/json">
-  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Appointments.Select(appt => new {
-    id              = appt.Id,
-    patientName     = appt.PatientName,
-    patientEmail    = appt.PatientEmail,
-    patientPhone    = appt.PatientPhone,
-    doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
-    doctorId        = appt.DoctorId,
-    serviceName     = appt.ServiceName,
-    serviceId       = appt.ServiceId,
-    serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
-    appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd"),
-    appointmentDateFormatted = appt.AppointmentDate.ToString("MMM dd"),
-    appointmentTime = appt.AppointmentTime,
-    status          = appt.Status,
-    notes           = appt.Notes
-  })))
-</script>
+<!-- Data injected via AdminStore -->
 
 
 <div id="book-modal" class="fixed inset-0 z-50 hidden">
@@ -391,10 +202,6 @@ Layout = "AdminSide/_StaffLayout";
                 <select id="book-service"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Choose a service…</option>
-                  @foreach (var svc in Model.Services)
-                  {
-                    <option value="@svc.Id" data-name="@svc.Name" data-category="@svc.Category">@svc.Name</option>
-                  }
                 </select>
                 <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
               </div>
@@ -406,10 +213,6 @@ Layout = "AdminSide/_StaffLayout";
                 <select id="book-doctor"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Any available specialist</option>
-                  @foreach (var doc in Model.Doctors)
-                  {
-                    <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
-                  }
                 </select>
                 <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
               </div>
@@ -489,10 +292,6 @@ Layout = "AdminSide/_StaffLayout";
             <select id="edit-doctor"
               class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
               <option value="">Any available specialist</option>
-              @foreach (var doc in Model.Doctors)
-              {
-                <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
-              }
             </select>
           </div>
         </div>
@@ -558,10 +357,6 @@ Layout = "AdminSide/_StaffLayout";
             <select id="confirm-doctor"
               class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-emerald-500 transition-all outline-none appearance-none">
               <option value="">Select a doctor…</option>
-              @foreach (var doc in Model.Doctors)
-              {
-                <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
-              }
             </select>
           </div>
           <p id="doctor-hint" class="text-[10px] text-brand-400 mt-2 ml-1 hidden italic">

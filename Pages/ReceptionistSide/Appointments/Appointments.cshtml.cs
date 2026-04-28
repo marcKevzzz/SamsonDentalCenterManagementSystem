@@ -44,7 +44,7 @@ public class AdminAppointmentsModel : AdminPageModel
         
         if (token == null)
         {
-            return RedirectToPage("/Sign-in");
+            return RedirectToPage("/Authentication/Signin");
         }
 
         try

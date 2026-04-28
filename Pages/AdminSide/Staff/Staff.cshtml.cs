@@ -27,16 +27,7 @@ public class AdminStaffModel : AdminPageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        try
-        {
-            Doctors = await _doctorService.GetAllWithProfilesAsync();
-            Receptionists = await _receptionistService.GetAllWithProfilesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load staff");
-        }
-
+        // Data handled by AdminStore on the client
         return Page();
     }
 }

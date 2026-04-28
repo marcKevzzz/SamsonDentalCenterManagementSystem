@@ -23,6 +23,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string ProfileId { get; set; } = string.Empty;
 
         // Foreign Key Navigation Property
-        // public Profile? Profile { get; set; } 
+        [JsonProperty("profiles")]
+        [System.Text.Json.Serialization.JsonPropertyName("profiles")]
+        public Profile? Profile { get; set; }
     }
 }

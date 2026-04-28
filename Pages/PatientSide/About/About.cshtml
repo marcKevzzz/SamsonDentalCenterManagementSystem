@@ -17,8 +17,8 @@ ViewData["Title"] = "About page";
     <h1 class="about-hero-text brand-font font-extrabold leading-[1.05]  text-[clamp(2.6rem,6vw,4.2rem)] text-white mb-3">
       About Us
     </h1>
-    <p class="about-hero-text font-body text-[0.92rem] text-white/45 max-w-sm leading-relaxed">
-      Discover the story, mission, and people behind Samson Dental Center's commitment to excellence.
+    <p class="about-hero-text font-body text-[0.92rem] text-white/45  leading-relaxed">
+      @(Model.ClinicSettings.AboutText ?? "Discover the story, mission, and people behind Samson Dental Center's commitment to excellence.")
     </p>
   </div>
 
@@ -85,7 +85,7 @@ ViewData["Title"] = "About page";
         >
           <div class="brand-font font-bold text-white text-[1.1rem]">Est. 2008</div>
           <div class="font-body text-white/55 text-[0.78rem] mt-0.5 uppercase tracking-widest">
-            Quezon City, Philippines
+            @(Model.ClinicSettings.LocationAddress ?? "Quezon City, Philippines")
           </div>
         </div>
       </div>

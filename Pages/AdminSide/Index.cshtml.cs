@@ -36,32 +36,7 @@ public class AdminDashboardModel : AdminPageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        // 1. Fetch Stats
-        var allProfiles = await _profileService.GetAllProfiles();
-        TotalPatientsCount = allProfiles.Count(p => p.Role == "patient");
-        
-        var doctorService = HttpContext.RequestServices.GetRequiredService<DoctorService>();
-        var allDoctors = await doctorService.GetAllWithProfilesAsync();
-        DoctorsCount = allDoctors.Count(d => d.IsActive);
-
-        var allAppts = await _appointmentService.GetAllAsync();
-        TodayAppointmentsCount = allAppts.Count(a => a.AppointmentDate.Date == DateTime.Today);
-        UpcomingAppointments = allAppts
-            .Where(a => a.AppointmentDate.Date >= DateTime.Today && a.Status != "cancelled" && a.Status != "arrived")
-            .OrderBy(a => a.AppointmentDate)
-            .ThenBy(a => a.AppointmentTime)
-            .Take(5)
-            .ToList();
-
-
-        // 2. Fetch Invoices
-        var allInvoices = await _invoiceService.GetAllInvoicesAsync();
-        RecentInvoices = allInvoices.Take(5).ToList();
-        
-        MonthlyRevenue = allInvoices
-            .Where(i => i.CreatedAt.Month == DateTime.Today.Month && i.CreatedAt.Year == DateTime.Today.Year && i.Status == "paid")
-            .Sum(i => i.FinalAmount);
-
+        // Data handled by AdminStore on the client side
         return Page();
     }
 }

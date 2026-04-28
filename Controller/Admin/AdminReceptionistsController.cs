@@ -22,6 +22,22 @@ public class AdminReceptionistsController : ControllerBase
         _logger = logger;
     }
 
+    // ── GET /api/admin/receptionists ──────────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> GetReceptionists()
+    {
+        try
+        {
+            var data = await _svc.GetAllWithProfilesAsync();
+            return Ok(new { ok = true, data = data });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetReceptionists failed");
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
     // ── GET /api/admin/receptionists/available-users ──────────────────────────
     [HttpGet("available-users")]
     public async Task<IActionResult> GetAvailableUsers()

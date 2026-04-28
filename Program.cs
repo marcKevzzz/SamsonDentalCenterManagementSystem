@@ -167,6 +167,11 @@ builder.Services.AddScoped<ReviewService>(provider =>
     );
 });
 
+builder.Services.AddScoped<ClinicService>(provider =>
+{
+    return new ClinicService(serviceClient);
+});
+
 // ── EF Core ───────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -220,7 +225,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("StaffOnly", p => p.RequireRole("admin", "doctor", "receptionist"));
 });
 builder.Services.AddRazorPages();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.IgnoreReadOnlyProperties = true;
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 var app = builder.Build();
 

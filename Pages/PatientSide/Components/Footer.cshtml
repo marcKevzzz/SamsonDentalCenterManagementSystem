@@ -1,3 +1,7 @@
+@inject SamsonDentalCenterManagementSystem.Services.ClinicService ClinicService
+@{
+    var settings = await ClinicService.GetSettingsAsync();
+}
 <footer class="bg-brand text-white">
   <div class="max-w mx-auto px-8 lg:px-12 pt-16 pb-8">
     <div
@@ -5,36 +9,28 @@
     >
       <!-- Brand -->
       <div>
-        <div
-          class="flex items-center gap-0.5 -ml-4 text-white mb-4"
-        >
-          <img src="~/images/logo.svg" alt="logo" class="w-14 h-14 object-cover mt-1 brightness-150" />
+        <div class="brand-logo flex items-center mb-6">
+          <img src="@(string.IsNullOrEmpty(settings?.LogoUrl) ? "/images/logo.svg" : settings.LogoUrl)" alt="logo" class="w-14 h-14 object-cover mt-1 brightness-150" />
             <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2">
-                Samson  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full">Dental  Center</span>
+          @(settings?.ClinicName?.Replace(" Dental Center", "") ?? "Samson")  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full text-center">Dental Center</span>
             </span>
         </div>
         <p
           class="font-body text-[0.82rem] text-white/40 leading-relaxed max-w-[220px] mb-6"
         >
-          Empowering communities with world-class dental solutions and
-          compassionate care since 2008.
+          @(settings?.AboutText ?? "Empowering communities with world-class dental solutions and compassionate care since 2008.")
         </p>
         <div class="flex gap-3">
-          <a
-            href="#"
-            class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 text-xs font-bold hover:bg-primary hover:border-primary hover:text-white transition-all"
-            >f</a
-          >
-          <a
-            href="#"
-            class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 text-xs font-bold hover:bg-primary hover:border-primary hover:text-white transition-all"
-            >in</a
-          >
-          <a
-            href="#"
-            class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 text-xs font-bold hover:bg-primary hover:border-primary hover:text-white transition-all"
-            >𝕏</a
-          >
+          @if (!string.IsNullOrEmpty(settings?.FacebookUrl)) {
+            <a href="@settings.FacebookUrl" target="_blank" class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 hover:bg-primary hover:text-white transition-all">
+                <i class="fa-brands fa-facebook-f text-xs"></i>
+            </a>
+          }
+          @if (!string.IsNullOrEmpty(settings?.InstagramUrl)) {
+            <a href="@settings.InstagramUrl" target="_blank" class="w-9 h-9 border border-white/15 rounded-lg flex items-center justify-center text-white/50 hover:bg-primary hover:text-white transition-all">
+                <i class="fa-brands fa-instagram text-xs"></i>
+            </a>
+          }
         </div>
       </div>
 
@@ -121,7 +117,7 @@
     <!-- Footer bottom -->
     <div class="flex flex-wrap justify-between items-center pt-7 gap-4">
       <p class="font-body text-[0.74rem] text-white/28">
-        © 2024 Samson Dental Center. All Rights Reserved.
+        © @DateTime.Now.Year @(settings?.ClinicName ?? "Samson Dental Center"). All Rights Reserved.
       </p>
       <div class="flex gap-6">
         <a

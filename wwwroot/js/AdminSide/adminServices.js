@@ -1,11 +1,25 @@
 import { Toast, Modal } from "../ui.js";
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-let ALL_SVCS = JSON.parse(
-  document.getElementById("services-data")?.textContent ?? "[]",
-);
-let filtered = [...ALL_SVCS];
+import { AdminStore } from './AdminStore.js';
+
+let ALL_SVCS = [];
+let filtered = [];
 let selectedHeroFile = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const data = await AdminStore.loadData('services', '/api/services/all');
+    if (data) initializeWithData({ services: data });
+});
+
+function initializeWithData(data) {
+    ALL_SVCS = data.services || [];
+    filtered = [...ALL_SVCS];
+    
+    const loading = document.getElementById('services-loading');
+    if (loading) loading.remove();
+    
+    renderGrid();
+}
 
 // ── Category config ───────────────────────────────────────────────────────────
 const CAT = {
@@ -31,7 +45,8 @@ const CAT = {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  renderGrid();
+    // renderGrid() is now called from initializeWithData
+
 
   document
     .getElementById("searchInput")

@@ -15,6 +15,16 @@ ViewData["Title"] = "Home page";
         review_date = r.ReviewDate ?? r.CreatedAt,
         created_at = r.CreatedAt
     })));
+
+    window.clinicSettings = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        faqs = Model.ClinicSettings.FaqsRaw,
+        hours = Model.ClinicSettings.ClinicalHoursRaw,
+        photos = Model.ClinicSettings.ClinicPhotosRaw,
+        status = new {
+            isAutomated = Model.ClinicSettings.IsAutomatedStatus,
+            manual = Model.ClinicSettings.ManualStatus
+        }
+    }));
 </script>
 
 <section id="hero" class="relative h-screen max-h-[900px] flex items-center overflow-hidden bg-[var(--brand-dark)]">
@@ -253,11 +263,12 @@ ViewData["Title"] = "Home page";
 
         <h3 class="brand-font font-extrabold text-[1.5rem] mt-10 mb-2">Visit Us</h3>
         <p class="brand-font font-semibold text-[0.92rem] mb-2">
-          7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila
+          @(Model.ClinicSettings.LocationAddress ?? "7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila")
         </p>
         <p class="font-body text-[0.84rem] text-muted leading-relaxed mb-5">
-          Located near Tandang Sora Market, easily accessible via Commonwealth Avenue. We have ample parking space
-          available for our patients.
+          Email: @(Model.ClinicSettings.ContactEmail ?? "support@samson.com") <br>
+          Phone: @(Model.ClinicSettings.ContactPhone ?? "N/A")
+          @if (!string.IsNullOrEmpty(Model.ClinicSettings.Landline)) { <span> | @Model.ClinicSettings.Landline</span> }
         </p>
         <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
           class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-[var(--brand-dark)] border-b-2 border-[var(--primary)] pb-0.5 hover:text-[var(--primary)] transition-colors no-underline">
@@ -267,10 +278,27 @@ ViewData["Title"] = "Home page";
 
     <!-- Right: Map -->
     <div class="reveal-up relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 group h-[500px]">
-      <iframe class="w-full h-full border-0"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.4!2d121.057!3d14.694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b17b7b8a5e9d%3A0x8e3e6f6d8d1f8b5e!2sTandang%20Sora%20Ave%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1710000000000"
-        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+      @if (!string.IsNullOrEmpty(Model.ClinicSettings.MapsUrl) && (Model.ClinicSettings.MapsUrl.Contains("google.com/maps/embed") || Model.ClinicSettings.MapsUrl.Contains("pb=")))
+      {
+          <iframe class="w-full h-full border-0"
+            src="@Model.ClinicSettings.MapsUrl"
+            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+      }
+      else
+      {
+          <div class="w-full h-full bg-slate-100 flex flex-col items-center justify-center p-12 text-center">
+              <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
+                  <i class="fa-solid fa-map-location-dot text-brand text-3xl"></i>
+              </div>
+              <h3 class="brand-font font-bold text-brand text-xl mb-3">Interactive Map Not Ready</h3>
+              <p class="font-body text-sm text-slate-500 max-w-xs mb-8">Please use the official Google Maps Embed URL in settings to enable the interactive view.</p>
+              <a href="@(Model.ClinicSettings.MapsUrl ?? "https://maps.google.com/?q=Samson+Dental+Center")" target="_blank"
+                 class="px-8 py-3 bg-brand text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-brand/20">
+                  Open in Google Maps
+              </a>
+          </div>
+      }
     </div>
 
   </div>

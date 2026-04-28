@@ -112,21 +112,23 @@ ViewData["Title"] = "My Appointments page";
         var statusClass = s switch
         {
             "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
-            "completed" => "bg-blue-50 text-blue-600 border-blue-100",
+            "completed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
             "cancelled" => "bg-red-50 text-red-600 border-red-100",
             "pending"   => "bg-orange-50 text-orange-600 border-orange-100",
-            "arrived"   => "bg-yellow-50 text-yellow-600 border-yellow-100",
+            "arrived"   => "bg-blue-50 text-blue-600 border-blue-100",
             "no-show"   => "bg-slate-50 text-slate-600 border-slate-100",
+            "no_show"   => "bg-slate-50 text-slate-600 border-slate-100",
             _           => "bg-gray-50 text-gray-600 border-gray-100"
         };
 
         var accentColor = s switch {
             "confirmed" => "bg-emerald-500",
-            "completed" => "bg-blue-500",
+            "completed" => "bg-emerald-500",
             "cancelled" => "bg-red-500",
             "pending"   => "bg-orange-500",
-            "arrived"   => "bg-yellow-500",
+            "arrived"   => "bg-blue-500",
             "no-show"   => "bg-slate-500",
+            "no_show"   => "bg-slate-500",
             _           => "bg-gray-500"
         };
 

@@ -155,13 +155,13 @@ function renderDetailsForm() {
                     <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
                         Phone <span class="text-primary">*</span>
                     </label>
-                    <input id="f_phone" type="tel" class="form-input"
-                        placeholder="+63 9XX XXX XXXX" value="${phone}"
-                        oninput="clearErr('phone')" />
+                    <input id="f_phone" type="tel" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
+                        placeholder="0912 345 6789" value="${phone}"
+                        ${loggedIn ? "readonly" : 'oninput="clearErr(\'phone\')"'} />
                     <div id="err_phone" class="field-error">Phone is required.</div>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Sex</label>
                     <select id="f_sex" class="form-input ${loggedIn ? "bg-slate-50" : ""}" ${loggedIn ? "disabled" : ""}>
@@ -178,11 +178,13 @@ function renderDetailsForm() {
                 </div>
             </div>
             ${loggedIn ? `
-            <p class="font-body text-[.72rem] text-muted">
-                <i class="fa-solid fa-lock text-muted mr-1"></i>
-                Your details are pre-filled from your account.
-                <a href="/Profile/Settings" target="_blank" class="text-primary hover:underline">Update in Settings</a>
-            </p>` : ""}
+            <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+                <i class="fa-solid fa-lock text-[10px] text-muted"></i>
+                <p class="font-body text-[.72rem] text-muted">
+                    Details locked to account. 
+                    <a href="/Profile/Settings" target="_blank" class="text-primary font-semibold hover:underline">Edit Settings</a>
+                </p>
+            </div>` : ""}
         </div>
 
         <!-- For-other fields (hidden by default) -->

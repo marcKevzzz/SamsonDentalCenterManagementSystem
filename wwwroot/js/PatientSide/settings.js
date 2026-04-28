@@ -308,12 +308,12 @@ async function saveAllInfo() {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            firstName: document.getElementById("firstName").value.trim(),
-            lastName: document.getElementById("lastName").value.trim(),
-            dateOfBirth: document.getElementById("dateOfBirth").value || null,
+            first_name: document.getElementById("firstName").value.trim(),
+            last_name: document.getElementById("lastName").value.trim(),
+            date_of_birth: document.getElementById("dateOfBirth").value || null,
             sex: document.getElementById("sex").value,
             email: document.getElementById("email").value.trim(),
-            phoneNumber: document.getElementById("contactNumber").value.trim(),
+            phone_number: document.getElementById("contactNumber").value.trim(),
             address: document.getElementById("address").value.trim(),
           }),
         });
@@ -323,6 +323,25 @@ async function saveAllInfo() {
 
         if (result.ok) {
           Toast.show("Profile saved!", "success");
+
+          // Sync localStorage so navbar reflects new name
+          const saved = localStorage.getItem("sb_user");
+          if (saved) {
+            const user = JSON.parse(saved);
+            user.firstName = document.getElementById("firstName").value.trim();
+            user.lastName = document.getElementById("lastName").value.trim();
+            user.initials = (
+              (user.firstName?.[0] || "") + (user.lastName?.[0] || "")
+            ).toUpperCase();
+            localStorage.setItem("sb_user", JSON.stringify(user));
+
+            setupUserDisplay(
+              `${user.firstName} ${user.lastName}`,
+              user.email,
+              user.initials,
+              user.avatarUrl,
+            );
+          }
         } else {
           Toast.show(result.error ?? "Save failed.", "danger");
         }

@@ -57,11 +57,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("service_id")]
         public string ServiceId { get; set; } = string.Empty;
 
-        // ── service_name is a real column in your DB (confirmed by the JSON) ──
-        // It must be a stored column, not computed from the join, because your
-        // appointment JSON has "service_name": "Dental Fillings" at the top level.
-         [JsonPropertyName("dental_services")]
-        [JsonProperty("dental_services")]
+        [Reference(typeof(DentalService))]
         public DentalService? Service { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
@@ -109,8 +105,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         // NOT mapped as [Column] — these come from embedded PostgREST selects.
         // Use both JsonProperty and JsonPropertyName so both Newtonsoft and STJ
         // can deserialize them from the HTTP response.
-        [JsonPropertyName("doctors")]
-        [JsonProperty("doctors")]
+        [Reference(typeof(Doctor))]
         public Doctor? Doctor { get; set; }
     }
 }

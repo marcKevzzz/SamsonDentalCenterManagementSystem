@@ -12,6 +12,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string Id { get; set; } = "";
 
         [Column("patient_id")]
+        [JsonPropertyName("patient_id")]
         public string? PatientId { get; set; }
 
         [Column("subject")]

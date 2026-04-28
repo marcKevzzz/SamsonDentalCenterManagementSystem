@@ -21,7 +21,7 @@ public class AdminServicesModel : AdminPageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        Services = await _svcService.GetAll(activeOnly: false);
+        // Data handled by AdminStore on the client side
         return Page();
     }
 }

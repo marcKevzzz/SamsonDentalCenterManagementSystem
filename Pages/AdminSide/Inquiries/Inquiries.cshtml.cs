@@ -20,7 +20,6 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Inquiries = await _inquiryService.GetAllInquiriesAsync();
             return Page();
         }
     }

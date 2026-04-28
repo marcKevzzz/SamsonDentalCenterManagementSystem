@@ -39,9 +39,9 @@ Layout = "AdminSide/_StaffLayout";
                     </svg></div>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-blue-50 text-primary">+12%</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">@Model.TotalPatientsCount</div>
+            <div class="font-display text-3xl font-extrabold text-brand" id="stat-total-patients">...</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Total Patients</div>
-            <div class="text-[11px] text-emerald-600 mt-1.5">↑ 24 new this week</div>
+            <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-patients-trend">Loading...</div>
         </div>
         <div
             class="stat-card stat-teal relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
@@ -57,9 +57,9 @@ Layout = "AdminSide/_StaffLayout";
                 <span
                     class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">Active</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">@Model.DoctorsCount</div>
+            <div class="font-display text-3xl font-extrabold text-brand" id="stat-active-doctors">...</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Doctors on Staff</div>
-            <div class="text-[11px] text-emerald-600 mt-1.5">↑ 5 specialists</div>
+            <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-doctors-trend">Loading...</div>
         </div>
         <div
             class="stat-card stat-red relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
@@ -74,9 +74,9 @@ Layout = "AdminSide/_StaffLayout";
                     </svg></div>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-red-50 text-red-700">Today</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">@Model.TodayAppointmentsCount</div>
+            <div class="font-display text-3xl font-extrabold text-brand" id="stat-today-appts">...</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Appointments Today</div>
-            <div class="text-[11px] text-red-500 mt-1.5">↓ 12 pending confirm</div>
+            <div class="text-[11px] text-red-500 mt-1.5" id="stat-appts-trend">Loading...</div>
         </div>
         <div
             class="stat-card stat-purple relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
@@ -89,9 +89,9 @@ Layout = "AdminSide/_StaffLayout";
                     </svg></div>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700">+8%</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand">₱@Model.MonthlyRevenue.ToString("N1")</div>
+            <div class="font-display text-3xl font-extrabold text-brand" id="stat-monthly-revenue">₱0</div>
             <div class="text-[12px] text-brand-500 mt-0.5">This Month Revenue</div>
-            <div class="text-[11px] text-emerald-600 mt-1.5">↑ ₱180K vs last month</div>
+            <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-revenue-trend">Loading...</div>
         </div>
     </div>
 
@@ -232,41 +232,12 @@ Layout = "AdminSide/_StaffLayout";
                                 Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        @if (!Model.UpcomingAppointments.Any())
-                        {
-                            <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-slate-400 text-[13px]">
-                                    No upcoming appointments.
-                                </td>
-                            </tr>
-                        }
-                        @foreach (var appt in Model.UpcomingAppointments)
-                        {
-                            <!-- Console.WriteLine($"Upcoming Appointment: {appt.Doctor.Profile}"); -->
-                            <tr>
-                                <td class="px-4 py-3 text-[13px]">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[9.5px] font-bold flex-shrink-0">
-                                            @(appt.PatientName?[0].ToString() ?? "P")
-                                        </div>
-                                        @if (!string.IsNullOrEmpty(appt.PatientId)) {
-                                            <a href="/Admin/Patients/Details?id=@appt.PatientId" class="hover:text-primary transition-colors">@appt.PatientName</a>
-                                        } else {
-                                            <span>@appt.PatientName</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-[12.5px] text-brand-500">@appt.Doctor.Profile.FirstName @appt.Doctor.Profile.LastName</td>
-                                <td class="px-4 py-3 text-[12.5px]">@appt.ServiceName</td>
-                                <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">@appt.AppointmentTime</td>
-                                <td class="px-4 py-3">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border @(appt.Status == "confirmed" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-amber-50 text-amber-600 border-amber-100") uppercase tracking-wider">
-                                        @appt.Status
-                                    </span>
-                                </td>
-                            </tr>
-                        }
+                    <tbody class="divide-y divide-slate-50" id="upcoming-appts-body">
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-400 text-[13px]">
+                                <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading appointments...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -278,26 +249,17 @@ Layout = "AdminSide/_StaffLayout";
                 <h3 class="font-display text-[13.5px] font-bold text-brand">Recent Invoices</h3>
                 <a href="/Admin/Invoices" class="text-[10.5px] font-semibold text-primary hover:underline">View All →</a>
             </div>
-            <div class="space-y-3">
-                @if (!Model.RecentInvoices.Any())
-                {
-                    <p class="text-[12px] text-slate-400 text-center py-4 italic">No invoices generated yet.</p>
-                }
-                @foreach (var inv in Model.RecentInvoices)
-                {
-                        <a href="/Admin/Patients/Details?id=@inv.PatientId" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
-                        <div class="min-w-0">
-                            <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
-                            <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd, hh:mm tt")</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-[12.5px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
-                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
-                        </div>
-                    </a>
-                }
+            <div class="space-y-3" id="recent-invoices-body">
+                <div class="py-10 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-slate-200 text-2xl mb-2 block"></i>
+                    <p class="text-[12px] text-slate-400 font-medium">Loading invoices...</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script type="module" src="~/js/AdminSide/adminDashboard.js" asp-append-version="true"></script>
+}
 

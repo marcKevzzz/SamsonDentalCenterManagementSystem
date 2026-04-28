@@ -46,7 +46,7 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
                     <option value="staff">Staff</option>
                 </select>
                 <span class="ml-auto text-[11px] text-slate-400" id="userCount">
-                    @users.Count user@(users.Count != 1 ? "s" : "")
+                    Initializing...
                 </span>
             </div>
             <div class="overflow-x-auto">
@@ -91,96 +91,14 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
                         </tr>
                     </thead>
                     <tbody id="usersTableBody" class="divide-y divide-slate-50">
-                        @foreach (var u in users)
-                        {
-                        var initials = (u.FirstName?.Length > 0 ? u.FirstName[0].ToString() : "") +
-                        (u.LastName?.Length > 0 ? u.LastName[0].ToString() : "");
-                        var age = u.DateOfBirth.HasValue
-                        ? (DateTime.Today.Year - u.DateOfBirth.Value.Year -
-                        (DateTime.Today.DayOfYear < u.DateOfBirth.Value.DayOfYear ? 1 : 0)).ToString() : "—" ; var
-                            sexShort=u.Sex switch { "Male"=> "M", "Female" => "F", _ => "—" };
-
-                            <tr class="user-row hover:bg-slate-50/60 transition-colors"
-                                data-name="@((u.FirstName + " " + u.LastName).ToLower())" data-role="@u.Role?.ToLower()"
-                                data-id="@u.Id">
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[10px] font-bold font-display flex-shrink-0 overflow-hidden">
-                                            @if (!string.IsNullOrEmpty(u.AvatarUrl))
-                                            {
-                                            <img src="@u.AvatarUrl" class="w-full h-full object-cover" alt="avatar" />
-                                            }
-                                            else
-                                            {
-                                            @initials.ToUpper()
-                                            }
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="text-[14px] font-medium truncate">@u.FirstName @u.LastName</div>
-                                            <div class="text-[10px] text-brand-400 truncate">@(u.Id.Length >= 13 ? u.Id[..13] : u.Id)</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-[12.5px] text-brand-500 whitespace-nowrap">@age / @sexShort
-                                </td>
-                                <td class="px-4 py-3 text-[12.5px] text-brand-500 truncate max-w-0">
-                                    <span class="truncate block" title="@u.Email">@u.Email</span>
-                                </td>
-                                <td class="px-4 py-3 text-[12.5px] truncate max-w-0">
-                                    <span class="truncate block" title="@u.PhoneNumber">@(u.PhoneNumber ?? "—")</span>
-                                </td>
-                                <td class="px-4 py-3 text-[12.5px] truncate max-w-0">
-                                    <span class="truncate block" title="@u.Address">@(string.IsNullOrEmpty(u.Address) ?
-                                        "—" : u.Address)</span>
-                                </td>
-                                <td class="px-4 py-3 text-[12.5px] capitalize">@u.Role</td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center">
-                                        @if (u.IsActive)
-                                        {
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-600">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <div class="flex flex-col gap-0.5">
-                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Inactive</span>
-                                                @if (u.ReactivationRequested)
-                                                {
-                                                    <span class="text-[8px] text-primary font-bold animate-pulse">Requesting...</span>
-                                                }
-                                            </div>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-1">
-                                        <button onclick="openEditModal('@u.Id')"
-                                            class="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors"
-                                            title="Edit">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                            </svg>
-                                        </button>
-                                        <button onclick="confirmDelete('@u.Id', '@u.FirstName @u.LastName')"
-                                            class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                            title="Delete">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6" />
-                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                                                <path d="M10 11v6M14 11v6" />
-                                                <path d="M9 6V4h6v2" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            }
+                        <tr>
+                            <td colspan="8" class="py-12 text-center" id="users-loading">
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mx-auto mb-3 text-primary">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                </div>
+                                <p class="text-[12px] text-brand-400">Loading users...</p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 <div id="emptyState" class="hidden py-16 text-center">
@@ -218,23 +136,6 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
     </div>
     <partial name="Components/UserModal" />
 
-    <script id="users-data" type="application/json">
-    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-        users.Select(u => new {
-            id          = u.Id,
-            firstName   = u.FirstName,
-            lastName    = u.LastName,
-            email       = u.Email ?? "",
-            phone       = u.PhoneNumber ?? "",
-            address     = u.Address ?? "",
-            dob         = u.DateOfBirth?.ToString("yyyy-MM-dd") ?? "",
-            sex         = u.Sex ?? "",
-            role        = u.Role ?? "patient",
-            avatarUrl   = u.AvatarUrl ?? "",
-            isActive    = u.IsActive,
-            reactivationRequested = u.ReactivationRequested
-        })
-    ))
-</script>
+<!-- Data injected via AdminStore -->
 
     <script type="module" src="~/js/AdminSide/adminUsers.js"></script>

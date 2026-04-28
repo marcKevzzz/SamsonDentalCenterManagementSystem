@@ -1,16 +1,31 @@
 import { Toast, Modal } from "../ui.js";
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-const ALL_USERS = JSON.parse(document.getElementById("users-data").textContent);
+import { AdminStore } from './AdminStore.js';
 
-// ── State ─────────────────────────────────────────────────────────────────────
+let ALL_USERS = [];
 const PAGE_SIZE = 20;
 let currentPage = 1;
-let filtered = [...ALL_USERS];
+let filtered = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const data = await AdminStore.loadData('users', '/api/admin/data/users');
+    if (data) initializeWithData({ users: data });
+});
+
+function initializeWithData(data) {
+    ALL_USERS = data.users || [];
+    filtered = [...ALL_USERS];
+    
+    const loading = document.getElementById('users-loading');
+    if (loading) loading?.closest('tr')?.remove();
+    
+    renderTable();
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  renderTable();
+    // renderTable() is now called from initializeWithData
+
   document
     .getElementById("searchInput")
     .addEventListener("input", applyFilters);
@@ -80,7 +95,9 @@ function renderTable() {
 }
 
 function rowHTML(u) {
-  const initials = (u.firstName[0] || "") + (u.lastName[0] || "");
+  const firstName = u.firstName || "";
+  const lastName = u.lastName || "";
+  const initials = (firstName[0] || "") + (lastName[0] || "");
   const age = u.dob ? calcAge(u.dob) : "—";
   const sexShort = u.sex === "Male" ? "M" : u.sex === "Female" ? "F" : "—";
   const avatar = u.avatarUrl

@@ -294,6 +294,17 @@ async function handleSignIn() {
       },
     });
 
+    if (!response.ok) {
+        const text = await response.text();
+        console.error("Signin Error:", text);
+        throw new Error("Server error during sign in.");
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Unexpected response from server.");
+    }
+
     const result = await response.json();
 
     if (result.ok) {

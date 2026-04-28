@@ -106,9 +106,9 @@ window.viewApptDetails = (appt) => {
     const s = appt.status.toLowerCase();
     badge.className = 'inline-flex px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase ' + 
         (s === 'confirmed' ? 'bg-emerald-100 text-emerald-600' : 
-         s === 'completed' ? 'bg-blue-100 text-blue-600' : 
+         s === 'completed' ? 'bg-emerald-100 text-emerald-600' : 
          s === 'cancelled' ? 'bg-red-100 text-red-600' : 
-         s === 'arrived'   ? 'bg-yellow-100 text-yellow-600' : 
+         s === 'arrived'   ? 'bg-blue-100 text-blue-600' : 
          s === 'no-show'   ? 'bg-slate-100 text-slate-600' : 'bg-orange-100 text-orange-600');
 
     modal.classList.remove('hidden');

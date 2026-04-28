@@ -1,32 +1,156 @@
 
-import { Toast } from "../ui.js";
+import { AdminStore } from './AdminStore.js';
 
 let addedItems = [];
+let ARRIVED_APPTS = [];
+let RECENT_INVOICES = [];
+let SERVICES = [];
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    // Check for pre-selected appointment from dashboard
-    const preselectApptId = document.getElementById('inv-preselect-appt')?.value;
-    if (preselectApptId) {
-        setTimeout(() => {
-            const patientSelect = document.getElementById('inv-patient');
-            if (patientSelect) {
-                // Try to find the option with this value
-                const exists = Array.from(patientSelect.options).some(opt => opt.value === preselectApptId);
-                if (exists) {
-                    patientSelect.value = preselectApptId;
-                    const event = new Event('change');
-                    patientSelect.dispatchEvent(event);
-                    openCreateInvoice();
-                } else {
-                    console.warn(`[Invoice] Pre-selected appointment ${preselectApptId} not found in dropdown.`);
-                }
-            }
-        }, 300);
+document.addEventListener('DOMContentLoaded', async () => {
+    const appts = await AdminStore.loadData('appointments', '/api/admin/data/appointments');
+    const invoices = await AdminStore.loadData('invoices', '/api/admin/data/invoices');
+    const services = await AdminStore.loadData('services', '/api/services/all');
+    
+    initializeWithData({
+        appointments: appts,
+        invoices: invoices,
+        services: services
+    });
+
+    // Discount input handler
+    const discountInput = document.getElementById('inv-discount-input');
+    if (discountInput) {
+        discountInput.addEventListener('input', calculateTotals);
+    }
+});
+
+function initializeWithData(data) {
+    ARRIVED_APPTS = data.appointments?.filter(a => a.status === 'arrived') || [];
+    RECENT_INVOICES = data.invoices || [];
+    SERVICES = data.services || [];
+
+    // Filter by doctor if applicable
+    const doctorRecordId = document.getElementById('inv-doctor-id')?.value;
+    if (doctorRecordId) {
+        ARRIVED_APPTS = ARRIVED_APPTS.filter(a => a.doctorId === doctorRecordId);
+        RECENT_INVOICES = RECENT_INVOICES.filter(i => i.doctorId === doctorRecordId);
     }
 
-    // Patient select change handler
+    hydrateUI();
+}
+
+function hydrateUI() {
+    // 1. Update Arrived Summary
+    const arrivedCountEl = document.getElementById('arrived-count');
+    if (arrivedCountEl) arrivedCountEl.textContent = `Waiting: ${ARRIVED_APPTS.length}`;
+
+    // 2. Render Arrived Cards
+    const cardContainer = document.getElementById('arrived-patients-container');
+    const loadingArrived = document.getElementById('arrived-loading');
+    if (loadingArrived) loadingArrived.remove();
+
+    if (ARRIVED_APPTS.length === 0) {
+        cardContainer.innerHTML = `
+            <div class="col-span-full py-20 text-center">
+                <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                    <i class="fa-solid fa-chair text-slate-200 text-2xl"></i>
+                </div>
+                <p class="text-[13px] text-brand-400 font-medium">No arrived patients at the moment.</p>
+            </div>`;
+    } else {
+        cardContainer.innerHTML = ARRIVED_APPTS.map(appt => `
+            <div class="bg-white rounded-2xl border-2 border-amber-100 p-5 shadow-lg shadow-amber-900/5 relative group hover:border-amber-300 transition-all cursor-pointer"
+                 onclick="openCreateInvoiceWithPreselect('${appt.id}')">
+                <div class="absolute top-2 right-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">Arrived</div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg">${appt.patientName?.[0] || 'P'}</div>
+                    <div>
+                        <h4 class="text-[15px] font-bold text-brand-900">${appt.patientName}</h4>
+                        <p class="text-[11px] text-brand-400 font-medium">${appt.serviceName}</p>
+                    </div>
+                </div>
+                <div class="space-y-3 mb-5">
+                    <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-clock opacity-40 w-4"></i>Scheduled: ${appt.appointmentTime}</div>
+                    <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-file-invoice opacity-40 w-4"></i>Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Invoice</span></div>
+                </div>
+                <button class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">Create Invoice</button>
+            </div>`).join('');
+    }
+
+    // 3. Render Recent Invoices
+    const invoiceTbody = document.getElementById('invoices-table-body');
+    const loadingInvoices = document.getElementById('invoices-loading');
+    if (loadingInvoices) loadingInvoices.closest('tr')?.remove();
+
+    if (RECENT_INVOICES.length === 0) {
+        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-file-invoice text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand-400 font-medium">No invoices found yet.</p></td></tr>`;
+    } else {
+        invoiceTbody.innerHTML = RECENT_INVOICES.map(inv => {
+            const date = new Date(inv.createdAt);
+            const statusClass = inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : inv.status === 'cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100';
+            return `
+                <tr class="hover:bg-slate-50/50 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="text-[13px] font-bold text-brand-900">${date.toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric' })}</div>
+                        <div class="text-[10px] text-brand-400">${date.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-[10px] font-bold">${inv.patient?.fullName?.[0] || 'P'}</div>
+                            <div>
+                                <div class="text-[13px] font-bold text-brand-900">${inv.patientName || inv.patient?.fullName || 'Unknown'}</div>
+                                <div class="text-[10px] text-brand-400">#${inv.id.slice(0, 8)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1 max-w-[200px]">
+                            ${(inv.items || []).slice(0, 2).map(i => `<span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand-600 font-medium">${i.description}</span>`).join('')}
+                            ${inv.items?.length > 2 ? `<span class="px-2 py-0.5 bg-brand-50 rounded-md text-[10px] text-brand-600 font-bold">+${inv.items.length - 2}</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="text-[13px] font-bold text-brand-900">₱${inv.finalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        ${inv.discountAmount > 0 ? `<div class="text-[10px] text-emerald-500 font-bold">-₱${inv.discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} Disc.</div>` : ''}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="px-3 py-1 ${statusClass} border rounded-full text-[10px] font-bold uppercase tracking-wider">${inv.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-eye text-xs"></i></button>
+                        <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-print text-xs"></i></button>
+                    </td>
+                </tr>`;
+        }).join('');
+    }
+
+    // 4. Update Modal Selects
     const patientSelect = document.getElementById('inv-patient');
+    if (patientSelect) {
+        patientSelect.innerHTML = '<option value="">Select arrived patient…</option>' + ARRIVED_APPTS.map(appt => {
+            const svc = SERVICES.find(s => s.id === appt.serviceId);
+            return `<option value="${appt.id}" data-name="${appt.patientName}" data-patientid="${appt.patientId}" data-service="${appt.serviceName}" data-serviceid="${appt.serviceId}" data-price="${svc?.price || 0}">${appt.patientName} — ${appt.serviceName} (${new Date(appt.appointmentDate).toLocaleDateString('en-PH', { month: 'short', day: '2-digit' })})</option>`;
+        }).join('');
+
+        // Re-apply pre-select if pending
+        const preselectApptId = document.getElementById('inv-preselect-appt')?.value;
+        if (preselectApptId && patientSelect.querySelector(`option[value="${preselectApptId}"]`)) {
+            patientSelect.value = preselectApptId;
+            patientSelect.dispatchEvent(new Event('change'));
+            openCreateInvoice();
+            document.getElementById('inv-preselect-appt').value = ""; // Clear after use
+        }
+    }
+
+    const serviceSelect = document.getElementById('inv-service-select');
+    if (serviceSelect) {
+        serviceSelect.innerHTML = '<option value="">Choose service…</option>' + SERVICES.map(svc => `
+            <option value="${svc.id}" data-name="${svc.name}" data-price="${svc.price}">${svc.name} — ₱${svc.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</option>
+        `).join('');
+    }
+
+    // Re-attach patient select change handler
     if (patientSelect) {
         patientSelect.addEventListener('change', () => {
             const option = patientSelect.options[patientSelect.selectedIndex];
@@ -37,18 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const servicePrice = parseFloat(option.getAttribute('data-price') || "0");
 
             if (serviceId && addedItems.length === 0) {
-                // Auto-add the primary service from appointment
                 addServiceItemManual(serviceId, serviceName, servicePrice, 1);
             }
         });
     }
-
-    // Discount input handler
-    const discountInput = document.getElementById('inv-discount-input');
-    if (discountInput) {
-        discountInput.addEventListener('input', calculateTotals);
-    }
-});
+}
 
 /** ── UI CONTROLS ─────────────────────────────────────────────────────────── */
 

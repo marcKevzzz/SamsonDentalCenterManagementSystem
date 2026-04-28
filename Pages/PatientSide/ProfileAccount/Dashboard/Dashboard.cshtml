@@ -128,9 +128,10 @@ ViewData["Title"] = "Dashboard";
             var nextStatusClass = ns switch {
               "confirmed" => "bg-emerald-500/20 text-emerald-300",
               "pending"   => "bg-orange-500/20 text-orange-300",
-              "arrived"   => "bg-yellow-500/20 text-yellow-300",
-              "completed" => "bg-blue-500/20 text-blue-300",
+              "arrived"   => "bg-blue-500/20 text-blue-300",
+              "completed" => "bg-emerald-500/20 text-emerald-300",
               "no-show"   => "bg-slate-500/20 text-slate-300",
+              "no_show"   => "bg-slate-500/20 text-slate-300",
               "cancelled" => "bg-red-500/20 text-red-300",
               _           => "bg-blue-500/20 text-blue-300"
             };

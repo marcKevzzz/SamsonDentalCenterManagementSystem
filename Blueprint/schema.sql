@@ -36,6 +36,26 @@ CREATE TABLE public.appointments (
   CONSTRAINT appointments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id),
   CONSTRAINT appointments_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
 );
+CREATE TABLE public.clinic_settings (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  clinic_name text NOT NULL DEFAULT 'Samson Dental Center'::text,
+  about_text text,
+  location_address text,
+  contact_email text,
+  contact_phone text,
+  clinical_hours jsonb DEFAULT '[]'::jsonb,
+  is_automated_status boolean DEFAULT true,
+  manual_status text DEFAULT 'open'::text,
+  faqs jsonb DEFAULT '[]'::jsonb,
+  clinic_photos jsonb DEFAULT '[]'::jsonb,
+  updated_at timestamp with time zone DEFAULT now(),
+  maps_url text,
+  landline text,
+  facebook_url text,
+  instagram_url text,
+  logo_url text,
+  CONSTRAINT clinic_settings_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.dental_services (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE,
@@ -158,6 +178,7 @@ CREATE TABLE public.profiles (
   avatar_url text,
   email text,
   is_active boolean NOT NULL DEFAULT true,
+  reactivation_requested boolean NOT NULL DEFAULT false,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
@@ -169,6 +190,20 @@ CREATE TABLE public.receptionists (
   profile_id uuid UNIQUE,
   CONSTRAINT receptionists_pkey PRIMARY KEY (id),
   CONSTRAINT receptionists_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.reviews (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  author_name text NOT NULL,
+  author_avatar text,
+  rating integer NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text text,
+  platform text NOT NULL DEFAULT 'Manual'::text,
+  platform_review_id text UNIQUE,
+  external_link text,
+  is_visible boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  review_date timestamp with time zone,
+  CONSTRAINT reviews_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.treatments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -184,18 +219,4 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_pkey PRIMARY KEY (id),
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
-);
-CREATE TABLE public.reviews (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  author_name text NOT NULL,
-  author_avatar text,
-  rating integer NOT NULL,
-  review_text text NOT NULL,
-  platform text NOT NULL DEFAULT 'Manual'::text,
-  platform_review_id text,
-  external_link text,
-  is_visible boolean NOT NULL DEFAULT false,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT reviews_pkey PRIMARY KEY (id),
-  CONSTRAINT reviews_platform_review_id_key UNIQUE (platform_review_id)
 );

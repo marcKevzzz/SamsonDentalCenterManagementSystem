@@ -1,15 +1,146 @@
-import { Toast } from "../ui.js";
+import { AdminStore } from './AdminStore.js';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function getToken() {
-    return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? "";
-}
-
+let DOCTORS = [];
+let RECEPTIONISTS = [];
 let _activeRole = "doctor";
 let _selectedSpecialties = [];
 let _specialtyOptions = [];
 
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const docs = await AdminStore.loadData('doctors', '/api/admin/data/doctors');
+    const recs = await AdminStore.loadData('receptionists', '/api/admin/data/receptionists'); 
+    
+    initializeWithData({
+        doctors: docs?.data || docs,
+        receptionists: recs?.data || recs
+    });
+});
+
+function initializeWithData(data) {
+    DOCTORS = data.doctors || [];
+    RECEPTIONISTS = data.receptionists || [];
+    
+    // Auto-update summary
+    const activeDocs = DOCTORS.filter(d => d.isActive).length;
+    const activeRecs = RECEPTIONISTS.filter(r => r.isActive).length;
+    document.getElementById('staff-summary-text').textContent = 
+        `${activeDocs} doctors · ${activeRecs} receptionists · ${DOCTORS.length + RECEPTIONISTS.length} total`;
+
+    renderStaffCards();
+}
+
+function renderStaffCards() {
+    const container = document.getElementById('staff-container');
+    const loading = document.getElementById('staff-loading-state');
+    if (loading) loading.remove();
+
+    if (DOCTORS.length === 0 && RECEPTIONISTS.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full py-16 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <i class="fa-solid fa-users text-xl"></i>
+                </div>
+                <p class="text-[13px] text-brand-400">No staff added yet.</p>
+            </div>`;
+        return;
+    }
+
+    const docHTML = DOCTORS.map(doc => renderDoctorCard(doc)).join('');
+    const recHTML = RECEPTIONISTS.map(rec => renderReceptionistCard(rec)).join('');
+    container.innerHTML = docHTML + recHTML;
+}
+
+function renderDoctorCard(doc) {
+    const firstName = doc.profile?.firstName || "";
+    const lastName = doc.profile?.lastName || "";
+    const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
+    const fullName = doc.profile ? `${doc.title} ${firstName} ${lastName}`.trim() : `${doc.title} (No Profile)`;
+    const specList = Array.isArray(doc.specialties) ? doc.specialties : (doc.specialties ? doc.specialties.split(',') : []);
+    
+    const docJson = JSON.stringify({
+        id: doc.id,
+        profileId: doc.profileId,
+        title: doc.title,
+        specialties: specList.join(','),
+        bio: doc.bio,
+        isActive: doc.isActive,
+        availability: doc.availability || []
+    }).replace(/'/g, "&apos;");
+
+    return `
+      <div data-role="doctor" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${doc.isActive ? "" : "opacity-60"}">
+        <div class="flex items-center justify-between px-4 py-1.5 ${doc.isActive ? "bg-blue-50" : "bg-slate-100"}">
+          <span class="text-[10px] font-bold uppercase tracking-wider ${doc.isActive ? "text-primary" : "text-slate-400"}"><i class="fa-solid fa-user-doctor mr-1"></i> Doctor</span>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${doc.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${doc.isActive ? "Active" : "Inactive"}</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start gap-3 mb-4">
+            ${doc.profile?.avatarUrl 
+                ? `<img src="${doc.profile.avatarUrl}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />`
+                : `<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white text-[15px] font-bold shrink-0 shadow-sm">${initials}</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <div class="font-display font-bold text-brand-900 text-[14px] leading-tight truncate">${fullName}</div>
+              <div class="text-[11px] text-brand-400 truncate mt-0.5">${doc.profile?.email || ""}</div>
+            </div>
+            <button onclick='openStaffModal(${docJson})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            ${specList.slice(0, 3).map(s => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 font-semibold">${s.trim()}</span>`).join('')}
+            ${specList.length > 3 ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">+${specList.length - 3} more</span>` : ''}
+          </div>
+          <p class="text-[11.5px] text-slate-500 leading-tight line-clamp-2">${doc.bio || ""}</p>
+          <div class="border-t border-slate-100 pt-2 mt-2">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-brand-400 mb-1">Availability</p>
+            <div class="flex flex-row gap-1">
+                ${(doc.availability || []).length > 0 
+                    ? doc.availability.map(a => `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-brand-600 font-medium">${DAY_ABBR[a.dayOfWeek]}</span>`).join('')
+                    : '<p class="text-[11px] text-brand-300 italic">No schedule set.</p>'
+                }
+            </div>
+          </div>
+        </div>
+      </div>`;
+}
+
+function renderReceptionistCard(rec) {
+    const firstName = rec.profile?.firstName || "";
+    const lastName = rec.profile?.lastName || "";
+    const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
+    const fullName = rec.profile ? `${firstName} ${lastName}`.trim() : `(No Profile)`;
+    
+    const recJson = JSON.stringify({
+        id: rec.id,
+        profileId: rec.profileId,
+        deskLocation: rec.deskLocation,
+        isActive: rec.isActive
+    }).replace(/'/g, "&apos;");
+
+    return `
+      <div data-role="receptionist" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${rec.isActive ? "" : "opacity-60"}">
+        <div class="flex items-center justify-between px-4 py-1.5 ${rec.isActive ? "bg-purple-50" : "bg-slate-100"}">
+          <span class="text-[10px] font-bold uppercase tracking-wider ${rec.isActive ? "text-purple-600" : "text-slate-400"}"><i class="fa-solid fa-headset mr-1"></i> Receptionist</span>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${rec.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${rec.isActive ? "Active" : "Inactive"}</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start gap-3 mb-4">
+            ${rec.profile?.avatarUrl 
+                ? `<img src="${rec.profile.avatarUrl}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />`
+                : `<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white text-[15px] font-bold shrink-0 shadow-sm">${initials}</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <div class="font-display font-bold text-brand-900 text-[14px] leading-tight truncate">${fullName}</div>
+              <div class="text-[11px] text-brand-400 truncate mt-0.5">${rec.profile?.email || ""}</div>
+            </div>
+            <button onclick='openStaffModal(null, ${recJson})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
+          </div>
+          ${rec.deskLocation ? `<div class="flex flex-wrap gap-1.5"><span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 font-semibold"><i class="fa-solid fa-location-dot mr-1"></i> Desk: ${rec.deskLocation}</span></div>` : ''}
+        </div>
+      </div>`;
+}
 
 // ── Filter bar ────────────────────────────────────────────────────────────────
 window.filterStaff = function (role) {
@@ -452,10 +583,9 @@ async function saveReceptionistPayload(id, profileId, isActive, errorEl) {
     }
 }
 
-// ── Close on backdrop click ───────────────────────────────────────────────────
+// Initialized via AdminStore events
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("staffModal")?.addEventListener("click", (e) => {
         if (e.target.id === "staffModal") closeStaffModal();
     });
-    updatePillsVisibility();
 });

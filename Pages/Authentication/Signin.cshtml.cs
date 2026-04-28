@@ -35,7 +35,22 @@ public class SigninModel : PageModel
         // 1. Check if the "Remember Me" or Session cookie exists
         var token = Request.Cookies["sb-access-token"];
         if (!string.IsNullOrEmpty(token))
-            return RedirectToPage("/Admin/Dashboard");
+        {
+            try
+            {
+                var user = await _supabase.Auth.GetUser(token);
+                if (user != null)
+                {
+                    var profile = await _profileService.GetProfileById(user.Id!);
+                    var role = profile?.Role?.ToLower() ?? "patient";
+
+                    if (role == "admin") return Redirect("/Admin/Dashboard");
+                    if (role == "doctor") return Redirect("/Doctor/Dashboard");
+                    if (role == "receptionist") return Redirect("/Receptionist/Dashboard");
+                }
+            }
+            catch { /* Token might be invalid or expired, proceed to sign-in page */ }
+        }
 
         return Page();
     }
@@ -139,12 +154,12 @@ public class SigninModel : PageModel
                                 ok = true,
                                 user = new
                                 {
-                                    firstName,
-                                    lastName,
+                                    firstName = profile?.FirstName ?? firstName,
+                                    lastName = profile?.LastName ?? lastName,
                                     email = user.Email,
                                     initials = (
-                                        firstName?.FirstOrDefault().ToString()
-                                        + (lastName?.Length > 0 ? lastName[0].ToString() : "")
+                                        (profile?.FirstName ?? firstName)?.FirstOrDefault().ToString()
+                                        + ((profile?.LastName ?? lastName)?.Length > 0 ? (profile?.LastName ?? lastName)[0].ToString() : "")
                                     ).ToUpper(),
                                     id = user.Id,
                                     avatarUrl,

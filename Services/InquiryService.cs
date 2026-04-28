@@ -36,7 +36,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Inquiry>> GetAllInquiriesAsync()
         {
-           var path = "/inquiries?select=*,patient:profiles!inquiries_patient_id_fkey(*)&order=created_at.desc";
+           var path = "/inquiries?select=*,patient:profiles!patient_id(*)&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();

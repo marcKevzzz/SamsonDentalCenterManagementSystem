@@ -39,7 +39,7 @@ namespace SamsonDentalCenterManagementSystem.Helpers
 
             if (string.IsNullOrEmpty(userId))
             {
-                context.Result = new RedirectResult("/sign-in");
+                context.Result = new RedirectResult("/Authentication/Signin");
                 return;
             }
 
@@ -74,7 +74,7 @@ namespace SamsonDentalCenterManagementSystem.Helpers
             catch (Exception ex)
             {
                 Console.WriteLine($"[AdminPageModel] Auth guard error: {ex.Message}");
-                context.Result = new RedirectResult("/sign-in");
+                context.Result = new RedirectResult("/Authentication/Signin");
                 return;
             }
 
