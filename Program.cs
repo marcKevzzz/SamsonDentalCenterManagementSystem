@@ -1,26 +1,27 @@
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using SamsonDentalCenterManagementSystem.Data;
-using System.Text;
-using Supabase;
-using System.Text.Json;
-using System.Net;
- using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Security.Cryptography;
-using SamsonDentalCenterManagementSystem.Services;
-using SamsonDentalCenterManagementSystem.Helpers;
+using Microsoft.IdentityModel.Tokens;
 using Resend;
-
+using SamsonDentalCenterManagementSystem.Data;
+using SamsonDentalCenterManagementSystem.Helpers;
+using SamsonDentalCenterManagementSystem.Services;
+using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Supabase client ───────────────────────────────────────────────────────────
-var supabaseUrl = builder.Configuration["Supabase:Url"]
+var supabaseUrl =
+    builder.Configuration["Supabase:Url"]
     ?? throw new Exception("Supabase:Url is missing from configuration.");
-var supabaseKey = builder.Configuration["Supabase:Key"]
+var supabaseKey =
+    builder.Configuration["Supabase:Key"]
     ?? throw new Exception("Supabase:Key is missing from configuration.");
 var supabaseProjectRef = new Uri(supabaseUrl).Host.Split('.')[0];
 
@@ -29,76 +30,81 @@ var resendAPIToken = builder.Configuration["Resend:ApiToken"];
 var appBaseUrl = builder.Configuration["App:BaseUrl"];
 var outscraperKey = builder.Configuration["Outscraper:ApiKey"];
 
-
 var ecKey = ECDsa.Create();
-ecKey.ImportParameters(new ECParameters
-{
-    Curve = ECCurve.NamedCurves.nistP256,
-    Q = new ECPoint
+ecKey.ImportParameters(
+    new ECParameters
     {
-        X = Base64UrlEncoder.DecodeBytes("pLXuec5sdLlBZbcCGKS1zDO1A5r3ZfwupDBM4u8Q0C8"),
-        Y = Base64UrlEncoder.DecodeBytes("VpK_fXGKWg1tnIQHcCa3-eUwECUP2LTPhU8igZf79Bg")
+        Curve = ECCurve.NamedCurves.nistP256,
+        Q = new ECPoint
+        {
+            X = Base64UrlEncoder.DecodeBytes("pLXuec5sdLlBZbcCGKS1zDO1A5r3ZfwupDBM4u8Q0C8"),
+            Y = Base64UrlEncoder.DecodeBytes("VpK_fXGKWg1tnIQHcCa3-eUwECUP2LTPhU8igZf79Bg"),
+        },
     }
-});
+);
 
-var signingKey = new ECDsaSecurityKey(ecKey)
-{
-    KeyId = jwtKid
-};
+var signingKey = new ECDsaSecurityKey(ecKey) { KeyId = jwtKid };
 
 // ── Anon client — for auth/signin pages ──────────────────────────────────────
-var anonClient = new Supabase.Client(supabaseUrl, supabaseKey, new SupabaseOptions
-{
-    AutoRefreshToken = true
-});
+var anonClient = new Supabase.Client(
+    supabaseUrl,
+    supabaseKey,
+    new SupabaseOptions { AutoRefreshToken = true }
+);
 
 await anonClient.InitializeAsync();
-builder.Services.AddScoped(_ => anonClient);  // ← this is what SigninModel needs
+builder.Services.AddScoped(_ => anonClient); // ← this is what SigninModel needs
 
 // ── Service role client — for DB queries, bypasses RLS ───────────────────────
-var supabaseServiceKey = builder.Configuration["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey missing");
+var supabaseServiceKey =
+    builder.Configuration["Supabase:ServiceKey"]
+    ?? throw new Exception("Supabase:ServiceKey missing");
 
-var serviceClient = new Supabase.Client(supabaseUrl, supabaseServiceKey, new SupabaseOptions
-{
-    AutoRefreshToken = false
-});
+var serviceClient = new Supabase.Client(
+    supabaseUrl,
+    supabaseServiceKey,
+    new SupabaseOptions { AutoRefreshToken = false }
+);
 await serviceClient.InitializeAsync();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SessionHelper>();
 
 // ── RBAC: Claims Transformer — injects app_role from profiles table ──────────
-builder.Services.AddScoped<IClaimsTransformation, SamsonDentalCenterManagementSystem.Helpers.RoleClaimsTransformer>();
+builder.Services.AddScoped<
+    IClaimsTransformation,
+    SamsonDentalCenterManagementSystem.Helpers.RoleClaimsTransformer
+>();
 
 builder.Services.AddHttpClient<ResendClient>();
-builder.Services.Configure<ResendClientOptions>( options =>
+builder.Services.Configure<ResendClientOptions>(options =>
 {
     options.ApiToken = resendAPIToken ?? throw new Exception("Resend API Token is missing");
-} );
+});
 builder.Services.AddTransient<IResend, ResendClient>();
 
-builder.Services.AddSingleton<ProfileService>(_ =>
-    new ProfileService(serviceClient, supabaseServiceKey, supabaseUrl)
-);
+builder.Services.AddSingleton<ProfileService>(_ => new ProfileService(
+    serviceClient,
+    supabaseServiceKey,
+    supabaseUrl
+));
 
-builder.Services.AddSingleton<DentalServiceService>(_ =>
-    new DentalServiceService(serviceClient)
-);
+builder.Services.AddSingleton<DentalServiceService>(_ => new DentalServiceService(serviceClient));
 
 // ── Setup IHttpClientFactory to prevent socket exhaustion ─────────────────────
 builder.Services.AddHttpClient("SupabaseClient");
 
 // ── Appointment Service Registration ──────────────────────────────────────────
-// We use AddSingleton (or AddScoped) and manually pass the config values 
+// We use AddSingleton (or AddScoped) and manually pass the config values
 // required by the constructor you defined in Services/AppointmentService.cs
 builder.Services.AddScoped<AppointmentService>(provider =>
 {
     var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
     return new AppointmentService(
-        serviceClient, 
-        supabaseServiceKey, 
-        supabaseUrl, 
-        provider.GetRequiredService<IResend>(), 
+        serviceClient,
+        supabaseServiceKey,
+        supabaseUrl,
+        provider.GetRequiredService<IResend>(),
         appBaseUrl ?? "http://localhost:5081",
         httpFactory.CreateClient("SupabaseClient")
     );
@@ -107,13 +113,21 @@ builder.Services.AddScoped<AppointmentService>(provider =>
 builder.Services.AddSingleton<DoctorService>(provider =>
 {
     var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
-    return new DoctorService(httpFactory.CreateClient("SupabaseClient"), supabaseUrl, supabaseServiceKey);
+    return new DoctorService(
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey
+    );
 });
 
 builder.Services.AddSingleton<ReceptionistService>(provider =>
 {
     var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
-    return new ReceptionistService(httpFactory.CreateClient("SupabaseClient"), supabaseUrl, supabaseServiceKey);
+    return new ReceptionistService(
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey
+    );
 });
 
 builder.Services.AddScoped<InvoiceService>(provider =>
@@ -149,33 +163,33 @@ builder.Services.AddScoped<ReviewService>(provider =>
         httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
         supabaseServiceKey,
-        apifyKey 
+        apifyKey
     );
 });
 
 // ── EF Core ───────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
-
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
-         {
-            ValidateIssuer           = true,
-            ValidIssuer              = "https://iglnkxzttnkjnvdzccji.supabase.co/auth/v1",
-            ValidateAudience         = false,
-            ValidateLifetime         = true,
+        {
+            ValidateIssuer = true,
+            ValidIssuer = "https://iglnkxzttnkjnvdzccji.supabase.co/auth/v1",
+            ValidateAudience = false,
+            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey         = signingKey,
-            NameClaimType            = "sub",
-            RoleClaimType            = "role"
+            IssuerSigningKey = signingKey,
+            NameClaimType = "sub",
+            RoleClaimType = "role",
         };
 
-         options.Events = new JwtBearerEvents
+        options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
             {
@@ -186,7 +200,7 @@ builder.Services
             {
                 context.Token = context.Request.Cookies["sb-access-token"];
                 return Task.CompletedTask;
-            }
+            },
         };
     });
 
@@ -198,7 +212,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", p => p.RequireRole("admin"));
@@ -208,8 +221,6 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
-
-
 
 var app = builder.Build();
 

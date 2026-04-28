@@ -72,6 +72,7 @@ function rowHTML(appt) {
   };
   const config = statusConfig[appt.status.toLowerCase()] || { classes: "bg-slate-50 text-slate-600 border-slate-100", label: appt.status };
 
+  const status = (appt.status || "").toLowerCase();
   const idStr = `"${appt.id}"`;
  
   let workflowBtn = '';
@@ -91,7 +92,7 @@ function rowHTML(appt) {
       <td class="px-4 py-4">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-            ${appt.patientName[0]}
+            ${(appt.patientName || "G")[0]}
           </div>
           <div>
             <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">${appt.patientName}</div>
@@ -118,25 +119,25 @@ function rowHTML(appt) {
       <td class="px-4 py-4 text-right whitespace-nowrap">
         <div class="flex items-center justify-end gap-2">
           ${workflowBtn}
-          <div class="inline-block text-left action-dropdown">
+          <div class="inline-block text-left action-dropdown relative">
             <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
-            <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-50 overflow-hidden">
+            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
               <div class="py-1">
-                ${appt.status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ''}
-                ${appt.status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ''}
-                ${appt.status === "confirmed" || appt.status === "arrived" ? `
+                ${status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ''}
+                ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ''}
+                ${status === "confirmed" || status === "arrived" ? `
                   <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
                   <button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
                 ` : ''}
                 <div class="h-px bg-slate-100 my-1"></div>
-                ${['confirmed', 'pending', 'arrived'].includes(appt.status) ? `
+                ${['confirmed', 'pending', 'arrived'].includes(status) ? `
                   <button onclick='openEditModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-rotate w-4"></i> Reschedule</button>
                   <button onclick='cancelAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-ban w-4"></i> Cancel</button>
                 ` : ''}
-                ${['cancelled', 'no-show', 'completed'].includes(appt.status) ? `<button onclick='openBookModal()' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-plus w-4"></i> Book Again</button>` : ''}
-                ${['waitlist', 'no-show', 'cancelled', 'completed'].includes(appt.status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ''}
+                ${['cancelled', 'no_show', 'no-show', 'completed'].includes(status) ? `<button onclick='openBookModal()' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-plus w-4"></i> Book Again</button>` : ''}
+                ${['waitlist', 'no_show', 'no-show', 'cancelled', 'completed'].includes(status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ''}
               </div>
             </div>
           </div>
@@ -395,10 +396,32 @@ window.submitReschedule = async () => {
 
 window.toggleDropdown = (event, btn) => {
     event.stopPropagation();
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        if (menu !== btn.nextElementSibling) menu.classList.add('hidden');
-    });
-    btn.nextElementSibling.classList.toggle('hidden');
+    const menu = btn.nextElementSibling;
+    const isHidden = menu.classList.contains('hidden');
+
+    // Close all other menus
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+
+    if (isHidden) {
+        menu.classList.remove('hidden');
+        
+        // --- Smart Positioning ---
+        const rect = menu.getBoundingClientRect();
+        const winH = window.innerHeight;
+        
+        // If it goes off the bottom, flip it to the top
+        if (rect.bottom > winH - 20) {
+            menu.style.bottom = '100%';
+            menu.style.top = 'auto';
+            menu.classList.add('mb-2');
+            menu.classList.remove('mt-2');
+        } else {
+            menu.style.bottom = 'auto';
+            menu.style.top = '100%';
+            menu.classList.add('mt-2');
+            menu.classList.remove('mb-2');
+        }
+    }
 }
 
 window.addEventListener('click', function(e) {

@@ -95,8 +95,8 @@ function rowHTML(u) {
                     ${avatar}
                 </div>
                 <div class="min-w-0">
-                    <div class="text-[13px] font-medium truncate">${u.firstName} ${u.lastName}</div>
-                    <div class="text-[10px] text-brand-400 truncate">${u.id.slice(0, 8)}…</div>
+                    <div class="text-[14px] font-medium truncate">${u.firstName} ${u.lastName}</div>
+                    <div class="text-[10px] text-brand-400 truncate">${u.id.slice(0, 13)}…</div>
                 </div>
             </div>
         </td>
@@ -110,38 +110,90 @@ function rowHTML(u) {
         <td class="px-4 py-3 text-[12.5px] truncate max-w-0">
             <span class="truncate block" title="${u.address}">${u.address || "—"}</span>
         </td>
-        </td>
-        <td class="px-4 py-3 text-[12.5px] capitalize">${u.role}</td>
-        <td class="px-4 py-3">
-            <div class="flex items-center gap-1">
-                <button data-edit="${u.id}"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors" title="Edit">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                </button>
-                <button data-delete="${u.id}" data-name="${u.firstName} ${u.lastName}"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Delete">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                        <path d="M10 11v6M14 11v6"/>
-                        <path d="M9 6V4h6v2"/>
-                    </svg>
-                </button>
+        <td class="px-4 py-3 text-[12.5px] truncate max-w-0 capitalize">${u.role}</td>
+    <td class="px-4 py-3">
+        <div class="flex items-center">
+            ${
+              u.isActive
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-600">Active</span>`
+                : `<div class="flex flex-col gap-0.5">
+                   <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Inactive</span>
+                   ${u.reactivationRequested ? `<span class="text-[8px] text-primary font-bold animate-pulse">Requesting...</span>` : ""}
+                 </div>`
+            }
+        </div>
+    </td>
+    <td class="px-4 py-3 text-right">
+        <div class="inline-block text-left action-dropdown relative">
+            <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
+                <div class="py-1">
+                    <button data-edit="${u.id}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                        <i class="fa-solid fa-pen-to-square w-4"></i> Edit Profile
+                    </button>
+                    <button data-toggle="${u.id}" data-active="${u.isActive}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium ${u.isActive ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"} flex items-center gap-3 transition-colors">
+                        <i class="fa-solid ${u.isActive ? "fa-user-slash" : "fa-user-check"} w-4"></i> ${u.isActive ? "Deactivate" : "Activate"}
+                    </button>
+                    <div class="h-px bg-slate-100 my-1"></div>
+                    <button data-delete="${u.id}" data-name="${u.firstName} ${u.lastName}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
+                        <i class="fa-solid fa-trash-can w-4"></i> Delete Account
+                    </button>
+                </div>
             </div>
-        </td>
-    </tr>`;
+        </div>
+    </td>
+</tr>`;
+}
+
+async function toggleActive(id, currentActive) {
+  const newActive = !currentActive;
+  const msg = newActive
+    ? "Are you sure you want to activate this account?"
+    : "Are you sure you want to deactivate this account? The user will be blocked from signing in.";
+
+  Modal.open({
+    title: newActive ? "Activate Account" : "Deactivate Account",
+    message: msg,
+    type: newActive ? "info" : "warning",
+    confirmText: newActive ? "Activate" : "Deactivate",
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`/api/admin/users/${id}/toggle-active`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newActive),
+        });
+        const result = await res.json();
+        if (result.ok) {
+          Toast.show(
+            `Account ${newActive ? "activated" : "deactivated"}.`,
+            "success",
+          );
+          window.location.reload();
+        } else {
+          Toast.show(result.error || "Operation failed.", "danger");
+        }
+      } catch (err) {
+        Toast.show("An error occurred.", "danger");
+      }
+    },
+  });
 }
 
 // ── Event delegation for dynamically rendered rows ────────────────────────────
 document.addEventListener("click", (e) => {
   const editBtn = e.target.closest("[data-edit]");
   const deleteBtn = e.target.closest("[data-delete]");
+  const toggleBtn = e.target.closest("[data-toggle]");
   if (editBtn) openEditModal(editBtn.dataset.edit);
   if (deleteBtn)
     confirmDelete(deleteBtn.dataset.delete, deleteBtn.dataset.name);
+  if (toggleBtn)
+    toggleActive(toggleBtn.dataset.toggle, toggleBtn.dataset.active === "true");
 });
 
 // ── Pagination ────────────────────────────────────────────────────────────────
@@ -327,19 +379,53 @@ function closeModal() {
 }
 
 function clearModalFields() {
-  [
-    "mFirstName",
-    "mLastName",
-    "mEmail",
-    "mDob",
-    "mPhone",
-    "mAddress",
-  ].forEach((id) => {
-    document.getElementById(id).value = "";
-  });
+  ["mFirstName", "mLastName", "mEmail", "mDob", "mPhone", "mAddress"].forEach(
+    (id) => {
+      document.getElementById(id).value = "";
+    },
+  );
   document.getElementById("mSex").value = "";
   document.getElementById("mRole").value = "patient";
 }
+
+window.toggleDropdown = (event, btn) => {
+  event.stopPropagation();
+  const menu = btn.nextElementSibling;
+  const isHidden = menu.classList.contains("hidden");
+
+  // Close all other menus
+  document
+    .querySelectorAll(".dropdown-menu")
+    .forEach((m) => m.classList.add("hidden"));
+
+  if (isHidden) {
+    menu.classList.remove("hidden");
+
+    // --- Smart Positioning ---
+    const rect = menu.getBoundingClientRect();
+    const winH = window.innerHeight;
+
+    if (rect.bottom > winH - 20) {
+      menu.style.bottom = "100%";
+      menu.style.top = "auto";
+      menu.classList.add("mb-2");
+      menu.classList.remove("mt-2");
+    } else {
+      menu.style.bottom = "auto";
+      menu.style.top = "100%";
+      menu.classList.add("mt-2");
+      menu.classList.remove("mb-2");
+    }
+  }
+};
+
+window.addEventListener("click", function (e) {
+  if (!e.target.closest(".action-dropdown")) {
+    document
+      .querySelectorAll(".dropdown-menu")
+      .forEach((menu) => menu.classList.add("hidden"));
+  }
+});
 
 // ── Expose save/close for inline HTML buttons ─────────────────────────────────
 window.saveUser = saveUser;

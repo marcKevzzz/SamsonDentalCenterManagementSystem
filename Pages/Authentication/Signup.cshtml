@@ -4,7 +4,9 @@
 Layout = "_AuthLayout";
 }
 
-<div class="hidden lg:flex lg:w-[44%] bg-brand flex-col justify-between p-12 relative overflow-hidden shrink-0">
+<div class="min-h-screen flex flex-col lg:flex-row w-screen">
+  <!-- ── Left panel (branding) ── -->
+  <div class="hidden lg:flex lg:w-[44%] bg-brand flex-col justify-between p-12 relative overflow-hidden shrink-0">
   <div class="absolute inset-0 bg-grid"></div>
   <div class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
   <div class="absolute top-20 -right-24 w-64 h-64 rounded-full bg-primary/08 blur-2xl pointer-events-none"></div>
@@ -82,21 +84,24 @@ Layout = "_AuthLayout";
   </div>
 
   <div class="relative z-10 flex items-center gap-4">
-    <div class="flex -space-x-2">
-      <img src="https://randomuser.me/api/portraits/women/44.jpg"
-        class="w-8 h-8 rounded-full border-2 border-brand object-cover" alt="" />
-      <img src="https://randomuser.me/api/portraits/men/32.jpg"
-        class="w-8 h-8 rounded-full border-2 border-brand object-cover" alt="" />
-      <img src="https://randomuser.me/api/portraits/women/68.jpg"
-        class="w-8 h-8 rounded-full border-2 border-brand object-cover" alt="" />
-    </div>
-    <div>
-      <div class="text-[#f59e0b] text-sm leading-none">★★★★★</div>
-      <div class="font-body text-[0.7rem] text-white/50 mt-0.5">
-        Trusted by 2,000+ patients
+      <div class="flex -space-x-2">
+        <img src="https://lh3.googleusercontent.com/a-/ALV-UjVMTO8ZKtusYda0fj-MNyPjNApqatDSwCeT5DssAZJBx8aRxXys=s1920-c-rp-mo-br100"
+          class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
+        <img src="https://lh3.googleusercontent.com/a-/ALV-UjW4vZtcjc5AEyOFFepK2phIcWfYbXxQ81yQEwp2SHJYAvJTg2Qi=s1920-c-rp-mo-br100"
+          class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
+        <img src="https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/667932985_10240902911885972_4273212527651409196_n.jpg?stp=cp0_dst-jpg_s40x40_tt6&_nc_cat=104&ccb=1-7&_nc_sid=e99d92&_nc_ohc=X6WjRApnxTUQ7kNvwFzOJ6p&_nc_oc=AdrvZUsgnrkCwVyoZbCK1Z3KgcpAMbMIYXNU2JUxKdlLW3xWn0aaKU-PCRR1yQOSJjs&_nc_zt=24&_nc_ht=scontent-iad3-1.xx&_nc_gid=QVJutDZN4mxEghyW4SNWyw&_nc_ss=72289&oh=00_Af1SI1Qtn0dMhBNisioii8j1A2pvgeXk3OKzbPH5hu4dUw&oe=69F55F97"
+          class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
+      </div>
+      <div>
+        <div class="text-[#f59e0b] text-sm font-bold flex items-center gap-1">
+          <i class="fa-solid fa-star"></i>
+          <span>@ViewData["ReviewAvg"] / 5.0</span>
+        </div>
+        <div class="font-body text-[0.7rem] text-white/50 mt-0.5">
+          Trusted by @ViewData["ReviewCount"] patients
+        </div>
       </div>
     </div>
-  </div>
 </div>
 
 <!-- ── Right panel ── -->
@@ -112,7 +117,7 @@ Layout = "_AuthLayout";
 
     <!-- Header -->
     <div class="mb-7">
-      <h2 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-1.5">
+      <h2 class="brand-font font-extrabold text-brand text-[1.7rem] lg:text-nowrap leading-tight mb-1.5">
         Create your account
       </h2>
       <p class="font-body text-[0.9rem] text-muted">
@@ -415,4 +420,5 @@ Layout = "_AuthLayout";
       <a href="/sign-in" class="text-primary font-medium hover:underline ml-1">Sign in →</a>
     </p>
   </form>
+</div>
 </div>

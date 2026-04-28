@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-// namespace SamsonDentalCenterManagementSystem.Pages.Patientside.Authentication;
+namespace SamsonDentalCenterManagementSystem.Pages.Authentication;
+
 public class SignoutModel : PageModel
 {
     private readonly Supabase.Client _supabase;

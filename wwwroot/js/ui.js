@@ -155,3 +155,7 @@ export const Modal = (() => {
 
   return { open };
 })();
+
+// Expose to window for inline scripts
+window.Toast = Toast;
+window.Modal = Modal;

@@ -1,0 +1,212 @@
+@page "/sign-in"
+@model SigninModel
+@{
+Layout = "_AuthLayout";
+}
+
+<div class="min-h-screen flex flex-col lg:flex-row w-screen">
+  <!-- ── Left panel (branding) ── -->
+  <div class="hidden lg:flex lg:w-[44%] bg-brand flex-col justify-between p-12 relative overflow-hidden shrink-0">
+    <div class="absolute inset-0 bg-grid"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+    <div class="absolute top-20 -right-24 w-64 h-64 rounded-full bg-primary/08 blur-2xl pointer-events-none"></div>
+
+    <!-- Center -->
+    <div class="relative z-10 my-auto">
+      <div
+        class="flex items-center gap-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/35 mb-5">
+        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Patient
+        Portal
+      </div>
+      <h2 class="brand-font font-extrabold text-white leading-[1.08] mb-5" style="font-size: clamp(2rem, 3.2vw, 2.8rem)">
+        Your smile,<br />your account.
+      </h2>
+      <p class="font-body text-[0.9rem] text-white/50 leading-relaxed max-w-xs mb-10">
+        Access appointments, treatment history, and exclusive member offers — all
+        in one place.
+      </p>
+      <div class="space-y-3.5">
+        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+          <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
+              height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg></span>
+          View & manage upcoming appointments
+        </div>
+        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+          <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
+              height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg></span>
+          Access treatment history & records
+        </div>
+        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+          <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
+              height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg></span>
+          Exclusive promos & member discounts
+        </div>
+        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+          <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
+              height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12" />
+            </svg></span>
+          Faster check-in on every visit
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust -->
+    <div class="relative z-10 flex items-center gap-4">
+      <div class="flex -space-x-2">
+        <img src="https://lh3.googleusercontent.com/a-/ALV-UjVMTO8ZKtusYda0fj-MNyPjNApqatDSwCeT5DssAZJBx8aRxXys=s1920-c-rp-mo-br100"
+          class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
+        <img src="https://lh3.googleusercontent.com/a-/ALV-UjW4vZtcjc5AEyOFFepK2phIcWfYbXxQ81yQEwp2SHJYAvJTg2Qi=s1920-c-rp-mo-br100"
+          class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
+        <img src="https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/667932985_10240902911885972_4273212527651409196_n.jpg?stp=cp0_dst-jpg_s40x40_tt6&_nc_cat=104&ccb=1-7&_nc_sid=e99d92&_nc_ohc=X6WjRApnxTUQ7kNvwFzOJ6p&_nc_oc=AdrvZUsgnrkCwVyoZbCK1Z3KgcpAMbMIYXNU2JUxKdlLW3xWn0aaKU-PCRR1yQOSJjs&_nc_zt=24&_nc_ht=scontent-iad3-1.xx&_nc_gid=QVJutDZN4mxEghyW4SNWyw&_nc_ss=72289&oh=00_Af1SI1Qtn0dMhBNisioii8j1A2pvgeXk3OKzbPH5hu4dUw&oe=69F55F97"
+          class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
+      </div>
+      <div>
+        <div class="text-[#f59e0b] text-sm font-bold flex items-center gap-1">
+          <i class="fa-solid fa-star"></i>
+          <span>@ViewData["ReviewAvg"] / 5.0</span>
+        </div>
+        <div class="font-body text-[0.7rem] text-white/50 mt-0.5">
+          Trusted by @ViewData["ReviewCount"] patients
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right panel (form) ── -->
+  <div class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto ">
+    <div class="w-full max-w-[420px] fade-up animate">
+      <!-- Mobile logo -->
+      <div  class="brand-logo flex items-center mb-2 -ml-4">
+             <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 " />
+              <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex">
+                  Samson  <span id="logo-last" class="text-gray-600 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/20 rounded-full">Dental  Center</span>
+              </span>
+          </div>
+
+      <div class="mb-8">
+        <h2 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-1.5">
+          Welcome back
+        </h2>
+        <p class="font-body text-[0.9rem] text-muted">
+          Sign in to your patient account to continue.
+        </p>
+      </div>
+
+      <form id="signinForm" method="post" class="space-y-4 ">
+        @Html.AntiForgeryToken()
+        <!-- Email -->
+        <div>
+          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Email
+            Address</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </span>
+            <input asp-for="Input.Email" id="si_email" type="email" class="auth-input" placeholder="juan@email.com" />
+          </div>
+          <div id="err_si_email" class="field-error">
+            Please enter a valid email address.
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div>
+
+          <label for="si_pw"
+            class="font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Password</label>
+          <div class="relative" name="pass">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </span>
+            <input asp-for="Input.Password" id="si_pw" type="password" class="auth-input pr-11"
+              placeholder="Enter your password" />
+            <button type="button" data-input="si_pw"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors check-pw">
+              <svg class="eye-show" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg class="eye-hide hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            </button>
+          </div>
+          <div id="err_si_pw" class="field-error">
+            Password is required.
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <!-- Remember me -->
+          <div class="flex items-center gap-2.5">
+            <input type="checkbox" id="rememberMe" name="rememberMe"
+              class="accent-primary w-4 h-4 cursor-pointer rounded" />
+            <label for="rememberMe" class="font-body text-[0.83rem] text-muted cursor-pointer select-none">Keep me signed
+              in</label>
+          </div>
+          <a href="/forgot-password" class="font-body text-[0.76rem] text-primary hover:underline">Forgot password?</a>
+        </div>
+
+        <!-- Sign in btn -->
+        <button type="button" id="signin-btn"
+          class="brand-font font-bold text-[0.85rem] tracking-wider uppercase w-full bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
+          Sign In →
+        </button>
+
+        <div class="or-line font-body">or</div>
+
+        <!-- Guest -->
+        <a href="../"
+          class="brand-font font-bold text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Continue as Guest
+        </a>
+      </form>
+
+      <p class="font-body text-[0.85rem] text-muted text-center mt-7">
+        Don't have an account?
+        <a href="/sign-up" class="text-primary font-medium hover:underline ml-1">Create one →</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+@if (TempData["Success"] != null || TempData["Error"] != null)
+{
+    <script type="module">
+        import { Toast } from '/js/ui.js';
+        document.addEventListener("DOMContentLoaded", () => {
+            @if (TempData["Success"] != null)
+            {
+                <text>Toast.show("@TempData["Success"]", "success");</text>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <text>Toast.show("@TempData["Error"]", "danger");</text>
+            }
+        });
+    </script>
+}

@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("nextTab")
     ?.addEventListener("click", () => switchTab("contact"));
+
+  document
+    .getElementById("deactivateAccount")
+    ?.addEventListener("click", deactivateAccountHandler);
 });
 
 function initProfileData() {
@@ -73,12 +77,15 @@ function switchTab(name) {
   ["personal", "contact", "security"].forEach((t) => {
     const panel = document.getElementById("tab-" + t);
     const btn = document.getElementById("tab-btn-" + t);
+    const grpBtn = document.getElementById("grpBtn");
     if (t === name) {
       panel.classList.remove("hidden");
+      grpBtn.classList.add("hidden");
       btn.classList.remove("text-muted", "border-transparent");
       btn.classList.add("text-primary", "border-primary");
     } else {
       panel.classList.add("hidden");
+      grpBtn.classList.remove("hidden");
       btn.classList.remove("text-primary", "border-primary");
       btn.classList.add("text-muted", "border-transparent");
     }
@@ -401,4 +408,31 @@ function updateAvatarUI(url) {
   } else {
     circle.innerHTML = name;
   }
+}
+
+async function deactivateAccountHandler() {
+  Modal.open({
+    title: "Deactivate Account",
+    message:
+      "Are you sure you want to deactivate your account? You will be signed out and your account will be disabled until you contact support.",
+    type: "error",
+    onConfirm: async () => {
+      try {
+        const res = await fetch("/api/settings/deactivate", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        const result = await res.json();
+        if (result.ok) {
+          window.location.href = "/sign-in";
+        } else {
+          Toast.show(result.error || "Deactivation failed.", "danger");
+        }
+      } catch (err) {
+        console.error("Deactivate error:", err);
+        Toast.show("An unexpected error occurred.", "danger");
+      }
+    },
+  });
 }

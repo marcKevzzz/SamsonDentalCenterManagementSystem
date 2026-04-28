@@ -9,16 +9,16 @@ const STEPS = {
     fields: [
       { id: "su_fn", validate: (v) => !!v, msg: "First name is required." },
       { id: "su_ln", validate: (v) => !!v, msg: "Last name is required." },
-      { 
-        id: "su_dob", 
+      {
+        id: "su_dob",
         validate: (v) => {
           if (!v) return false;
           const date = new Date(v);
           const today = new Date();
           today.setHours(0, 0, 0, 0); // Only compare dates
           return date <= today;
-        }, 
-        msg: "Birthday cannot be in the future." 
+        },
+        msg: "Birthday cannot be in the future.",
       },
       { id: "su_sex", validate: (v) => !!v, msg: "Please select your sex." },
     ],
@@ -261,10 +261,9 @@ async function handleSignIn() {
     if (!email) showErr("si_email", "Email is required.");
     if (!password) showErr("si_pw", "Password is required.");
     return;
-  } 
-   else if (password.length < 8){
-    showErr("si_pw", "Password must be at least 8 characters.")
-   }
+  } else if (password.length < 8) {
+    showErr("si_pw", "Password must be at least 8 characters.");
+  }
 
   // 1. UI Loading State
   const originalBtnText = signinBtn.innerHTML;
@@ -320,17 +319,48 @@ async function handleSignIn() {
     } else {
       // 4. Handle Errors (Show a toast or label)
       const errorMsg = result.errors[0] || "Login failed";
-      
+
       if (errorMsg === "This email is not registered.") {
         showErr("si_email", "");
       } else if (errorMsg === "Incorrect password.") {
-        showErr("si_pw", "");
+        showErr("si_pw", "Incorrect password.");
       } else if (errorMsg === "Invalid email or password.") {
         showErr("si_email", "");
         showErr("si_pw", "");
       }
-      
-      Toast.show(errorMsg, "danger");
+
+      if (result.error_type === "account_deactivated") {
+        Modal.open({
+          title: "Account Deactivated",
+          message: errorMsg,
+          type: "warning",
+          confirmText: "Request Activation",
+          cancelText: "Cancel",
+          onConfirm: async () => {
+            try {
+              const reqRes = await fetch("/api/auth/request-reactivation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: result.userId }),
+              });
+              const reqJson = await reqRes.json();
+              if (reqJson.ok) {
+                Toast.show(
+                  "Reactivation request sent! Please wait for admin approval.",
+                  "success",
+                );
+              } else {
+                Toast.show("Failed to send request.", "danger");
+              }
+            } catch (err) {
+              Toast.show("An error occurred.", "danger");
+            }
+          },
+        });
+      } else {
+        Toast.show(errorMsg, "danger");
+      }
+
       resetBtn(signinBtn, originalBtnText);
     }
   } catch (err) {

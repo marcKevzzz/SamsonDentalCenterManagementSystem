@@ -122,7 +122,7 @@ Layout = "AdminSide/_StaffLayout";
           }
           @foreach (var appt in Model.Appointments)
           {
-            var shortId = "#APT-" + appt.Id[..4].ToUpper();
+            var shortId = "#APT-" + (appt.Id.Length >= 4 ? appt.Id[..4] : appt.Id).ToUpper();
             var dateStr = appt.AppointmentDate.ToString("MMM dd") + " · " + appt.AppointmentTime;
             var (badgeClasses, statusLabel) = appt.Status.ToLower() switch
             {
@@ -162,7 +162,7 @@ Layout = "AdminSide/_StaffLayout";
               <td class="px-4 py-4">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-                    @(appt.PatientName[..1])
+                    @(!string.IsNullOrEmpty(appt.PatientName) ? appt.PatientName[..1] : "G")
                   </div>
                   <div>
                     <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
@@ -222,9 +222,9 @@ Layout = "AdminSide/_StaffLayout";
       <i class="fa-solid fa-ellipsis-vertical"></i>
     </button>
 
-    <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-50 overflow-hidden">
+    <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
       <div class="py-1">
-        @if (appt.Status == "pending")
+        @if (string.Equals(appt.Status, "pending", StringComparison.OrdinalIgnoreCase))
         {
           <button onclick='confirmAppt(@Html.Raw(apptJson))' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
@@ -232,7 +232,7 @@ Layout = "AdminSide/_StaffLayout";
           </button>
         }
 
-        @if (appt.Status == "confirmed")
+        @if (string.Equals(appt.Status, "confirmed", StringComparison.OrdinalIgnoreCase))
         {
           <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
@@ -240,7 +240,7 @@ Layout = "AdminSide/_StaffLayout";
           </button>
         }
 
-        @if (appt.Status is "confirmed" or "arrived")
+        @if (string.Equals(appt.Status, "confirmed", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "arrived", StringComparison.OrdinalIgnoreCase))
         {
           <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
@@ -255,7 +255,7 @@ Layout = "AdminSide/_StaffLayout";
         
         <div class="h-px bg-slate-100 my-1"></div>
 
-        @if (appt.Status is "confirmed" or "pending" or "arrived")
+        @if (string.Equals(appt.Status, "confirmed", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "pending", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "arrived", StringComparison.OrdinalIgnoreCase))
         {
           <button onclick='openEditModal(@Html.Raw(apptJson))' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors">
@@ -268,7 +268,7 @@ Layout = "AdminSide/_StaffLayout";
           </button>
         }
 
-        @if (appt.Status is "cancelled" or "no-show" or "completed")
+        @if (string.Equals(appt.Status, "cancelled", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no_show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no-show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "completed", StringComparison.OrdinalIgnoreCase))
         {
           <button onclick='openBookModal()' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors">
@@ -276,7 +276,7 @@ Layout = "AdminSide/_StaffLayout";
           </button>
         }
 
-        @if (appt.Status is "waitlist" or "no-show" or "cancelled" or "completed")
+        @if (string.Equals(appt.Status, "waitlist", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no_show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "no-show", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "cancelled", StringComparison.OrdinalIgnoreCase) || string.Equals(appt.Status, "completed", StringComparison.OrdinalIgnoreCase))
         {
           <button onclick='deleteAppt(@Html.Raw(apptJson))' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">

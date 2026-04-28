@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SamsonDentalCenterManagementSystem.Models;
 using Supabase;
+using Supabase.Gotrue;
 
 public class ProfileService
 {
@@ -275,6 +276,47 @@ public class ProfileService
                 path,
                 new Supabase.Storage.FileOptions { Upsert = true, ContentType = contentType }
             );
+    }
+
+    public async Task ResetPasswordForEmail(string email, string? baseUrl = null)
+    {
+        try
+        {
+            var options = new ResetPasswordForEmailOptions(email)
+            {
+                // Use 'RedirectTo' property
+                RedirectTo = $"{baseUrl}/reset-password",
+            };
+
+            await _supabase.Auth.ResetPasswordForEmail(options);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Password reset failed: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task DeactivateAccount(string userId)
+    {
+        await _supabase
+            .From<Profile>()
+            .Where(x => x.Id == userId)
+            .Set(x => x.IsActive, false)
+            .Update();
+    }
+
+    public async Task ToggleUserActive(string userId, bool isActive)
+    {
+        // Ensure IsActive and ReactivationRequested are marked with [Column] in Profile.cs
+        await _supabase
+            .From<Profile>()
+            .Where(x => x.Id == userId)
+            .Set(x => x.IsActive, isActive)
+            .Set(x => x.ReactivationRequested, false)
+            .Update();
+
+        Console.WriteLine($"[Service] Profile {userId} set to Active: {isActive}");
     }
 
     public string GetPublicUrl(string bucket, string path)

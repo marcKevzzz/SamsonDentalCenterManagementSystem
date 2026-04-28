@@ -45,3 +45,34 @@
     - Integrated dynamic reviews into Home page with horizontal scrolling and platform icons (Google/Facebook).
     - Added dynamic rating/count stats to Home and Patient Signin pages.
     - Implemented real Apify Yelp Scraper integration with manual trigger and caching in Supabase.
+  - Refactored Profile and Security management:
+    - Fixed 500 error on profile save by adding `Newtonsoft.Json.JsonIgnore` to UI-only fields in `Profile` model.
+    - Separated basic profile details (Name, DOB, Phone, Address) from account security (Email, Password).
+    - Moved Email field to Security tab in Settings page.
+    - Updated `SettingsController` and `settings.js` to handle separated update flows.
+    - Implemented "Forgot Password" functionality with a new request page and Supabase integration.
+    - Added `ResetPasswordForEmail` to `ProfileService`.
+  - Enhanced Email Confirmation and Password Recovery:
+    - Refactored `AuthController.ConfirmEmail` to fetch real user roles and profiles from Supabase.
+    - Updated `EmailConfirmed.cshtml` to handle `signup`, `email_change`, and `recovery` types.
+    - Implemented `ResetPassword` page to handle password recovery via email links.
+    - Added robust error handling for expired or invalid confirmation tokens.
+    - Fixed authentication redirection by explicitly setting `EmailRedirectTo` in Signup and Forgot Password flows.
+    - Improved `EmailConfirmed.cshtml` to detect tokens from both URL hash and query parameters.
+    - Expanded support for `invite` and `email_change` confirmation types.
+  - Profile Settings Refactor (Part 2):
+    - Moved Email field back to Contact tab for easier access.
+    - Re-integrated email update into `SavePersonal` flow.
+    - Replaced "Delete Account" with "Deactivate Account" flow.
+    - Implemented `is_active` status in `profiles` table with migration.
+    - Added `DeactivateAccount` logic to `ProfileService` and `SettingsController`.
+    - Updated Sign-in logic to block deactivated accounts and provide `error_type: account_deactivated`.
+    - Implemented Reactivation Request flow:
+      - Added `reactivation_requested` column to `profiles` with migration.
+      - Added `RequestReactivation` endpoint to `AuthController`.
+      - Integrated "Request Activation" Modal in sign-in page for deactivated users.
+    - Enhanced Admin Users Management:
+      - Added "Status" column to Admin Users table.
+      - Implemented deactivation/activation toggle in Admin UI.
+      - Added `ToggleActive` endpoint to `AdminUsersController`.
+      - Visual indicators for reactivation requests in the Admin table.

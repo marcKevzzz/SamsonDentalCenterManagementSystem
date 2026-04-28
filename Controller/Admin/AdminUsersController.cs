@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using SamsonDentalCenterManagementSystem.Models;
 using Supabase.Gotrue;
-using Microsoft.Extensions.Configuration;
 
 namespace SamsonDentalCenterManagementSystem.Controllers;
 
@@ -19,11 +19,16 @@ public class AdminUsersController : ControllerBase
     private readonly string _supabaseUrl;
     private static readonly HttpClient _http = new HttpClient();
 
-    public AdminUsersController(ProfileService profileService, Supabase.Client supabase, IConfiguration config)
+    public AdminUsersController(
+        ProfileService profileService,
+        Supabase.Client supabase,
+        IConfiguration config
+    )
     {
         _profileService = profileService;
         _supabase = supabase;
-        _serviceRoleKey = config["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey is missing");
+        _serviceRoleKey =
+            config["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey is missing");
         _supabaseUrl = config["Supabase:Url"] ?? throw new Exception("Supabase:Url is missing");
     }
 
@@ -37,50 +42,59 @@ public class AdminUsersController : ControllerBase
         try
         {
             var data = new Dictionary<string, object>();
-            if (!string.IsNullOrWhiteSpace(p.FirstName)) data["first_name"] = p.FirstName;
-            if (!string.IsNullOrWhiteSpace(p.LastName)) data["last_name"] = p.LastName;
-            if (p.DateOfBirth.HasValue) data["date_of_birth"] = p.DateOfBirth.Value.ToString("yyyy-MM-dd");
-            if (!string.IsNullOrWhiteSpace(p.Sex)) data["sex"] = p.Sex;
-            if (!string.IsNullOrWhiteSpace(p.PhoneNumber)) data["phone_number"] = p.PhoneNumber;
-            if (!string.IsNullOrWhiteSpace(p.Address)) data["address"] = p.Address;
+            if (!string.IsNullOrWhiteSpace(p.FirstName))
+                data["first_name"] = p.FirstName;
+            if (!string.IsNullOrWhiteSpace(p.LastName))
+                data["last_name"] = p.LastName;
+            if (p.DateOfBirth.HasValue)
+                data["date_of_birth"] = p.DateOfBirth.Value.ToString("yyyy-MM-dd");
+            if (!string.IsNullOrWhiteSpace(p.Sex))
+                data["sex"] = p.Sex;
+            if (!string.IsNullOrWhiteSpace(p.PhoneNumber))
+                data["phone_number"] = p.PhoneNumber;
+            if (!string.IsNullOrWhiteSpace(p.Address))
+                data["address"] = p.Address;
             data["role"] = string.IsNullOrWhiteSpace(p.Role) ? "patient" : p.Role.ToLower();
-            if (!string.IsNullOrWhiteSpace(p.AvatarUrl)) data["avatar_url"] = p.AvatarUrl;
-            if (!string.IsNullOrWhiteSpace(p.Email)) data["email"] = p.Email;
+            if (!string.IsNullOrWhiteSpace(p.AvatarUrl))
+                data["avatar_url"] = p.AvatarUrl;
+            if (!string.IsNullOrWhiteSpace(p.Email))
+                data["email"] = p.Email;
 
             _http.DefaultRequestHeaders.Clear();
             _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
             _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
-            
+
             var payload = new
-
             {
-
                 email = p.Email,
 
                 password = "Password123!",
 
                 email_confirm = true,
 
-                user_metadata = data
-
+                user_metadata = data,
             };
 
-            
+            var content = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(payload),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
 
-            var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
-
+            Console.WriteLine($"[CreateUser] Attempting to create user: {p.Email}");
             var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users", content);
-            
+
             if (!res.IsSuccessStatusCode)
             {
                 var error = await res.Content.ReadAsStringAsync();
+                Console.WriteLine($"[CreateUser] Failed: {error}");
                 return BadRequest(new { ok = false, error = $"Invite failed: {error}" });
             }
-            
+
             var resStr = await res.Content.ReadAsStringAsync();
             var json = System.Text.Json.JsonDocument.Parse(resStr);
             var id = json.RootElement.GetProperty("id").GetString();
-            
+
             return Ok(new { ok = true, id });
         }
         catch (Exception ex)
@@ -106,7 +120,7 @@ public class AdminUsersController : ControllerBase
 
     // ── DELETE /api/admin/users/{id} — Delete user ────────────────────────────
     [HttpDelete("{id}")]
-   public async Task DeleteProfile(string id)
+    public async Task DeleteProfile(string id)
     {
         // 1. Delete auth user FIRST (important)
         _http.DefaultRequestHeaders.Clear();
@@ -123,11 +137,27 @@ public class AdminUsersController : ControllerBase
         }
 
         // 2. Delete profile AFTER
-        await _supabase
-            .From<Profile>()
-            .Where(x => x.Id == id)
-            .Delete();
+        await _supabase.From<Profile>().Where(x => x.Id == id).Delete();
 
         Console.WriteLine($"[DeleteProfile] User {id} fully deleted.");
+    }
+
+    // ── POST /api/admin/users/{id}/toggle-active ──────────────────────────────
+    [HttpPost("{id}/toggle-active")]
+    public async Task<IActionResult> ToggleActive(string id, [FromBody] bool isActive)
+    {
+        try
+        {
+            Console.WriteLine($"[ToggleActive] Attempting to toggle active status for ID: {id} to {isActive}");
+            
+            await _profileService.ToggleUserActive(id, isActive);
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ToggleActive] Error: {ex.Message}");
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
     }
 }

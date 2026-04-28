@@ -52,13 +52,14 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[700px] table-fixed">
                     <colgroup>
-                        <col class="w-[22%]" />
+                        <col class="w-[20%]" />
                         <col class="w-[9%]" />
-                        <col class="w-[16%]" />
-                        <col class="w-[12%]" />
-                        <col class="w-[14%]" />
+                        <col class="w-[15%]" />
+                        <col class="w-[11%]" />
+                        <col class="w-[15%]" />
+                        <col class="w-[10%]" />
+                        <col class="w-[9%]" />
                         <col class="w-[8%]" />
-                        <col class="w-[9%]" />
                     </colgroup>
                     <thead class="bg-slate-50">
                         <tr>
@@ -81,6 +82,9 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
                             <th
                                 class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
                                 Role</th>
+                            <th
+                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+                                Status</th>
                             <th
                                 class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
                                 Actions</th>
@@ -113,8 +117,8 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
                                             }
                                         </div>
                                         <div class="min-w-0">
-                                            <div class="text-[13px] font-medium truncate">@u.FirstName @u.LastName</div>
-                                            <div class="text-[10px] text-brand-400 truncate">@u.Id[..12]…</div>
+                                            <div class="text-[14px] font-medium truncate">@u.FirstName @u.LastName</div>
+                                            <div class="text-[10px] text-brand-400 truncate">@(u.Id.Length >= 13 ? u.Id[..13] : u.Id)</div>
                                         </div>
                                     </div>
                                 </td>
@@ -131,6 +135,24 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
                                         "—" : u.Address)</span>
                                 </td>
                                 <td class="px-4 py-3 text-[12.5px] capitalize">@u.Role</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center">
+                                        @if (u.IsActive)
+                                        {
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-600">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <div class="flex flex-col gap-0.5">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Inactive</span>
+                                                @if (u.ReactivationRequested)
+                                                {
+                                                    <span class="text-[8px] text-primary font-bold animate-pulse">Requesting...</span>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-1">
                                         <button onclick="openEditModal('@u.Id')"
@@ -208,7 +230,9 @@ var users = Model.Users ?? new List<SamsonDentalCenterManagementSystem.Models.Pr
             dob         = u.DateOfBirth?.ToString("yyyy-MM-dd") ?? "",
             sex         = u.Sex ?? "",
             role        = u.Role ?? "patient",
-            avatarUrl   = u.AvatarUrl ?? ""
+            avatarUrl   = u.AvatarUrl ?? "",
+            isActive    = u.IsActive,
+            reactivationRequested = u.ReactivationRequested
         })
     ))
 </script>

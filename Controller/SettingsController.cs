@@ -39,7 +39,12 @@ public class SettingsController : ControllerBase
             var bytes = ms.ToArray();
 
             var ext = Path.GetExtension(file.FileName);
-            var publicUrl = await _profileService.UploadAvatar(userId, bytes, ext, file.ContentType);
+            var publicUrl = await _profileService.UploadAvatar(
+                userId,
+                bytes,
+                ext,
+                file.ContentType
+            );
 
             return Ok(new { ok = true, url = publicUrl });
         }
@@ -57,7 +62,9 @@ public class SettingsController : ControllerBase
     {
         var userId = User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
-            return Task.FromResult<IActionResult>(Unauthorized(new { ok = false, error = "Not authenticated." }));
+            return Task.FromResult<IActionResult>(
+                Unauthorized(new { ok = false, error = "Not authenticated." })
+            );
 
         try
         {
@@ -67,7 +74,9 @@ public class SettingsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[RemoveAvatar] Error: {ex.Message}");
-            return Task.FromResult<IActionResult>(StatusCode(500, new { ok = false, error = ex.Message }));
+            return Task.FromResult<IActionResult>(
+                StatusCode(500, new { ok = false, error = ex.Message })
+            );
         }
     }
 
@@ -82,9 +91,10 @@ public class SettingsController : ControllerBase
         {
             await _profileService.UpdateProfile(userId, p);
 
-            // ← was calling UpdateProfile twice, should be UpdateUserEmail
             if (!string.IsNullOrWhiteSpace(p.Email))
+            {
                 await _profileService.UpdateUserEmail(userId, p.Email);
+            }
 
             return Ok(new { ok = true });
         }
@@ -96,44 +106,76 @@ public class SettingsController : ControllerBase
     }
 
     [HttpPut("update-password")]
-public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest req)
-{
-    var userId = User.FindFirst("sub")?.Value;
-    if (string.IsNullOrEmpty(userId))
-        return Unauthorized(new { ok = false, error = "Not authenticated." });
-
-    if (string.IsNullOrWhiteSpace(req.NewPassword) || req.NewPassword.Length < 8)
-        return BadRequest(new { ok = false, error = "Password must be at least 8 characters." });
-
-    if (req.NewPassword != req.ConfirmPassword)
-        return BadRequest(new { ok = false, error = "Passwords do not match." });
-
-    try
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest req)
     {
-        // 1. Verify Current Password
-        var email = User.FindFirst("email")?.Value;
-        if (string.IsNullOrEmpty(email))
-            return Unauthorized(new { ok = false, error = "User email not found." });
+        var userId = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { ok = false, error = "Not authenticated." });
 
-        if (string.IsNullOrWhiteSpace(req.CurrentPassword))
-            return BadRequest(new { ok = false, error = "Current password is required." });
+        if (string.IsNullOrWhiteSpace(req.NewPassword) || req.NewPassword.Length < 8)
+            return BadRequest(
+                new { ok = false, error = "Password must be at least 8 characters." }
+            );
 
-        try {
-            await _supabase.Auth.SignIn(email, req.CurrentPassword);
-        } catch (Exception) {
-            return BadRequest(new { ok = false, error = "Current password mismatch." });
+        if (req.NewPassword != req.ConfirmPassword)
+            return BadRequest(new { ok = false, error = "Passwords do not match." });
+
+        try
+        {
+            // 1. Verify Current Password
+            var email = User.FindFirst("email")?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new { ok = false, error = "User email not found." });
+
+            if (string.IsNullOrWhiteSpace(req.CurrentPassword))
+                return BadRequest(new { ok = false, error = "Current password is required." });
+
+            try
+            {
+                await _supabase.Auth.SignIn(email, req.CurrentPassword);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { ok = false, error = "Current password mismatch." });
+            }
+
+            // 2. Update to New Password
+            await _profileService.UpdateUserPassword(userId, req.NewPassword);
+
+            // 3. Update Email if provided and changed
+            if (!string.IsNullOrWhiteSpace(req.Email))
+            {
+                await _profileService.UpdateUserEmail(userId, req.Email);
+            }
+
+            return Ok(new { ok = true });
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[UpdatePassword] Error: {ex.Message}");
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
 
-        // 2. Update to New Password
-        await _profileService.UpdateUserPassword(userId, req.NewPassword);
-        return Ok(new { ok = true });
-    }
-    catch (Exception ex)
+    [HttpPost("deactivate")]
+    public async Task<IActionResult> Deactivate()
     {
-        Console.WriteLine($"[SavePassword] Error: {ex.Message}");
-        return StatusCode(500, new { ok = false, error = ex.Message });
+        var userId = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { ok = false, error = "Not authenticated." });
+
+        try
+        {
+            await _profileService.DeactivateAccount(userId);
+            Response.Cookies.Delete("sb-access-token");
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Deactivate] Error: {ex.Message}");
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
     }
-}
 
     [HttpGet("ping")]
     public IActionResult Ping() => Ok(new { ok = true, message = "controller is alive" });
@@ -145,6 +187,7 @@ public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest
 public class UpdatePasswordRequest
 {
     public string? CurrentPassword { get; set; }
-    public string? NewPassword     { get; set; }
+    public string? NewPassword { get; set; }
     public string? ConfirmPassword { get; set; }
+    public string? Email { get; set; }
 }

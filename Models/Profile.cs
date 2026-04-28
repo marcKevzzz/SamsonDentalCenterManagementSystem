@@ -1,6 +1,6 @@
+using System.Text.Json.Serialization;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
-using System.Text.Json.Serialization;
 
 namespace SamsonDentalCenterManagementSystem.Models
 {
@@ -35,23 +35,37 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("address")]
         public string? Address { get; set; }
 
-       [Column("role")]
+        [Column("role")]
         public string? Role { get; set; }
 
         [Column("avatar_url")]
         [JsonPropertyName("avatar_url")]
         public string? AvatarUrl { get; set; }
 
-
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("is_active")]
+        public bool IsActive { get; set; } = true;
+
+        [Column("reactivation_requested")]
+        public bool ReactivationRequested { get; set; } = false;
+
         [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string FullName => $"{FirstName} {LastName}";
 
         // --- UI / Auth fields — excluded from Supabase insert ---
-        [JsonIgnore] public string Password { get; set; } = string.Empty;
-        [JsonIgnore] public string ConfirmPassword { get; set; } = string.Empty;
-        [JsonIgnore] public bool Consent { get; set; }
+        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string Password { get; set; } = string.Empty;
+
+        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string ConfirmPassword { get; set; } = string.Empty;
+
+        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public bool Consent { get; set; }
     }
 }

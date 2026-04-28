@@ -93,30 +93,41 @@ Layout = null;
         // Fragments are never sent to the server — we must handle them client-side.
 
         (async function () {
-            const hash = window.location.hash.substring(1); // strip #
-            const params = new URLSearchParams(hash);
+            const hash = window.location.hash.substring(1);
+            const hashParams = new URLSearchParams(hash);
+            const queryParams = new URLSearchParams(window.location.search);
 
-            const accessToken = params.get("access_token");
-            const type = params.get("type");
-            const error = params.get("error_description");
+            const accessToken = hashParams.get("access_token") || queryParams.get("access_token");
+            const type = hashParams.get("type") || queryParams.get("type");
+            const error = hashParams.get("error") || queryParams.get("error");
+            const errorDescription = hashParams.get("error_description") || queryParams.get("error_description");
 
-            console.log("Email confirmation params:", { accessToken, type, error });
+            console.log("Email confirmation params:", { type, error, errorDescription });
 
             // Handle error from Supabase (e.g. expired link)
-            if (error) {
-                showError(decodeURIComponent(error));
+            if (error || errorDescription) {
+                showError(decodeURIComponent(errorDescription || error || "The link is invalid or has expired."));
                 return;
             }
 
-            // Must be a signup confirmation
-            if (!accessToken || type !== "signup") {
-                // Could be arriving without a fragment — show error
-                showError("No confirmation token found. The link may be invalid.");
+            if (!accessToken) {
+                showError("No confirmation token found. Please check your link.");
+                return;
+            }
+
+            // Handle Password Recovery
+            if (type === "recovery") {
+                window.location.href = `/reset-password#access_token=${accessToken}`;
+                return;
+            }
+
+            // Handle Email Change / Signup / Invite
+            if (type !== "signup" && type !== "email_change" && type !== "invite") {
+                showError("Invalid confirmation type.");
                 return;
             }
 
             try {
-                // Store the access token as a cookie via our backend
                 const res = await fetch("/api/auth/confirm-email", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -127,18 +138,25 @@ Layout = null;
                 const result = await res.json();
 
                 if (result.ok) {
-                    showSuccess(result.user);
+                    const message = type === "email_change" 
+                        ? "Your email address has been updated successfully." 
+                        : "Your account has been verified. You can now sign in.";
+                    showSuccess(result.user, message);
                 } else {
                     showError(result.error ?? "Confirmation failed.");
                 }
             } catch (err) {
-                showError("An unexpected error occurred.");
+                showError("An unexpected error occurred. Please try again.");
             }
         })();
 
-        function showSuccess(user) {
+        function showSuccess(user, message) {
             document.getElementById("stateLoading").classList.add("hidden");
             document.getElementById("stateSuccess").classList.remove("hidden");
+            
+            if (message) {
+                document.querySelector("#stateSuccess p").textContent = message;
+            }
 
             // Save user to localStorage if returned
             if (user) {

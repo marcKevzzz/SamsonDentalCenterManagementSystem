@@ -157,6 +157,7 @@ CREATE TABLE public.profiles (
   updated_at timestamp with time zone DEFAULT now(),
   avatar_url text,
   email text,
+  is_active boolean NOT NULL DEFAULT true,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
