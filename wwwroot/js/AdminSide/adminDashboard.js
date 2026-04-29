@@ -21,23 +21,24 @@ function hydrateDashboard(data) {
 
     // 1. Update Stats
     if (data.stats) {
+        const stats = data.stats;
         const totalPatients = document.getElementById('stat-total-patients');
-        if (totalPatients) totalPatients.textContent = data.stats.totalPatients.toLocaleString();
+        if (totalPatients && stats.totalPatients !== undefined) totalPatients.textContent = stats.totalPatients.toLocaleString();
 
         const activeDoctors = document.getElementById('stat-active-doctors');
-        if (activeDoctors) activeDoctors.textContent = data.stats.activeDoctors;
+        if (activeDoctors && stats.activeDoctors !== undefined) activeDoctors.textContent = stats.activeDoctors;
 
         const todayAppts = document.getElementById('stat-today-appts');
-        if (todayAppts) todayAppts.textContent = data.stats.todayAppointments;
+        if (todayAppts && stats.todayAppointments !== undefined) todayAppts.textContent = stats.todayAppointments;
 
         const monthlyRevenue = document.getElementById('stat-monthly-revenue');
-        if (monthlyRevenue) monthlyRevenue.textContent = `₱${data.stats.monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+        if (monthlyRevenue && stats.monthlyRevenue !== undefined) monthlyRevenue.textContent = `₱${stats.monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
         // Trends (mock for now as backend doesn't provide history yet, but we'll use dynamic placeholders)
-        document.getElementById('stat-patients-trend').textContent = `↑ ${Math.floor(data.stats.totalPatients * 0.1)} new this week`;
-        document.getElementById('stat-doctors-trend').textContent = `↑ ${data.stats.activeDoctors} specialists active`;
-        document.getElementById('stat-appts-trend').textContent = `Today's schedule`;
-        document.getElementById('stat-revenue-trend').textContent = `↑ ${(data.stats.monthlyRevenue * 0.05).toLocaleString()} vs last week`;
+        if (stats.totalPatients !== undefined) document.getElementById('stat-patients-trend').textContent = `↑ ${Math.floor(stats.totalPatients * 0.1)} new this week`;
+        if (stats.activeDoctors !== undefined) document.getElementById('stat-doctors-trend').textContent = `↑ ${stats.activeDoctors} specialists active`;
+        if (document.getElementById('stat-appts-trend')) document.getElementById('stat-appts-trend').textContent = `Today's schedule`;
+        if (stats.monthlyRevenue !== undefined) document.getElementById('stat-revenue-trend').textContent = `↑ ${(stats.monthlyRevenue * 0.05).toLocaleString()} vs last week`;
     }
 
     // 2. Hydrate Upcoming Appointments

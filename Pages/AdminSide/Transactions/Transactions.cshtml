@@ -231,15 +231,16 @@
 
             const data = await res.json();
             if (data.ok) {
-                window.location.reload();
+                if (window.Toast) window.Toast.show("Payment recorded successfully", "success");
+                setTimeout(() => window.location.reload(), 1000);
             } else {
-                alert(data.error || "Payment failed");
+                if (window.Toast) window.Toast.show(data.error || "Payment failed", "danger");
                 btn.disabled = false;
                 btn.innerText = "Record Payment";
             }
         } catch (err) {
-            console.error(err);
-            alert("Network error");
+            console.error("[RecordPayment Error]", err);
+            if (window.Toast) window.Toast.show("Network error or server failure", "danger");
             btn.disabled = false;
             btn.innerText = "Record Payment";
         }

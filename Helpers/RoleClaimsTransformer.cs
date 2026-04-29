@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using SamsonDentalCenterManagementSystem.Services;
 
 namespace SamsonDentalCenterManagementSystem.Helpers
 {
@@ -24,8 +25,9 @@ namespace SamsonDentalCenterManagementSystem.Helpers
             if (principal.HasClaim(c => c.Type == "app_role"))
                 return principal;
 
-            var userId = principal.FindFirst("sub")?.Value
-                      ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId =
+                principal.FindFirst("sub")?.Value
+                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
                 return principal;

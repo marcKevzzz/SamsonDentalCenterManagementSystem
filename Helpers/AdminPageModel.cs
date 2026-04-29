@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Services;
 
 namespace SamsonDentalCenterManagementSystem.Helpers
 {
@@ -32,10 +33,10 @@ namespace SamsonDentalCenterManagementSystem.Helpers
 
         public override async Task OnPageHandlerExecutionAsync(
             PageHandlerExecutingContext context,
-            PageHandlerExecutionDelegate next)
+            PageHandlerExecutionDelegate next
+        )
         {
-            var userId = User.FindFirst("sub")?.Value
-                      ?? User.Identity?.Name;
+            var userId = User.FindFirst("sub")?.Value ?? User.Identity?.Name;
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -58,12 +59,14 @@ namespace SamsonDentalCenterManagementSystem.Helpers
 
                 CurrentUserId = userId;
                 CurrentUserRole = role;
-                CurrentUserName = profile != null
-                    ? $"{profile.FirstName} {profile.LastName}".Trim()
-                    : "Staff";
-                CurrentUserInitials = profile != null
-                    ? $"{(profile.FirstName?.Length > 0 ? profile.FirstName[0] : ' ')}{(profile.LastName?.Length > 0 ? profile.LastName[0] : ' ')}".Trim().ToUpper()
-                    : "S";
+                CurrentUserName =
+                    profile != null ? $"{profile.FirstName} {profile.LastName}".Trim() : "Staff";
+                CurrentUserInitials =
+                    profile != null
+                        ? $"{(profile.FirstName?.Length > 0 ? profile.FirstName[0] : ' ')}{(profile.LastName?.Length > 0 ? profile.LastName[0] : ' ')}"
+                            .Trim()
+                            .ToUpper()
+                        : "S";
 
                 // Make available to Razor views via ViewData
                 ViewData["UserRole"] = CurrentUserRole;

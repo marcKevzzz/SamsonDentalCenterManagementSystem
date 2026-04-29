@@ -6,11 +6,13 @@ namespace SamsonDentalCenterManagementSystem.Services
     public class ClinicService
     {
         private readonly Supabase.Client _supabase;
+        private readonly ActivityLogService _logs;
         private const string DefaultSettingsId = "00000000-0000-0000-0000-000000000001";
 
-        public ClinicService(Supabase.Client supabase)
+        public ClinicService(Supabase.Client supabase, ActivityLogService logs)
         {
             _supabase = supabase;
+            _logs = logs;
         }
 
         public async Task<ClinicSettings> GetSettingsAsync()
@@ -42,6 +44,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 settings.Id = DefaultSettingsId;
                 settings.UpdatedAt = DateTime.UtcNow;
                 await _supabase.From<ClinicSettings>().Upsert(settings);
+
+                await _logs.LogActionAsync(null, "updated clinic settings", null, null, "Settings", "/Admin/Settings");
             }
             catch (Exception ex)
             {

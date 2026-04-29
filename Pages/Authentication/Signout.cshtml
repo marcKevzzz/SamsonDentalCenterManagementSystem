@@ -12,6 +12,13 @@
     // Clear all auth-related localStorage keys
     localStorage.removeItem("sb_user");
     localStorage.removeItem("returnUrl");
+    
+    // Clear admin data cache to prevent stale data errors
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("admin_cache_") || key.startsWith("admin_v2_")) {
+            localStorage.removeItem(key);
+        }
+    });
 
     // Redirect to sign-in
     window.location.replace("/sign-in");

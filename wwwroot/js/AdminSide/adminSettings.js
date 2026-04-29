@@ -34,10 +34,11 @@ export class ClinicSettings {
         this.initTabs();
         this.initStatusToggle();
         
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Load data immediately since init() is already called within DOMContentLoaded
+        (async () => {
             const data = await AdminStore.loadData('settings', '/api/admin/data/settings');
             if (data) this.initializeWithData({ settings: data });
-        });
+        })();
 
         window.addFaq = () => this.addFaq();
         window.removeFaq = (i) => this.removeFaq(i);

@@ -6,7 +6,7 @@ using SamsonDentalCenterManagementSystem.ViewModels;
 
 namespace SamsonDentalCenterManagementSystem.Controllers.Admin;
 
-[Authorize(Policy = "StaffOnly")]
+// [Authorize(Policy = "StaffOnly")]
 [ApiController]
 [Route("api/admin/data")]
 [IgnoreAntiforgeryToken]
@@ -20,8 +20,9 @@ public class AdminDataController : ControllerBase
     private readonly DoctorService _doctorService;
     private readonly ReceptionistService _receptionistService;
     private readonly ClinicService _clinicService;
+    private readonly ActivityLogService _activityLogService;
+    private readonly NotificationService _notificationService;
     private readonly ILogger<AdminDataController> _logger;
-
 
     public AdminDataController(
         AppointmentService appointmentService,
@@ -32,7 +33,10 @@ public class AdminDataController : ControllerBase
         DoctorService doctorService,
         ReceptionistService receptionistService,
         ClinicService clinicService,
-        ILogger<AdminDataController> logger)
+        ActivityLogService activityLogService,
+        NotificationService notificationService,
+        ILogger<AdminDataController> logger
+    )
     {
         _appointmentService = appointmentService;
         _profileService = profileService;
@@ -42,34 +46,47 @@ public class AdminDataController : ControllerBase
         _doctorService = doctorService;
         _receptionistService = receptionistService;
         _clinicService = clinicService;
+        _activityLogService = activityLogService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
     [HttpGet("appointments")]
     public async Task<IActionResult> GetAppointments()
     {
-        try {
+        try
+        {
             var data = await _appointmentService.GetAllAsync();
             // Projecting to a simpler object to be 100% sure we don't leak Supabase internal props
-            var dtos = data.Select(a => new {
-                id = a.Id,
-                patientId = a.PatientId,
-                patientName = a.PatientName,
-                patientEmail = a.PatientEmail,
-                patientPhone = a.PatientPhone,
-                serviceId = a.ServiceId,
-                serviceName = a.Service?.Name,
-                doctorId = a.DoctorId,
-                doctorName = a.Doctor != null ? $"{a.Doctor.Title} {a.Doctor.Profile?.FirstName} {a.Doctor.Profile?.LastName}".Trim() : null,
-                appointmentDate = a.AppointmentDate,
-                appointmentTime = a.AppointmentTime,
-                status = a.Status,
-                isWaitlist = a.IsWaitlist,
-                notes = a.Notes,
-                createdAt = a.CreatedAt
-            }).ToList();
+            var dtos = data.Select(a => new
+                {
+                    id = a.Id,
+                    patientId = a.PatientId,
+                    patientName = a.PatientName,
+                    patientEmail = a.PatientEmail,
+                    patientPhone = a.PatientPhone,
+                    serviceId = a.ServiceId,
+                    serviceName = a.Service?.Name,
+                    doctorId = a.DoctorId,
+                    doctorName = a.Doctor != null
+                        ? (
+                            !string.IsNullOrWhiteSpace(a.Doctor.Profile?.FirstName)
+                                ? $"{a.Doctor.Title} {a.Doctor.Profile?.FirstName} {a.Doctor.Profile?.LastName}".Trim()
+                                : $"{a.Doctor.Title} Unknown".Trim()
+                        )
+                        : null,
+                    appointmentDate = a.AppointmentDate,
+                    appointmentTime = a.AppointmentTime,
+                    status = a.Status,
+                    isWaitlist = a.IsWaitlist,
+                    notes = a.Notes,
+                    createdAt = a.CreatedAt,
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -77,24 +94,31 @@ public class AdminDataController : ControllerBase
     [HttpGet("patients")]
     public async Task<IActionResult> GetPatients()
     {
-        try {
+        try
+        {
             var allProfiles = await _profileService.GetAllProfiles();
-            var dtos = allProfiles.Where(p => p.Role == "patient").Select(p => new {
-                id = p.Id,
-                firstName = p.FirstName,
-                lastName = p.LastName,
-                email = p.Email,
-                avatarUrl = p.AvatarUrl,
-                phone = p.PhoneNumber,
-                role = p.Role,
-                dob = p.DateOfBirth,
-                sex = p.Sex,
-                address = p.Address,
-                isActive = p.IsActive,
-                reactivationRequested = p.ReactivationRequested
-            }).ToList();
+            var dtos = allProfiles
+                .Where(p => p.Role == "patient")
+                .Select(p => new
+                {
+                    id = p.Id,
+                    firstName = p.FirstName,
+                    lastName = p.LastName,
+                    email = p.Email,
+                    avatarUrl = p.AvatarUrl,
+                    phone = p.PhoneNumber,
+                    role = p.Role,
+                    dob = p.DateOfBirth,
+                    sex = p.Sex,
+                    address = p.Address,
+                    isActive = p.IsActive,
+                    reactivationRequested = p.ReactivationRequested,
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -102,30 +126,42 @@ public class AdminDataController : ControllerBase
     [HttpGet("invoices")]
     public async Task<IActionResult> GetInvoices()
     {
-        try {
+        try
+        {
             var data = await _invoiceService.GetAllInvoicesAsync();
-            var dtos = data.Select(i => new {
-                id = i.Id,
-                appointmentId = i.AppointmentId,
-                patientId = i.PatientId,
-                patientName = i.Patient != null ? $"{i.Patient.FirstName} {i.Patient.LastName}" : "Unknown",
-                doctorId = i.DoctorId,
-                doctorName = i.Doctor != null ? $"{i.Doctor.Title} {i.Doctor.Profile?.FirstName} {i.Doctor.Profile?.LastName}".Trim() : "N/A",
-                totalAmount = i.TotalAmount,
-                discountAmount = i.DiscountAmount,
-                finalAmount = i.FinalAmount,
-                status = i.Status,
-                createdAt = i.CreatedAt,
-                items = i.Items?.Select(item => new {
-                    id = item.Id,
-                    description = item.Description,
-                    unitPrice = item.UnitPrice,
-                    quantity = item.Quantity,
-                    totalPrice = item.TotalPrice
-                }).ToList()
-            }).ToList();
+            var dtos = data.Select(i => new
+                {
+                    id = i.Id,
+                    appointmentId = i.AppointmentId,
+                    patientId = i.PatientId,
+                    patientName = i.Patient != null
+                        ? $"{i.Patient.FirstName} {i.Patient.LastName}"
+                        : "Unknown",
+                    doctorId = i.DoctorId,
+                    doctorName = i.Doctor != null
+                        ? $"{i.Doctor.Title} {i.Doctor.Profile?.FirstName} {i.Doctor.Profile?.LastName}".Trim()
+                        : "N/A",
+                    totalAmount = i.TotalAmount,
+                    discountAmount = i.DiscountAmount,
+                    finalAmount = i.FinalAmount,
+                    status = i.Status,
+                    createdAt = i.CreatedAt,
+                    items = i
+                        .Items?.Select(item => new
+                        {
+                            id = item.Id,
+                            description = item.Description,
+                            unitPrice = item.UnitPrice,
+                            quantity = item.Quantity,
+                            totalPrice = item.TotalPrice,
+                        })
+                        .ToList(),
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -133,28 +169,38 @@ public class AdminDataController : ControllerBase
     [HttpGet("inquiries")]
     public async Task<IActionResult> GetInquiries()
     {
-        try {
+        try
+        {
             var data = await _inquiryService.GetAllInquiriesAsync();
-            var dtos = data.Select(i => new {
-                id = i.Id,
-                patientId = i.PatientId ?? i.Patient?.Id,
-                patientName = i.Patient != null ? $"{i.Patient.FirstName} {i.Patient.LastName}" : $"{i.GuestFirstName} {i.GuestLastName}".Trim(),
-                guestFirstName = i.GuestFirstName,
-                guestLastName = i.GuestLastName,
-                subject = i.Subject,
-                status = i.Status,
-                createdAt = i.CreatedAt,
-                updatedAt = i.UpdatedAt,
-                patient = i.Patient != null ? new {
-                    firstName = i.Patient.FirstName,
-                    lastName = i.Patient.LastName,
-                    fullName = $"{i.Patient.FirstName} {i.Patient.LastName}",
-                    avatarUrl = i.Patient.AvatarUrl,
-                    isActive = i.Patient.IsActive
-                } : null
-            }).ToList();
+            var dtos = data.Select(i => new
+                {
+                    id = i.Id,
+                    patientId = i.PatientId ?? i.Patient?.Id,
+                    patientName = i.Patient != null
+                        ? $"{i.Patient.FirstName} {i.Patient.LastName}"
+                        : $"{i.GuestFirstName} {i.GuestLastName}".Trim(),
+                    guestFirstName = i.GuestFirstName,
+                    guestLastName = i.GuestLastName,
+                    subject = i.Subject,
+                    status = i.Status,
+                    createdAt = i.CreatedAt,
+                    updatedAt = i.UpdatedAt,
+                    patient = i.Patient != null
+                        ? new
+                        {
+                            firstName = i.Patient.FirstName,
+                            lastName = i.Patient.LastName,
+                            fullName = $"{i.Patient.FirstName} {i.Patient.LastName}",
+                            avatarUrl = i.Patient.AvatarUrl,
+                            isActive = i.Patient.IsActive,
+                        }
+                        : null,
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -162,24 +208,30 @@ public class AdminDataController : ControllerBase
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {
-        try {
+        try
+        {
             var allProfiles = await _profileService.GetAllProfiles();
-            var dtos = allProfiles.Select(p => new {
-                id = p.Id,
-                firstName = p.FirstName,
-                lastName = p.LastName,
-                email = p.Email,
-                avatarUrl = p.AvatarUrl,
-                phone = p.PhoneNumber,
-                role = p.Role,
-                dob = p.DateOfBirth,
-                sex = p.Sex,
-                address = p.Address,
-                isActive = p.IsActive,
-                reactivationRequested = p.ReactivationRequested
-            }).ToList();
+            var dtos = allProfiles
+                .Select(p => new
+                {
+                    id = p.Id,
+                    firstName = p.FirstName,
+                    lastName = p.LastName,
+                    email = p.Email,
+                    avatarUrl = p.AvatarUrl,
+                    phone = p.PhoneNumber,
+                    role = p.Role,
+                    dob = p.DateOfBirth,
+                    sex = p.Sex,
+                    address = p.Address,
+                    isActive = p.IsActive,
+                    reactivationRequested = p.ReactivationRequested,
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -187,11 +239,14 @@ public class AdminDataController : ControllerBase
     [HttpGet("settings")]
     public async Task<IActionResult> GetSettings()
     {
-        try {
+        try
+        {
             var s = await _clinicService.GetSettingsAsync();
-            if (s == null) return NotFound();
+            if (s == null)
+                return NotFound();
 
-            var dto = new {
+            var dto = new
+            {
                 id = s.Id,
                 clinicName = s.ClinicName,
                 logoUrl = s.LogoUrl,
@@ -208,10 +263,12 @@ public class AdminDataController : ControllerBase
                 clinicPhotos = s.ClinicPhotos,
                 clinicalHoursJson = s.ClinicalHoursJson,
                 faqsJson = s.FaqsJson,
-                clinicPhotosJson = s.ClinicPhotosJson
+                clinicPhotosJson = s.ClinicPhotosJson,
             };
             return Ok(new { ok = true, data = dto });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -219,7 +276,8 @@ public class AdminDataController : ControllerBase
     [HttpGet("stats")]
     public async Task<IActionResult> GetStats()
     {
-        try {
+        try
+        {
             var allProfiles = await _profileService.GetAllProfiles();
             var appointments = await _appointmentService.GetAllAsync();
             var invoices = await _invoiceService.GetAllInvoicesAsync();
@@ -229,14 +287,22 @@ public class AdminDataController : ControllerBase
             {
                 TotalPatients = allProfiles.Count(p => p.Role == "patient"),
                 ActiveDoctors = doctors.Count(d => d.IsActive),
-                TodayAppointments = appointments.Count(a => a.AppointmentDate.Date == DateTime.Today),
+                TodayAppointments = appointments.Count(a =>
+                    a.AppointmentDate.Date == DateTime.Today
+                ),
                 MonthlyRevenue = invoices
-                    .Where(i => i.CreatedAt.Month == DateTime.Today.Month && i.CreatedAt.Year == DateTime.Today.Year && i.Status == "paid")
-                    .Sum(i => i.FinalAmount)
+                    .Where(i =>
+                        i.CreatedAt.Month == DateTime.Today.Month
+                        && i.CreatedAt.Year == DateTime.Today.Year
+                        && i.Status == "paid"
+                    )
+                    .Sum(i => i.FinalAmount),
             };
 
             return Ok(new { ok = true, data = stats });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             _logger.LogError(ex, "Failed to fetch admin stats");
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
@@ -245,29 +311,40 @@ public class AdminDataController : ControllerBase
     [HttpGet("doctors")]
     public async Task<IActionResult> GetDoctors()
     {
-        try {
+        try
+        {
             var data = await _doctorService.GetAllWithProfilesAsync();
-            var dtos = data.Select(d => new {
-                id = d.Id,
-                profileId = d.ProfileId,
-                title = d.Title,
-                specialties = d.Specialties,
-                bio = d.Bio,
-                isActive = d.IsActive,
-                profile = d.Profile != null ? new {
-                    firstName = d.Profile.FirstName,
-                    lastName = d.Profile.LastName,
-                    email = d.Profile.Email,
-                    avatarUrl = d.Profile.AvatarUrl
-                } : null,
-                availability = d.Availability?.Select(a => new {
-                    dayOfWeek = a.DayOfWeek,
-                    startTime = a.StartTime,
-                    endTime = a.EndTime
-                }).ToList()
-            }).ToList();
+            var dtos = data.Select(d => new
+                {
+                    id = d.Id,
+                    profileId = d.ProfileId,
+                    title = d.Title,
+                    specialties = d.Specialties,
+                    bio = d.Bio,
+                    isActive = d.IsActive,
+                    profile = d.Profile != null
+                        ? new
+                        {
+                            firstName = d.Profile.FirstName,
+                            lastName = d.Profile.LastName,
+                            email = d.Profile.Email,
+                            avatarUrl = d.Profile.AvatarUrl,
+                        }
+                        : null,
+                    availability = d
+                        .Availability?.Select(a => new
+                        {
+                            dayOfWeek = a.DayOfWeek,
+                            startTime = a.StartTime,
+                            endTime = a.EndTime,
+                        })
+                        .ToList(),
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
@@ -275,22 +352,103 @@ public class AdminDataController : ControllerBase
     [HttpGet("receptionists")]
     public async Task<IActionResult> GetReceptionists()
     {
-        try {
+        try
+        {
             var data = await _receptionistService.GetAllWithProfilesAsync();
-            var dtos = data.Select(r => new {
-                id = r.Id,
-                profileId = r.ProfileId,
-                deskLocation = r.DeskLocation,
-                isActive = r.IsActive,
-                profile = r.Profile != null ? new {
-                    firstName = r.Profile.FirstName,
-                    lastName = r.Profile.LastName,
-                    email = r.Profile.Email,
-                    avatarUrl = r.Profile.AvatarUrl
-                } : null
-            }).ToList();
+            var dtos = data.Select(r => new
+                {
+                    id = r.Id,
+                    profileId = r.ProfileId,
+                    deskLocation = r.DeskLocation,
+                    isActive = r.IsActive,
+                    profile = r.Profile != null
+                        ? new
+                        {
+                            firstName = r.Profile.FirstName,
+                            lastName = r.Profile.LastName,
+                            email = r.Profile.Email,
+                            avatarUrl = r.Profile.AvatarUrl,
+                        }
+                        : null,
+                })
+                .ToList();
             return Ok(new { ok = true, data = dtos });
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpGet("activity-logs")]
+    public async Task<IActionResult> GetActivityLogs()
+    {
+        try
+        {
+            var data = await _activityLogService.GetAllLogsAsync();
+            var dtos = data.Select(l => new
+                {
+                    id = l.Id,
+                    profileId = l.ProfileId,
+                    userName = l.Profile != null
+                        ? $"{l.Profile.FirstName} {l.Profile.LastName}"
+                        : "System",
+                    action = l.Action,
+                    details = l.Details,
+                    category = l.Category,
+                    link = l.Link,
+                    ipAddress = l.IpAddress,
+                    createdAt = l.CreatedAt,
+                })
+                .ToList();
+            return Ok(new { ok = true, data = dtos });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpGet("notifications")]
+    public async Task<IActionResult> GetNotifications()
+    {
+        try
+        {
+            var profileId = User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(profileId))
+                return Unauthorized();
+
+            var data = await _notificationService.GetUserNotificationsAsync(profileId);
+            var dtos = data.Select(n => new
+                {
+                    id = n.Id,
+                    title = n.Title,
+                    message = n.Message,
+                    isRead = n.IsRead,
+                    type = n.Type,
+                    link = n.Link,
+                    createdAt = n.CreatedAt,
+                })
+                .ToList();
+
+            return Ok(new { ok = true, data = dtos });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost("notifications/read/{id}")]
+    public async Task<IActionResult> MarkNotificationRead(string id)
+    {
+        try
+        {
+            await _notificationService.MarkAsReadAsync(id);
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }

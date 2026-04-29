@@ -1,3 +1,4 @@
+using SamsonDentalCenterManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -20,3 +21,4 @@ public class ReceptionistDashboardModel : AdminPageModel
         return Page();
     }
 }
+

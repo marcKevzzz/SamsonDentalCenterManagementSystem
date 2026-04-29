@@ -12,6 +12,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
         private readonly string _apifyKey;
+        private readonly ActivityLogService _logs;
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -21,13 +22,15 @@ namespace SamsonDentalCenterManagementSystem.Services
             HttpClient http,
             string supabaseUrl,
             string serviceRoleKey,
-            string apifyKey
+            string apifyKey,
+            ActivityLogService logs
         )
         {
             _http = http;
             _supabaseUrl = supabaseUrl?.TrimEnd('/') ?? "";
             _serviceRoleKey = serviceRoleKey;
             _apifyKey = apifyKey;
+            _logs = logs;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -45,7 +48,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
             var json = await res.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<Review>>(json, _json) ?? new();
+            var reviews = JsonSerializer.Deserialize<List<Review>>(json, _json) ?? new();
+
+            return reviews;
         }
 
         public async Task<List<Review>> GetVisibleReviewsAsync()
@@ -69,6 +74,15 @@ namespace SamsonDentalCenterManagementSystem.Services
                 "application/json"
             );
             await _http.SendAsync(req);
+
+            await _logs.LogActionAsync(
+                null,
+                visible ? "made review visible" : "hid review",
+                $"Review ID: {id}",
+                null,
+                "Review",
+                "/Admin/Reviews"
+            );
         }
 
         public async Task AddReviewAsync(Review review)
@@ -90,6 +104,15 @@ namespace SamsonDentalCenterManagementSystem.Services
                 "application/json"
             );
             await _http.SendAsync(req);
+
+            await _logs.LogActionAsync(
+                null,
+                "added review manually",
+                $"Author: {review.AuthorName}",
+                null,
+                "Review",
+                "/Admin/Reviews"
+            );
         }
 
         public async Task AddReviewsBulkAsync(List<Review> reviews)
@@ -144,6 +167,14 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (list.Any())
             {
                 await AddReviewsBulkAsync(list);
+                await _logs.LogActionAsync(
+                    null,
+                    "synced external reviews",
+                    $"Count: {list.Count}",
+                    null,
+                    "Review",
+                    "/Admin/Reviews"
+                );
             }
         }
 
@@ -378,6 +409,14 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (list.Any())
             {
                 await AddReviewsBulkAsync(list);
+                await _logs.LogActionAsync(
+                    null,
+                    "imported local reviews",
+                    $"Count: {list.Count}",
+                    null,
+                    "Review",
+                    "/Admin/Reviews"
+                );
             }
         }
     }

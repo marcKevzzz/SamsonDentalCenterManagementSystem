@@ -33,7 +33,7 @@ function initializeWithData(data) {
             docName = lastAppt.doctorName || (lastAppt.doctor && lastAppt.doctor.profile ? `Dr. ${lastAppt.doctor.profile.lastName}` : "No Record");
         }
 
-        const dob = p.dateOfBirth ? new Date(p.dateOfBirth) : null;
+        const dob = p.dob ? new Date(p.dob) : null;
         const age = dob ? (new Date().getFullYear() - dob.getFullYear()) : 0;
 
         return {
@@ -42,7 +42,7 @@ function initializeWithData(data) {
             lastName: p.lastName,
             avatarUrl: p.avatarUrl,
             sex: p.sex,
-            dob: p.dateOfBirth,
+            dob: p.dob,
             age: age,
             initials: `${(p.firstName || p.firstName || "")[0] || ""}${(p.lastName || p.lastName || "")[0] || ""}`.toUpperCase(),
             lastVisit: lastAppt ? new Date(lastAppt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "--",
@@ -94,10 +94,10 @@ function renderTable() {
                             : `<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold font-display ring-1 ring-primary/20">${p.initials}</div>`
                         }
                         <div>
-                            <a href="/Admin/Patients/Details?id=${p.id}" class="text-[13.5px] font-semibold text-brand-900 hover:text-primary transition-colors block leading-tight">
+                            <a href="/Admin/Patients/Details?id=${p.id || ''}" class="text-[13.5px] font-semibold text-brand-900 hover:text-primary transition-colors block leading-tight">
                                 ${p.firstName} ${p.lastName}
                             </a>
-                            <span class="text-[10px] font-mono text-brand-400 uppercase tracking-tight">#P-${p.id.slice(0, 5)}</span>
+                            <span class="text-[10px] font-mono text-brand-400 uppercase tracking-tight">#P-${(p.id || "00000").slice(0, 5)}</span>
                         </div>
                     </div>
                 </td>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Resend;
 using SamsonDentalCenterManagementSystem.Data;
 using SamsonDentalCenterManagementSystem.Helpers;
+using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Services;
 using Supabase;
 
@@ -83,13 +85,17 @@ builder.Services.Configure<ResendClientOptions>(options =>
 });
 builder.Services.AddTransient<IResend, ResendClient>();
 
-builder.Services.AddSingleton<ProfileService>(_ => new ProfileService(
+builder.Services.AddSingleton<ProfileService>(provider => new ProfileService(
     serviceClient,
     supabaseServiceKey,
-    supabaseUrl
+    supabaseUrl,
+    provider.GetRequiredService<ActivityLogService>()
 ));
 
-builder.Services.AddSingleton<DentalServiceService>(_ => new DentalServiceService(serviceClient));
+builder.Services.AddSingleton<DentalServiceService>(provider => new DentalServiceService(
+    serviceClient,
+    provider.GetRequiredService<ActivityLogService>()
+));
 
 // ── Setup IHttpClientFactory to prevent socket exhaustion ─────────────────────
 builder.Services.AddHttpClient("SupabaseClient");
@@ -106,7 +112,9 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         supabaseUrl,
         provider.GetRequiredService<IResend>(),
         appBaseUrl ?? "http://localhost:5081",
-        httpFactory.CreateClient("SupabaseClient")
+        httpFactory.CreateClient("SupabaseClient"),
+        provider.GetRequiredService<ActivityLogService>(),
+        provider.GetRequiredService<NotificationService>()
     );
 });
 
@@ -137,7 +145,9 @@ builder.Services.AddScoped<InvoiceService>(provider =>
         serviceClient,
         httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
-        supabaseServiceKey
+        supabaseServiceKey,
+        provider.GetRequiredService<ActivityLogService>(),
+        provider.GetRequiredService<NotificationService>()
     );
 });
 
@@ -148,7 +158,9 @@ builder.Services.AddScoped<InquiryService>(provider =>
         serviceClient,
         httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
-        supabaseServiceKey
+        supabaseServiceKey,
+        provider.GetRequiredService<ActivityLogService>(),
+        provider.GetRequiredService<NotificationService>()
     );
 });
 
@@ -163,13 +175,38 @@ builder.Services.AddScoped<ReviewService>(provider =>
         httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
         supabaseServiceKey,
-        apifyKey
+        apifyKey,
+        provider.GetRequiredService<ActivityLogService>()
     );
 });
 
 builder.Services.AddScoped<ClinicService>(provider =>
 {
-    return new ClinicService(serviceClient);
+    return new ClinicService(serviceClient, provider.GetRequiredService<ActivityLogService>());
+});
+
+builder.Services.AddSingleton<ActivityLogService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    var hubContext = provider.GetRequiredService<IHubContext<AdminHub>>();
+    return new ActivityLogService(
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey,
+        hubContext
+    );
+});
+
+builder.Services.AddSingleton<NotificationService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    var hubContext = provider.GetRequiredService<IHubContext<AdminHub>>();
+    return new NotificationService(
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey,
+        hubContext
+    );
 });
 
 // ── EF Core ───────────────────────────────────────────────────────────────────
@@ -224,13 +261,21 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ReceptionistOrAdmin", p => p.RequireRole("receptionist", "admin"));
     options.AddPolicy("StaffOnly", p => p.RequireRole("admin", "doctor", "receptionist"));
 });
+builder.Services.AddSignalR();
 builder.Services.AddRazorPages();
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.IgnoreReadOnlyProperties = true;
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-});
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Remove IgnoreReadOnlyProperties to allow serialization of anonymous types in API responses
+        options.JsonSerializerOptions.ReferenceHandler = System
+            .Text
+            .Json
+            .Serialization
+            .ReferenceHandler
+            .IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 var app = builder.Build();
 
@@ -249,6 +294,7 @@ app.UseAuthentication(); // ← was missing — JWT never ran without this
 app.UseSession();
 app.UseAuthorization();
 
+app.MapHub<AdminHub>("/adminHub");
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 app.MapControllers();

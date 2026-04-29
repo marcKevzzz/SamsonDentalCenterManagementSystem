@@ -3,7 +3,7 @@
  * Granular caching with LocalStorage persistence.
  */
 export const AdminStore = (() => {
-  const CACHE_KEY_PREFIX = 'admin_cache_';
+  const CACHE_KEY_PREFIX = 'admin_v2_';
   const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
 
   /**
@@ -33,6 +33,12 @@ export const AdminStore = (() => {
       }
 
       const json = await res.json();
+      
+      // Do not cache explicit error responses
+      if (json && json.ok === false) {
+        throw new Error(`API returned error: ${json.error || 'Unknown error'}`);
+      }
+
       const data = json.data || json;
       
       setLocal(key, data);

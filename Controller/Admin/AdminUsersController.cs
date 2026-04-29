@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SamsonDentalCenterManagementSystem.Models;
+using SamsonDentalCenterManagementSystem.Services;
 using Supabase.Gotrue;
 
 namespace SamsonDentalCenterManagementSystem.Controllers;
@@ -148,8 +149,10 @@ public class AdminUsersController : ControllerBase
     {
         try
         {
-            Console.WriteLine($"[ToggleActive] Attempting to toggle active status for ID: {id} to {isActive}");
-            
+            Console.WriteLine(
+                $"[ToggleActive] Attempting to toggle active status for ID: {id} to {isActive}"
+            );
+
             await _profileService.ToggleUserActive(id, isActive);
 
             return Ok(new { ok = true });

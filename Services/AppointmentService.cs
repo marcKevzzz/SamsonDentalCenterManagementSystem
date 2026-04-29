@@ -14,6 +14,8 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly IResend _resend;
         private readonly string _appBaseUrl;
         private readonly HttpClient _http;
+        private readonly ActivityLogService _logs;
+        private readonly NotificationService _notifs;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -41,7 +43,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             string supabaseUrl,
             IResend resend,
             string appBaseUrl,
-            HttpClient http
+            HttpClient http,
+            ActivityLogService logs,
+            NotificationService notifs
         )
         {
             _supabase = supabase;
@@ -50,6 +54,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             _resend = resend;
             _appBaseUrl = appBaseUrl.TrimEnd('/');
             _http = http;
+            _logs = logs;
+            _notifs = notifs;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -66,7 +72,8 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var path = "/doctors?select=*,profiles(*)&is_active=eq.true&order=title.asc";
+                var path =
+                    "/doctors?select=*,profile:profiles(*)&is_active=eq.true&order=title.asc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -244,6 +251,26 @@ namespace SamsonDentalCenterManagementSystem.Services
             var created = res.Models.First();
             created.Service = new DentalService { Id = p.ServiceId, Name = p.ServiceName };
 
+            // Log action
+            await _logs.LogActionAsync(
+                appt.PatientId,
+                "booked appointment",
+                $"Service: {p.ServiceName}",
+                null,
+                "Appointment",
+                $"/Admin/Appointments?id={created.Id}"
+            );
+
+            // Send notification to staff or patient if needed
+            if (appt.PatientId != null)
+            {
+                await _notifs.CreateNotificationAsync(
+                    appt.PatientId,
+                    "Appointment Booked",
+                    $"Your appointment for {p.ServiceName} is now pending confirmation."
+                );
+            }
+
             // Send email for guest non-waitlist bookings
             if (p.IsGuest && !p.IsWaitlist)
                 await SendGuestConfirmationEmail(created);
@@ -415,6 +442,15 @@ namespace SamsonDentalCenterManagementSystem.Services
             var patchRes = await _http.SendAsync(patchReq);
             patchRes.EnsureSuccessStatusCode();
 
+            await _logs.LogActionAsync(
+                null,
+                "updated appointment status",
+                $"ID: {id}, New Status: {newStatus}",
+                null,
+                "Appointment",
+                $"/Admin/Appointments?id={id}"
+            );
+
             // 3.5 If status is 'arrived', promote guest or 'other' to a patient profile
             if (newStatus == "arrived")
             {
@@ -440,7 +476,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_services(*),doctors(*,profiles(*))&id=eq.{id}&limit=1";
+                    $"/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&id=eq.{id}&limit=1";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 if (!res.IsSuccessStatusCode)
@@ -499,6 +535,15 @@ namespace SamsonDentalCenterManagementSystem.Services
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
+            await _logs.LogActionAsync(
+                null,
+                "rescheduled appointment",
+                $"ID: {id}, New Date: {fixedDate:yyyy-MM-dd}, New Time: {newTime}",
+                null,
+                "Appointment",
+                $"/Admin/Appointments?id={id}"
+            );
+
             // Step 3: Re-fetch with doctor join so the email has the doctor name
             var updated = await GetById(id) ?? existing;
             updated.AppointmentDate = fixedDate;
@@ -513,7 +558,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    "/appointments?select=*,dental_services(*),doctors(*,profiles(*))&order=appointment_date.desc";
+                    "/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -1269,7 +1314,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("service_id")]
         public string ServiceId { get; set; } = string.Empty;
 
-        [JsonPropertyName("dental_services")]
+        [JsonPropertyName("dental_service")]
         public DentalServiceDto? DentalService { get; set; }
 
         [JsonPropertyName("doctor_id")]
@@ -1305,7 +1350,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("confirmed_at")]
         public DateTime? ConfirmedAt { get; set; }
 
-        [JsonPropertyName("doctors")]
+        [JsonPropertyName("doctor")]
         public DoctorDto? Doctor { get; set; }
     }
 

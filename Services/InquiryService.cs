@@ -11,18 +11,22 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly HttpClient _http;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
+        private readonly ActivityLogService _logs;
+        private readonly NotificationService _notifs;
 
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public InquiryService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey)
+        public InquiryService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs)
         {
             _supabase = supabase;
             _http = http;
             _supabaseUrl = supabaseUrl.TrimEnd('/');
             _serviceRoleKey = serviceRoleKey;
+            _logs = logs;
+            _notifs = notifs;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -94,6 +98,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             // 2. Create Initial Message
             await AddMessageAsync(created.Id, inquiry.PatientId, initialMessage, false);
 
+            // Log action
+            await _logs.LogActionAsync(inquiry.PatientId, "sent inquiry", $"Subject: {inquiry.Subject}", null, "Inquiry", $"/Admin/Inquiries?id={created.Id}");
+
             return created;
         }
 
@@ -123,6 +130,13 @@ namespace SamsonDentalCenterManagementSystem.Services
                 Encoding.UTF8, "application/json");
             
             await _http.SendAsync(updateReq);
+
+            if (isFromStaff && senderId != null)
+            {
+                // If staff replies, notify patient
+                // We need patient_id from inquiry, but for now let's assume senderId is staff
+                await _logs.LogActionAsync(senderId, "replied to inquiry", $"Inquiry ID: {inquiryId}", null, "Inquiry", $"/Admin/Inquiries?id={inquiryId}");
+            }
         }
 
     }

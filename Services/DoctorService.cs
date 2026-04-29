@@ -38,7 +38,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public DateTime CreatedAt { get; set; }
 
         // ── profiles columns (nested object from the join) ────────────────────
-        [JsonPropertyName("profiles")]
+        [JsonPropertyName("profile")]
         public ProfileDto? Profile { get; set; }
 
         // ── doctor_availability rows (array from the join) ────────────────────
@@ -52,8 +52,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 : "Unknown Profile";
 
         public string Initials =>
-            $"{Profile?.FirstName?.FirstOrDefault().ToString().ToUpper() ?? ""}" +
-            $"{Profile?.LastName?.FirstOrDefault().ToString().ToUpper()  ?? "?"}";
+            $"{Profile?.FirstName?.FirstOrDefault().ToString().ToUpper() ?? ""}"
+            + $"{Profile?.LastName?.FirstOrDefault().ToString().ToUpper() ?? "?"}";
     }
 
     public class ProfileDto
@@ -100,11 +100,18 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("is_active")]
         public bool IsActive { get; set; } = true;
 
-        public string DayAbbr => DayOfWeek switch
-        {
-            0 => "Sun", 1 => "Mon", 2 => "Tue", 3 => "Wed",
-            4 => "Thu", 5 => "Fri", 6 => "Sat", _ => "?"
-        };
+        public string DayAbbr =>
+            DayOfWeek switch
+            {
+                0 => "Sun",
+                1 => "Mon",
+                2 => "Tue",
+                3 => "Wed",
+                4 => "Thu",
+                5 => "Fri",
+                6 => "Sat",
+                _ => "?",
+            };
     }
 
     // ── Service ───────────────────────────────────────────────────────────────
@@ -116,13 +123,13 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         private static readonly JsonSerializerOptions _json = new()
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
         public DoctorService(HttpClient http, string supabaseUrl, string serviceRoleKey)
         {
-            _http           = http;
-            _supabaseUrl    = supabaseUrl.TrimEnd('/');
+            _http = http;
+            _supabaseUrl = supabaseUrl.TrimEnd('/');
             _serviceRoleKey = serviceRoleKey;
         }
 
@@ -130,7 +137,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
         {
             var req = new HttpRequestMessage(method, $"{_supabaseUrl}/rest/v1{path}");
-            req.Headers.Add("apikey",        _serviceRoleKey);
+            req.Headers.Add("apikey", _serviceRoleKey);
             req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             return req;
@@ -145,15 +152,16 @@ namespace SamsonDentalCenterManagementSystem.Services
             // select=*,profiles(*),doctor_availability(*) tells PostgREST to
             // embed both related tables. Because these are separate FK relations
             // they come back as distinct nested keys, not flattened columns.
-            var path = "/doctors?select=*,profiles(*),doctor_availability(*)&order=created_at.asc";
-            var req  = BuildRequest(HttpMethod.Get, path);
-            var res  = await _http.SendAsync(req);
+            var path =
+                "/doctors?select=*,profile:profiles(*),doctor_availability(*)&order=created_at.asc";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
 
             res.EnsureSuccessStatusCode();
 
-            var json    = await res.Content.ReadAsStringAsync();
-            var doctors = JsonSerializer.Deserialize<List<DoctorDto>>(json, _json)
-                          ?? new List<DoctorDto>();
+            var json = await res.Content.ReadAsStringAsync();
+            var doctors =
+                JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new List<DoctorDto>();
 
             return doctors;
         }
@@ -161,29 +169,31 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Fetch active doctors only ─────────────────────────────────────────
         public async Task<List<DoctorDto>> GetActiveWithProfilesAsync()
         {
-            var path = "/doctors?select=*,profiles(*),doctor_availability(*)" +
-                       "&is_active=eq.true&order=created_at.asc";
-            var req  = BuildRequest(HttpMethod.Get, path);
-            var res  = await _http.SendAsync(req);
+            var path =
+                "/doctors?select=*,profile:profiles(*),doctor_availability(*)"
+                + "&is_active=eq.true&order=created_at.asc";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
 
             res.EnsureSuccessStatusCode();
 
-            var json    = await res.Content.ReadAsStringAsync();
+            var json = await res.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new();
         }
 
         // ── Fetch a single doctor by their Profile ID ─────────────────────────
         public async Task<DoctorDto?> GetDoctorByProfileIdAsync(string profileId)
         {
-            var path = $"/doctors?select=*,profiles(*),doctor_availability(*)&profile_id=eq.{profileId}";
-            var req  = BuildRequest(HttpMethod.Get, path);
-            var res  = await _http.SendAsync(req);
+            var path =
+                $"/doctors?select=*,profile:profiles(*),doctor_availability(*)&profile_id=eq.{profileId}";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
 
             res.EnsureSuccessStatusCode();
 
-            var json    = await res.Content.ReadAsStringAsync();
+            var json = await res.Content.ReadAsStringAsync();
             var doctors = JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new();
-            
+
             return doctors.FirstOrDefault();
         }
 
@@ -191,42 +201,56 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task<List<ProfileDto>> GetAvailableProfilesAsync()
         {
             // All doctor-role OR admin-role profiles
-            var profileReq = BuildRequest(HttpMethod.Get,
-                "/profiles?select=*&role=in.(doctor,admin)&order=first_name.asc");
+            var profileReq = BuildRequest(
+                HttpMethod.Get,
+                "/profiles?select=*&role=in.(doctor,admin)&order=first_name.asc"
+            );
             var profileRes = await _http.SendAsync(profileReq);
             profileRes.EnsureSuccessStatusCode();
 
-            var allProfiles = JsonSerializer.Deserialize<List<ProfileDto>>(
-                await profileRes.Content.ReadAsStringAsync(), _json) ?? new();
+            var allProfiles =
+                JsonSerializer.Deserialize<List<ProfileDto>>(
+                    await profileRes.Content.ReadAsStringAsync(),
+                    _json
+                ) ?? new();
 
             // Existing doctor profile_ids
             var docReq = BuildRequest(HttpMethod.Get, "/doctors?select=profile_id");
             var docRes = await _http.SendAsync(docReq);
             docRes.EnsureSuccessStatusCode();
 
-            var linked = JsonSerializer
-                .Deserialize<List<JsonElement>>(
-                    await docRes.Content.ReadAsStringAsync(), _json)
-                ?.Select(e => e.TryGetProperty("profile_id", out var v) ? v.GetString() : null)
-                .Where(id => id != null)
-                .ToHashSet() ?? new();
+            var linked =
+                JsonSerializer
+                    .Deserialize<List<JsonElement>>(await docRes.Content.ReadAsStringAsync(), _json)
+                    ?.Select(e => e.TryGetProperty("profile_id", out var v) ? v.GetString() : null)
+                    .Where(id => id != null)
+                    .ToHashSet()
+                ?? new();
 
             return allProfiles.Where(p => !linked.Contains(p.Id)).ToList();
         }
 
         // ── Create — direct REST, bypasses ORM nav-property serialization ────
-        public async Task<DoctorDto?> CreateAsync(string profileId, string title, string[]? specialties, string? bio, bool isActive)
+        public async Task<DoctorDto?> CreateAsync(
+            string profileId,
+            string title,
+            string[]? specialties,
+            string? bio,
+            bool isActive
+        )
         {
             var req = BuildRequest(HttpMethod.Post, "/doctors");
             req.Headers.Add("Prefer", "return=representation");
-            var body = JsonSerializer.Serialize(new
-            {
-                profile_id  = profileId,
-                title       = title,
-                specialties = specialties ?? Array.Empty<string>(),
-                bio         = bio,
-                is_active   = isActive
-            });
+            var body = JsonSerializer.Serialize(
+                new
+                {
+                    profile_id = profileId,
+                    title = title,
+                    specialties = specialties ?? Array.Empty<string>(),
+                    bio = bio,
+                    is_active = isActive,
+                }
+            );
             req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
 
             var res = await _http.SendAsync(req);
@@ -238,17 +262,25 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Update — direct REST ─────────────────────────────────────────────
-        public async Task<DoctorDto?> UpdateAsync(string id, string title, string[]? specialties, string? bio, bool isActive)
+        public async Task<DoctorDto?> UpdateAsync(
+            string id,
+            string title,
+            string[]? specialties,
+            string? bio,
+            bool isActive
+        )
         {
             var req = BuildRequest(HttpMethod.Patch, $"/doctors?id=eq.{id}");
             req.Headers.Add("Prefer", "return=representation");
-            var body = JsonSerializer.Serialize(new
-            {
-                title       = title,
-                specialties = specialties ?? Array.Empty<string>(),
-                bio         = bio,
-                is_active   = isActive
-            });
+            var body = JsonSerializer.Serialize(
+                new
+                {
+                    title = title,
+                    specialties = specialties ?? Array.Empty<string>(),
+                    bio = bio,
+                    is_active = isActive,
+                }
+            );
             req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
 
             var res = await _http.SendAsync(req);
@@ -274,21 +306,25 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task SetAvailabilityAsync(string doctorId, List<DoctorAvailability> slots)
         {
             // 1. Delete old slots
-            var delReq = BuildRequest(HttpMethod.Delete, $"/doctor_availability?doctor_id=eq.{doctorId}");
+            var delReq = BuildRequest(
+                HttpMethod.Delete,
+                $"/doctor_availability?doctor_id=eq.{doctorId}"
+            );
             var delRes = await _http.SendAsync(delReq);
             delRes.EnsureSuccessStatusCode();
 
-            if (slots == null || !slots.Any()) return;
+            if (slots == null || !slots.Any())
+                return;
 
             // 2. Insert new slots
             var insReq = BuildRequest(HttpMethod.Post, "/doctor_availability");
             var payload = slots.Select(s => new
             {
-                doctor_id   = doctorId,
+                doctor_id = doctorId,
                 day_of_week = s.DayOfWeek,
-                start_time  = s.StartTime,
-                end_time    = s.EndTime,
-                is_active   = true
+                start_time = s.StartTime,
+                end_time = s.EndTime,
+                is_active = true,
             });
             var body = JsonSerializer.Serialize(payload);
             insReq.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");

@@ -1,3 +1,4 @@
+using SamsonDentalCenterManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Helpers;
@@ -18,3 +19,4 @@ public class AdminReportsModel : AdminPageModel
     {
     }
 }
+

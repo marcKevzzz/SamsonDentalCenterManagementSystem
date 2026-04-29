@@ -220,3 +220,25 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
+CREATE TABLE public.activity_logs (
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    action text NOT NULL,
+    details text,
+    category text,
+    link text,
+    ip_address text,
+    created_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT activity_logs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.notifications (
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    title text NOT NULL,
+    message text NOT NULL,
+    is_read boolean NOT NULL DEFAULT false,
+    type text NOT NULL DEFAULT 'info',
+    link text,
+    created_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT notifications_pkey PRIMARY KEY (id)
+);

@@ -1,8 +1,8 @@
-using SamsonDentalCenterManagementSystem.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SamsonDentalCenterManagementSystem.Models;
 
 namespace SamsonDentalCenterManagementSystem.Services
 {
@@ -12,18 +12,29 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly HttpClient _http;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
+        private readonly ActivityLogService _logs;
+        private readonly NotificationService _notifs;
 
         private static readonly JsonSerializerOptions _json = new()
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
-        public InvoiceService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey)
+        public InvoiceService(
+            Supabase.Client supabase,
+            HttpClient http,
+            string supabaseUrl,
+            string serviceRoleKey,
+            ActivityLogService logs,
+            NotificationService notifs
+        )
         {
             _supabase = supabase;
             _http = http;
             _supabaseUrl = supabaseUrl.TrimEnd('/');
             _serviceRoleKey = serviceRoleKey;
+            _logs = logs;
+            _notifs = notifs;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -41,25 +52,31 @@ namespace SamsonDentalCenterManagementSystem.Services
             var req = BuildRequest(HttpMethod.Post, "/invoices");
             req.Headers.Add("Prefer", "return=representation");
             req.Content = new StringContent(
-                JsonSerializer.Serialize(new {
-                    appointment_id  = invoice.AppointmentId,
-                    patient_id      = invoice.PatientId,
-                    doctor_id       = invoice.DoctorId,
-                    total_amount    = invoice.TotalAmount,
-                    discount_amount = invoice.DiscountAmount,
-                    final_amount    = invoice.FinalAmount,
-                    status          = invoice.Status,
-                    notes           = invoice.Notes
-                    // omit id — let Supabase generate it
-                }),
-                Encoding.UTF8, "application/json");
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        appointment_id = invoice.AppointmentId,
+                        patient_id = invoice.PatientId,
+                        doctor_id = invoice.DoctorId,
+                        total_amount = invoice.TotalAmount,
+                        discount_amount = invoice.DiscountAmount,
+                        final_amount = invoice.FinalAmount,
+                        status = invoice.Status,
+                        notes = invoice.Notes,
+                        // omit id — let Supabase generate it
+                    }
+                ),
+                Encoding.UTF8,
+                "application/json"
+            );
 
-            var res  = await _http.SendAsync(req);
+            var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
-            var json        = await res.Content.ReadAsStringAsync();
-            var created     = JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault()
-                            ?? throw new Exception("Invoice creation returned empty.");
+            var json = await res.Content.ReadAsStringAsync();
+            var created =
+                JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault()
+                ?? throw new Exception("Invoice creation returned empty.");
 
             // Now created.Id is the real server-generated UUID
             foreach (var item in items)
@@ -67,51 +84,62 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var itemsReq = BuildRequest(HttpMethod.Post, "/invoice_items");
             itemsReq.Content = new StringContent(
-                JsonSerializer.Serialize(items.Select(i => new {
-                    invoice_id  = i.InvoiceId,
-                    service_id  = i.ServiceId,
-                    description = i.Description,
-                    unit_price  = i.UnitPrice,
-                    quantity    = i.Quantity,
-                    total_price = i.TotalPrice
-                })),
-                Encoding.UTF8, "application/json");
+                JsonSerializer.Serialize(
+                    items.Select(i => new
+                    {
+                        invoice_id = i.InvoiceId,
+                        service_id = i.ServiceId,
+                        description = i.Description,
+                        unit_price = i.UnitPrice,
+                        quantity = i.Quantity,
+                        total_price = i.TotalPrice,
+                    })
+                ),
+                Encoding.UTF8,
+                "application/json"
+            );
 
             var itemsRes = await _http.SendAsync(itemsReq);
             itemsRes.EnsureSuccessStatusCode();
+
+            await _logs.LogActionAsync(invoice.PatientId, "generated invoice", $"Total: {created.FinalAmount}", null, "Invoice", $"/Admin/Invoices?id={created.Id}");
 
             return created;
         }
 
         public async Task CreateTreatmentsAsync(List<Treatment> treatments)
         {
-            if (treatments.Count == 0) return;
+            if (treatments.Count == 0)
+                return;
             await _supabase.From<Treatment>().Insert(treatments);
         }
 
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)
         {
-            var res = await _supabase.From<Invoice>()
+            var res = await _supabase
+                .From<Invoice>()
                 .Where(x => x.AppointmentId == appointmentId)
                 .Get();
-            
+
             var invoice = res.Models.FirstOrDefault();
             if (invoice != null)
             {
                 // Fetch items separately or use JOIN if configured
-                var itemsRes = await _supabase.From<InvoiceItem>()
+                var itemsRes = await _supabase
+                    .From<InvoiceItem>()
                     .Where(x => x.InvoiceId == invoice.Id)
                     .Get();
                 invoice.Items = itemsRes.Models;
             }
-            
+
             return invoice;
         }
 
         public async Task<List<Invoice>> GetAllPendingInvoicesAsync()
         {
             // For the front desk checkout view
-            var path = "/invoices?select=*,invoice_items(*)&status=eq.pending&order=created_at.desc";
+            var path =
+                "/invoices?select=*,invoice_items(*)&status=eq.pending&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -120,20 +148,10 @@ namespace SamsonDentalCenterManagementSystem.Services
             return JsonSerializer.Deserialize<List<Invoice>>(json, _json) ?? new();
         }
 
-        public async Task UpdateInvoiceStatusAsync(string invoiceId, string status)
-        {
-            var res = await _supabase.From<Invoice>().Where(x => x.Id == invoiceId).Get();
-            var invoice = res.Models.FirstOrDefault();
-            if (invoice != null)
-            {
-                invoice.Status = status;
-                await _supabase.From<Invoice>().Upsert(invoice);
-            }
-        }
-
         public async Task<List<Invoice>> GetAllInvoicesAsync()
         {
-            var path = "/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors!doctor_id(*),invoice_items(*)&order=created_at.desc";
+            var path =
+                "/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -144,7 +162,8 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Invoice>> GetInvoicesByDoctorIdAsync(string doctorId)
         {
-            var path = $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors!doctor_id(*),invoice_items(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
+            var path =
+                $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -153,34 +172,51 @@ namespace SamsonDentalCenterManagementSystem.Services
             return JsonSerializer.Deserialize<List<Invoice>>(json, _json) ?? new();
         }
 
+        public async Task UpdateInvoiceStatusAsync(string invoiceId, string status)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/invoices?id=eq.{invoiceId}");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(new { status }),
+                Encoding.UTF8,
+                "application/json"
+            );
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            await _logs.LogActionAsync(null, "updated invoice status", $"ID: {invoiceId}, New Status: {status}", null, "Invoice", $"/Admin/Invoices?id={invoiceId}");
+        }
+
         public async Task RecordPaymentAsync(Payment payment)
         {
             await _supabase.From<Payment>().Insert(payment);
 
-            // Optional: Check if invoice is fully paid and update status
-            var res = await _supabase.From<Payment>()
+            // Calculate total paid
+            var res = await _supabase
+                .From<Payment>()
                 .Where(x => x.InvoiceId == payment.InvoiceId)
                 .Get();
-            
+
             var totalPaid = res.Models.Sum(p => p.Amount);
 
-            var invRes = await _supabase.From<Invoice>()
-                .Where(x => x.Id == payment.InvoiceId)
-                .Get();
+            // Get invoice to check amount
+            var payRes = await _supabase.From<Payment>().Insert(payment);
+
+            // Log payment
+            await _logs.LogActionAsync(payment.InvoiceId, "payment recorded", $"Amount: {payment.Amount}", null, "Invoice", $"/Admin/Invoices?id={payment.InvoiceId}");
             
+            // Re-calc status logic...
+            var invRes = await _supabase.From<Invoice>().Where(i => i.Id == payment.InvoiceId).Get();
             var invoice = invRes.Models.FirstOrDefault();
             if (invoice != null)
             {
-                if (totalPaid >= invoice.FinalAmount)
-                {
-                    invoice.Status = "paid";
-                    await _supabase.From<Invoice>().Upsert(invoice);
-                }
-                else if (totalPaid > 0)
-                {
-                    invoice.Status = "partial";
-                    await _supabase.From<Invoice>().Upsert(invoice);
-                }
+                // Send notification to patient
+                await _notifs.CreateNotificationAsync(invoice.PatientId, "Payment Received", $"A payment of {payment.Amount:C} has been recorded for your invoice.");
+
+                string newStatus =
+                    totalPaid >= invoice.FinalAmount
+                        ? "paid"
+                        : (totalPaid > 0 ? "partial" : "pending");
+                await UpdateInvoiceStatusAsync(invoice.Id, newStatus);
             }
         }
     }
