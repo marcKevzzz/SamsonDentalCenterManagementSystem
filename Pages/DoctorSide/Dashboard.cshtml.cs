@@ -6,28 +6,32 @@ using SamsonDentalCenterManagementSystem.Services;
 
 namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide;
 
-public class DoctorDashboardModel : AdminPageModel
+public class DashboardModel : AdminPageModel
 {
     private readonly AppointmentService _appointmentService;
     private readonly DoctorService _doctorService;
     private readonly DentalServiceService _dentalService;
+    private readonly StaffLeaveService _leaveService;
 
-    public DoctorDashboardModel(
+    public DashboardModel(
         ProfileService profileService, 
         AppointmentService appointmentService, 
         DoctorService doctorService,
-        DentalServiceService dentalService)
+        DentalServiceService dentalService,
+        StaffLeaveService leaveService)
         : base(profileService)
     {
         _appointmentService = appointmentService;
         _doctorService = doctorService;
         _dentalService = dentalService;
+        _leaveService = leaveService;
     }
 
     public List<Appointment> MyAppointments { get; set; } = new();
     public List<Appointment> ArrivedPatients { get; set; } = new();
     public List<DentalService> AllServices { get; set; } = new();
     public List<Invoice> RecentInvoices { get; set; } = new();
+    public List<StaffLeave> MyLeaves { get; set; } = new();
     
     public int TodayAppointmentsCount { get; set; }
     public int PendingReviewsCount { get; set; }
@@ -83,6 +87,8 @@ public class DoctorDashboardModel : AdminPageModel
             var myInvoices = await invoiceService.GetInvoicesByDoctorIdAsync(doctorId);
             RecentInvoices = myInvoices.Take(5).ToList();
             TotalInvoicesCount = myInvoices.Count;
+
+            MyLeaves = await _leaveService.GetLeavesByProfileIdAsync(CurrentUserId);
         }
         else if (CurrentUserRole == "admin")
         {

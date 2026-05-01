@@ -16,6 +16,7 @@ public class AdminUsersController : ControllerBase
     private readonly ProfileService _profileService;
     private readonly Supabase.Client _supabase;
 
+    private readonly ActivityLogService _logs;
     private readonly string _serviceRoleKey;
     private readonly string _supabaseUrl;
     private static readonly HttpClient _http = new HttpClient();
@@ -23,11 +24,13 @@ public class AdminUsersController : ControllerBase
     public AdminUsersController(
         ProfileService profileService,
         Supabase.Client supabase,
+        ActivityLogService logs,
         IConfiguration config
     )
     {
         _profileService = profileService;
         _supabase = supabase;
+        _logs = logs;
         _serviceRoleKey =
             config["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey is missing");
         _supabaseUrl = config["Supabase:Url"] ?? throw new Exception("Supabase:Url is missing");
@@ -35,66 +38,103 @@ public class AdminUsersController : ControllerBase
 
     // ── POST /api/admin/users — Create user ───────────────────────────────────
     [HttpPost]
-    public async Task<IActionResult> CreateUser([FromBody] Profile p)
+    public async Task<IActionResult> CreateUser([FromBody] UserPayload p)
     {
         if (string.IsNullOrWhiteSpace(p.Email))
             return BadRequest(new { ok = false, error = "Email is required." });
 
         try
         {
-            var data = new Dictionary<string, object>();
-            if (!string.IsNullOrWhiteSpace(p.FirstName))
-                data["first_name"] = p.FirstName;
-            if (!string.IsNullOrWhiteSpace(p.LastName))
-                data["last_name"] = p.LastName;
-            if (p.DateOfBirth.HasValue)
-                data["date_of_birth"] = p.DateOfBirth.Value.ToString("yyyy-MM-dd");
-            if (!string.IsNullOrWhiteSpace(p.Sex))
-                data["sex"] = p.Sex;
-            if (!string.IsNullOrWhiteSpace(p.PhoneNumber))
-                data["phone_number"] = p.PhoneNumber;
-            if (!string.IsNullOrWhiteSpace(p.Address))
-                data["address"] = p.Address;
-            data["role"] = string.IsNullOrWhiteSpace(p.Role) ? "patient" : p.Role.ToLower();
-            if (!string.IsNullOrWhiteSpace(p.AvatarUrl))
-                data["avatar_url"] = p.AvatarUrl;
-            if (!string.IsNullOrWhiteSpace(p.Email))
-                data["email"] = p.Email;
-
+            // 1. Create Auth User with random password
+            var tempPassword = Guid.NewGuid().ToString() + "A1!";
+            
             _http.DefaultRequestHeaders.Clear();
             _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
             _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
 
-            var payload = new
+            var authPayload = new
             {
                 email = p.Email,
-
-                password = "Password123!",
-
-                email_confirm = true,
-
-                user_metadata = data,
+                password = tempPassword,
+                email_confirm = true, // Still true so they don't have to verify email separately
+                user_metadata = new { 
+                    first_name = p.FirstName, 
+                    last_name = p.LastName,
+                    role = p.Role?.ToLower() ?? "patient"
+                }
             };
 
-            var content = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(payload),
-                System.Text.Encoding.UTF8,
-                "application/json"
-            );
-
-            Console.WriteLine($"[CreateUser] Attempting to create user: {p.Email}");
-            var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users", content);
+            var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users", 
+                new StringContent(System.Text.Json.JsonSerializer.Serialize(authPayload), System.Text.Encoding.UTF8, "application/json"));
 
             if (!res.IsSuccessStatusCode)
             {
                 var error = await res.Content.ReadAsStringAsync();
-                Console.WriteLine($"[CreateUser] Failed: {error}");
-                return BadRequest(new { ok = false, error = $"Invite failed: {error}" });
+                return BadRequest(new { ok = false, error = $"Auth creation failed: {error}" });
             }
 
             var resStr = await res.Content.ReadAsStringAsync();
             var json = System.Text.Json.JsonDocument.Parse(resStr);
-            var id = json.RootElement.GetProperty("id").GetString();
+            var id = json.RootElement.GetProperty("id").GetString()!;
+
+            // 2. Trigger Recovery Email (Invitation)
+            // This sends the standard Supabase recovery email which acts as a "Set Password" link
+            await _http.PostAsync($"{_supabaseUrl}/auth/v1/recover",
+                new StringContent(System.Text.Json.JsonSerializer.Serialize(new { email = p.Email }), System.Text.Encoding.UTF8, "application/json"));
+
+            // 2. Create Profile Record
+            p.Id = id;
+            await _profileService.CreateProfile(p);
+
+            // 3. Handle Staff Logic (Bio / Availability)
+            if (p.Role?.ToLower() == "doctor")
+            {
+                var doc = new Doctor { 
+                    Id = Guid.NewGuid().ToString(),
+                    ProfileId = id,
+                    Bio = p.Bio,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _supabase.From<Doctor>().Insert(doc);
+                
+                if (p.Availability != null && p.Availability.Any())
+                {
+                    foreach(var av in p.Availability) {
+                        av.Id = Guid.NewGuid().ToString();
+                        av.StaffId = doc.Id;
+                        av.StaffType = "doctor";
+                    }
+                    await _supabase.From<StaffAvailability>().Insert(p.Availability);
+                }
+            }
+            else if (p.Role?.ToLower() == "receptionist")
+            {
+                var rec = new Receptionist {
+                    Id = Guid.NewGuid().ToString(),
+                    ProfileId = id,
+                    Bio = p.Bio,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _supabase.From<Receptionist>().Insert(rec);
+
+                if (p.Availability != null && p.Availability.Any())
+                {
+                    foreach(var av in p.Availability) {
+                        av.Id = Guid.NewGuid().ToString();
+                        av.StaffId = rec.Id;
+                        av.StaffType = "receptionist";
+                    }
+                    await _supabase.From<StaffAvailability>().Insert(p.Availability);
+                }
+            }
+
+            // 4. Send Welcome Email (Password Reset Flow)
+            try {
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                await _profileService.ResetPasswordForEmail(p.Email, baseUrl);
+            } catch (Exception ex) {
+                Console.WriteLine($"[CreateUser] Welcome email failed: {ex.Message}");
+            }
 
             return Ok(new { ok = true, id });
         }
@@ -106,7 +146,7 @@ public class AdminUsersController : ControllerBase
 
     // ── PUT /api/admin/users/{id} — Update user ───────────────────────────────
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] Profile p)
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UserPayload p)
     {
         try
         {
@@ -143,6 +183,30 @@ public class AdminUsersController : ControllerBase
         Console.WriteLine($"[DeleteProfile] User {id} fully deleted.");
     }
 
+    // ── POST /api/admin/users/{id}/avatar — Upload avatar ────────────────────
+    [HttpPost("{id}/avatar")]
+    public async Task<IActionResult> UploadAvatar(string id, IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { ok = false, error = "No file uploaded." });
+
+        try
+        {
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            var ext = Path.GetExtension(file.FileName);
+            var contentType = file.ContentType;
+
+            var url = await _profileService.UploadAvatar(id, bytes, ext, contentType);
+            return Ok(new { ok = true, url });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
     // ── POST /api/admin/users/{id}/toggle-active ──────────────────────────────
     [HttpPost("{id}/toggle-active")]
     public async Task<IActionResult> ToggleActive(string id, [FromBody] bool isActive)
@@ -161,6 +225,29 @@ public class AdminUsersController : ControllerBase
         {
             Console.WriteLine($"[ToggleActive] Error: {ex.Message}");
             return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost("{id}/resend-invite")]
+    public async Task<IActionResult> ResendInvite(string id)
+    {
+        try
+        {
+            var profile = await _profileService.GetProfileById(id);
+            if (profile == null) return NotFound();
+
+            // Trigger Supabase recovery email (Set Password flow)
+            var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/recover",
+                new StringContent(System.Text.Json.JsonSerializer.Serialize(new { email = profile.Email }), System.Text.Encoding.UTF8, "application/json"));
+
+            if (!res.IsSuccessStatusCode) return BadRequest(new { ok = false, error = "Failed to send recovery email." });
+
+            await _logs.LogActionAsync(id, "resent invitation", $"User: {profile.FullName}", null, "Admin", $"/Admin/Users");
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { ok = false, error = ex.Message });
         }
     }
 }

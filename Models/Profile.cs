@@ -9,24 +9,27 @@ namespace SamsonDentalCenterManagementSystem.Models
     {
         // internal object? Models;
 
-        [PrimaryKey("id", false)]
+        [PrimaryKey("id", true)]
         public string Id { get; set; } = string.Empty;
 
         [Column("first_name")]
-        [JsonPropertyName("first_name")]
+        [JsonPropertyName("firstName")]
         public string FirstName { get; set; } = string.Empty;
 
         [Column("last_name")]
-        [JsonPropertyName("last_name")]
+        [JsonPropertyName("lastName")]
         public string LastName { get; set; } = string.Empty;
 
         [Column("date_of_birth")]
+        [JsonPropertyName("dateOfBirth")]
         public DateTime? DateOfBirth { get; set; }
 
         [Column("sex")]
+        [JsonPropertyName("sex")]
         public string? Sex { get; set; }
 
         [Column("phone_number")]
+        [JsonPropertyName("phoneNumber")]
         public string? PhoneNumber { get; set; }
 
         [Column("email")]
@@ -39,7 +42,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? Role { get; set; }
 
         [Column("avatar_url")]
-        [JsonPropertyName("avatar_url")]
+        [JsonPropertyName("avatarUrl")]
         public string? AvatarUrl { get; set; }
 
         [Column("created_at")]
@@ -50,6 +53,9 @@ namespace SamsonDentalCenterManagementSystem.Models
 
         [Column("reactivation_requested")]
         public bool ReactivationRequested { get; set; } = false;
+
+        [Column("requires_merge_review")]
+        public bool RequiresMergeReview { get; set; } = false;
 
         [JsonIgnore]
         [Newtonsoft.Json.JsonIgnore]

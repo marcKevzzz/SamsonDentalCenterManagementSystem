@@ -11,10 +11,23 @@ namespace SamsonDentalCenterManagementSystem.Controllers;
 public class AppointmentsController : ControllerBase
 {
     private readonly AppointmentService _apptService;
+    private readonly BlockedDateService _blockedDates;
 
-    public AppointmentsController(AppointmentService apptService)
+    public AppointmentsController(AppointmentService apptService, BlockedDateService blockedDates)
     {
         _apptService = apptService;
+        _blockedDates = blockedDates;
+    }
+
+    // GET /api/appointments/check-date?date=yyyy-MM-dd
+    // Used by patient-side calendar to mark blocked dates
+    [HttpGet("check-date")]
+    public async Task<IActionResult> CheckDate([FromQuery] string date)
+    {
+        if (!DateTime.TryParse(date, out var d))
+            return BadRequest(new { ok = false, error = "Invalid date." });
+        var blocked = await _blockedDates.IsDateBlockedAsync(d);
+        return Ok(new { ok = true, blocked });
     }
 
     // GET /api/appointments/doctors?category=Cosmetic
@@ -62,9 +75,15 @@ public class AppointmentsController : ControllerBase
         if (!p.IsWaitlist && string.IsNullOrWhiteSpace(p.AppointmentTime))
             return BadRequest(new { ok = false, error = "Appointment time is required." });
 
+        // Guard: blocked date
+        if (!p.IsWaitlist)
+        {
+            var isBlocked = await _blockedDates.IsDateBlockedAsync(p.AppointmentDate);
+            if (isBlocked)
+                return Conflict(new { ok = false, error = "This date has been blocked by the clinic. Please choose another date." });
+        }
+
         // FIX Bug 2: Only check double-booking when the logged-in user IS the patient
-        // (isForOther=false). When booking for someone else, allow it — the logged-in
-        // user is just the contact person, not the patient being treated.
         if (!p.IsGuest && !p.IsWaitlist && !p.IsForOther && !string.IsNullOrEmpty(p.PatientId))
         {
             var hasBooking = await _apptService.HasExistingBookingAsPatient(p.PatientId, p.AppointmentDate);

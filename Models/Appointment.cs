@@ -98,6 +98,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("notes")]
         public string? Notes { get; set; }
 
+        [Column("source")]
+        public string Source { get; set; } = "online";
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 

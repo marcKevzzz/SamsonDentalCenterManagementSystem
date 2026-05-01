@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Http;
 using System.Net.Http.Headers;
 using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Models;
@@ -13,6 +14,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
         private readonly IHubContext<AdminHub> _hubContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private static readonly JsonSerializerOptions _json = new()
         {
@@ -23,13 +25,15 @@ namespace SamsonDentalCenterManagementSystem.Services
             HttpClient http,
             string supabaseUrl,
             string serviceRoleKey,
-            IHubContext<AdminHub> hubContext
+            IHubContext<AdminHub> hubContext,
+            IHttpContextAccessor httpContextAccessor
         )
         {
             _http = http;
             _supabaseUrl = supabaseUrl.TrimEnd('/');
             _serviceRoleKey = serviceRoleKey;
             _hubContext = hubContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -42,7 +46,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         public async Task LogActionAsync(
-            string? profileId,
+            string? targetProfileId,
             string action,
             string? details = null,
             string? ipAddress = null,
@@ -50,9 +54,60 @@ namespace SamsonDentalCenterManagementSystem.Services
             string? link = null
         )
         {
+            // 1. Resolve performing user (the one who did the action)
+            string? performerId = _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
+            
+            // 2. Resolve IP if not provided
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                var remoteIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress;
+                if (remoteIp != null)
+                {
+                    // Map IPv6 loopback to readable form
+                    if (System.Net.IPAddress.IsLoopback(remoteIp))
+                        ipAddress = "127.0.0.1";
+                    // Unwrap IPv4-mapped IPv6 (::ffff:x.x.x.x)
+                    else if (remoteIp.IsIPv4MappedToIPv6)
+                        ipAddress = remoteIp.MapToIPv4().ToString();
+                    else
+                        ipAddress = remoteIp.ToString();
+                }
+            }
+
+            string userName = "System";
+            // Use performerId if available (for logs), otherwise fallback to targetProfileId
+            string? logProfileId = performerId ?? targetProfileId;
+
+            if (!string.IsNullOrEmpty(logProfileId))
+            {
+                try
+                {
+                    // Fetch profile name via direct REST to avoid circular dependency with ProfileService
+                    var path = $"/profiles?select=first_name,last_name&id=eq.{logProfileId}&limit=1";
+                    var profileReq = BuildRequest(HttpMethod.Get, path);
+                    var profileRes = await _http.SendAsync(profileReq);
+                    if (profileRes.IsSuccessStatusCode)
+                    {
+                        var profileJson = await profileRes.Content.ReadAsStringAsync();
+                        var profiles = JsonSerializer.Deserialize<List<JsonElement>>(profileJson, _json);
+                        if (profiles != null && profiles.Count > 0)
+                        {
+                            var p = profiles[0];
+                            string first = p.TryGetProperty("first_name", out var f) ? f.GetString() ?? "" : "";
+                            string last = p.TryGetProperty("last_name", out var l) ? l.GetString() ?? "" : "";
+                            userName = $"{first} {last}".Trim();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ActivityLogService] Failed to fetch profile name: {ex.Message}");
+                }
+            }
+
             var log = new
             {
-                profile_id = profileId,
+                profile_id = logProfileId,
                 action = action,
                 details = details,
                 ip_address = ipAddress,
@@ -84,7 +139,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                         {
                             id = created.Id,
                             profileId = created.ProfileId,
-                            userName = "System", // Default for now, ideally fetch profile
+                            userName = userName,
                             action = created.Action,
                             details = created.Details,
                             category = created.Category,

@@ -28,13 +28,14 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="~/js/config.js" asp-append-version="true"></script>
   <script type="module" src="~/js/AdminSide/AdminStore.js" asp-append-version="true"></script>
   <script type="module" src="~/js/AdminSide/site.js" asp-append-version="true" defer></script>
   <script src="~/js/AdminSide/adminNotifications.js" asp-append-version="true" defer></script>
 </head>
 
-<body>
+<body data-role="@(ViewData["UserRole"]?.ToString()?.ToLower() ?? "admin")">
   <!-- Overlay for mobile sidebar -->
   <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[49] hidden"></div>
 
@@ -86,7 +87,7 @@
             <span class="sidebar-text transition-opacity duration-300">Dashboard</span>
           </a>
 
-          @if(r == "admin" || r == "receptionist") {
+          @if(r == "admin" || r == "receptionist" || r == "doctor") {
           <div class="nav-label px-7 py-2.5 mt-1">
             <span
               class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">People</span>
@@ -99,22 +100,42 @@
               <circle cx="9" cy="7" r="4" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Patients</span>
-            <span
-              class="nav-badge sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">248</span>
+            <span id="notif-patients-count" class="sidebar-text ml-auto bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
           </a>
           }
 
           @if(r == "admin") {
-          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="/Admin/Staff" id="admin-doctors">
-            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-  <circle cx="9" cy="7" r="4" />
-  <path d="M19 11l2 2 4-4" />
-</svg>
+          <!-- Staff Dropdown -->
+          <div class="relative px-2">
+            <button class="nav-item group w-full flex items-center gap-4 px-4 py-2.5 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all hover:bg-white/[0.05]"
+              id="staff-dropdown-btn">
+              <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M19 11l2 2 4-4" />
+              </svg>
+              <span class="sidebar-text transition-opacity duration-300">Staff</span>
+              <span id="notif-staff-count" class="sidebar-text ml-auto bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
+              <svg class="sidebar-text ml-auto transition-transform duration-200" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="staff-arrow">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
 
-            <span class="sidebar-text transition-opacity duration-300">Staff</span>
-          </a>
+            <!-- Dropdown content (Expanded Sidebar) -->
+            <div id="staff-dropdown" class="hidden pl-10 pr-2 py-1 space-y-1 overflow-hidden transition-all duration-300">
+              <a href="/Admin/Staff/Doctors" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Doctors</a>
+              <a href="/Admin/Staff/Receptionists" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Receptionists</a>
+            </div>
+
+            <!-- Popup Menu (Collapsed Sidebar) -->
+            <div id="staff-popup" class="hidden fixed left-[72px] mt-[-40px] w-44 bg-[#1f2c4b] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[500] animate-in fade-in slide-in-from-left-2 duration-200">
+              <div class="px-4 py-2 border-b border-white/5 bg-white/5">
+                <span class="text-[10px] font-black uppercase tracking-widest text-white/40">Staff Directory</span>
+              </div>
+              <a href="/Admin/Staff/Doctors" class="block px-4 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors">Doctors</a>
+              <a href="/Admin/Staff/Receptionists" class="block px-4 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors">Receptionists</a>
+            </div>
+          </div>
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="/Admin/Users" id="admin-users">
           <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -145,13 +166,27 @@
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Appointments</span>
-            <span
-              class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display">12</span>
+            <span id="notif-appointments-count" class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
           </a>
+
+          @if(r == "admin") {
+          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
+            href="/Admin/BlockedDates" id="admin-blocked-dates">
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+              <line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+            <span class="sidebar-text transition-opacity duration-300">Blocked Dates</span>
+          </a>
+          }
 
           @if(r == "admin" || r == "doctor") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="@basePath/Invoices" id="admin-invoices">
+            href="@basePath/Treatments" id="admin-invoices">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -160,7 +195,7 @@
               <line x1="16" y1="17" x2="8" y2="17" />
               <polyline points="10 9 9 9 8 9" />
             </svg>
-            <span class="sidebar-text transition-opacity duration-300">Invoices</span>
+            <span class="sidebar-text transition-opacity duration-300">Treatments</span>
           </a>
           }
 
@@ -175,31 +210,47 @@
               <path d="M10 16h4" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Services</span>
+            <span id="notif-services-count" class="sidebar-text ml-auto bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
           </a>
           }
 
           @if(r == "admin" || r == "receptionist") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="@basePath/Transactions" id="admin-transactions">
+            href="@basePath/Billing" id="admin-transactions">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z" />
-  <path d="M16 8h-6" />
-  <path d="M16 12H8" />
-  <path d="M13 16H8" />
-</svg>
+              <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z" />
+              <path d="M16 8h-6" />
+              <path d="M16 12H8" />
+              <path d="M13 16H8" />
+            </svg>
 
             <span class="sidebar-text transition-opacity duration-300">Billing</span>
           </a>
+          }
+
+          @if(r == "admin" || r == "receptionist" || r == "doctor") {
+          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
+            href="@basePath/Availability" id="staff-availability">
+            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+              <line x1="8" y1="14" x2="16" y2="14" />
+            </svg>
+            <span class="sidebar-text transition-opacity duration-300">@(r == "admin" ? "Leaves" : "My Schedule")</span>
+            <span id="notif-leaves-count" class="sidebar-text ml-auto bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
+          </a>
+          }
 
           <div class="px-7 py-2.5 mt-1">
             <span
               class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">Analytics</span>
           </div>
-          }
 
-          @if(r == "admin") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="/Admin/Reports" id="admin-reports">
+            href="@basePath/Reports" id="admin-reports">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />
@@ -208,9 +259,7 @@
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Reports</span>
           </a>
-          }
 
-          @if(r == "admin" || r == "receptionist") {
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="@basePath/Inquiries" id="admin-inquiries">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -218,8 +267,7 @@
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Inquiries</span>
-            <span
-              class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display">5</span>
+            <span id="notif-inquiries-count" class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
           </a>
 
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
@@ -230,39 +278,70 @@
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Activity Logs</span>
           </a>
-          <div class="px-7 py-2.5 mt-1">
-            <span
-              class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">Controls</span>
-          </div>
           }
-          @if(r == "admin") {
+          
+          
+          @if(r == "admin" ){
+          <div class="px-7 py-2.5 mt-1">
+            <span class="sidebar-text text-[9.5px] font-bold uppercase tracking-[0.12em] text-white font-display">Controls</span>
+          </div>
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
             href="@basePath/Reviews" id="admin-reviews">
             <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  <path d="M12 7l1.25 2.5 2.75.5-2 2 .5 2.75L12 13l-2.5 1.25.5-2.75-2-2 2.75-.5L12 7z" />
-</svg>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              <path d="M12 7l1.25 2.5 2.75.5-2 2 .5 2.75L12 13l-2.5 1.25.5-2.75-2-2 2.75-.5L12 7z" />
+            </svg>
 
             <span class="sidebar-text transition-opacity duration-300">Reviews</span>
-            <span
-              class="sidebar-text ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display">5</span>
+            <span id="notif-reviews-count" class="sidebar-text ml-auto bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full font-display hidden">0</span>
           </a>
 
-          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="@basePath/Settings" id="admin-settings">
-            <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-  <circle cx="12" cy="12" r="3" />
-</svg>
+          <!-- Settings Dropdown -->
+          <div class="relative px-2">
+            <button class="nav-item group w-full flex items-center gap-4 px-4 py-2.5 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all hover:bg-white/[0.05]"
+              id="settings-dropdown-btn">
+              <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span class="sidebar-text transition-opacity duration-300">Settings</span>
+              <svg class="sidebar-text ml-auto transition-transform duration-200" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="settings-arrow">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
 
-            <span class="sidebar-text transition-opacity duration-300">Settings</span>
-          </a>
+            <!-- Dropdown content (Expanded Sidebar) -->
+            <div id="settings-dropdown" class="hidden pl-10 pr-2 py-1 space-y-1 overflow-hidden transition-all duration-300">
+              <a href="/Admin/Settings/Identity" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Identity</a>
+              <a href="/Admin/Settings/Availability" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Availability</a>
+              <a href="/Admin/Settings/FAQs" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">FAQs</a>
+              <a href="/Admin/Settings/Photos" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Photos</a>
+            </div>
+
+            <!-- Popup Menu (Collapsed Sidebar) -->
+            <div id="settings-popup" class="hidden fixed left-[72px] mt-[-40px] w-44 bg-[#1f2c4b] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[500] animate-in fade-in slide-in-from-left-2 duration-200">
+              <div class="px-4 py-2 border-b border-white/5 bg-white/5">
+                <span class="text-[10px] font-black uppercase tracking-widest text-white/40">Clinic Settings</span>
+              </div>
+              <a href="/Admin/Settings/Identity" class="block px-4 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors">Identity</a>
+              <a href="/Admin/Settings/Availability" class="block px-4 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors">Availability</a>
+              <a href="/Admin/Settings/FAQs" class="block px-4 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors">FAQs</a>
+              <a href="/Admin/Settings/Photos" class="block px-4 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors">Photos</a>
+            </div>
+          </div>
           }
         </nav>
 
-        <div class="p-2 border-t border-white/[0.07] flex-shrink-0 overflow-hidden">
+        <div class="p-2 border-t border-white/[0.07] flex-shrink-0 overflow-visible relative">
+          
+          <!-- Popup for Collapsed State -->
+          <div id="user-popup" class="hidden absolute bottom-[100%] left-2 mb-2 w-48 bg-[#1f2c4b] border border-white/10 rounded-xl shadow-xl overflow-hidden z-[300]">
+            <a href="/StaffProfile" class="block px-4 py-2.5 text-sm text-white hover:bg-white/[0.05] transition-colors font-medium">Profile</a>
+            <button id="popupSignoutBtn" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-white/[0.05] transition-colors font-medium">Sign Out</button>
+          </div>
+
           <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.05]">
-            <div class="flex items-center gap-2.5">
+            <div id="user-profile-btn" class="flex items-center gap-2.5 cursor-pointer hover:bg-white/[0.05] p-1.5 -ml-1.5 rounded-xl transition-colors">
               <div
                 class="w-8 h-8 rounded-full bg-primary primary/80 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
                 id="sidebar-user-initials">
@@ -289,10 +368,10 @@
 
     <!-- MAIN -->
     <main id="main"
-      class="flex-1 flex flex-col min-h-screen transition-all duration-[250ms] lg:ml-[256px] overflow-hidden">
+      class="flex-1 flex flex-col min-h-screen transition-all duration-[250ms] lg:ml-[256px] overflow-hidden relative">
       <!-- TOPBAR -->
       <header
-        class="bg-white border-b border-slate-200 sticky top-0 z-[50] flex items-center justify-between px-4 lg:px-6 h-[60px] flex-shrink-0 ">
+        class="bg-white border-b border-slate-200  z-[50] flex items-center justify-between px-4 lg:px-6 h-[60px] flex-shrink-0 fixed left-[72px] top-0 w-[calc(100%-72px)]">
         <div class="flex items-center gap-3">
           <!-- Hamburger (mobile only) -->
           <button class="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
@@ -335,7 +414,7 @@
             </button>
             
             <!-- Notification Dropdown -->
-            <div id="notif-dropdown" class="z-[200] hidden bg-white divide-y divide-slate-100 rounded-2xl shadow-xl border border-slate-200 w-80 max-h-[480px] overflow-hidden">
+            <div id="notif-dropdown" class="z-[200] hidden bg-white !translate-x-[-285px] !translate-y-[44px] divide-y divide-slate-100 rounded-2xl shadow-xl border border-slate-200 rounded-tr-none w-80 max-h-[480px] overflow-hidden">
               <div class="px-4 py-3 bg-slate-50/50 flex items-center justify-between">
                 <span class="text-[13px] font-bold text-brand">Notifications</span>
                 <button id="mark-all-read" class="text-[10px] text-primary font-semibold hover:underline">Mark all as read</button>
@@ -363,7 +442,7 @@
       </header>
 
       <!-- PAGE CONTENT -->
-      <div class="flex-1 max-w-full overflow-hidden">@RenderBody()</div>
+      <div class="flex-1 max-w-full overflow-hidden mt-[60px]">@RenderBody()</div>
     </main>
   </div>
 
@@ -378,6 +457,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+  <script src="/_framework/aspnetcore-browser-refresh.js"></script>
 
   @await RenderSectionAsync("Scripts", required: false)
 </body>

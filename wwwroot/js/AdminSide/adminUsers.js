@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("userModal").addEventListener("click", (e) => {
     if (e.target.id === "userModal") closeModal();
   });
+
+  // Removed role toggle logic as bio/availability were removed from modal
 });
 
 // ── Filter ────────────────────────────────────────────────────────────────────
@@ -150,6 +152,9 @@ function rowHTML(u) {
                     <button data-edit="${u.id}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors">
                         <i class="fa-solid fa-pen-to-square w-4"></i> Edit Profile
                     </button>
+                    <button data-resend="${u.id}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
+                        <i class="fa-solid fa-paper-plane w-4"></i> Resend Invite
+                    </button>
                     <button data-toggle="${u.id}" data-active="${u.isActive}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium ${u.isActive ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"} flex items-center gap-3 transition-colors">
                         <i class="fa-solid ${u.isActive ? "fa-user-slash" : "fa-user-check"} w-4"></i> ${u.isActive ? "Deactivate" : "Activate"}
                     </button>
@@ -190,7 +195,9 @@ async function toggleActive(id, currentActive) {
             `Account ${newActive ? "activated" : "deactivated"}.`,
             "success",
           );
-          window.location.reload();
+          await AdminStore.invalidate('users');
+          const data = await AdminStore.loadData('users', '/api/admin/data/users');
+          if (data) initializeWithData({ users: data });
         } else {
           Toast.show(result.error || "Operation failed.", "danger");
         }
@@ -206,12 +213,32 @@ document.addEventListener("click", (e) => {
   const editBtn = e.target.closest("[data-edit]");
   const deleteBtn = e.target.closest("[data-delete]");
   const toggleBtn = e.target.closest("[data-toggle]");
+  const resendBtn = e.target.closest("[data-resend]");
+
   if (editBtn) openEditModal(editBtn.dataset.edit);
   if (deleteBtn)
     confirmDelete(deleteBtn.dataset.delete, deleteBtn.dataset.name);
   if (toggleBtn)
     toggleActive(toggleBtn.dataset.toggle, toggleBtn.dataset.active === "true");
+  if (resendBtn) resendInvite(resendBtn.dataset.resend);
 });
+
+async function resendInvite(id) {
+    try {
+        const res = await fetch(`/api/admin/users/${id}/resend-invite`, {
+            method: 'POST',
+            headers: { RequestVerificationToken: getToken() }
+        });
+        if (res.ok) {
+            Toast.show("Invitation email resent.", "success");
+        } else {
+            const err = await res.json();
+            Toast.show(err.error || "Failed to resend invite.", "danger");
+        }
+    } catch (err) {
+        Toast.show("An unexpected error occurred.", "danger");
+    }
+}
 
 // ── Pagination ────────────────────────────────────────────────────────────────
 function renderPaginationBtns(totalPages) {
@@ -273,11 +300,30 @@ function getToken() {
   );
 }
 
+function getFormState() {
+  return JSON.stringify({
+    fn: document.getElementById("mFirstName").value,
+    ln: document.getElementById("mLastName").value,
+    em: document.getElementById("mEmail").value,
+    dob: document.getElementById("mDob").value,
+    sex: document.getElementById("mSex").value,
+    ph: document.getElementById("mPhone").value,
+    add: document.getElementById("mAddress").value,
+    role: document.getElementById("mRole").value
+  });
+}
+
+// Availability data collection removed as requested
+
+
+let initialFormState = "";
+
 // ── Add Modal ─────────────────────────────────────────────────────────────────
 function openAddModal() {
   document.getElementById("modalTitle").textContent = "Add User";
   document.getElementById("modalUserId").value = "";
   clearModalFields();
+  initialFormState = getFormState();
   showModal();
 }
 
@@ -293,9 +339,10 @@ function openEditModal(id) {
   document.getElementById("mEmail").value = u.email;
   document.getElementById("mDob").value = u.dob;
   document.getElementById("mSex").value = u.sex;
-  document.getElementById("mPhone").value = u.phone;
-  document.getElementById("mAddress").value = u.address;
+  document.getElementById("mPhone").value = u.phone || "";
+  document.getElementById("mAddress").value = u.address || "";
   document.getElementById("mRole").value = u.role;
+  initialFormState = getFormState();
   showModal();
 }
 
@@ -304,17 +351,18 @@ async function saveUser() {
   const id = document.getElementById("modalUserId").value;
   const isEdit = !!id;
   const saveBtn = document.getElementById("modalSaveBtn");
+  const role = document.getElementById("mRole").value;
 
   const payload = {
     id,
     firstName: document.getElementById("mFirstName").value.trim(),
     lastName: document.getElementById("mLastName").value.trim(),
     email: document.getElementById("mEmail").value.trim(),
-    dateOfBirth: document.getElementById("mDob").value,
+    dateOfBirth: document.getElementById("mDob").value || null,
     sex: document.getElementById("mSex").value,
     phoneNumber: document.getElementById("mPhone").value.trim(),
     address: document.getElementById("mAddress").value.trim(),
-    role: document.getElementById("mRole").value,
+    role: role
   };
 
   if (!payload.firstName || !payload.lastName || !payload.email) {
@@ -338,13 +386,31 @@ async function saveUser() {
 
     const result = await res.json();
     if (result.ok) {
+        // Handle Avatar Upload if file selected
+        const avatarFile = document.getElementById("mAvatar").files[0];
+        if (avatarFile) {
+            const userId = result.id || id;
+            const formData = new FormData();
+            formData.append("file", avatarFile);
+            
+            await fetch(`/api/admin/users/${userId}/avatar`, {
+                method: "POST",
+                body: formData,
+                headers: { RequestVerificationToken: getToken() }
+            });
+        }
+
+      initialFormState = getFormState(); // Bypass discard check on successful save
       closeModal();
-      window.location.reload();
       Toast.show(`User ${isEdit ? "updated" : "created"}.`, "success");
+      await AdminStore.invalidate('users');
+      const data = await AdminStore.loadData('users', '/api/admin/data/users');
+      if (data) initializeWithData({ users: data });
     } else {
       Toast.show(result.error ?? "Save failed.", "danger");
     }
-  } catch {
+  } catch (err) {
+    console.error(err);
     Toast.show("An unexpected error occurred.", "danger");
   } finally {
     saveBtn.disabled = false;
@@ -371,9 +437,10 @@ function confirmDelete(id, name) {
         });
         const result = await res.json();
         if (result.ok) {
-          closeDeleteModal();
-          window.location.reload();
           Toast.show("User deleted.", "success");
+          await AdminStore.invalidate('users');
+          const data = await AdminStore.loadData('users', '/api/admin/data/users');
+          if (data) initializeWithData({ users: data });
         } else {
           Toast.show(result.error ?? "Delete failed.", "danger");
         }
@@ -391,6 +458,20 @@ function showModal() {
 }
 
 function closeModal() {
+  if (initialFormState && getFormState() !== initialFormState) {
+    Modal.open({
+      title: "Discard Changes?",
+      message: "You have unsaved changes. Are you sure you want to discard them?",
+      type: "warning",
+      confirmText: "Discard",
+      cancelText: "Keep Editing",
+      onConfirm: () => {
+        initialFormState = getFormState(); // Reset so next closeModal call succeeds
+        closeModal();
+      }
+    });
+    return;
+  }
   document.getElementById("userModal").classList.add("hidden");
   document.getElementById("userModal").classList.remove("flex");
 }

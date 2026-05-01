@@ -1,0 +1,284 @@
+@page "/Admin/Treatments"
+@model TreatmentsModel
+@{
+    Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "Treatments";
+}
+
+<div class="page p-6">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h2 class="text-2xl font-extrabold text-brand tracking-tight">Arrived Patients</h2>
+      <p class="text-[13px] text-brand-400 mt-1">Patients waiting for treatment and billing generation</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-4 py-2 bg-brand-50 border border-brand-100 rounded-xl text-[12px] font-bold text-brand" id="arrived-count">
+        Waiting: ...
+      </span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8" id="arrived-patients-container">
+    <div class="col-span-full py-20 text-center" id="arrived-loading">
+      <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary">
+        <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+      </div>
+      <p class="text-[13px] text-brand-400 font-medium">Loading arrived patients...</p>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-5 mt-10">
+      <div>
+          <h3 class="text-xl font-extrabold text-brand tracking-tight">Recent Treatments</h3>
+          <p class="text-[12px] text-brand-400">Track and manage treatment records</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+          <div class="relative min-w-[200px]">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 translate-half text-slate-400 text-xs"></i>
+              <input type="text" id="invSearch" placeholder="Search patient..." 
+                  class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] focus:border-primary outline-none transition-all" />
+          </div>
+          <select id="invStatusFilter" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-brand-600 outline-none focus:border-primary transition-all">
+              <option value="">All Status</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="cancelled">Cancelled</option>
+          </select>
+      </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto overflow-y-hidden mb-8">
+      <table id="recentInvoicesTable" class="w-full text-left border-collapse min-w-[800px]">
+          <thead>
+              <tr class="bg-slate-50/50 border-b border-slate-100">
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Date</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Patient</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Services</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-right">Amount</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-center">Status</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-right">Actions</th>
+              </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50" id="invoices-table-body">
+              <tr>
+                  <td colspan="6" class="px-6 py-20 text-center" id="invoices-loading">
+                      <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary">
+                          <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+                      </div>
+                      <p class="text-[13px] text-brand-400 font-medium">Loading recent treatments...</p>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- CREATE TREATMENT MODAL                                                      -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <div id="create-invoice-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeCreateInvoice()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+      <div id="create-invoice-box" class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] pointer-events-auto
+             transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
+
+        <!-- Modal Header -->
+        <div class="relative h-28 bg-brand flex items-center px-8 shrink-0 overflow-hidden">
+          <div class="absolute inset-0 opacity-10"
+            style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+          <div class="relative z-10">
+            <h3 class="font-display font-extrabold text-white text-xl tracking-tight">Record Treatment</h3>
+            <p class="text-white/50 text-[11px] font-bold uppercase tracking-[0.2em] mt-1">Generate a Treatment Record & Billing
+            </p>
+          </div>
+          <button onclick="closeCreateInvoice()"
+            class="absolute top-5 right-6 text-white/30 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-100 px-8 shrink-0">
+          <button id="tab-billing" onclick="switchTab('billing')"
+            class="flex items-center gap-2 px-4 py-3 text-[12px] font-bold border-b-2 transition-all text-primary border-primary">
+            <i class="fa-solid fa-calculator text-[11px]"></i> Services & Billing
+          </button>
+          <button id="tab-treatment" onclick="switchTab('treatment')"
+            class="flex items-center gap-2 px-4 py-3 text-[12px] font-bold border-b-2 transition-all text-slate-400 border-transparent">
+            <i class="fa-solid fa-tooth text-[11px]"></i> Treatment Notes
+          </button>
+        </div>
+
+        <!-- Hidden fields -->
+        <input type="hidden" id="inv-doctor-id" value="@Model.DoctorRecordId" />
+        <input type="hidden" id="inv-preselect-appt" value="@(Request.Query[" appt"].FirstOrDefault() ?? "" )" />
+
+        <!-- ── TAB 1: BILLING ────────────────────────────────────────────── -->
+        <div id="panel-billing" class="flex-1 overflow-y-auto">
+          <div class="p-8 space-y-6">
+
+            <!-- Patient Select -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand">Patient</h4>
+              </div>
+              <div class="relative">
+                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-slate-300 text-xs"></i>
+                <select id="inv-patient"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
+                  <option value="">Select arrived patient…</option>
+                </select>
+                <i
+                  class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-slate-300 text-[10px] pointer-events-none"></i>
+              </div>
+            </div>
+
+            <!-- Add Service -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand">Add Services</h4>
+              </div>
+              <div class="flex items-end gap-3">
+                <div class="flex-1 relative">
+                  <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-slate-300 text-xs"></i>
+                  <select id="inv-service-select"
+                    class="w-full text-[12px] pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
+                    <option value="">Choose service…</option>
+                  </select>
+                  <i
+                    class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-slate-300 text-[10px] pointer-events-none"></i>
+                </div>
+                <div class="w-20">
+                  <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-0.5">Qty</label>
+                  <input type="number" id="inv-qty" value="1" min="1" max="20"
+                    class="w-full text-[12px] text-center py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none" />
+                </div>
+                <button onclick="addServiceItem()"
+                  class="px-4 py-2.5 rounded-xl bg-primary text-white text-[12px] font-bold hover:opacity-90 transition-all active:scale-95 shrink-0">
+                  <i class="fa-solid fa-plus mr-1"></i> Add
+                </button>
+              </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+              <table class="w-full">
+                <thead class="bg-slate-50/50">
+                  <tr>
+                    <th
+                      class="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 py-2.5 w-10">#
+                    </th>
+                    <th class="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 py-2.5">
+                      Service</th>
+                    <th class="text-right text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 py-2.5">
+                      Price</th>
+                    <th
+                      class="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 py-2.5 w-20">
+                      Qty</th>
+                    <th class="text-right text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 py-2.5">
+                      Total</th>
+                    <th
+                      class="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400 px-4 py-2.5 w-12">
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="invoice-items-body">
+                  <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-[12px] text-slate-400">
+                      <i class="fa-solid fa-cart-plus text-slate-200 text-2xl mb-2 block"></i>
+                      No services added yet.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-3">
+              <div class="flex justify-between text-[13px]">
+                <span class="text-slate-500">Subtotal</span>
+                <span id="inv-subtotal" class="font-bold text-brand">₱0.00</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-slate-500">Discount (₱)</span>
+                <div class="relative w-32">
+                  <span class="absolute left-0 top-1/2 translate-half text-[12px] font-bold text-slate-400">₱</span>
+                  <input type="number" id="inv-discount-input" value="0" min="0" step="50"
+                    class="w-full text-right text-[14px] font-bold pl-4 pr-1 py-1 bg-transparent border-0 border-b-2 border-slate-200 focus:border-primary outline-none transition-colors" />
+                </div>
+              </div>
+              <div class="h-px bg-slate-200"></div>
+              <div class="flex justify-between text-[15px]">
+                <span class="font-bold text-brand">Total Due</span>
+                <span id="inv-final" class="font-extrabold text-primary">₱0.00</span>
+              </div>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-3">
+              <label class="block text-[10px] font-bold text-slate-500 mb-1.5 ml-0.5 uppercase tracking-wider">Treatment
+                Notes</label>
+              <textarea id="inv-notes" rows="2" placeholder="Additional notes for the treatment…"
+                class="w-full text-[12px] px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/20 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none resize-none"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 2: DETAILED PROCEDURES ────────────────────────────────────── -->
+        <div id="panel-treatment" class="flex-1 overflow-y-auto hidden">
+          <div class="p-8">
+            <div id="treatment-body" class="space-y-4"></div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-between p-6 bg-slate-50 border-t border-slate-100 shrink-0">
+          <div class="flex gap-3 ml-auto">
+            <button onclick="closeCreateInvoice()"
+              class="px-5 py-2.5 text-[12px] font-bold rounded-xl text-brand">Cancel</button>
+            <button id="inv-next-btn" onclick="switchTab('treatment')"
+              class="px-6 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white">Next: Procedures</button>
+            <button id="inv-back-btn" onclick="switchTab('billing')"
+              class="hidden px-6 py-2.5 text-[12px] font-bold rounded-xl border border-slate-200 text-brand">Back</button>
+            <button id="inv-submit-btn" onclick="submitInvoice()"
+              class="hidden px-6 py-2.5 text-[12px] font-bold rounded-xl bg-primary text-white">Save Treatment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.openCreateInvoiceWithPreselect = function (apptId) {
+      if (typeof window.openCreateInvoice === 'function') {
+        window.openCreateInvoice();
+      }
+      setTimeout(() => {
+        const select = document.getElementById('inv-patient');
+        if (select) {
+          select.value = apptId;
+          select.dispatchEvent(new Event('change'));
+        }
+      }, 150);
+    };
+
+    // Client-side filtering for Recent Treatments table
+    document.getElementById('invSearch')?.addEventListener('input', filterInvoices);
+    document.getElementById('invStatusFilter')?.addEventListener('change', filterInvoices);
+
+    function filterInvoices() {
+        const query = document.getElementById('invSearch').value.toLowerCase();
+        const status = document.getElementById('invStatusFilter').value.toLowerCase();
+        const rows = document.querySelectorAll('#recentInvoicesTable tbody tr');
+
+        rows.forEach(row => {
+            const patient = row.querySelector('td:nth-child(2)')?.innerText.toLowerCase() || "";
+            const rowStatus = row.querySelector('td:nth-child(5)')?.innerText.toLowerCase() || "";
+            
+            const matchesSearch = patient.includes(query);
+            const matchesStatus = !status || rowStatus.includes(status);
+
+            row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        });
+    }
+  </script>
+  <script type="module" src="~/js/AdminSide/doctorInvoice.js"></script>

@@ -1,0 +1,151 @@
+@page "/Admin/BlockedDates"
+@namespace SamsonDentalCenterManagementSystem.Pages.Admin
+@model BlockedDatesModel
+@{
+Layout = "AdminSide/_StaffLayout";
+}
+
+<div id="page-blocked-dates" class="page p-4 md:p-6">
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h2 class="font-display text-xl font-extrabold text-brand">Blocked Dates</h2>
+      <p class="text-[12px] text-brand-400 mt-0.5">Manage clinic closures and date restrictions</p>
+    </div>
+    <button onclick="openAddBlockModal()"
+      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-red-500 shadow-md shadow-red-500/25 hover:bg-red-600 transition-colors">
+      <i class="fa-solid fa-ban text-[11px]"></i>
+      Block a Date
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
+          <i class="fa-solid fa-ban text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-total-blocked">-</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Total Blocked</div>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
+          <i class="fa-solid fa-calendar-day text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-upcoming-blocked">-</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Upcoming</div>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-calendar-xmark text-sm"></i>
+        </div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-past-blocked">-</div>
+      </div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Past</div>
+    </div>
+  </div>
+
+  <!-- Blocked Dates Grid -->
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400">All Blocked Dates</span>
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-brand-300 text-[10px]"></i>
+        <input id="blocked-search" type="text" placeholder="Search by reason…" oninput="filterBlocked()"
+          class="text-[11px] pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white w-48" />
+      </div>
+    </div>
+    <div id="blocked-grid" class="divide-y divide-slate-50">
+      <div class="px-4 py-10 text-center text-[12px] text-brand-400">
+        <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading blocked dates…
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD BLOCK MODAL ──────────────────────────────────────────────────── -->
+<div id="add-block-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeAddBlockModal()"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div id="add-block-modal-box"
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
+
+      <div class="p-6 border-b border-slate-100 bg-red-50/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+            <i class="fa-solid fa-ban text-red-500"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-extrabold text-[17px] text-brand">Block a Date</h3>
+            <p class="text-[11px] text-brand-400 font-bold uppercase tracking-wider mt-0.5">Prevent new bookings</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <div>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Date to Block *</label>
+          <input id="add-block-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+            class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Reason <span class="text-brand-400 font-normal">(optional)</span></label>
+          <input id="add-block-reason" type="text" placeholder="e.g. Clinic holiday, Staff training…"
+            class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all outline-none" />
+        </div>
+        <p id="add-block-error" class="text-[11px] text-red-500 hidden"></p>
+      </div>
+
+      <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
+        <button onclick="closeAddBlockModal()"
+          class="px-6 py-2.5 text-[12px] font-bold text-brand hover:text-brand transition-colors">Cancel</button>
+        <button onclick="submitAddBlock()"
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-red-500 text-white shadow-xl shadow-red-500/20 hover:opacity-90 transition-all">
+          <i class="fa-solid fa-ban mr-1.5"></i>Block Date
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFLICT MODAL ──────────────────────────────────────────────────── -->
+<div id="bd-conflict-modal" class="fixed inset-0 z-[60] hidden">
+  <div class="absolute inset-0 bg-brand/50 backdrop-blur-md"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div id="bd-conflict-modal-box"
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
+
+      <div class="p-6 border-b border-amber-100 bg-amber-50/70">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-extrabold text-[17px] text-brand">Date Blocked — Action Required</h3>
+            <p id="bd-conflict-summary" class="text-[12px] text-amber-700 mt-0.5"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <p class="text-[12px] text-brand-600 mb-3">The following appointments are still active on this date. They will <strong>not</strong> be automatically cancelled — please handle them manually.</p>
+        <div id="bd-conflict-list" class="space-y-2 max-h-56 overflow-y-auto"></div>
+      </div>
+
+      <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
+        <button onclick="closeBdConflictModal()"
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/10 hover:opacity-90 transition-all">
+          Got it, I'll handle them
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="~/js/AdminSide/adminBlockedDates.js"></script>

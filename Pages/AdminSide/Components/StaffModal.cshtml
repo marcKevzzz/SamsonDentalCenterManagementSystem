@@ -11,12 +11,12 @@
             </button>
         </div>
 
-        <div class="px-6 py-5 space-y-4">
+        <div class="px-6 py-5 gap-4">
             <input type="hidden" id="staffId" />
             <input type="hidden" id="staffEditRole" />
 
             <!-- ── Role Toggle ─────────────────────────────────────────────── -->
-            <div id="roleToggleGroup" class="flex flex-col gap-1.5">
+            <div id="roleToggleGroup" class="flex flex-col gap-1.5 mb-4">
                 <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Staff Role <span class="text-red-400">*</span></label>
                 <div class="flex gap-2">
                     <button type="button" id="roleBtnDoctor"
@@ -35,7 +35,7 @@
             </div>
 
             <!-- ── User Select ─────────────────────────────────────────────── -->
-            <div class="flex flex-col gap-1.5" id="userSelectGroup">
+            <div class="flex flex-col gap-1.5 mb-4" id="userSelectGroup">
                 <label class="text-[11px] font-semibold text-slate-600 tracking-wide">
                     Select User <span id="roleHintLabel" class="text-brand-400">(Doctor role)</span>
                     <span class="text-red-400">*</span>
@@ -75,36 +75,37 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="flex flex-col gap-1.5 mb-4">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Bio</label>
-                    <textarea id="staffBio" rows="3" placeholder="Short biography about the doctor..."
-                           class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 resize-none"></textarea>
-                </div>
-
-                <!-- ── Availability Editor ─────────────────────────────────── -->
-                <div id="availabilitySection">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Availability Schedule</label>
-                        <button type="button" onclick="addAvailabilityRow()"
-                            class="text-[11px] font-semibold text-primary hover:text-primary/80 flex items-center gap-1">
-                            <i class="fa-solid fa-plus text-[9px]"></i> Add Slot
-                        </button>
-                    </div>
-                    <div id="availabilityRows" class="space-y-2">
-                        <!-- Dynamic rows added by JS -->
-                    </div>
-                    <p id="noAvailabilityMsg" class="text-[10px] text-brand-300 italic mt-1">No schedule set. Click "Add Slot" to create one.</p>
-                </div>
             </div>
 
             <!-- ── Receptionist-only fields ────────────────────────────────── -->
             <div id="receptionistFields" class="hidden">
-                <div class="flex flex-col gap-1.5">
+                <div class="flex flex-col gap-1.5 mb-4">
                     <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Desk Location</label>
                     <input id="staffDeskLocation" type="text" placeholder="e.g. Front Desk, 2nd Floor"
                            class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
+            </div>
+
+            <!-- ── Shared fields ───────────────────────────────────────────── -->
+            <div class="flex flex-col gap-1.5 mb-4">
+                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Bio</label>
+                <textarea id="staffBio" rows="3" placeholder="Short biography..."
+                       class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 resize-none"></textarea>
+            </div>
+
+            <!-- ── Availability Editor ─────────────────────────────────── -->
+            <div id="availabilitySection" class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Availability Schedule</label>
+                    <button type="button" onclick="addAvailabilityRow()"
+                        class="text-[11px] font-semibold text-primary hover:text-primary/80 flex items-center gap-1">
+                        <i class="fa-solid fa-plus text-[9px]"></i> Add Slot
+                    </button>
+                </div>
+                <div id="availabilityRows" class="space-y-2">
+                    <!-- Dynamic rows added by JS -->
+                </div>
+                <p id="noAvailabilityMsg" class="text-[10px] text-brand-300 italic mt-1">No schedule set. Click "Add Slot" to create one.</p>
             </div>
 
             <!-- ── Active status ───────────────────────────────────────────── -->

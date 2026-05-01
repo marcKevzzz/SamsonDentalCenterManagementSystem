@@ -3,20 +3,25 @@ import { AdminStore } from './AdminStore.js';
 
 let addedItems = [];
 let ARRIVED_APPTS = [];
-let RECENT_INVOICES = [];
+let RECENT_TREATMENTS = [];
 let SERVICES = [];
 
-// Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-    const appts = await AdminStore.loadData('appointments', '/api/admin/data/appointments');
-    const invoices = await AdminStore.loadData('invoices', '/api/admin/data/invoices');
-    const services = await AdminStore.loadData('services', '/api/services/all');
+async function refreshData(force = false) {
+    const appts    = await AdminStore.loadData('appointments', '/api/admin/data/appointments', { force });
+    const treatments = await AdminStore.loadData('treatments', '/api/admin/data/invoices', { force });
+    // Always force-fresh services so price is never stale from a pre-auth-fix cache
+    const services = await AdminStore.loadData('services', '/api/services/all', { force: true });
     
     initializeWithData({
         appointments: appts,
-        invoices: invoices,
+        treatments: treatments,
         services: services
     });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+    refreshData();
 
     // Discount input handler
     const discountInput = document.getElementById('inv-discount-input');
@@ -25,16 +30,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// Listen for SignalR updates
+window.addEventListener("admin:appointments:updated", (e) => {
+    console.log("Real-time Appt update (Doctor Treatment)");
+    refreshData(true);
+});
+
+window.addEventListener("admin:treatments:updated", (e) => {
+    console.log("Real-time Treatment update (Doctor Treatment)");
+    refreshData(true);
+});
+
 function initializeWithData(data) {
     ARRIVED_APPTS = data.appointments?.filter(a => a.status === 'arrived') || [];
-    RECENT_INVOICES = data.invoices || [];
+    RECENT_TREATMENTS = data.treatments || [];
     SERVICES = data.services || [];
 
     // Filter by doctor if applicable
     const doctorRecordId = document.getElementById('inv-doctor-id')?.value;
     if (doctorRecordId) {
         ARRIVED_APPTS = ARRIVED_APPTS.filter(a => a.doctorId === doctorRecordId);
-        RECENT_INVOICES = RECENT_INVOICES.filter(i => i.doctorId === doctorRecordId);
+        RECENT_TREATMENTS = RECENT_TREATMENTS.filter(i => i.doctorId === doctorRecordId);
     }
 
     hydrateUI();
@@ -72,21 +88,21 @@ function hydrateUI() {
                 </div>
                 <div class="space-y-3 mb-5">
                     <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-clock opacity-40 w-4"></i>Scheduled: ${appt.appointmentTime}</div>
-                    <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-file-invoice opacity-40 w-4"></i>Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Invoice</span></div>
+                    <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-file-invoice opacity-40 w-4"></i>Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span></div>
                 </div>
-                <button class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">Create Invoice</button>
+                <button class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">Record Treatment</button>
             </div>`).join('');
     }
 
-    // 3. Render Recent Invoices
+    // 3. Render Recent Treatments
     const invoiceTbody = document.getElementById('invoices-table-body');
     const loadingInvoices = document.getElementById('invoices-loading');
     if (loadingInvoices) loadingInvoices.closest('tr')?.remove();
 
-    if (RECENT_INVOICES.length === 0) {
-        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-file-invoice text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand-400 font-medium">No invoices found yet.</p></td></tr>`;
+    if (RECENT_TREATMENTS.length === 0) {
+        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-file-invoice text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand-400 font-medium">No treatment records found yet.</p></td></tr>`;
     } else {
-        invoiceTbody.innerHTML = RECENT_INVOICES.map(inv => {
+        invoiceTbody.innerHTML = RECENT_TREATMENTS.map(inv => {
             const date = new Date(inv.createdAt);
             const statusClass = inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : inv.status === 'cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100';
             return `
@@ -130,7 +146,7 @@ function hydrateUI() {
     if (patientSelect) {
         patientSelect.innerHTML = '<option value="">Select arrived patient…</option>' + ARRIVED_APPTS.map(appt => {
             const svc = SERVICES.find(s => s.id === appt.serviceId);
-            return `<option value="${appt.id}" data-name="${appt.patientName}" data-patientid="${appt.patientId}" data-service="${appt.serviceName}" data-serviceid="${appt.serviceId}" data-price="${svc?.price || 0}">${appt.patientName} — ${appt.serviceName} (${new Date(appt.appointmentDate).toLocaleDateString('en-PH', { month: 'short', day: '2-digit' })})</option>`;
+            return `<option value="${appt.id}" data-name="${appt.patientName}" data-patientid="${appt.patientId}" data-doctorid="${appt.doctorId}" data-service="${appt.serviceName}" data-serviceid="${appt.serviceId}" data-price="${svc?.price || 0}">${appt.patientName} — ${appt.serviceName} (${new Date(appt.appointmentDate).toLocaleDateString('en-PH', { month: 'short', day: '2-digit' })})</option>`;
         }).join('');
 
         // Re-apply pre-select if pending
@@ -157,8 +173,11 @@ function hydrateUI() {
             if (!option || !option.value) return;
 
             const serviceName = option.getAttribute('data-service');
-            const serviceId = option.getAttribute('data-serviceid');
-            const servicePrice = parseFloat(option.getAttribute('data-price') || "0");
+            const serviceId   = option.getAttribute('data-serviceid');
+
+            // Re-lookup price from live SERVICES array — never trust baked-in data-price
+            const liveSvc = SERVICES.find(s => s.id === serviceId);
+            const servicePrice = liveSvc ? parseFloat(liveSvc.price) : 0;
 
             if (serviceId && addedItems.length === 0) {
                 addServiceItemManual(serviceId, serviceName, servicePrice, 1);
@@ -263,10 +282,12 @@ window.addServiceItem = function() {
         return;
     }
 
-    const id = option.value;
+    const id   = option.value;
     const name = option.getAttribute('data-name');
-    const price = parseFloat(option.getAttribute('data-price'));
-    const qty = parseInt(qtyInput.value) || 1;
+    // Re-lookup from live SERVICES so price is always current
+    const liveSvc = SERVICES.find(s => s.id === id);
+    const price = liveSvc ? parseFloat(liveSvc.price) : parseFloat(option.getAttribute('data-price') || '0');
+    const qty  = parseInt(qtyInput.value) || 1;
 
     addServiceItemManual(id, name, price, qty);
     
@@ -376,9 +397,11 @@ function renderTreatmentForms() {
 
 window.submitInvoice = async function() {
     const submitBtn = document.getElementById('inv-submit-btn');
-    const doctorId = document.getElementById('inv-doctor-id').value;
     const apptId = document.getElementById('inv-patient').value;
     const patientOption = document.getElementById('inv-patient').options[document.getElementById('inv-patient').selectedIndex];
+    
+    // Fallback to data-doctorid if hidden field is empty (Admin view)
+    const doctorId = document.getElementById('inv-doctor-id').value || patientOption.getAttribute('data-doctorid');
     const patientId = patientOption.getAttribute('data-patientid');
     const discount = parseFloat(document.getElementById('inv-discount-input').value) || 0;
     const notes = document.getElementById('inv-notes').value;
@@ -409,7 +432,7 @@ window.submitInvoice = async function() {
     };
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Generating…';
+    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving…';
 
     try {
         const response = await fetch('/api/invoice/create', {
@@ -421,16 +444,17 @@ window.submitInvoice = async function() {
         const result = await response.json();
 
         if (result.ok) {
-            showToast("Invoice generated successfully!", "success");
-            setTimeout(() => location.reload(), 1500);
+            showToast("Treatment recorded successfully!", "success");
+            closeCreateInvoice();
+            refreshData(true);
         } else {
-            showToast(result.error || "Failed to create invoice.", "error");
+            showToast(result.error || "Failed to record treatment.", "error");
         }
     } catch (err) {
         showToast("Network error occurred.", "error");
     } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-file-invoice mr-2"></i> Generate Invoice';
+        submitBtn.innerHTML = 'Save Treatment';
     }
 }
 

@@ -1,0 +1,55 @@
+@page "/Admin/Availability"
+@model SamsonDentalCenterManagementSystem.Helpers.AdminPageModel
+@{
+    Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "Staff Leave Management";
+}
+
+<div id="page-leaves" class="p-4 md:p-6 min-h-full bg-slate-50/50">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+            <h2 class="font-display text-2xl font-extrabold text-brand tracking-tight">Staff Leave Management</h2>
+            <p class="text-[12px] text-brand-400 font-medium mt-1 uppercase tracking-wider">Review and manage leave requests</p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                <button onclick="filterLeaves('all')" class="filter-btn px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all bg-brand text-white shadow-sm" data-filter="all">All</button>
+                <button onclick="filterLeaves('pending')" class="filter-btn px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all text-slate-500 hover:text-brand" data-filter="pending">Pending</button>
+                <button onclick="filterLeaves('approved')" class="filter-btn px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all text-slate-500 hover:text-brand" data-filter="approved">Approved</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-100">
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Staff Member</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Type</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Reason</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="leaves-table-body" class="divide-y divide-slate-50">
+                    <!-- Loaded via JS -->
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <i class="fa-solid fa-circle-notch fa-spin text-primary text-2xl"></i>
+                                <span class="text-[12px] font-medium text-brand-400">Loading leave requests...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/AdminSide/adminLeaves.js" asp-append-version="true"></script>
+}

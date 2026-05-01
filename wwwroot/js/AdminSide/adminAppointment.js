@@ -35,13 +35,14 @@ const getAppt = (x) =>
   typeof x === "string" ? ALL_APPT.find((a) => a.id === x) : x;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", async () => {
+async function refreshData(force = false) {
   const appts = await AdminStore.loadData(
     "appointments",
     "/api/admin/data/appointments",
+    { force }
   );
-  const docs = await AdminStore.loadData("doctors", "/api/admin/doctors");
-  const svcs = await AdminStore.loadData("services", "/api/services/all");
+  const docs = await AdminStore.loadData("doctors", "/api/admin/data/doctors", { force });
+  const svcs = await AdminStore.loadData("services", "/api/services/all", { force });
 
   if (appts) {
     initializeWithData({
@@ -50,6 +51,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       services: svcs,
     });
   }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await refreshData();
+  checkUrlParams();
+});
+
+async function checkUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const patientId = params.get('patientId');
+  const openModal = params.get('openModal');
+
+  if (patientId) {
+    // Load patients to find the match
+    const patientsData = await AdminStore.loadData('patients', '/api/admin/data/patients');
+    if (patientsData) {
+      const patient = patientsData.find(p => p.id === patientId);
+      if (patient) {
+        document.getElementById('book-patient-id').value = patient.id;
+        document.getElementById('book-patient-name').value = `${patient.firstName} ${patient.lastName}`;
+        document.getElementById('book-patient-email').value = patient.email;
+        document.getElementById('book-patient-phone').value = patient.phone || '';
+        
+        if (openModal === 'true') {
+          window.openBookModal(true); // pass true to skip reset
+        }
+      }
+    }
+  }
+}
+
+// Listen for SignalR updates from AdminStore
+window.addEventListener("admin:appointments:updated", (e) => {
+  console.log("Appointment update received via SignalR", e.detail);
+  refreshData(true); // Force refresh from server
 });
 
 function initializeWithData(data) {
@@ -83,14 +119,11 @@ function initializeWithData(data) {
 
 function renderStats(stats) {
   const s = stats || {};
-  document.getElementById("stat-confirmed").textContent =
-    s.appointmentsConfirmed !== undefined ? s.appointmentsConfirmed : ALL_APPT.filter((a) => a.status === "confirmed").length;
-  document.getElementById("stat-pending").textContent =
-    s.appointmentsPending !== undefined ? s.appointmentsPending : ALL_APPT.filter((a) => a.status === "pending").length;
-  document.getElementById("stat-waitlist").textContent =
-    s.appointmentsWaitlist !== undefined ? s.appointmentsWaitlist : ALL_APPT.filter((a) => a.status === "waitlist").length;
-  document.getElementById("stat-cancelled").textContent =
-    s.appointmentsCancelled !== undefined ? s.appointmentsCancelled : ALL_APPT.filter((a) => a.status === "cancelled").length;
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl("stat-confirmed", s.appointmentsConfirmed !== undefined ? s.appointmentsConfirmed : ALL_APPT.filter((a) => a.status === "confirmed").length);
+  setEl("stat-pending",   s.appointmentsPending   !== undefined ? s.appointmentsPending   : ALL_APPT.filter((a) => a.status === "pending").length);
+  setEl("stat-waitlist",  s.appointmentsWaitlist  !== undefined ? s.appointmentsWaitlist  : ALL_APPT.filter((a) => a.status === "waitlist").length);
+  setEl("stat-cancelled", s.appointmentsCancelled !== undefined ? s.appointmentsCancelled : ALL_APPT.filter((a) => a.status === "cancelled").length);
 }
 
 function hydrateDropdowns() {
@@ -132,10 +165,11 @@ function hydrateDropdowns() {
 function renderTable() {
   const tbody = document.getElementById("appointments-body");
   const pagBar = document.getElementById("paginationBar");
+  if (!tbody) return;
 
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">No appointments found.</td></tr>`;
-    pagBar.classList.add("hidden");
+    if (pagBar) pagBar.classList.add("hidden");
     return;
   }
 
@@ -145,15 +179,17 @@ function renderTable() {
 
   tbody.innerHTML = pageItems.map((appt) => rowHTML(appt)).join("");
 
-  if (filtered.length > PAGE_SIZE) {
-    pagBar.classList.remove("hidden");
-    pagBar.classList.add("flex");
-    document.getElementById("paginationInfo").textContent =
-      `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length} appointments`;
-    renderPaginationBtns(totalPages);
-  } else {
-    pagBar.classList.add("hidden");
-    pagBar.classList.remove("flex");
+  if (pagBar) {
+    if (filtered.length > PAGE_SIZE) {
+      pagBar.classList.remove("hidden");
+      pagBar.classList.add("flex");
+      const infoEl = document.getElementById("paginationInfo");
+      if (infoEl) infoEl.textContent = `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length} appointments`;
+      renderPaginationBtns(totalPages);
+    } else {
+      pagBar.classList.add("hidden");
+      pagBar.classList.remove("flex");
+    }
   }
 }
 
@@ -178,7 +214,7 @@ function rowHTML(appt) {
       label: "Completed",
     },
     no_show: {
-      classes: "bg-slate-50 text-slate-600 border-slate-100",
+      classes: "bg-slate-200/80 text-slate-600 border-slate-100",
       label: "No-Show",
     },
     cancelled: {
@@ -231,6 +267,9 @@ function rowHTML(appt) {
         </div>
       </td>
       <td class="px-4 py-4">
+        ${renderSourceBadge(appt.source)}
+      </td>
+      <td class="px-4 py-4">
         <div class="text-[12.5px] font-bold text-brand-900">${appt.appointmentDateFormatted}</div>
         <div class="text-[11px] text-brand-400">${appt.appointmentTime}</div>
       </td>
@@ -277,6 +316,22 @@ function rowHTML(appt) {
     </tr>`;
 }
 
+function renderSourceBadge(source) {
+  const s = (source || "online").toLowerCase();
+  if (s === "guest") {
+    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-user-secret text-[9px]"></i> Guest</span>`;
+  } else if (s === "admin") {
+    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-[9px]"></i> Admin</span>`;
+  } else if (s === "walk_in") {
+    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-person-walking text-[9px]"></i> Walk-in</span>`;
+  } else if (s === "phone") {
+    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-phone text-[9px]"></i> Phone</span>`;
+  } else {
+    // default to online
+    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-globe text-[9px]"></i> Online</span>`;
+  }
+}
+
 function renderPaginationBtns(totalPages) {
   const container = document.getElementById("paginationBtns");
   let html = `<button data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">← Prev</button>`;
@@ -306,8 +361,12 @@ window.filterTable = () => {
       appt.patientName.toLowerCase().includes(q) ||
       (appt.doctorName && appt.doctorName.toLowerCase().includes(q)) ||
       appt.serviceName.toLowerCase().includes(q);
+      
+    // Split status filter into array to handle comma-separated values
+    const statusArray = status ? status.toLowerCase().split(',').map(s => s.trim()) : [];
     const matchStatus =
-      !status || appt.status.toLowerCase() === status.toLowerCase();
+      !status || statusArray.includes(appt.status.toLowerCase());
+      
     const matchDate = !date || appt.appointmentDate === date;
     return matchSearch && matchStatus && matchDate;
   });
@@ -341,8 +400,52 @@ const hideModal = (id) => {
   });
 };
 
-window.openBookModal = () => showModal("book-modal");
-window.closeBookModal = () => hideModal("book-modal");
+let initialBookFormState = "";
+
+function getBookFormState() {
+  return JSON.stringify({
+    id: document.getElementById("book-patient-id")?.value || "",
+    n: document.getElementById("book-patient-name")?.value || "",
+    e: document.getElementById("book-patient-email")?.value || "",
+    p: document.getElementById("book-patient-phone")?.value || "",
+    s: document.getElementById("book-service")?.value || "",
+    d: document.getElementById("book-doctor")?.value || "",
+    dt: document.getElementById("book-date")?.value || "",
+    t: document.getElementById("book-time")?.value || "",
+    nt: document.getElementById("book-notes")?.value || ""
+  });
+}
+
+window.openBookModal = (skipReset = false) => {
+  if (!skipReset) {
+    // Reset fields to ensure clean state on open
+    const fields = ["book-patient-id", "book-patient-name", "book-patient-email", "book-patient-phone", "book-service", "book-doctor", "book-date", "book-time", "book-notes"];
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if(el) el.value = "";
+    });
+  }
+  initialBookFormState = getBookFormState();
+  showModal("book-modal");
+};
+
+window.closeBookModal = () => {
+  if (initialBookFormState && getBookFormState() !== initialBookFormState) {
+    Modal.open({
+      title: "Discard Changes?",
+      message: "You have unsaved changes. Are you sure you want to discard them?",
+      type: "warning",
+      confirmText: "Discard",
+      cancelText: "Keep Editing",
+      onConfirm: () => {
+        initialBookFormState = getBookFormState();
+        closeBookModal();
+      }
+    });
+    return;
+  }
+  hideModal("book-modal");
+};
 
 window.submitBook = async () => {
   const name = document.getElementById("book-patient-name").value.trim();
@@ -365,6 +468,7 @@ window.submitBook = async () => {
   }
 
   const res = await post("/api/admin/appointments/book", {
+    patientId: document.getElementById("book-patient-id").value || null,
     patientName: name,
     patientEmail: email,
     patientPhone: phone,
@@ -376,12 +480,14 @@ window.submitBook = async () => {
     appointmentTime: time,
     notes,
     isGuest: false,
+    source: "admin",
   });
 
   if (res.ok) {
+    initialBookFormState = getBookFormState(); // bypass discard check
     Toast.show("Appointment booked!", "success");
     closeBookModal();
-    setTimeout(() => location.reload(), 800);
+    refreshData(true);
   } else {
     Toast.show(res.error ?? "Failed to book appointment.", "danger");
   }
@@ -450,7 +556,7 @@ window.submitConfirm = async () => {
   if (res.ok) {
     Toast.show("Appointment confirmed!", "success");
     closeConfirmModal();
-    setTimeout(() => location.reload(), 600);
+    refreshData(true);
   } else {
     Toast.show(res.error ?? "Failed to confirm.", "danger");
   }
@@ -495,7 +601,7 @@ window.updateStatus = (apptInput, status) => {
       });
       if (res.ok) {
         Toast.show(`Status updated to ${config.label}.`, "success");
-        setTimeout(() => location.reload(), 600);
+        refreshData(true);
       } else Toast.show(res.error ?? "Failed to update status.", "danger");
     },
   });
@@ -516,7 +622,7 @@ window.cancelAppt = (apptInput) => {
       });
       if (res.ok) {
         Toast.show("Appointment cancelled.", "info");
-        setTimeout(() => location.reload(), 600);
+        refreshData(true);
       } else Toast.show(res.error ?? "Failed to cancel.", "danger");
     },
   });
@@ -534,7 +640,7 @@ window.deleteAppt = (apptInput) => {
       const res = await post("/api/admin/appointments/delete", { id: appt.id });
       if (res.ok) {
         Toast.show("Appointment removed.", "success");
-        setTimeout(() => location.reload(), 600);
+        refreshData(true);
       } else Toast.show(res.error ?? "Failed to remove.", "danger");
     },
   });
@@ -554,15 +660,41 @@ window.openRescheduleModal = (apptInput) => {
   _setupEditModal(appt);
 };
 
+let initialEditFormState = "";
+function getEditFormState() {
+  return JSON.stringify({
+    dt: document.getElementById("edit-date")?.value || "",
+    t: document.getElementById("edit-time")?.value || "",
+    d: document.getElementById("edit-doctor")?.value || ""
+  });
+}
+
 function _setupEditModal(appt) {
   document.getElementById("edit-appt-id").value = appt.id;
   document.getElementById("edit-date").value = appt.appointmentDate;
   document.getElementById("edit-time").value = appt.appointmentTime;
   document.getElementById("edit-doctor").value = appt.doctorId ?? "";
+  initialEditFormState = getEditFormState();
   showModal("edit-modal");
 }
 
-window.closeEditModal = () => hideModal("edit-modal");
+window.closeEditModal = () => {
+  if (initialEditFormState && getEditFormState() !== initialEditFormState) {
+    Modal.open({
+      title: "Discard Changes?",
+      message: "You have unsaved changes. Are you sure you want to discard them?",
+      type: "warning",
+      confirmText: "Discard",
+      cancelText: "Keep Editing",
+      onConfirm: () => {
+        initialEditFormState = getEditFormState();
+        closeEditModal();
+      }
+    });
+    return;
+  }
+  hideModal("edit-modal");
+};
 
 window.submitReschedule = async () => {
   const id = document.getElementById("edit-appt-id").value;
@@ -583,9 +715,10 @@ window.submitReschedule = async () => {
   });
 
   if (res.ok) {
+    initialEditFormState = getEditFormState(); // bypass check
     Toast.show("Appointment updated!", "success");
     closeEditModal();
-    setTimeout(() => location.reload(), 800);
+    refreshData(true);
   } else {
     Toast.show(res.error ?? "Failed to update.", "danger");
   }
@@ -630,3 +763,147 @@ window.addEventListener("click", function (e) {
       .forEach((menu) => menu.classList.add("hidden"));
   }
 });
+
+// ── BLOCK DATE ────────────────────────────────────────────────────────────────
+let _blockedDates = [];
+
+async function loadBlockedDates() {
+  try {
+    const res = await fetch("/api/admin/blocked-dates", { credentials: "include" });
+    if (!res.ok) return;
+    const json = await res.json();
+    _blockedDates = json.data || [];
+    renderBlockedList();
+  } catch (e) {
+    console.error("[loadBlockedDates]", e);
+  }
+}
+
+function renderBlockedList() {
+  const container = document.getElementById("blocked-dates-list");
+  if (!container) return;
+  if (_blockedDates.length === 0) {
+    container.innerHTML = '<p class="text-[11px] text-brand-400 italic">No dates are currently blocked.</p>';
+    return;
+  }
+  container.innerHTML = _blockedDates.map(b => {
+    const d = new Date(b.blockedDate + "T00:00:00");
+    const label = d.toLocaleDateString("en-PH", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    return `
+      <div class="flex items-center justify-between px-3 py-2 bg-red-50 border border-red-100 rounded-xl group">
+        <div>
+          <span class="text-[12px] font-bold text-red-700">${label}</span>
+          ${b.reason ? `<span class="text-[10px] text-brand-400 ml-2">— ${b.reason}</span>` : ""}
+        </div>
+        <button onclick="unblockDate('${b.id}')"
+          class="text-[10px] text-red-400 hover:text-red-600 font-bold px-2 py-0.5 rounded-lg hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100">
+          Remove
+        </button>
+      </div>`;
+  }).join("");
+}
+
+window.openBlockDateModal = async function () {
+  const modal = document.getElementById("block-date-modal");
+  const box = document.getElementById("block-date-modal-box");
+  modal.classList.remove("hidden");
+  gsap.fromTo(box, { scale: 0.9, opacity: 0, y: 20 }, { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" });
+  await loadBlockedDates();
+};
+
+window.closeBlockDateModal = function () {
+  const modal = document.getElementById("block-date-modal");
+  const box = document.getElementById("block-date-modal-box");
+  gsap.to(box, { scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
+    onComplete: () => {
+      modal.classList.add("hidden");
+      document.getElementById("block-date-input").value = "";
+      document.getElementById("block-date-reason").value = "";
+    }
+  });
+};
+
+window.submitBlockDate = async function () {
+  const date = document.getElementById("block-date-input").value;
+  const reason = document.getElementById("block-date-reason").value.trim();
+  if (!date) { Toast.show("Please select a date.", "warning"); return; }
+
+  try {
+    const res = await fetch("/api/admin/blocked-dates", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", RequestVerificationToken: getToken() },
+      body: JSON.stringify({ date, reason: reason || null }),
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      Toast.show(json.error || "Failed to block date.", "danger");
+      return;
+    }
+
+    Toast.show("Date blocked successfully.", "success");
+    closeBlockDateModal();
+
+    // Show conflict modal if existing appointments affected
+    if (json.data.conflictCount > 0) {
+      showConflictModal(json.data);
+    }
+
+    await loadBlockedDates();
+  } catch (e) {
+    Toast.show("Network error.", "danger");
+  }
+};
+
+function showConflictModal(data) {
+  const modal = document.getElementById("conflict-modal");
+  const box = document.getElementById("conflict-modal-box");
+  const summary = document.getElementById("conflict-summary");
+  const list = document.getElementById("conflict-list");
+
+  summary.textContent = `${data.conflictCount} active appointment${data.conflictCount > 1 ? "s" : ""} found on ${data.blockedDate}.`;
+
+  list.innerHTML = data.conflicts.map(c => `
+    <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
+      <div>
+        <div class="text-[12.5px] font-bold text-brand-900">${c.patientName}</div>
+        <div class="text-[11px] text-brand-400">${c.serviceName || ""} · ${c.appointmentTime} · <span class="capitalize">${c.status}</span></div>
+        <div class="text-[10px] text-brand-400">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
+      </div>
+      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase">${c.status}</span>
+    </div>`).join("");
+
+  modal.classList.remove("hidden");
+  gsap.fromTo(box, { scale: 0.9, opacity: 0, y: 20 }, { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" });
+}
+
+window.closeConflictModal = function () {
+  const modal = document.getElementById("conflict-modal");
+  const box = document.getElementById("conflict-modal-box");
+  gsap.to(box, { scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
+    onComplete: () => modal.classList.add("hidden")
+  });
+};
+
+window.unblockDate = async function (id) {
+  Modal.open({
+    title: "Remove Block",
+    message: "Remove this date block? Patients will be able to book again.",
+    type: "warning",
+    confirmText: "Remove Block",
+    onConfirm: async () => {
+      try {
+        const res = await fetch(`/api/admin/blocked-dates/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: { RequestVerificationToken: getToken() },
+        });
+        if ((await res.json()).ok) {
+          Toast.show("Date unblocked.", "success");
+          await loadBlockedDates();
+        }
+      } catch { Toast.show("Network error.", "danger"); }
+    }
+  });
+};

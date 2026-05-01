@@ -6,7 +6,7 @@ Layout = "AdminSide/_StaffLayout";
 
 
 <!-- ── DASHBOARD ── -->
-<div id="page-dashboard" class="page active p-4 md:p-6">
+<div id="page-dashboard" class="page active p-4 md:p-6 xl:max-h-[calc(100vh-60px)]">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
             <h2 class="font-display text-[clamp(17px,3vw,22px)] font-extrabold text-brand">Good morning, @Model.CurrentUserName 👋
@@ -110,44 +110,8 @@ Layout = "AdminSide/_StaffLayout";
                         class="px-3 py-1 text-[10.5px] font-semibold rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors">Month</button>
                 </div>
             </div>
-            <div class="h-36 flex items-end gap-2 px-1">
-                <div class="cbar">
-                    <div class="cbar-inner" style="height:60%;background:linear-gradient(180deg,#1E40AF,#3b82f6)"></div>
-                    <span class="text-[9.5px] text-brand">Mon</span>
-                </div>
-                <div class="cbar">
-                    <div class="cbar-inner" style="height:80%;background:linear-gradient(180deg,#1E40AF,#3b82f6)"></div>
-                    <span class="text-[9.5px] text-brand">Tue</span>
-                </div>
-                <div class="cbar">
-                    <div class="cbar-inner" style="height:55%;background:linear-gradient(180deg,#1E40AF,#3b82f6)"></div>
-                    <span class="text-[9.5px] text-brand">Wed</span>
-                </div>
-                <div class="cbar">
-                    <div class="cbar-inner"
-                        style="height:95%;background:linear-gradient(180deg,#c0392b,#ef4444);box-shadow:0 0 10px rgba(192,57,43,.35)">
-                    </div><span class="text-[9.5px] font-semibold text-orange-600">Thu</span>
-                </div>
-                <div class="cbar">
-                    <div class="cbar-inner" style="height:70%;background:linear-gradient(180deg,#1E40AF,#3b82f6)"></div>
-                    <span class="text-[9.5px] text-brand">Fri</span>
-                </div>
-                <div class="cbar">
-                    <div class="cbar-inner" style="height:40%;background:linear-gradient(180deg,#94a3b8,#cbd5e1)"></div>
-                    <span class="text-[9.5px] text-brand">Sat</span>
-                </div>
-                <div class="cbar">
-                    <div class="cbar-inner" style="height:25%;background:linear-gradient(180deg,#94a3b8,#cbd5e1)"></div>
-                    <span class="text-[9.5px] text-brand">Sun</span>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-3 mt-3 pt-3 border-t border-slate-100">
-                <div class="flex items-center gap-1.5 text-[10.5px] text-brand"><span
-                        class="w-2 h-2 rounded-sm inline-block bg-primary"></span>Outpatient</div>
-                <div class="flex items-center gap-1.5 text-[10.5px] text-brand"><span
-                        class="w-2 h-2 rounded-sm inline-block bg-orange-600"></span>Emergency</div>
-                <div class="flex items-center gap-1.5 text-[10.5px] text-brand"><span
-                        class="w-2 h-2 rounded-sm inline-block bg-slate-300"></span>Weekend</div>
+            <div class="h-48 w-full mt-4">
+                <canvas id="visitsChart"></canvas>
             </div>
         </div>
 
@@ -155,56 +119,16 @@ Layout = "AdminSide/_StaffLayout";
         <div class="bg-white rounded-2xl p-5 border border-slate-200">
             <h3 class="font-display text-[13.5px] font-bold text-brand">Department Load</h3>
             <p class="text-[10.5px] text-brand-500 mt-0.5 mb-3">Active cases by unit</p>
-            <div class="flex justify-center mb-3">
-                <svg width="120" height="120" viewBox="0 0 140 140">
-                    <circle cx="70" cy="70" r="54" fill="none" stroke="#f1f5f9" stroke-width="18" />
-                    <circle cx="70" cy="70" r="54" fill="none" stroke="#1E40AF" stroke-width="18"
-                        stroke-dasharray="122 217" stroke-dashoffset="0" class="dr" />
-                    <circle cx="70" cy="70" r="54" fill="none" stroke="#c0392b" stroke-width="18"
-                        stroke-dasharray="81 258" stroke-dashoffset="-122" class="dr" />
-                    <circle cx="70" cy="70" r="54" fill="none" stroke="#059669" stroke-width="18"
-                        stroke-dasharray="68 271" stroke-dashoffset="-203" class="dr" />
-                    <circle cx="70" cy="70" r="54" fill="none" stroke="#7c3aed" stroke-width="18"
-                        stroke-dasharray="68 271" stroke-dashoffset="-271" class="dr" />
-                    <text x="70" y="65" text-anchor="middle" fill="#0F172A" font-size="22" font-weight="800"
-                        font-family="Syne,sans-serif">248</text>
-                    <text x="70" y="81" text-anchor="middle" fill="#6b7280" font-size="10"
-                        font-family="DM Sans,sans-serif">Total</text>
-                </svg>
-            </div>
-            <div class="space-y-1.5">
-                <div class="flex items-center justify-between text-[12px]">
-                    <div class="flex items-center gap-2"><span
-                            class="w-2 h-2 rounded-full bg-primary inline-block"></span><span
-                            class="text-brand-500">General</span></div><span
-                        class="font-semibold text-brand">36%</span>
-                </div>
-                <div class="flex items-center justify-between text-[12px]">
-                    <div class="flex items-center gap-2"><span
-                            class="w-2 h-2 rounded-full bg-orange-600 inline-block"></span><span
-                            class="text-brand-500">Emergency</span></div><span
-                        class="font-semibold text-brand">24%</span>
-                </div>
-                <div class="flex items-center justify-between text-[12px]">
-                    <div class="flex items-center gap-2"><span
-                            class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span><span
-                            class="text-brand-500">Pediatrics</span></div><span
-                        class="font-semibold text-brand">20%</span>
-                </div>
-                <div class="flex items-center justify-between text-[12px]">
-                    <div class="flex items-center gap-2"><span
-                            class="w-2 h-2 rounded-full bg-violet-600 inline-block"></span><span
-                            class="text-brand-500">Cardiology</span></div><span
-                        class="font-semibold text-brand">20%</span>
-                </div>
+            <div class="h-48 w-full flex justify-center mt-4">
+                <canvas id="departmentChart"></canvas>
             </div>
         </div>
     </div>
 
     <!-- Bottom row -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 xl:max-h-[calc(100vh-670px)]">
         <!-- Appointments table -->
-        <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden xl:max-h-[calc(100vh-670px)] overflow-auto">
             <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
                 <h3 class="font-display text-[13.5px] font-bold text-brand">Upcoming Appointments</h3>
                 <button class="text-[10.5px] font-semibold text-primary hover:underline"
@@ -243,20 +167,22 @@ Layout = "AdminSide/_StaffLayout";
             </div>
         </div>
 
-        <!-- Activity -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200">
+        <!-- Activity Logs -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 xl:max-h-[calc(100vh-670px)] overflow-auto">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-display text-[13.5px] font-bold text-brand">Recent Invoices</h3>
-                <a href="/Admin/Invoices" class="text-[10.5px] font-semibold text-primary hover:underline">View All →</a>
+                <h3 class="font-display text-[13.5px] font-bold text-brand">Activity Logs</h3>
+                <a href="/Admin/ActivityLogs" class="text-[10.5px] font-semibold text-primary hover:underline">View All →</a>
             </div>
-            <div class="space-y-3" id="recent-invoices-body">
+            <div class="space-y-3" id="dashboard-activity-body">
                 <div class="py-10 text-center">
                     <i class="fa-solid fa-circle-notch fa-spin text-slate-200 text-2xl mb-2 block"></i>
-                    <p class="text-[12px] text-slate-400 font-medium">Loading invoices...</p>
+                    <p class="text-[12px] text-slate-400 font-medium">Loading activity...</p>
                 </div>
             </div>
         </div>
     </div>
+
+    
 </div>
 
 @section Scripts {

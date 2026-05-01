@@ -12,6 +12,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("desk_location")]
         public string? DeskLocation { get; set; }
 
+        [JsonPropertyName("bio")]
+        public string? Bio { get; set; }
+
         [JsonPropertyName("is_active")]
         public bool IsActive { get; set; } = true;
 
@@ -24,6 +27,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("profiles")]
         public ProfileDto? Profile { get; set; }
 
+        [JsonPropertyName("staff_availability")]
+        public List<ReceptionistAvailabilityDto>? Availability { get; set; }
+
         public string FullName =>
             Profile != null
                 ? $"{Profile.FirstName} {Profile.LastName}".Trim()
@@ -32,6 +38,27 @@ namespace SamsonDentalCenterManagementSystem.Services
         public string Initials =>
             $"{Profile?.FirstName?.FirstOrDefault().ToString().ToUpper() ?? ""}" +
             $"{Profile?.LastName?.FirstOrDefault().ToString().ToUpper()  ?? "?"}";
+    }
+
+    public class ReceptionistAvailabilityDto
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("staff_id")]
+        public string ReceptionistId { get; set; } = string.Empty;
+
+        [JsonPropertyName("day_of_week")]
+        public int DayOfWeek { get; set; }
+
+        [JsonPropertyName("start_time")]
+        public string StartTime { get; set; } = string.Empty;
+
+        [JsonPropertyName("end_time")]
+        public string EndTime { get; set; } = string.Empty;
+
+        [JsonPropertyName("is_active")]
+        public bool IsActive { get; set; } = true;
     }
 
     public class ReceptionistService
@@ -63,6 +90,22 @@ namespace SamsonDentalCenterManagementSystem.Services
             return req;
         }
 
+        // ── Fetch availability from staff_availability (no FK embed needed) ──
+        private async Task<Dictionary<string, List<ReceptionistAvailabilityDto>>> FetchReceptionistAvailabilityAsync()
+        {
+            try
+            {
+                var req = BuildRequest(HttpMethod.Get, "/staff_availability?staff_type=eq.receptionist");
+                var res = await _http.SendAsync(req);
+                if (!res.IsSuccessStatusCode) return new();
+                var json  = await res.Content.ReadAsStringAsync();
+                var slots = JsonSerializer.Deserialize<List<ReceptionistAvailabilityDto>>(json, _json) ?? new();
+                return slots.GroupBy(s => s.ReceptionistId)
+                            .ToDictionary(g => g.Key, g => g.ToList());
+            }
+            catch { return new(); }
+        }
+
         public async Task<List<ReceptionistDto>> GetAllWithProfilesAsync()
         {
             var path = "/receptionists?select=*,profiles(*)&order=created_at.asc";
@@ -71,9 +114,12 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             res.EnsureSuccessStatusCode();
 
-            var json          = await res.Content.ReadAsStringAsync();
-            var receptionists = JsonSerializer.Deserialize<List<ReceptionistDto>>(json, _json)
-                                ?? new List<ReceptionistDto>();
+            var receptionists = JsonSerializer.Deserialize<List<ReceptionistDto>>(
+                await res.Content.ReadAsStringAsync(), _json) ?? new();
+
+            var avail = await FetchReceptionistAvailabilityAsync();
+            foreach (var r in receptionists)
+                r.Availability = avail.TryGetValue(r.Id, out var s) ? s : new();
 
             return receptionists;
         }
@@ -139,13 +185,14 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Update ───────────────────────────────────────────────────────────
-        public async Task<ReceptionistDto?> UpdateAsync(string id, string? deskLocation, bool isActive)
+        public async Task<ReceptionistDto?> UpdateAsync(string id, string? deskLocation, string? bio, bool isActive)
         {
             var req = BuildRequest(HttpMethod.Patch, $"/receptionists?id=eq.{id}");
             req.Headers.Add("Prefer", "return=representation");
             var body = JsonSerializer.Serialize(new
             {
                 desk_location = deskLocation,
+                bio           = bio,
                 is_active     = isActive
             });
             req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
@@ -167,6 +214,38 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
+        }
+
+        // ── Availability ─────────────────────────────────────────────────────
+        public async Task<List<ReceptionistAvailabilityDto>> UpdateAvailabilityAsync(string receptionistId, List<ReceptionistAvailabilityDto> slots)
+        {
+            // 1. Delete existing for receptionist
+            var delReq = BuildRequest(HttpMethod.Delete, $"/staff_availability?staff_id=eq.{receptionistId}&staff_type=eq.receptionist");
+            await _http.SendAsync(delReq);
+
+            if (!slots.Any()) return new List<ReceptionistAvailabilityDto>();
+
+            // 2. Insert new slots
+            var insReq = BuildRequest(HttpMethod.Post, "/staff_availability");
+            insReq.Headers.Add("Prefer", "return=representation");
+
+            var payload = slots.Select(s => new
+            {
+                staff_id    = receptionistId,
+                staff_type  = "receptionist",
+                day_of_week = s.DayOfWeek,
+                start_time  = s.StartTime,
+                end_time    = s.EndTime,
+                is_active   = s.IsActive
+            }).ToList();
+
+            insReq.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+
+            var res = await _http.SendAsync(insReq);
+            res.EnsureSuccessStatusCode();
+
+            var json = await res.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<ReceptionistAvailabilityDto>>(json, _json) ?? new();
         }
     }
 }

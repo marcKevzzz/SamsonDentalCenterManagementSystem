@@ -2,6 +2,8 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Resend;
+using Microsoft.AspNetCore.SignalR;
+using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Models;
 
 namespace SamsonDentalCenterManagementSystem.Services
@@ -16,6 +18,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly HttpClient _http;
         private readonly ActivityLogService _logs;
         private readonly NotificationService _notifs;
+        private readonly ClinicService _clinic;
+        private readonly BlockedDateService _blockedDates;
+        private readonly IHubContext<AdminHub> _hubContext;
+        private readonly ProfileService _profiles;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -45,7 +51,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             string appBaseUrl,
             HttpClient http,
             ActivityLogService logs,
-            NotificationService notifs
+            NotificationService notifs,
+            IHubContext<AdminHub> hubContext,
+            ClinicService clinic,
+            BlockedDateService blockedDates,
+            ProfileService profiles
         )
         {
             _supabase = supabase;
@@ -56,6 +66,10 @@ namespace SamsonDentalCenterManagementSystem.Services
             _http = http;
             _logs = logs;
             _notifs = notifs;
+            _hubContext = hubContext;
+            _clinic = clinic;
+            _blockedDates = blockedDates;
+            _profiles = profiles;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -201,22 +215,119 @@ namespace SamsonDentalCenterManagementSystem.Services
         // Waitlist            → "waitlist"   (regardless of login state)
         private static string DetermineStatus(AppointmentPayload p)
         {
-            if (p.IsWaitlist)
-                return "waitlist";
+            if (p.IsWaitlist) return "waitlist";
+            
+            // Staff-created appointments (Admin/Receptionist/Walk-in) are auto-confirmed if doctor is assigned
+            var src = (p.Source ?? "").ToLower();
+            if ((src == "admin" || src == "receptionist" || src == "walk_in") && !string.IsNullOrEmpty(p.DoctorId))
+                return "confirmed";
 
-            // If you want EVERY successfull booking to start as pending:
             return "pending";
         }
 
         // ── Create appointment ────────────────────────────────────────────────
         public async Task<Appointment> Create(AppointmentPayload p)
         {
-            var emailStatus = DetermineStatus(p);
+            // ── Validation ───────────────────────────────────────────────────
+            if (!p.IsWaitlist)
+            {
+                // 1. Blocked Dates
+                if (await _blockedDates.IsDateBlockedAsync(p.AppointmentDate))
+                    throw new Exception("This date is blocked by the clinic.");
+
+                // 2. Clinic Hours
+                var settings = await _clinic.GetSettingsAsync();
+                var dayName = p.AppointmentDate.DayOfWeek.ToString();
+                var hours = settings.ClinicalHours.FirstOrDefault(h => h.Day.Equals(dayName, StringComparison.OrdinalIgnoreCase));
+                
+                if (hours == null || hours.Closed)
+                    throw new Exception($"The clinic is closed on {dayName}.");
+
+                // Parse time (e.g. "9:00 AM") to compare
+                if (DateTime.TryParse(p.AppointmentTime, out var apptTime))
+                {
+                    if (DateTime.TryParse(hours.Open, out var openTime) && DateTime.TryParse(hours.Close, out var closeTime))
+                    {
+                        var apptTimeSpan = apptTime.TimeOfDay;
+                        if (apptTimeSpan < openTime.TimeOfDay || apptTimeSpan >= closeTime.TimeOfDay)
+                            throw new Exception($"Appointment time {p.AppointmentTime} is outside clinic hours ({hours.Open} - {hours.Close}).");
+                    }
+                }
+
+                // 3. Doctor Availability & Conflicts
+                if (!string.IsNullOrEmpty(p.DoctorId))
+                {
+                    // Check conflicts (double-booking)
+                    var booked = await GetBookedSlots(p.DoctorId, p.AppointmentDate);
+                    if (booked.Contains(p.AppointmentTime))
+                        throw new Exception("This time slot is already booked for this specialist.");
+
+                    // Check doctor's scheduled availability
+                    var dow = (int)p.AppointmentDate.DayOfWeek;
+                    var availPath = $"/staff_availability?staff_id=eq.{p.DoctorId}&day_of_week=eq.{dow}&is_active=eq.true";
+                    var availReq = BuildRequest(HttpMethod.Get, availPath);
+                    var availRes = await _http.SendAsync(availReq);
+                    if (availRes.IsSuccessStatusCode)
+                    {
+                        var availJson = await availRes.Content.ReadAsStringAsync();
+                        var slots = JsonSerializer.Deserialize<List<StaffAvailability>>(availJson, _jsonOptions) ?? new();
+                        if (!slots.Any())
+                            throw new Exception("Specialist is not available on this day.");
+                        
+                        // Optional: check specific time range if doctor has partial day availability
+                        var matchingSlot = slots.FirstOrDefault(s => 
+                        {
+                            if (DateTime.TryParse(s.StartTime, out var sStart) && DateTime.TryParse(s.EndTime, out var sEnd))
+                            {
+                                var t = apptTime.TimeOfDay;
+                                return t >= sStart.TimeOfDay && t < sEnd.TimeOfDay;
+                            }
+                            return true; // fallback if parse fails
+                        });
+                        
+                        if (matchingSlot == null)
+                            throw new Exception($"Specialist is only available from {slots[0].StartTime} to {slots[0].EndTime}.");
+                    }
+                }
+            }
+
+            var status = DetermineStatus(p);
+            var emailStatus = (status == "confirmed" || status == "waitlist") ? status : "pending";
 
             // FIX THE DATE BUG: Strip time and offset to keep it on the selected day
             var fixedDate = DateTime.SpecifyKind(p.AppointmentDate.Date, DateTimeKind.Unspecified);
 
             var token = (p.IsGuest && !p.IsWaitlist) ? Guid.NewGuid().ToString("N") : null;
+
+            // --- Smart Matching & Shadow Profiles ---
+            if (p.IsGuest && string.IsNullOrEmpty(p.PatientId))
+            {
+                // Parse name (PatientName is usually "First Last")
+                var nameParts = p.PatientName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                var firstName = nameParts.Length > 0 ? nameParts[0] : "";
+                var lastName = nameParts.Length > 1 ? nameParts[1] : "";
+
+                var matchResult = await _profiles.SmartMatchProfile(firstName, lastName, p.PatientEmail, p.PatientPhone);
+
+                if (matchResult.Profile != null)
+                {
+                    // Strong Match found -> Auto link
+                    p.PatientId = matchResult.Profile.Id;
+                }
+                else
+                {
+                    // Create Shadow Profile
+                    p.PatientId = await _profiles.CreateShadowProfile(
+                        firstName,
+                        lastName,
+                        p.PatientEmail,
+                        p.PatientPhone,
+                        p.PatientSex,
+                        p.PatientDob,
+                        matchResult.RequiresReview
+                    );
+                }
+            }
 
             var appt = new Appointment
             {
@@ -240,11 +351,13 @@ namespace SamsonDentalCenterManagementSystem.Services
                 AppointmentDate = fixedDate,
                 AppointmentTime = p.AppointmentTime,
                 IsWaitlist = p.IsWaitlist,
-                Status = "pending",
-                EmailStatus = DetermineEmailStatus(p),
+                Status = status,
+                EmailStatus = emailStatus,
                 Notes = p.Notes,
+                Source = !string.IsNullOrEmpty(p.Source) ? p.Source : (p.IsGuest ? "guest" : "online"),
                 CreatedAt = DateTime.UtcNow,
                 ConfirmationToken = token,
+                ConfirmedAt = status == "confirmed" ? DateTime.UtcNow : null
             };
 
             var res = await _supabase.From<Appointment>().Insert(appt);
@@ -278,6 +391,10 @@ namespace SamsonDentalCenterManagementSystem.Services
             Console.WriteLine(
                 $"[Appointment] Created {created.Id} emailstatus={emailStatus} guest={p.IsGuest} waitlist={p.IsWaitlist}"
             );
+
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "create", id = created.Id });
+
             return created;
         }
 
@@ -324,6 +441,9 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
+
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "cancel", id = id });
 
             await SendCancellationEmail(appt);
             await PromoteWaitlist(
@@ -442,6 +562,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             var patchRes = await _http.SendAsync(patchReq);
             patchRes.EnsureSuccessStatusCode();
 
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "status_update", id = id, status = newStatus });
+
             await _logs.LogActionAsync(
                 null,
                 "updated appointment status",
@@ -535,6 +658,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "reschedule", id = id });
+
             await _logs.LogActionAsync(
                 null,
                 "rescheduled appointment",
@@ -581,7 +707,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_services(*),doctors(*,profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
+                    $"/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -595,6 +721,27 @@ namespace SamsonDentalCenterManagementSystem.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"[GetByPatient Error]: {ex.Message}");
+                return new();
+            }
+        }
+
+        public async Task<List<Appointment>> GetByDoctorIdAsync(string doctorId)
+        {
+            try
+            {
+                var path = $"/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&doctor_id=eq.{doctorId}&order=appointment_date.desc";
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
+                res.EnsureSuccessStatusCode();
+
+                var json = await res.Content.ReadAsStringAsync();
+                var dtos = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
+
+                return dtos.Select(MapToModel).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetByDoctorIdAsync Error]: {ex.Message}");
                 return new();
             }
         }
@@ -703,58 +850,37 @@ namespace SamsonDentalCenterManagementSystem.Services
                 string? targetSex = appt.IsForOther ? appt.OtherSex : appt.PatientSex;
                 DateTime? targetDob = appt.IsForOther ? appt.OtherDob : appt.PatientDob;
 
-                // 1. Check for existing profile by Email OR Phone
-                var emailResult = await _supabase
-                    .From<Profile>()
-                    .Filter("email", Supabase.Postgrest.Constants.Operator.Equals, targetEmail)
-                    .Get();
+                // 1. Smart Match via ProfileService
+                var matchResult = await _profiles.SmartMatchProfile(targetFirst, targetLast, targetEmail, targetPhone);
+                string newPatientId;
 
-                var profile = emailResult.Models.FirstOrDefault();
-
-                if (profile == null)
+                if (matchResult.Profile != null)
                 {
-                    var phoneResult = await _supabase
-                        .From<Profile>()
-                        .Filter(
-                            "phone_number",
-                            Supabase.Postgrest.Constants.Operator.Equals,
-                            targetPhone
-                        )
-                        .Get();
-                    profile = phoneResult.Models.FirstOrDefault();
-                }
-
-                if (profile == null) // only create if neither email nor phone matched
-                {
-                    profile = new Profile
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        FirstName = targetFirst,
-                        LastName = targetLast,
-                        Email = targetEmail,
-                        PhoneNumber = targetPhone,
-                        Sex = targetSex,
-                        DateOfBirth = targetDob,
-                        Role = "patient",
-                        CreatedAt = DateTime.UtcNow,
-                    };
-
-                    await _supabase.From<Profile>().Insert(profile);
+                    newPatientId = matchResult.Profile.Id;
+                    Console.WriteLine($"[Promotion] Found existing profile {newPatientId} for {targetEmail}/{targetPhone}");
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"[Promotion] Found existing profile {profile.Id} for {targetEmail}/{targetPhone}"
+                    // 2. Create Shadow Profile
+                    newPatientId = await _profiles.CreateShadowProfile(
+                        targetFirst,
+                        targetLast,
+                        targetEmail,
+                        targetPhone,
+                        targetSex,
+                        targetDob,
+                        matchResult.RequiresReview
                     );
+                    Console.WriteLine($"[Promotion] Created new Shadow Profile {newPatientId}");
                 }
 
                 // 3. Link appointment to this profile
-                if (appt.PatientId != profile.Id)
+                if (appt.PatientId != newPatientId)
                 {
                     await _supabase
                         .From<Appointment>()
                         .Where(a => a.Id == appt.Id)
-                        .Set(a => a.PatientId!, profile.Id)
+                        .Set(a => a.PatientId!, newPatientId)
                         .Update();
                 }
             }
@@ -1338,6 +1464,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("notes")]
         public string? Notes { get; set; }
 
+        [JsonPropertyName("source")]
+        public string Source { get; set; } = "online";
+
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }
 
@@ -1378,5 +1507,6 @@ namespace SamsonDentalCenterManagementSystem.Services
         public bool IsWaitlist { get; set; }
         public string Status { get; set; } = "pending";
         public string? Notes { get; set; }
+        public string Source { get; set; } = "online";
     }
 }

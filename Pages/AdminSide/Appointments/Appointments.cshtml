@@ -5,24 +5,32 @@
 Layout = "AdminSide/_StaffLayout";
 }
 <!-- ── APPOINTMENTS ── -->
-<div id="page-appointments" class="page p-4 md:p-6 relative">
+<div id="page-appointments" class="page p-4 md:p-6 relative max-h-[calc(100vh-60px)]">
 
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <div>
-      <h2 class="font-display text-xl font-extrabold text-brand-900">Appointments</h2>
-      <p class="text-[12px] text-brand-500 mt-0.5">Schedule and manage appointments</p>
+      <h2 class="font-display text-xl font-extrabold text-brand">Appointments</h2>
+      <p class="text-[12px] text-brand mt-0.5">Schedule and manage appointments</p>
     </div>
-    <button onclick="openBookModal()"
-      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-      </svg>
-      Book Appointment
-    </button>
+    <div class="flex items-center gap-2">
+      <button onclick="openBlockDateModal()"
+        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors">
+        <i class="fa-solid fa-ban text-red-400 text-[11px]"></i>
+        Block Date
+      </button>
+      <button onclick="openBookModal()"
+        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Book Appointment
+      </button>
+    </div>
   </div>
+
 
   <!-- Stats -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -31,7 +39,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
            <i class="fa-solid fa-calendar-check text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-confirmed">-</div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-confirmed">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Confirmed</div>
     </div>
@@ -41,7 +49,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
            <i class="fa-solid fa-clock text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-pending">-</div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-pending">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Pending</div>
     </div>
@@ -51,7 +59,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
            <i class="fa-solid fa-list-ul text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-waitlist">-</div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-waitlist">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Waitlist</div>
     </div>
@@ -61,7 +69,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-accent">
            <i class="fa-solid fa-calendar-xmark text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900" id="stat-cancelled">-</div>
+        <div class="font-display text-2xl font-extrabold text-brand" id="stat-cancelled">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Cancelled</div>
     </div>
@@ -98,22 +106,23 @@ Layout = "AdminSide/_StaffLayout";
   </div>
 
   <!-- Table -->
-  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-    <div class="overflow-x-auto">
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden max-h-[calc(100vh-390px)]">
+    <div class="max-h-[calc(100vh-440px)] overflow-x-auto relative">
       <table class="w-full min-w-[640px]" id="appointments-table">
-        <thead class="bg-slate-50/50">
+        <thead class="bg-slate-50/50 sticky top-0 z-10 bg-white"> 
           <tr>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Ref ID</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Patient</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Service & Doctor</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Source</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Schedule</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Status</th>
             <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Workflow Action</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-50" id="appointments-body">
+        <tbody class="divide-y divide-slate-50 " id="appointments-body">
           <tr>
-            <td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">
+            <td colspan="7" class="px-4 py-10 text-center text-[12px] text-brand-400">
               <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Initializing data...
             </td>
           </tr>
@@ -129,16 +138,102 @@ Layout = "AdminSide/_StaffLayout";
 
 <!-- Data injected via AdminStore -->
 
+<!-- ── BLOCK DATE MODAL ──────────────────────────────────────────────────── -->
+<div id="block-date-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeBlockDateModal()"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div id="block-date-modal-box"
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
+
+      <div class="p-6 border-b border-slate-100 bg-red-50/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+            <i class="fa-solid fa-ban text-red-500"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-extrabold text-[17px] text-brand">Block a Date</h3>
+            <p class="text-[11px] text-brand-400 font-bold uppercase tracking-wider mt-0.5">Prevent new bookings</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <div>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Date to Block *</label>
+          <input id="block-date-input" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+            class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Reason <span class="text-brand-400 font-normal">(optional)</span></label>
+          <input id="block-date-reason" type="text" placeholder="e.g. Clinic holiday, Staff training, Emergency closure…"
+            class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all outline-none" />
+        </div>
+
+        <!-- Blocked dates list -->
+        <div>
+          <p class="text-[11px] font-bold text-brand-400 uppercase tracking-wider mb-2">Currently Blocked</p>
+          <div id="blocked-dates-list" class="space-y-1.5 max-h-40 overflow-y-auto">
+            <p class="text-[11px] text-brand-400 italic">Loading…</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
+        <button onclick="closeBlockDateModal()"
+          class="px-6 py-2.5 text-[12px] font-bold text-brand hover:text-brand transition-colors">Cancel</button>
+        <button onclick="submitBlockDate()"
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-red-500 text-white shadow-xl shadow-red-500/20 hover:opacity-90 transition-all">
+          <i class="fa-solid fa-ban mr-1.5"></i>Block Date
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFLICT MODAL (shown after blocking a date with existing appts) ──── -->
+<div id="conflict-modal" class="fixed inset-0 z-[60] hidden">
+  <div class="absolute inset-0 bg-brand/50 backdrop-blur-md"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div id="conflict-modal-box"
+      class="bg-white rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
+
+      <div class="p-6 border-b border-amber-100 bg-amber-50/70">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-extrabold text-[17px] text-brand">Date Blocked — Action Required</h3>
+            <p id="conflict-summary" class="text-[12px] text-amber-700 mt-0.5"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <p class="text-[12px] text-brand-600 mb-3">The following appointments are still active on this date. They will <strong>not</strong> be automatically cancelled — please handle them manually.</p>
+        <div id="conflict-list" class="space-y-2 max-h-56 overflow-y-auto"></div>
+      </div>
+
+      <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
+        <button onclick="closeConflictModal()"
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/10 hover:opacity-90 transition-all">
+          Got it, I'll handle them
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div id="book-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeBookModal()"></div>
+  <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeBookModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="book-modal-box"
       class="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden pointer-events-auto
              transform scale-95 opacity-0 transition-all duration-300 flex flex-col">
 
       <!-- Modal Header -->
-      <div class="relative h-32 bg-brand-900 flex items-center px-8 shrink-0 overflow-hidden">
+      <div class="relative h-32 bg-brand flex items-center px-8 shrink-0 overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
         <div class="relative z-10">
           <h3 class="font-display font-extrabold text-white text-2xl tracking-tight">Book Appointment</h3>
@@ -161,25 +256,26 @@ Layout = "AdminSide/_StaffLayout";
           
           <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Full Name *</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Full Name *</label>
               <div class="relative">
-                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
+                <input type="hidden" id="book-patient-id" />
                 <input id="book-patient-name" type="text" placeholder="e.g. Juan Dela Cruz"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Email Address *</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Email Address *</label>
               <div class="relative">
-                <i class="fa-solid fa-envelope absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-envelope absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <input id="book-patient-email" type="email" placeholder="patient@example.com"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Phone Number</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Phone Number</label>
               <div class="relative">
-                <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <input id="book-patient-phone" type="tel" placeholder="+63 9XX XXX XXXX"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
@@ -196,39 +292,39 @@ Layout = "AdminSide/_StaffLayout";
 
           <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Select Service *</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Select Service *</label>
               <div class="relative">
-                <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <select id="book-service"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Choose a service…</option>
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+                <i class="fa-solid fa-chevron absolute right-4 top-1/2 translate-half text-brand text-[10px] pointer-events-none"></i>
               </div>
             </div>
             <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Assign Doctor</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Assign Doctor</label>
               <div class="relative">
-                <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <select id="book-doctor"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Any available specialist</option>
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+                <i class="fa-solid fa-chevron absolute right-4 top-1/2 translate-half text-brand text-[10px] pointer-events-none"></i>
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Appointment Date *</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Appointment Date *</label>
               <div class="relative">
-                <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <input id="book-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Preferred Time *</label>
+              <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Preferred Time *</label>
               <div class="relative">
-                <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <select id="book-time"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Select slot…</option>
@@ -237,7 +333,7 @@ Layout = "AdminSide/_StaffLayout";
                     <option value="@slot">@slot</option>
                   }
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+                <i class="fa-solid fa-chevron absolute right-4 top-1/2 translate-half text-brand text-[10px] pointer-events-none"></i>
               </div>
             </div>
           </div>
@@ -245,7 +341,7 @@ Layout = "AdminSide/_StaffLayout";
 
         <!-- Section: Notes -->
         <div class="pt-2">
-          <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Additional Notes</label>
+          <label class="block text-[11px] font-bold text-brand mb-1.5 ml-1">Additional Notes</label>
           <textarea id="book-notes" rows="3" placeholder="Symptoms, preferences, or medical history notes…"
             class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
         </div>
@@ -256,11 +352,11 @@ Layout = "AdminSide/_StaffLayout";
         <p class="text-[10px] text-brand-400 italic">* Required fields for booking</p>
         <div class="flex gap-3">
           <button onclick="closeBookModal()"
-            class="px-6 py-2.5 text-[12px] font-bold rounded-xl text-brand-500 hover:text-brand-900 transition-colors">
+            class="px-6 py-2.5 text-[12px] font-bold rounded-xl text-brand hover:text-brand transition-colors">
             Cancel
           </button>
           <button onclick="submitBook()"
-            class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand-900 text-white shadow-xl shadow-brand-900/20 hover:opacity-90 transition-all active:scale-95">
+            class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/20 hover:opacity-90 transition-all active:scale-95">
             Create Appointment
           </button>
         </div>
@@ -271,14 +367,14 @@ Layout = "AdminSide/_StaffLayout";
 
 
 <div id="edit-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeEditModal()"></div>
+  <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeEditModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="edit-modal-box"
       class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto
              transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
 
       <div class="p-6 border-b border-slate-100">
-        <h3 id="edit-modal-title" class="font-display font-extrabold text-xl text-brand-900">Reschedule Appointment</h3>
+        <h3 id="edit-modal-title" class="font-display font-extrabold text-xl text-brand">Reschedule Appointment</h3>
         <p class="text-brand-400 text-[11px] font-bold uppercase tracking-wider mt-1">Adjust Date or Provider</p>
       </div>
 
@@ -286,9 +382,9 @@ Layout = "AdminSide/_StaffLayout";
 
       <div class="p-6 space-y-5">
         <div>
-          <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">Assigned Doctor</label>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Assigned Doctor</label>
           <div class="relative">
-            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
             <select id="edit-doctor"
               class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
               <option value="">Any available specialist</option>
@@ -298,12 +394,12 @@ Layout = "AdminSide/_StaffLayout";
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Date *</label>
+            <label class="block text-[11px] font-bold text-brand mb-2 ml-1">New Date *</label>
             <input id="edit-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
               class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none" />
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Time *</label>
+            <label class="block text-[11px] font-bold text-brand mb-2 ml-1">New Time *</label>
             <select id="edit-time"
               class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
               <option value="">Select slot</option>
@@ -318,11 +414,11 @@ Layout = "AdminSide/_StaffLayout";
 
       <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeEditModal()"
-          class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">
+          class="px-6 py-2.5 text-[12px] font-bold text-brand hover:text-brand transition-colors">
           Cancel
         </button>
         <button onclick="submitReschedule()"
-          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand-900/10 hover:opacity-90 transition-all">
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/10 hover:opacity-90 transition-all">
           Update Schedule
         </button>
       </div>
@@ -351,9 +447,9 @@ Layout = "AdminSide/_StaffLayout";
         </div>
         
         <div>
-          <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">Assign Dental Specialist *</label>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Assign Dental Specialist *</label>
           <div class="relative">
-            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
             <select id="confirm-doctor"
               class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-emerald-500 transition-all outline-none appearance-none">
               <option value="">Select a doctor…</option>
@@ -369,7 +465,7 @@ Layout = "AdminSide/_StaffLayout";
 
       <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeConfirmModal()"
-          class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">
+          class="px-6 py-2.5 text-[12px] font-bold text-brand hover:text-brand transition-colors">
           Dismiss
         </button>
         <button onclick="submitConfirm()"

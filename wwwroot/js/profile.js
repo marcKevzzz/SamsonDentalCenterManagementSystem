@@ -60,6 +60,51 @@ export function setupUserDisplay(name, email, initials, avatarUrl = null) {
   });
 }
 
+async function updatePatientCounts() {
+  try {
+    const res = await fetch("/api/patient/data/counts");
+    if (!res.ok) return;
+    const { data } = await res.json();
+
+    const elements = {
+      total: document.getElementById("notif-total-badge"),
+      dashboard: document.getElementById("notif-patient-dashboard-count"),
+      appointments: document.getElementById("notif-patient-appointments-count"),
+      records: document.getElementById("notif-patient-records-count"),
+      general: document.getElementById("notif-patient-general-count"),
+    };
+
+    const total = data.pendingAppointments + data.unreadNotifications;
+
+    if (elements.total) {
+      elements.total.innerText = total;
+      elements.total.classList.toggle("hidden", total === 0);
+    }
+
+    if (elements.appointments) {
+      elements.appointments.innerText = data.pendingAppointments;
+      elements.appointments.classList.toggle("hidden", data.pendingAppointments === 0);
+    }
+
+    if (elements.general) {
+      elements.general.innerText = data.unreadNotifications;
+      elements.general.classList.toggle("hidden", data.unreadNotifications === 0);
+    }
+
+    // Records (Treatments) - we show the total count if > 0 as a "status" indicator or just keep it simple
+    // User said "indicate the number of items inside that page"
+    if (elements.records) {
+        elements.records.innerText = data.totalRecords;
+        elements.records.classList.toggle("hidden", data.totalRecords === 0);
+    }
+
+  } catch (err) {
+    console.error("Failed to load patient counts:", err);
+  }
+}
+
+window.updatePatientCounts = updatePatientCounts;
+
 export function updateProfileState() {
   const savedUser = localStorage.getItem("sb_user");
   if (!savedUser) return;
@@ -78,6 +123,28 @@ export function updateProfileState() {
       user.initials,
       user.avatarUrl ?? null,
     );
+
+    if (user.role === "patient") {
+        updatePatientCounts();
+        
+        // Setup real-time notifications
+        if (window.signalR && !window.patientHubConnected) {
+            window.patientHubConnected = true;
+            const connection = new signalR.HubConnectionBuilder()
+              .withUrl("/adminHub")
+              .withAutomaticReconnect()
+              .build();
+
+            connection.on("ReceiveNotification", (n) => {
+              updatePatientCounts();
+              Toast.show(`New: ${n.title}`, "info");
+            });
+
+            connection.start()
+                .then(() => console.log("SignalR Connected (Patient Notifications)"))
+                .catch(err => console.error("SignalR Connection Error:", err));
+        }
+    }
   } catch (e) {
     console.error("Error parsing saved user", e);
     localStorage.removeItem("sb_user");

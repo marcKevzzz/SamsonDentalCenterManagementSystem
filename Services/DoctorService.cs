@@ -41,8 +41,8 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("profile")]
         public ProfileDto? Profile { get; set; }
 
-        // ── doctor_availability rows (array from the join) ────────────────────
-        [JsonPropertyName("doctor_availability")]
+        // ── staff_availability rows (array from the join) ──────────────────
+        [JsonPropertyName("staff_availability")]
         public List<AvailabilityDto>? Availability { get; set; }
 
         // ── Computed helpers for the view ─────────────────────────────────────
@@ -80,12 +80,13 @@ namespace SamsonDentalCenterManagementSystem.Services
         public string? Role { get; set; }
     }
 
+    // ── AvailabilityDto (used for read-side projections) ─────────────────────
     public class AvailabilityDto
     {
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
 
-        [JsonPropertyName("doctor_id")]
+        [JsonPropertyName("staff_id")]
         public string DoctorId { get; set; } = string.Empty;
 
         [JsonPropertyName("day_of_week")]
@@ -143,25 +144,35 @@ namespace SamsonDentalCenterManagementSystem.Services
             return req;
         }
 
-        // ── Fetch all doctors with profiles + availability ────────────────────
-        // Uses Supabase's PostgREST embedded resource syntax:
-        //   profiles(*)              → nested profile object
-        //   doctor_availability(*)   → nested availability array
+        // ── Fetch availability from staff_availability (no FK embed needed) ─────
+        private async Task<Dictionary<string, List<AvailabilityDto>>> FetchDoctorAvailabilityAsync()
+        {
+            try
+            {
+                var req = BuildRequest(HttpMethod.Get, "/staff_availability?staff_type=eq.doctor&is_active=eq.true");
+                var res = await _http.SendAsync(req);
+                if (!res.IsSuccessStatusCode) return new();
+                var json  = await res.Content.ReadAsStringAsync();
+                var slots = JsonSerializer.Deserialize<List<AvailabilityDto>>(json, _json) ?? new();
+                return slots.GroupBy(s => s.DoctorId)
+                            .ToDictionary(g => g.Key, g => g.ToList());
+            }
+            catch { return new(); }
+        }
+
+        // ── Fetch all doctors with profiles + availability ─────────────────────
         public async Task<List<DoctorDto>> GetAllWithProfilesAsync()
         {
-            // select=*,profiles(*),doctor_availability(*) tells PostgREST to
-            // embed both related tables. Because these are separate FK relations
-            // they come back as distinct nested keys, not flattened columns.
-            var path =
-                "/doctors?select=*,profile:profiles(*),doctor_availability(*)&order=created_at.asc";
-            var req = BuildRequest(HttpMethod.Get, path);
+            var req = BuildRequest(HttpMethod.Get, "/doctors?select=*,profile:profiles(*)&order=created_at.asc");
             var res = await _http.SendAsync(req);
-
             res.EnsureSuccessStatusCode();
 
-            var json = await res.Content.ReadAsStringAsync();
-            var doctors =
-                JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new List<DoctorDto>();
+            var doctors = JsonSerializer.Deserialize<List<DoctorDto>>(
+                await res.Content.ReadAsStringAsync(), _json) ?? new();
+
+            var avail = await FetchDoctorAvailabilityAsync();
+            foreach (var d in doctors)
+                d.Availability = avail.TryGetValue(d.Id, out var s) ? s : new();
 
             return doctors;
         }
@@ -169,32 +180,41 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Fetch active doctors only ─────────────────────────────────────────
         public async Task<List<DoctorDto>> GetActiveWithProfilesAsync()
         {
-            var path =
-                "/doctors?select=*,profile:profiles(*),doctor_availability(*)"
-                + "&is_active=eq.true&order=created_at.asc";
-            var req = BuildRequest(HttpMethod.Get, path);
+            var req = BuildRequest(HttpMethod.Get,
+                "/doctors?select=*,profile:profiles(*)&is_active=eq.true&order=created_at.asc");
             var res = await _http.SendAsync(req);
-
             res.EnsureSuccessStatusCode();
 
-            var json = await res.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new();
+            var doctors = JsonSerializer.Deserialize<List<DoctorDto>>(
+                await res.Content.ReadAsStringAsync(), _json) ?? new();
+
+            var avail = await FetchDoctorAvailabilityAsync();
+            foreach (var d in doctors)
+                d.Availability = avail.TryGetValue(d.Id, out var s) ? s : new();
+
+            return doctors;
         }
 
         // ── Fetch a single doctor by their Profile ID ─────────────────────────
         public async Task<DoctorDto?> GetDoctorByProfileIdAsync(string profileId)
         {
-            var path =
-                $"/doctors?select=*,profile:profiles(*),doctor_availability(*)&profile_id=eq.{profileId}";
-            var req = BuildRequest(HttpMethod.Get, path);
+            if (string.IsNullOrEmpty(profileId)) return null;
+            var req = BuildRequest(HttpMethod.Get,
+                $"/doctors?select=*,profile:profiles(*)&profile_id=eq.{profileId}");
             var res = await _http.SendAsync(req);
-
             res.EnsureSuccessStatusCode();
 
-            var json = await res.Content.ReadAsStringAsync();
-            var doctors = JsonSerializer.Deserialize<List<DoctorDto>>(json, _json) ?? new();
+            var doctors = JsonSerializer.Deserialize<List<DoctorDto>>(
+                await res.Content.ReadAsStringAsync(), _json) ?? new();
+            var doc = doctors.FirstOrDefault();
 
-            return doctors.FirstOrDefault();
+            if (doc != null)
+            {
+                var avail = await FetchDoctorAvailabilityAsync();
+                doc.Availability = avail.TryGetValue(doc.Id, out var s) ? s : new();
+            }
+
+            return doc;
         }
 
         // ── Fetch profiles not yet linked to a doctor (for the Add modal) ─────
@@ -303,12 +323,12 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Set availability — bypasses RLS ──────────────────────────────────
-        public async Task SetAvailabilityAsync(string doctorId, List<DoctorAvailability> slots)
+        public async Task SetAvailabilityAsync(string doctorId, List<StaffAvailability> slots)
         {
-            // 1. Delete old slots
+            // 1. Delete old slots for this doctor
             var delReq = BuildRequest(
                 HttpMethod.Delete,
-                $"/doctor_availability?doctor_id=eq.{doctorId}"
+                $"/staff_availability?staff_id=eq.{doctorId}&staff_type=eq.doctor"
             );
             var delRes = await _http.SendAsync(delReq);
             delRes.EnsureSuccessStatusCode();
@@ -317,10 +337,11 @@ namespace SamsonDentalCenterManagementSystem.Services
                 return;
 
             // 2. Insert new slots
-            var insReq = BuildRequest(HttpMethod.Post, "/doctor_availability");
+            var insReq = BuildRequest(HttpMethod.Post, "/staff_availability");
             var payload = slots.Select(s => new
             {
-                doctor_id = doctorId,
+                staff_id = doctorId,
+                staff_type = "doctor",
                 day_of_week = s.DayOfWeek,
                 start_time = s.StartTime,
                 end_time = s.EndTime,

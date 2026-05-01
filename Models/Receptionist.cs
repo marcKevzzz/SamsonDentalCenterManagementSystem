@@ -13,6 +13,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("desk_location")]
         public string? DeskLocation { get; set; }
 
+        [Column("bio")]
+        public string? Bio { get; set; }
+
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
@@ -22,9 +25,12 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("profile_id")]
         public string ProfileId { get; set; } = string.Empty;
 
-        // Foreign Key Navigation Property
         [JsonProperty("profiles")]
         [System.Text.Json.Serialization.JsonPropertyName("profiles")]
         public Profile? Profile { get; set; }
+
+        // Uses unified staff_availability table
+        [JsonProperty("staff_availability")]
+        public List<StaffAvailability>? Availability { get; set; }
     }
 }

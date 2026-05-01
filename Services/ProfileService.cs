@@ -75,6 +75,133 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
+        public async Task<(Profile? Profile, bool RequiresReview)> SmartMatchProfile(string firstName, string lastName, string email, string phone)
+        {
+            try
+            {
+                await _supabase.InitializeAsync();
+                
+                // Fetch all profiles that could potentially match
+                var response = await _supabase.From<Profile>()
+                    .Where(x => x.Role == "patient")
+                    .Get();
+
+                var profiles = response.Models;
+
+                // 1. Strong Match: Exact Email
+                var emailMatch = profiles.FirstOrDefault(p => !string.IsNullOrEmpty(p.Email) && p.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+                if (emailMatch != null) return (emailMatch, false);
+
+                // 2. Strong Match: Exact Name AND Exact Phone
+                var namePhoneMatch = profiles.FirstOrDefault(p => 
+                    p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase) &&
+                    p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrEmpty(p.PhoneNumber) && p.PhoneNumber == phone);
+                if (namePhoneMatch != null) return (namePhoneMatch, false);
+
+                // 3. Partial Match: Exact Name but different email/phone
+                var nameMatch = profiles.FirstOrDefault(p => 
+                    p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase) &&
+                    p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase));
+                if (nameMatch != null) return (null, true);
+
+                // 4. No match
+                return (null, false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SmartMatchProfile] Error: {ex.Message}");
+                return (null, false);
+            }
+        }
+
+        public async Task<string> CreateShadowProfile(string firstName, string lastName, string email, string phone, string? sex, DateTime? dob, bool requiresReview)
+        {
+            try
+            {
+                var newId = Guid.NewGuid().ToString();
+                var p = new Profile
+                {
+                    Id = newId,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    PhoneNumber = phone,
+                    Sex = sex,
+                    DateOfBirth = dob,
+                    Role = "patient",
+                    IsActive = true,
+                    RequiresMergeReview = requiresReview,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _supabase.From<Profile>().Insert(p);
+                return newId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CreateShadowProfile] Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<List<Profile>> GetShadowProfilesForEmail(string email, string currentUserId)
+        {
+            await _supabase.InitializeAsync();
+            var response = await _supabase.From<Profile>()
+                .Where(p => p.Email == email && p.Id != currentUserId && p.Role == "patient")
+                .Get();
+            return response.Models ?? new List<Profile>();
+        }
+
+        public async Task MergeProfile(string sourceId, string targetId)
+        {
+            await _supabase.InitializeAsync();
+
+            try
+            {
+                // Bulk update Appointments
+                await _supabase.From<Appointment>()
+                    .Where(a => a.PatientId == sourceId)
+                    .Set(a => a.PatientId, targetId)
+                    .Update();
+
+                // Bulk update Invoices
+                await _supabase.From<Invoice>()
+                    .Where(i => i.PatientId == sourceId)
+                    .Set(i => i.PatientId, targetId)
+                    .Update();
+
+                // Bulk update Inquiries
+                await _supabase.From<Inquiry>()
+                    .Where(i => i.PatientId == sourceId)
+                    .Set(i => i.PatientId, targetId)
+                    .Update();
+
+                // Bulk update Activity Logs
+                await _supabase.From<ActivityLog>()
+                    .Where(a => a.ProfileId == sourceId)
+                    .Set(a => a.ProfileId, targetId)
+                    .Update();
+
+                // Bulk update Notifications
+                await _supabase.From<Notification>()
+                    .Where(n => n.ProfileId == sourceId)
+                    .Set(n => n.ProfileId, targetId)
+                    .Update();
+
+                // Finally, delete the shadow profile
+                await _supabase.From<Profile>()
+                    .Where(p => p.Id == sourceId)
+                    .Delete();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MergeProfile] Error merging {sourceId} into {targetId}: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<string> UploadAvatar(
             string userId,
             byte[] bytes,
@@ -169,13 +296,86 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
-        public async Task CreateProfile(Profile p)
+        public async Task<List<Profile>> GetMyPatients(string doctorId)
         {
-            await _supabase.From<Profile>().Insert(p);
+            try
+            {
+                // To find my patients, we need to find all patients who have an appointment with this doctor
+                var apptResponse = await _supabase
+                    .From<Appointment>()
+                    .Select("patient_id, is_guest, patient_name")
+                    .Where(a => a.DoctorId == doctorId)
+                    .Get();
+
+                if (apptResponse.Models == null || !apptResponse.Models.Any()) return new List<Profile>();
+
+                var validPatientIds = apptResponse.Models
+                    .Where(a => !string.IsNullOrEmpty(a.PatientId))
+                    .Select(a => a.PatientId!)
+                    .Distinct()
+                    .ToList();
+
+                var profiles = new List<Profile>();
+
+                if (validPatientIds.Any())
+                {
+                    // Fetch those profiles
+                    var profResponse = await _supabase
+                        .From<Profile>()
+                        .Filter("id", Supabase.Postgrest.Constants.Operator.In, validPatientIds)
+                        .Get();
+                    
+                    if (profResponse.Models != null)
+                    {
+                        profiles.AddRange(profResponse.Models);
+                    }
+                }
+
+                // Add guests as dummy profiles
+                var guests = apptResponse.Models
+                    .Where(a => a.IsGuest || string.IsNullOrEmpty(a.PatientId))
+                    .GroupBy(a => a.PatientName)
+                    .Select(g => new Profile
+                    {
+                        Id = "guest_" + Guid.NewGuid().ToString().Substring(0, 8),
+                        FirstName = g.Key ?? "Guest",
+                        LastName = "",
+                        Role = "patient",
+                        IsActive = true
+                    });
+                
+                profiles.AddRange(guests);
+
+                return profiles;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ProfileService.GetMyPatients] Error: {ex.Message}");
+                return new List<Profile>();
+            }
+        }
+
+        public async Task CreateProfile(UserPayload p)
+        {
+            var profile = new Profile
+            {
+                Id = p.Id!,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                Email = p.Email,
+                DateOfBirth = p.DateOfBirth,
+                Sex = p.Sex,
+                PhoneNumber = p.PhoneNumber,
+                Address = p.Address,
+                Role = p.Role,
+                AvatarUrl = p.AvatarUrl,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _supabase.From<Profile>().Insert(profile);
         }
 
         // UPDATE profile fields
-        public async Task UpdateProfile(string userId, Profile p)
+        public async Task UpdateProfile(string userId, UserPayload p)
         {
             var profile = await _supabase.From<Profile>().Where(x => x.Id == userId).Single();
 
@@ -199,12 +399,28 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (!string.IsNullOrWhiteSpace(p.Email))
                 profile.Email = p.Email;
 
-            if (!string.IsNullOrWhiteSpace(p.DateOfBirth?.ToString()))
+            if (p.DateOfBirth.HasValue)
             {
                 profile.DateOfBirth = p.DateOfBirth.Value;
             }
 
             await _supabase.From<Profile>().Upsert(profile);
+            
+            // Sync Bio if staff
+            if (profile.Role == "doctor")
+            {
+                await _supabase.From<Doctor>()
+                    .Where(x => x.ProfileId == userId)
+                    .Set(x => x.Bio!, p.Bio)
+                    .Update();
+            }
+            else if (profile.Role == "receptionist")
+            {
+                await _supabase.From<Receptionist>()
+                    .Where(x => x.ProfileId == userId)
+                    .Set(x => x.Bio!, p.Bio)
+                    .Update();
+            }
 
             // Sync to auth.users metadata
             try

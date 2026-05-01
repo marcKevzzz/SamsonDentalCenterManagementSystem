@@ -27,7 +27,7 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(string section)
         {
             if (!ModelState.IsValid)
             {
@@ -36,8 +36,39 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
 
             try
             {
-                await _clinicService.UpdateSettingsAsync(Settings);
-                TempData["Toast"] = "Settings updated successfully!";
+                // Fetch existing to avoid overwriting unrelated fields with nulls
+                var existing = await _clinicService.GetSettingsAsync();
+
+                if (section == "Identity")
+                {
+                    existing.ClinicName = Settings.ClinicName;
+                    existing.AboutText = Settings.AboutText;
+                    existing.FacebookUrl = Settings.FacebookUrl;
+                    existing.InstagramUrl = Settings.InstagramUrl;
+                    existing.LocationAddress = Settings.LocationAddress;
+                    existing.MapsUrl = Settings.MapsUrl;
+                    existing.ContactEmail = Settings.ContactEmail;
+                    existing.ContactPhone = Settings.ContactPhone;
+                    existing.Landline = Settings.Landline;
+                    existing.LogoUrl = Settings.LogoUrl;
+                }
+                else if (section == "Availability")
+                {
+                    existing.IsAutomatedStatus = Settings.IsAutomatedStatus;
+                    existing.ManualStatus = Settings.ManualStatus;
+                    existing.ClinicalHoursJson = Settings.ClinicalHoursJson;
+                }
+                else if (section == "FAQs")
+                {
+                    existing.FaqsJson = Settings.FaqsJson;
+                }
+                else if (section == "Photos")
+                {
+                    existing.ClinicPhotosJson = Settings.ClinicPhotosJson;
+                }
+
+                await _clinicService.UpdateSettingsAsync(existing);
+                TempData["Toast"] = $"{section} updated successfully!";
                 TempData["ToastType"] = "success";
             }
             catch (Exception ex)

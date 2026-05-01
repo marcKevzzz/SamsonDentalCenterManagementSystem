@@ -1,6 +1,18 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.activity_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  profile_id uuid,
+  action text NOT NULL,
+  details text,
+  ip_address text,
+  created_at timestamp with time zone DEFAULT now(),
+  category text,
+  link text,
+  CONSTRAINT activity_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT activity_logs_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   patient_id uuid,
@@ -31,10 +43,20 @@ CREATE TABLE public.appointments (
   other_last_name text,
   other_email text,
   other_phone text,
+  source text NOT NULL DEFAULT 'online'::text,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id),
   CONSTRAINT appointments_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
+);
+CREATE TABLE public.blocked_dates (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  blocked_date date NOT NULL UNIQUE,
+  reason text,
+  blocked_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT blocked_dates_pkey PRIMARY KEY (id),
+  CONSTRAINT blocked_dates_blocked_by_fkey FOREIGN KEY (blocked_by) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.clinic_settings (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -75,16 +97,6 @@ CREATE TABLE public.dental_services (
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT dental_services_pkey PRIMARY KEY (id)
-);
-CREATE TABLE public.doctor_availability (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  doctor_id uuid NOT NULL,
-  day_of_week integer NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
-  start_time text NOT NULL,
-  end_time text NOT NULL,
-  is_active boolean NOT NULL DEFAULT true,
-  CONSTRAINT doctor_availability_pkey PRIMARY KEY (id),
-  CONSTRAINT doctor_availability_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
 );
 CREATE TABLE public.doctors (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -151,6 +163,18 @@ CREATE TABLE public.invoices (
   CONSTRAINT invoices_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT invoices_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
 );
+CREATE TABLE public.notifications (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  profile_id uuid,
+  title text NOT NULL,
+  message text NOT NULL,
+  is_read boolean NOT NULL DEFAULT false,
+  type text NOT NULL DEFAULT 'info'::text,
+  link text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT notifications_pkey PRIMARY KEY (id),
+  CONSTRAINT notifications_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.payments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   invoice_id uuid NOT NULL,
@@ -179,6 +203,7 @@ CREATE TABLE public.profiles (
   email text,
   is_active boolean NOT NULL DEFAULT true,
   reactivation_requested boolean NOT NULL DEFAULT false,
+  requires_merge_review boolean DEFAULT false,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
@@ -188,6 +213,7 @@ CREATE TABLE public.receptionists (
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   profile_id uuid UNIQUE,
+  bio text,
   CONSTRAINT receptionists_pkey PRIMARY KEY (id),
   CONSTRAINT receptionists_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
 );
@@ -205,6 +231,16 @@ CREATE TABLE public.reviews (
   review_date timestamp with time zone,
   CONSTRAINT reviews_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.staff_availability (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  staff_id uuid NOT NULL,
+  staff_type text NOT NULL CHECK (staff_type = ANY (ARRAY['doctor'::text, 'receptionist'::text])),
+  day_of_week integer NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
+  start_time text NOT NULL,
+  end_time text NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  CONSTRAINT staff_availability_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.treatments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   invoice_id uuid NOT NULL,
@@ -220,25 +256,26 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
-CREATE TABLE public.activity_logs (
-    id uuid NOT NULL DEFAULT gen_random_uuid(),
-    profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
-    action text NOT NULL,
-    details text,
-    category text,
-    link text,
-    ip_address text,
-    created_at timestamp with time zone DEFAULT now(),
-    CONSTRAINT activity_logs_pkey PRIMARY KEY (id)
+CREATE TABLE public.patient_medical_info (
+  patient_id uuid NOT NULL PRIMARY KEY,
+  blood_type text,
+  height numeric,
+  weight numeric,
+  is_smoker boolean DEFAULT false,
+  allergies jsonb DEFAULT '[]'::jsonb,
+  medications jsonb DEFAULT '[]'::jsonb,
+  history jsonb DEFAULT '{}'::jsonb,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT patient_medical_info_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
 );
-CREATE TABLE public.notifications (
-    id uuid NOT NULL DEFAULT gen_random_uuid(),
-    profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
-    title text NOT NULL,
-    message text NOT NULL,
-    is_read boolean NOT NULL DEFAULT false,
-    type text NOT NULL DEFAULT 'info',
-    link text,
-    created_at timestamp with time zone DEFAULT now(),
-    CONSTRAINT notifications_pkey PRIMARY KEY (id)
+CREATE TABLE public.patient_tooth_status (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  patient_id uuid NOT NULL,
+  tooth_number integer NOT NULL,
+  status text NOT NULL DEFAULT 'healthy',
+  notes text,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT patient_tooth_status_pkey PRIMARY KEY (id),
+  CONSTRAINT patient_tooth_status_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
+  UNIQUE(patient_id, tooth_number)
 );

@@ -2,6 +2,8 @@ using SamsonDentalCenterManagementSystem.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
+using SamsonDentalCenterManagementSystem.Hubs;
 
 namespace SamsonDentalCenterManagementSystem.Services
 {
@@ -13,13 +15,14 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly string _serviceRoleKey;
         private readonly ActivityLogService _logs;
         private readonly NotificationService _notifs;
+        private readonly IHubContext<AdminHub> _hubContext;
 
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public InquiryService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs)
+        public InquiryService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs, IHubContext<AdminHub> hubContext)
         {
             _supabase = supabase;
             _http = http;
@@ -27,6 +30,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _serviceRoleKey = serviceRoleKey;
             _logs = logs;
             _notifs = notifs;
+            _hubContext = hubContext;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -98,6 +102,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             // 2. Create Initial Message
             await AddMessageAsync(created.Id, inquiry.PatientId, initialMessage, false);
 
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveInquiryUpdate", new { action = "create", id = created.Id });
+
             // Log action
             await _logs.LogActionAsync(inquiry.PatientId, "sent inquiry", $"Subject: {inquiry.Subject}", null, "Inquiry", $"/Admin/Inquiries?id={created.Id}");
 
@@ -125,11 +132,14 @@ namespace SamsonDentalCenterManagementSystem.Services
             updateReq.Content = new StringContent(
                 JsonSerializer.Serialize(new {
                     status = status,
-                    updated_at = DateTime.UtcNow
+                    updated_at = DateTime.UtcNow.ToString("o")
                 }),
                 Encoding.UTF8, "application/json");
             
             await _http.SendAsync(updateReq);
+
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveInquiryUpdate", new { action = "message", id = inquiryId });
 
             if (isFromStaff && senderId != null)
             {
@@ -138,6 +148,24 @@ namespace SamsonDentalCenterManagementSystem.Services
                 await _logs.LogActionAsync(senderId, "replied to inquiry", $"Inquiry ID: {inquiryId}", null, "Inquiry", $"/Admin/Inquiries?id={inquiryId}");
             }
         }
+        public async Task MarkAsReadAsync(string inquiryId)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/inquiries?id=eq.{inquiryId}");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(new { is_read = true }),
+                Encoding.UTF8, "application/json");
+            await _http.SendAsync(req);
+        }
 
+        public async Task UpdateStatusAsync(string inquiryId, string status)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/inquiries?id=eq.{inquiryId}");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(new { status = status, updated_at = DateTime.UtcNow.ToString("o") }),
+                Encoding.UTF8, "application/json");
+            await _http.SendAsync(req);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveInquiryUpdate", new { action = "status", id = inquiryId, status = status });
+        }
     }
 }

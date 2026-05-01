@@ -110,12 +110,12 @@ public class InvoiceController : ControllerBase
             var finalAmount = totalAmount - req.DiscountAmount;
             if (finalAmount < 0) finalAmount = 0;
 
-            if (string.IsNullOrEmpty(req.AppointmentId) || !Guid.TryParse(req.AppointmentId, out _))
-                return BadRequest(new { ok = false, error = "A valid Appointment ID is required." });
-            if (string.IsNullOrEmpty(req.PatientId) || !Guid.TryParse(req.PatientId, out _))
-                return BadRequest(new { ok = false, error = "A valid Patient ID is required." });
-            if (string.IsNullOrEmpty(req.DoctorId) || !Guid.TryParse(req.DoctorId, out _))
-                return BadRequest(new { ok = false, error = "A valid Doctor ID is required." });
+            if (string.IsNullOrEmpty(req.AppointmentId))
+                return BadRequest(new { ok = false, error = "Appointment selection is required." });
+            if (string.IsNullOrEmpty(req.PatientId))
+                return BadRequest(new { ok = false, error = "Patient identification is required." });
+            if (string.IsNullOrEmpty(req.DoctorId))
+                return BadRequest(new { ok = false, error = "A assigned doctor is required to generate an invoice. Please ensure the appointment has a doctor assigned." });
 
             var invoice = new Invoice
             {

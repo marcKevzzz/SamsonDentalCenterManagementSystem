@@ -32,12 +32,24 @@ const predefined = {
     "You're very welcome! If you have any more questions, feel free to reach out. Have a great day!",
 };
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function refreshInquiries(force = false) {
   const data = await AdminStore.loadData(
     "inquiries",
     "/api/admin/data/inquiries",
+    { force }
   );
   if (data) initializeWithData({ inquiries: data });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  refreshInquiries();
+});
+
+// Listen for SignalR updates from AdminStore
+window.addEventListener("admin:inquiries:updated", (e) => {
+  console.log("Inquiry update received via SignalR", e.detail);
+  refreshInquiries(true);
+  if (ACTIVE_INQUIRY_ID) fetchMessages();
 });
 
 function initializeWithData(data) {
@@ -80,22 +92,37 @@ function getDisplayName(inq) {
 }
 
 function timeAgo(date) {
-  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  if (!date) return "N/A";
+  let dStr = String(date);
+  if (!dStr.endsWith('Z') && !dStr.includes('+') && dStr.includes('T')) dStr += 'Z';
+  
+  const now = new Date();
+  const past = new Date(dStr);
+  
+  if (isNaN(past.getTime())) return "N/A";
+
+  const seconds = Math.floor((now - past) / 1000);
+  
+  // Handle clock skew: if event happened up to 5 seconds in the future or within 60 seconds in the past
+  if (seconds < 60) return "just now";
+
   let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + "y ago";
+  if (interval >= 1) return Math.floor(interval) + "y ago";
   interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + "mo ago";
+  if (interval >= 1) return Math.floor(interval) + "mo ago";
   interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + "d ago";
+  if (interval >= 1) return Math.floor(interval) + "d ago";
   interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + "h ago";
+  if (interval >= 1) return Math.floor(interval) + "h ago";
   interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + "m ago";
-  return "now";
+  if (interval >= 1) return Math.floor(interval) + "m ago";
+  return "just now";
 }
 
 function formatDateSeparator(date) {
-  const d = new Date(date);
+  let dStr = String(date);
+  if (!dStr.endsWith('Z') && !dStr.includes('+') && dStr.includes('T')) dStr += 'Z';
+  const d = new Date(dStr);
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
@@ -130,13 +157,27 @@ function renderInquiryList() {
     const initials =
       displayName.length > 0 ? displayName[0].toUpperCase() : "G";
     const isPending = inq.status === "pending";
-    const date = new Date(inq.createdAt).toLocaleDateString("en-US", {
+    const isUnread = !inq.isRead;
+    
+    let cStr = String(inq.createdAt);
+    if (!cStr.endsWith('Z') && !cStr.includes('+') && cStr.includes('T')) cStr += 'Z';
+    const date = new Date(cStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
 
+    const statusBadge = `
+      <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+        inq.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 
+        inq.status === 'replied' ? 'bg-blue-100 text-blue-700' : 
+        'bg-amber-100 text-amber-700'
+      }">
+        ${inq.status}
+      </span>
+    `;
+
     return `
-            <div class="inquiry-item px-4 py-2 hover:bg-slate-50 cursor-pointer transition-all border-l-2 ${isPending ? "border-amber-400 bg-primary/8" : "border-transparent"} ${ACTIVE_INQUIRY_ID === inq.id ? "bg-slate-100 border-primary" : ""}"
+            <div class="inquiry-item px-4 py-2 hover:bg-slate-50 cursor-pointer transition-all border-l-2 ${isUnread ? "border-primary bg-primary/5" : "border-transparent"} ${ACTIVE_INQUIRY_ID === inq.id ? "bg-slate-100 border-primary" : ""}"
                 data-id="${inq.id}" data-name="${displayName.replace(/"/g, "&quot;")}" data-subject="${inq.subject.replace(/"/g, "&quot;")}" data-avatar="${avatarUrl}" data-active="${isActive}">
                 <div class="flex items-center gap-3 mb-1 pointer-events-none">
                     ${
@@ -148,12 +189,15 @@ function renderInquiryList() {
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[13px] font-bold text-slate-900 truncate">${displayName}</span>
-                                    ${isPending ? `<span class="unread-dot w-2 h-2 rounded-full bg-amber-500"></span>` : ""}
+                                    <span class="text-[13px] ${isUnread ? "font-bold text-brand" : "font-medium text-slate-600"} truncate">${displayName}</span>
+                                    ${isUnread ? `<span class="unread-dot w-2 h-2 rounded-full bg-primary animate-pulse"></span>` : ""}
                                 </div>
-                                ${!isActive ? `<span class="w-fit text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider mt-0.5">Deactivated</span>` : ""}
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    ${statusBadge}
+                                    ${!isActive ? `<span class="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Deactivated</span>` : ""}
+                                </div>
                             </div>
-                            <span class="text-[10px] text-slate-400">${timeAgo(inq.createdAt)}</span>
+                            <span class="text-[10px] text-slate-400">${timeAgo(inq.updatedAt)}</span>
                         </div>
                     </div>
                 </div>
@@ -171,6 +215,7 @@ function renderInquiryList() {
 
 async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
   ACTIVE_INQUIRY_ID = id;
+  const inq = ALL_INQUIRIES.find(x => x.id === id);
 
   // Mobile visibility
   if (window.innerWidth < 768) {
@@ -209,7 +254,145 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
     avatarBox.classList.add("bg-brand");
   }
 
+  // Render Patient Details Sidebar
+  renderPatientSidebar(inq);
+
+  // Mark as read in DB if not read
+  if (!inq.isRead) {
+    fetch(`/api/admin/data/inquiries/mark-read/${id}`, { method: 'POST' });
+    inq.isRead = true;
+    renderInquiryList();
+  }
+
+  // Show/Hide resolve button
+  const resolveBtn = document.getElementById('resolve-btn');
+  if (resolveBtn) {
+    if (inq.status === 'resolved') {
+      resolveBtn.classList.add('hidden');
+    } else {
+      resolveBtn.classList.remove('hidden');
+    }
+  }
+
   await fetchMessages();
+}
+
+window.markAsResolved = async function() {
+  if (!ACTIVE_INQUIRY_ID) return;
+  
+  if (!confirm("Are you sure you want to mark this inquiry as resolved?")) return;
+
+  try {
+    const res = await fetch("/api/admin/data/inquiries/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: ACTIVE_INQUIRY_ID, status: "resolved" })
+    });
+
+    if (res.ok) {
+      const inq = ALL_INQUIRIES.find(x => x.id === ACTIVE_INQUIRY_ID);
+      if (inq) inq.status = "resolved";
+      
+      const resolveBtn = document.getElementById('resolve-btn');
+      if (resolveBtn) resolveBtn.classList.add('hidden');
+      renderInquiryList();
+      Toast.show("Inquiry marked as resolved", "success");
+    }
+  } catch (err) {
+    console.error("Failed to mark resolved:", err);
+  }
+}
+
+function renderPatientSidebar(inq) {
+  const sidebar = document.getElementById('inquiry-patient-sidebar');
+  if (!sidebar) return;
+
+  if (!inq || !inq.patient) {
+      sidebar.innerHTML = `
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-4 text-slate-300">
+                <i class="fa-solid fa-user-secret text-2xl"></i>
+            </div>
+            <h4 class="text-[14px] font-bold text-brand">${inq ? getDisplayName(inq) : 'Guest Patient'}</h4>
+            <p class="text-[11px] text-brand-400 mt-1">${inq && inq.patientId ? 'Patient account found but profile error.' : 'This user is not registered in our system yet.'}</p>
+            ${inq && inq.guestEmail ? `<div class="mt-4 p-3 bg-slate-50 rounded-xl text-left border border-slate-100">
+                <div class="text-[9px] font-bold text-slate-400 uppercase mb-1">Guest Email</div>
+                <div class="text-[11px] text-brand truncate">${inq.guestEmail}</div>
+            </div>` : ''}
+        </div>
+      `;
+      return;
+  }
+
+  const role = document.body.dataset.role || 'admin';
+  const basePath = role === 'admin' ? '/Admin' : (role === 'doctor' ? '/Doctor' : '/Receptionist');
+
+  const p = inq.patient;
+  const initials = (p.firstName?.[0] || '') + (p.lastName?.[0] || '');
+
+  sidebar.innerHTML = `
+    <div class="p-6">
+        <div class="text-center mb-6">
+            <div class="relative inline-block">
+                ${p.avatarUrl ? `<img src="${p.avatarUrl}" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md mx-auto" />` : `<div class="w-20 h-20 rounded-2xl bg-brand/5 text-brand flex items-center justify-center text-2xl font-bold mx-auto border-2 border-white shadow-sm">${initials}</div>`}
+                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white ${p.isActive ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
+            </div>
+            <h4 class="text-[15px] font-bold text-brand mt-3">${p.fullName || (p.firstName + ' ' + p.lastName)}</h4>
+            <p class="text-[11px] text-brand-400">Patient ID: ${inq.patientId?.split('-')[0] || 'N/A'}</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Contact Information</label>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:border-primary/20">
+                        <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+                            <i class="fa-solid fa-envelope text-[11px]"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Email</div>
+                            <div class="text-[12px] font-medium text-brand truncate">${p.email || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:border-primary/20">
+                        <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+                            <i class="fa-solid fa-phone text-[11px]"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Phone</div>
+                            <div class="text-[12px] font-medium text-brand truncate">${p.phone || p.phoneNumber || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Quick Stats</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Gender</div>
+                        <div class="text-[12px] font-medium text-brand capitalize">${p.sex || 'N/A'}</div>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Age</div>
+                        <div class="text-[12px] font-medium text-brand">${p.dob ? Math.floor((new Date() - new Date(p.dob)) / 31557600000) : 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="mt-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Address</div>
+                    <div class="text-[12px] font-medium text-brand leading-relaxed">${p.address || 'No address provided'}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-slate-100">
+            <a href="${basePath}/Patients/Details?id=${inq.patientId}" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand text-white text-[12px] font-bold hover:bg-brand/90 transition-all">
+                <i class="fa-solid fa-folder-open"></i>
+                View Full Medical Record
+            </a>
+        </div>
+    </div>
+  `;
 }
 
 async function fetchMessages() {
@@ -233,7 +416,9 @@ async function fetchMessages() {
     let lastDate = null;
 
     data.messages.forEach((msg) => {
-      const msgDate = new Date(msg.created_at).toDateString();
+      let dStr = String(msg.created_at);
+      if (!dStr.endsWith('Z') && !dStr.includes('+') && dStr.includes('T')) dStr += 'Z';
+      const msgDate = new Date(dStr).toDateString();
       if (msgDate !== lastDate) {
         html += `
                     <div class="flex items-center gap-4 ">
@@ -248,7 +433,7 @@ async function fetchMessages() {
                 <div class="flex ${msg.is_from_staff ? "justify-end" : "justify-start"}">
                     <div class="max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-[12.5px] ${msg.is_from_staff ? "bg-primary text-white rounded-tr-none shadow-md shadow-primary/20" : "bg-slate-100 border border-slate-200 text-brand rounded-tl-none shadow-sm shadow-slate-900/15"}">
                         <p class="leading-relaxed font-medium whitespace-pre-wrap">${msg.message}</p>
-                        <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                        <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(dStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
                 </div>`;
     });
@@ -334,7 +519,4 @@ document.addEventListener("keypress", (e) => {
   }
 });
 
-// Auto-refresh messages
-setInterval(() => {
-  if (ACTIVE_INQUIRY_ID) fetchMessages();
-}, 10000);
+// Removed 10s polling - now uses SignalR via AdminStore events

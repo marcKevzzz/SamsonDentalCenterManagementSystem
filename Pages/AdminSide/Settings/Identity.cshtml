@@ -1,0 +1,137 @@
+@page "/Admin/Settings/Identity"
+@model SamsonDentalCenterManagementSystem.Pages.AdminSide.AdminSettingsModel
+@{
+    Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "Clinic Identity";
+    ViewData["Breadcrumb"] = "Settings · Identity";
+}
+
+<div class="h-full flex flex-col p-6 overflow-hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-brand tracking-tight font-display">Clinic Identity</h1>
+            <p class="text-slate-500 text-[13px] mt-1 font-medium">Control brand, public information, and contact details.</p>
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="toast-msg" value="@TempData["Toast"]" />
+    <input type="hidden" id="toast-type" value="@TempData["ToastType"]" />
+
+    <form method="post" asp-route-section="Identity" class="flex-1 flex flex-col gap-6 overflow-hidden">
+        <input type="hidden" asp-for="Settings.Id" />
+        
+        <div class="flex-1 overflow-y-auto pr-2 space-y-8 pb-32">
+            <div class="space-y-4">
+                <div class="flex items-center gap-6 p-6 bg-slate-50 rounded-[32px] border border-slate-100">
+                    <div id="logo-preview-container" class="relative w-24 h-24 rounded-2xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shadow-sm group">
+                        <img id="logo-preview" src="@(string.IsNullOrEmpty(Model.Settings.LogoUrl) ? "/images/logo.svg" : Model.Settings.LogoUrl)" class="w-full h-full object-contain p-2" />
+                        <div class="absolute inset-0 bg-brand/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                            <label class="cursor-pointer">
+                                <input type="file" class="hidden" onchange="uploadLogo(this)" accept="image/*">
+                                <i class="fa-solid fa-camera text-white text-xl"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="brand-font font-bold text-brand text-[15px]">Clinic Logo</h4>
+                        <p class="text-slate-400 text-[11px] leading-relaxed max-w-[200px]">Use a transparent PNG or SVG for best results on dark backgrounds.</p>
+                        <input type="hidden" asp-for="Settings.LogoUrl" id="logo-url" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Brand Identity -->
+                <div class="bg-white p-7 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+                            <i class="fa-solid fa-signature text-sm"></i>
+                        </div>
+                        <h3 class="text-slate-800 font-bold text-base">Brand Identity</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Official Clinic Name</label>
+                            <input asp-for="Settings.ClinicName" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all font-bold text-slate-700" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">About the Clinic</label>
+                            <textarea asp-for="Settings.AboutText" rows="4" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all resize-none font-medium text-slate-600 leading-relaxed"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Facebook URL</label>
+                                <div class="relative">
+                                    <i class="fa-brands fa-facebook absolute left-4 top-1/2 -translate-y-1/2 text-blue-600 text-sm"></i>
+                                    <input asp-for="Settings.FacebookUrl" class="w-full pl-10 pr-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" placeholder="facebook.com/..." />
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Instagram URL</label>
+                                <div class="relative">
+                                    <i class="fa-brands fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-pink-600 text-sm"></i>
+                                    <input asp-for="Settings.InstagramUrl" class="w-full pl-10 pr-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" placeholder="instagram.com/..." />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact & Logistics -->
+                <div class="bg-white p-7 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+                            <i class="fa-solid fa-map-location-dot text-sm"></i>
+                        </div>
+                        <h3 class="text-slate-800 font-bold text-base">Contact & Logistics</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Physical Address</label>
+                            <input asp-for="Settings.LocationAddress" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Google Maps Embed URL</label>
+                            <input asp-for="Settings.MapsUrl" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" placeholder="Paste map iframe src here" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Email</label>
+                                <input asp-for="Settings.ContactEmail" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Mobile</label>
+                                <input asp-for="Settings.ContactPhone" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Landline (Optional)</label>
+                            <input asp-for="Settings.Landline" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAB -->
+        <div class="fixed bottom-8 right-8 flex items-center gap-4">
+            <button type="submit" class="group bg-brand text-white pl-8 pr-10 py-5 rounded-[28px] font-black text-sm shadow-2xl shadow-brand/30 hover:shadow-brand/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <i class="fa-solid fa-check text-xs"></i>
+                </div>
+                Save Identity
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script type="module">
+        import { ClinicSettings } from '../../../js/adminSide/adminSettings.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            const settings = new ClinicSettings();
+            settings.init();
+        });
+    </script>
+}

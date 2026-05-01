@@ -114,7 +114,11 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         appBaseUrl ?? "http://localhost:5081",
         httpFactory.CreateClient("SupabaseClient"),
         provider.GetRequiredService<ActivityLogService>(),
-        provider.GetRequiredService<NotificationService>()
+        provider.GetRequiredService<NotificationService>(),
+        provider.GetRequiredService<IHubContext<AdminHub>>(),
+        provider.GetRequiredService<ClinicService>(),
+        provider.GetRequiredService<BlockedDateService>(),
+        provider.GetRequiredService<ProfileService>()
     );
 });
 
@@ -138,6 +142,17 @@ builder.Services.AddSingleton<ReceptionistService>(provider =>
     );
 });
 
+builder.Services.AddScoped<StaffLeaveService>(provider =>
+{
+    var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new StaffLeaveService(
+        httpFactory.CreateClient("SupabaseClient"),
+        supabaseUrl,
+        supabaseServiceKey,
+        provider.GetRequiredService<ActivityLogService>()
+    );
+});
+
 builder.Services.AddScoped<InvoiceService>(provider =>
 {
     var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
@@ -147,7 +162,8 @@ builder.Services.AddScoped<InvoiceService>(provider =>
         supabaseUrl,
         supabaseServiceKey,
         provider.GetRequiredService<ActivityLogService>(),
-        provider.GetRequiredService<NotificationService>()
+        provider.GetRequiredService<NotificationService>(),
+        provider.GetRequiredService<IHubContext<AdminHub>>()
     );
 });
 
@@ -160,7 +176,8 @@ builder.Services.AddScoped<InquiryService>(provider =>
         supabaseUrl,
         supabaseServiceKey,
         provider.GetRequiredService<ActivityLogService>(),
-        provider.GetRequiredService<NotificationService>()
+        provider.GetRequiredService<NotificationService>(),
+        provider.GetRequiredService<IHubContext<AdminHub>>()
     );
 });
 
@@ -185,6 +202,14 @@ builder.Services.AddScoped<ClinicService>(provider =>
     return new ClinicService(serviceClient, provider.GetRequiredService<ActivityLogService>());
 });
 
+builder.Services.AddScoped<BlockedDateService>(_ => new BlockedDateService(serviceClient));
+builder.Services.AddScoped<RecordService>(provider => new RecordService(
+    serviceClient,
+    provider.GetRequiredService<ActivityLogService>(),
+    provider.GetRequiredService<IHubContext<AdminHub>>()
+));
+
+
 builder.Services.AddSingleton<ActivityLogService>(provider =>
 {
     var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
@@ -193,7 +218,8 @@ builder.Services.AddSingleton<ActivityLogService>(provider =>
         httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
         supabaseServiceKey,
-        hubContext
+        hubContext,
+        provider.GetRequiredService<IHttpContextAccessor>()
     );
 });
 
@@ -277,7 +303,18 @@ builder
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
+    builder.Services.AddCors(options => {
+    options.AddPolicy("AllowVanilla", policy => {
+        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // SignalR MUST have this
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowVanilla");
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())

@@ -1,0 +1,62 @@
+@page "/Admin/Settings/FAQs"
+@model SamsonDentalCenterManagementSystem.Pages.AdminSide.AdminSettingsModel
+@{
+    Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "Clinic FAQs";
+    ViewData["Breadcrumb"] = "Settings · FAQs";
+}
+
+<div class="h-full flex flex-col p-6 overflow-hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-brand tracking-tight font-display">Clinic FAQs</h1>
+            <p class="text-slate-500 text-[13px] mt-1 font-medium">Manage frequently asked questions shown on the patient site.</p>
+        </div>
+        <button type="button" onclick="addFaq()" class="px-5 py-2.5 bg-brand text-white text-[11px] font-bold rounded-xl shadow-lg shadow-brand/20 hover:scale-105 active:scale-95 transition-all">
+            + New FAQ Entry
+        </button>
+    </div>
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="toast-msg" value="@TempData["Toast"]" />
+    <input type="hidden" id="toast-type" value="@TempData["ToastType"]" />
+
+    <form method="post" asp-route-section="FAQs" class="flex-1 flex flex-col gap-6 overflow-hidden">
+        <input type="hidden" asp-for="Settings.Id" />
+        
+        <div class="flex-1 overflow-y-auto pr-2 space-y-8 pb-32">
+            <div class="bg-white p-7 rounded-[32px] border border-slate-200 shadow-sm space-y-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+                        <i class="fa-solid fa-quote-left text-sm"></i>
+                    </div>
+                    <h3 class="text-slate-800 font-bold text-base">Common Questions</h3>
+                </div>
+                <input type="hidden" asp-for="Settings.FaqsJson" id="faqs-json" />
+                <div id="faqs-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- FAB -->
+        <div class="fixed bottom-8 right-8 flex items-center gap-4">
+            <button type="submit" class="group bg-brand text-white pl-8 pr-10 py-5 rounded-[28px] font-black text-sm shadow-2xl shadow-brand/30 hover:shadow-brand/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <i class="fa-solid fa-check text-xs"></i>
+                </div>
+                Save FAQs
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script type="module">
+        import { ClinicSettings } from '../../../js/adminSide/adminSettings.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            const settings = new ClinicSettings();
+            settings.init();
+        });
+    </script>
+}

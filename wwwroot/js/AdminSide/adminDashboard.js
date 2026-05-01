@@ -7,12 +7,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Dashboard needs stats and a few items
     const stats = await AdminStore.loadData('stats', '/api/admin/data/stats');
     const appts = await AdminStore.loadData('appointments', '/api/admin/data/appointments');
-    const invoices = await AdminStore.loadData('invoices', '/api/admin/data/invoices');
+    const logs = await AdminStore.loadData('activity-logs', '/api/admin/data/activity-logs');
+    const leaves = await AdminStore.loadData('leaves', '/api/staff/leave/all');
     
     hydrateDashboard({
         stats: stats,
         appointments: appts,
-        invoices: invoices
+        logs: logs,
+        leaves: leaves
     });
 });
 
@@ -34,11 +36,19 @@ function hydrateDashboard(data) {
         const monthlyRevenue = document.getElementById('stat-monthly-revenue');
         if (monthlyRevenue && stats.monthlyRevenue !== undefined) monthlyRevenue.textContent = `₱${stats.monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-        // Trends (mock for now as backend doesn't provide history yet, but we'll use dynamic placeholders)
-        if (stats.totalPatients !== undefined) document.getElementById('stat-patients-trend').textContent = `↑ ${Math.floor(stats.totalPatients * 0.1)} new this week`;
-        if (stats.activeDoctors !== undefined) document.getElementById('stat-doctors-trend').textContent = `↑ ${stats.activeDoctors} specialists active`;
+        // Trends (Now using real logic or approximations from key metrics)
+        if (stats.totalPatients !== undefined) document.getElementById('stat-patients-trend').textContent = `Total registered patients`;
+        if (stats.activeDoctors !== undefined) document.getElementById('stat-doctors-trend').textContent = `${stats.activeDoctors} specialists active`;
         if (document.getElementById('stat-appts-trend')) document.getElementById('stat-appts-trend').textContent = `Today's schedule`;
-        if (stats.monthlyRevenue !== undefined) document.getElementById('stat-revenue-trend').textContent = `↑ ${(stats.monthlyRevenue * 0.05).toLocaleString()} vs last week`;
+        if (stats.monthlyRevenue !== undefined) document.getElementById('stat-revenue-trend').textContent = `Current month`;
+
+        // Initialize Charts
+        if (stats.weeklyVisits) {
+            initVisitsChart(stats.weeklyVisits);
+        }
+        if (stats.departmentLoad) {
+            initDepartmentChart(stats.departmentLoad);
+        }
     }
 
     // 2. Hydrate Upcoming Appointments
@@ -88,27 +98,200 @@ function hydrateDashboard(data) {
         }
     }
 
-    // 3. Hydrate Recent Invoices
-    const invoicesBody = document.getElementById('recent-invoices-body');
-    if (invoicesBody) {
-        const recent = (data.invoices || [])
+    // 3. Hydrate Activity Logs
+    const logsBody = document.getElementById('dashboard-activity-body');
+    if (logsBody) {
+        const recent = (data.logs || [])
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(0, 5);
+            .slice(0, 7);
 
         if (recent.length === 0) {
-            invoicesBody.innerHTML = `<p class="text-[12px] text-slate-400 text-center py-4 italic">No invoices generated yet.</p>`;
+            logsBody.innerHTML = `<p class="text-[12px] text-slate-400 text-center py-4 italic">No recent activity.</p>`;
         } else {
-            invoicesBody.innerHTML = recent.map(inv => `
-                <a href="/Admin/Patients/Details?id=${inv.patientId}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
-                    <div class="min-w-0">
-                        <div class="text-[12px] font-bold text-brand-900 truncate">${inv.patient?.fullName || 'Unknown'}</div>
-                        <div class="text-[10px] text-brand-400 font-medium">${new Date(inv.createdAt).toLocaleString('en-PH', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}</div>
+            logsBody.innerHTML = recent.map(log => {
+                const colors = {
+                    'Admin': 'bg-blue-50 text-blue-600',
+                    'Staff': 'bg-indigo-50 text-indigo-600',
+                    'Patient': 'bg-emerald-50 text-emerald-600',
+                    'System': 'bg-slate-50 text-slate-400'
+                };
+                const colorClass = colors[log.category] || 'bg-slate-50 text-slate-500';
+
+                return `
+                <div class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all group">
+                    <div class="w-8 h-8 rounded-lg ${colorClass} flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid ${log.category === 'Admin' ? 'fa-user-shield' : log.category === 'Staff' ? 'fa-user-nurse' : 'fa-user'} text-[11px]"></i>
                     </div>
-                    <div class="text-right">
-                        <div class="text-[12.5px] font-extrabold text-brand-900">₱${inv.finalAmount.toLocaleString(undefined, { minimumFractionDigits: 0 })}</div>
-                        <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${inv.status}</span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-[11.5px] font-bold text-brand-900 truncate">${log.userName}</span>
+                            <span class="text-[9px] text-slate-400 font-medium whitespace-nowrap">${timeAgo(log.createdAt)}</span>
+                        </div>
+                        <p class="text-[10.5px] text-brand-500 leading-snug">${log.action}: <span class="text-brand-400 font-medium">${log.details}</span></p>
                     </div>
-                </a>`).join('');
+                </div>`;
+            }).join('');
         }
     }
+
+    // 4. Hydrate Leave Requests
+    const leavesBody = document.getElementById('leave-requests-body');
+    if (leavesBody) {
+        const pendingLeaves = (data.leaves || [])
+            .filter(l => l.status === 'pending')
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        if (pendingLeaves.length === 0) {
+            leavesBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 text-[13px]">No pending leave requests.</td></tr>`;
+        } else {
+            leavesBody.innerHTML = pendingLeaves.map(leave => {
+                const sDate = new Date(leave.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const eDate = new Date(leave.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 text-[12.5px] font-bold text-brand-900">${leave.staff_name || 'Staff'}</td>
+                        <td class="px-4 py-3 text-[12px] font-medium text-brand-500">${leave.leave_type}</td>
+                        <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">${sDate} - ${eDate}</td>
+                        <td class="px-4 py-3 text-[11px] text-slate-500 truncate max-w-[150px]" title="${leave.reason || ''}">${leave.reason || '-'}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-orange-50 text-orange-600 border-orange-100 uppercase tracking-wider">
+                                Pending
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="updateLeaveStatus('${leave.id}', 'approved')" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-white text-[10px] font-bold hover:bg-emerald-600 transition-colors">Approve</button>
+                                <button onclick="updateLeaveStatus('${leave.id}', 'rejected')" class="px-2.5 py-1 rounded-lg bg-rose-500 text-white text-[10px] font-bold hover:bg-rose-600 transition-colors">Reject</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+    }
+}
+
+window.updateLeaveStatus = async function(id, status) {
+    if (!confirm(`Are you sure you want to ${status.slice(0, -1)} this leave request?`)) return;
+
+    try {
+        const res = await fetch('/api/staff/leave/update-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, status })
+        });
+        
+        if (res.ok) {
+            AdminStore.clearCache('leaves'); // force refresh
+            location.reload();
+        } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to update leave status');
+        }
+    } catch(err) {
+        alert('Network error updating leave status');
+    }
+}
+
+function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + 'm ago';
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + 'h ago';
+    return Math.floor(hours / 24) + 'd ago';
+}
+
+let visitsChartInstance = null;
+function initVisitsChart(weeklyVisits) {
+    const ctx = document.getElementById('visitsChart');
+    if (!ctx) return;
+
+    if (visitsChartInstance) {
+        visitsChartInstance.destroy();
+    }
+
+    const labels = Object.keys(weeklyVisits);
+    const data = Object.values(weeklyVisits);
+
+    visitsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Appointments',
+                data: data,
+                backgroundColor: '#3b82f6',
+                borderRadius: 4,
+                barThickness: 24
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#94a3b8', font: { size: 10, family: 'DM Sans' } },
+                    grid: { color: '#f1f5f9' },
+                    border: { display: false }
+                },
+                x: {
+                    ticks: { color: '#64748b', font: { size: 10, family: 'DM Sans' } },
+                    grid: { display: false },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+}
+
+let deptChartInstance = null;
+function initDepartmentChart(departmentLoad) {
+    const ctx = document.getElementById('departmentChart');
+    if (!ctx) return;
+
+    if (deptChartInstance) {
+        deptChartInstance.destroy();
+    }
+
+    const labels = Object.keys(departmentLoad);
+    const data = Object.values(departmentLoad);
+
+    // Standard brand colors
+    const colors = ['#1E40AF', '#c0392b', '#059669', '#7c3aed', '#f59e0b', '#0ea5e9'];
+
+    deptChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, data.length),
+                borderWidth: 0,
+                cutout: '75%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        usePointStyle: true,
+                        font: { size: 11, family: 'DM Sans' },
+                        color: '#475569',
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
 }

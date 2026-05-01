@@ -205,12 +205,33 @@ function cardHTML(s) {
   </div>`;
 }
 
+let initialSvcFormState = "";
+
+function getSvcFormState() {
+  return JSON.stringify({
+    n: document.getElementById("mName").value,
+    c: document.getElementById("mCategory").value,
+    t: document.getElementById("mTagline").value,
+    s: document.getElementById("mSummary").value,
+    p: document.getElementById("mPrice").value,
+    d: document.getElementById("mDuration").value,
+    r: document.getElementById("mRecovery").value,
+    a: document.getElementById("mIsActive").checked,
+    i: document.getElementById("mIcon").value,
+    bLen: getBenefits().length,
+    sLen: getSteps().length,
+    fLen: getFaqs().length,
+    heroFile: selectedHeroFile ? selectedHeroFile.name : null
+  });
+}
+
 // ── Add Modal ─────────────────────────────────────────────────────────────────
 function openAddModal() {
   document.getElementById("modalTitle").textContent = "Add Service";
   document.getElementById("modalSvcId").value = "";
   selectedHeroFile = null;
   clearModalFields();
+  initialSvcFormState = getSvcFormState();
   showModal();
 }
 
@@ -257,6 +278,7 @@ function openEditModal(id) {
     document.getElementById("heroUploadStatus").classList.add("hidden");
   }
 
+  initialSvcFormState = getSvcFormState();
   showModal();
 }
 
@@ -323,7 +345,12 @@ async function saveService() {
 
     const result = await res.json();
     if (result.ok) {
-      window.location.reload();
+      initialSvcFormState = getSvcFormState(); // bypass discard check
+      closeModal();
+      Toast.show(`Service ${isEdit ? "updated" : "created"}.`, "success");
+      await AdminStore.invalidate('services');
+      const data = await AdminStore.loadData('services', '/api/services/all');
+      if (data) initializeWithData({ services: data });
     } else {
       Toast.show(result.error, "danger");
     }
@@ -379,8 +406,10 @@ function confirmDelete(id, name) {
       const result = await res.json();
       if (result.ok) {
         closeDeleteModal();
-        // Delay reload to let animation finish
-        setTimeout(() => window.location.reload(), 300);
+        Toast.show("Service deleted.", "success");
+        await AdminStore.invalidate('services');
+        const data = await AdminStore.loadData('services', '/api/services/all');
+        if (data) initializeWithData({ services: data });
       } else {
         Toast.show(result.error ?? "Delete failed.", "danger");
         fresh.disabled = false;
@@ -505,6 +534,21 @@ function showModal() {
 }
 
 function closeModal() {
+  if (initialSvcFormState && getSvcFormState() !== initialSvcFormState) {
+    Modal.open({
+      title: "Discard Changes?",
+      message: "You have unsaved changes. Are you sure you want to discard them?",
+      type: "warning",
+      confirmText: "Discard",
+      cancelText: "Keep Editing",
+      onConfirm: () => {
+        initialSvcFormState = getSvcFormState();
+        closeModal();
+      }
+    });
+    return;
+  }
+  
   gsap.to("#svcModal-box", {
     scale: 0.95,
     opacity: 0,

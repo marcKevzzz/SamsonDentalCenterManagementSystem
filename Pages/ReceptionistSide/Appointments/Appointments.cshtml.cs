@@ -5,20 +5,20 @@ using SamsonDentalCenterManagementSystem.Services;
 using SamsonDentalCenterManagementSystem.Helpers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace SamsonDentalCenterManagementSystem.Pages.ReceptionistSide;
+namespace SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.Appointments;
 
 [IgnoreAntiforgeryToken]
-public class AdminAppointmentsModel : AdminPageModel
+public class AppointmentsModel : AdminPageModel
 {
     private readonly AppointmentService _appointments;
     private readonly DentalServiceService _services;
-    private readonly ILogger<AdminAppointmentsModel> _logger;
+    private readonly ILogger<AppointmentsModel> _logger;
     private readonly SessionHelper _sessionHelper;
 
-    public AdminAppointmentsModel(
+    public AppointmentsModel(
         AppointmentService appointments,
         DentalServiceService services,
-        ILogger<AdminAppointmentsModel> logger,
+        ILogger<AppointmentsModel> logger,
         SessionHelper sessionHelper,
         ProfileService profileService)
         : base(profileService)
@@ -44,7 +44,7 @@ public class AdminAppointmentsModel : AdminPageModel
         
         if (token == null)
         {
-            return RedirectToPage("/Authentication/Signin");
+            return RedirectToPage("/Sign-in");
         }
 
         try

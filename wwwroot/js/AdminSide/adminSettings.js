@@ -1,4 +1,5 @@
 import { AdminStore } from './AdminStore.js';
+import { Modal } from '../ui.js';
 
 /**
  * Samson Dental Center - Clinic Settings Module
@@ -31,14 +32,21 @@ export class ClinicSettings {
     }
 
     init() {
-        this.initTabs();
         this.initStatusToggle();
+        this.initialState = this.getFormState();
         
-        // Load data immediately since init() is already called within DOMContentLoaded
         (async () => {
             const data = await AdminStore.loadData('settings', '/api/admin/data/settings');
-            if (data) this.initializeWithData({ settings: data });
+            if (data) {
+                this.initializeWithData({ settings: data });
+                this.initialState = this.getFormState(); // update after hydration
+            }
         })();
+
+        // Handle navigation guard
+        window.onbeforeunload = () => {
+            if (this.isDirty()) return "You have unsaved changes.";
+        };
 
         window.addFaq = () => this.addFaq();
         window.removeFaq = (i) => this.removeFaq(i);
@@ -52,6 +60,10 @@ export class ClinicSettings {
         const toastType = document.getElementById('toast-type')?.value;
         if (toastMsg && window.Toast) {
             window.Toast.show(toastMsg, toastType);
+            if (toastType === 'success') {
+                AdminStore.invalidate('settings');
+                this.initialState = this.getFormState(); // reset dirty state
+            }
         }
     }
 
@@ -85,25 +97,15 @@ export class ClinicSettings {
         this.initPhotos();
     }
 
-    initTabs() {
-        const btns = document.querySelectorAll(this.selectors.tabBtns);
-        const contents = document.querySelectorAll(this.selectors.tabContents);
+    getFormState() {
+        const formData = new FormData(document.querySelector('form'));
+        const obj = {};
+        formData.forEach((value, key) => { obj[key] = value; });
+        return JSON.stringify(obj);
+    }
 
-        btns.forEach(btn => {
-            btn.onclick = () => {
-                const target = btn.getAttribute('data-tab');
-                btns.forEach(b => {
-                    b.classList.remove('bg-white', 'text-brand', 'shadow-sm');
-                    b.classList.add('text-slate-500');
-                });
-                btn.classList.add('bg-white', 'text-brand', 'shadow-sm');
-                btn.classList.remove('text-slate-500');
-
-                contents.forEach(c => c.classList.add('hidden'));
-                const targetEl = document.getElementById(`tab-${target}`);
-                if (targetEl) targetEl.classList.remove('hidden');
-            };
-        });
+    isDirty() {
+        return this.initialState && this.getFormState() !== this.initialState;
     }
 
     // --- Hours Logic ---
@@ -228,10 +230,18 @@ export class ClinicSettings {
     }
 
     removeFaq(index) {
-        const input = document.querySelector(this.selectors.faqsJson);
-        const faqs = JSON.parse(input.value);
-        faqs.splice(index, 1);
-        this.renderFaqs(faqs);
+        Modal.open({
+            title: "Delete FAQ?",
+            message: "Are you sure you want to remove this FAQ? This change will be staged until you save.",
+            type: "danger",
+            confirmText: "Yes, Remove",
+            onConfirm: () => {
+                const input = document.querySelector(this.selectors.faqsJson);
+                const faqs = JSON.parse(input.value);
+                faqs.splice(index, 1);
+                this.renderFaqs(faqs);
+            }
+        });
     }
 
     updateFaq(index, key, value) {
@@ -344,16 +354,26 @@ export class ClinicSettings {
     }
 
     removePhoto(index) {
-        const input = document.querySelector(this.selectors.photosJson);
-        const photos = JSON.parse(input.value);
-        photos.splice(index, 1);
-        this.renderPhotos(photos);
+        Modal.open({
+            title: "Remove Photo?",
+            message: "Are you sure you want to remove this photo? This change will be staged until you save.",
+            type: "danger",
+            confirmText: "Yes, Remove",
+            onConfirm: () => {
+                const input = document.querySelector(this.selectors.photosJson);
+                const photos = JSON.parse(input.value);
+                photos.splice(index, 1);
+                this.renderPhotos(photos);
+            }
+        });
     }
 
     initStatusToggle() {
         const toggle = document.querySelector(this.selectors.autoToggle);
         const manualBox = document.querySelector(this.selectors.manualBox);
         
+        if (!toggle || !manualBox) return;
+
         const updateVisibility = () => {
             if (toggle.checked) {
                 manualBox.classList.add('opacity-40', 'pointer-events-none', 'grayscale');

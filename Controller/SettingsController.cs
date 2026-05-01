@@ -82,7 +82,7 @@ public class SettingsController : ControllerBase
     }
 
     [HttpPut("update-profile")]
-    public async Task<IActionResult> SavePersonal([FromBody] Profile p)
+    public async Task<IActionResult> SavePersonal([FromBody] UserPayload p)
     {
         var userId = User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))

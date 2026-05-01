@@ -1,6 +1,6 @@
 @page "/doctor/dashboard"
 @namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide
-@model DoctorDashboardModel
+@model SamsonDentalCenterManagementSystem.Pages.DoctorSide.DashboardModel
 @{
 ViewData["Title"] = "Doctor Dashboard";
 }
@@ -111,7 +111,7 @@ ViewData["Title"] = "Doctor Dashboard";
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Schedule (2/3) -->
-        <div class="lg:col-span-2 space-y-4">
+        <div class="lg:col-span-2 space-y-6">
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/30">
                     <h3 class="font-display font-bold text-brand text-[15px]">Your Upcoming Appointments</h3>
@@ -186,6 +186,35 @@ ViewData["Title"] = "Doctor Dashboard";
                     </table>
                 </div>
             </div>
+
+            <!-- Leave Requests -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display font-bold text-brand text-[15px]">My Leave Requests</h3>
+                    <button onclick="openLeaveModal()" class="px-3 py-1.5 bg-brand text-white text-[11px] font-bold rounded-lg shadow-sm hover:scale-105 transition-transform">Apply for Leave</button>
+                </div>
+                <div class="space-y-3">
+                    @if (!Model.MyLeaves.Any())
+                    {
+                        <p class="text-[12px] text-slate-400 py-4 italic text-center">No leave requests found.</p>
+                    }
+                    @foreach (var leave in Model.MyLeaves)
+                    {
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
+                            <div>
+                                <div class="text-[13px] font-bold text-brand-900">@leave.LeaveType</div>
+                                <div class="text-[11px] text-brand-400">@leave.StartDate.ToString("MMM dd") - @leave.EndDate.ToString("MMM dd")</div>
+                                @if(!string.IsNullOrEmpty(leave.Reason)){
+                                    <p class="text-[10px] text-brand-500 mt-1 italic">"@leave.Reason"</p>
+                                }
+                            </div>
+                            <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border @(leave.Status == "approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : leave.Status == "rejected" ? "bg-red-50 text-red-600 border-red-100" : "bg-blue-50 text-blue-600 border-blue-100")">
+                                @leave.Status
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
 
 
@@ -234,34 +263,77 @@ ViewData["Title"] = "Doctor Dashboard";
                     Open Records →
                 </button>
             </div>
+        </div>
+    </div>
+</div>
 
-
-            <!-- Mini Calendar or Stats -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400 mb-4">Patient Demographics
-                </h4>
-                <div class="space-y-4">
+<!-- Leave Modal -->
+<div id="leave-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeLeaveModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto flex flex-col overflow-hidden">
+            <div class="p-6 bg-brand-900 text-white">
+                <h3 class="font-display font-extrabold text-xl">Apply for Leave</h3>
+                <p class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Doctor Availability Request</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Leave Type</label>
+                    <select id="leave-type" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none">
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Vacation">Vacation</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <div class="flex justify-between text-[11px] font-bold mb-1.5">
-                            <span class="text-brand-600">Returning Patients</span>
-                            <span class="text-primary">85%</span>
-                        </div>
-                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-primary rounded-full" style="width: 85%"></div>
-                        </div>
+                        <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Start Date</label>
+                        <input id="leave-start" type="date" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none" />
                     </div>
                     <div>
-                        <div class="flex justify-between text-[11px] font-bold mb-1.5">
-                            <span class="text-brand-600">New Consultations</span>
-                            <span class="text-emerald-500">15%</span>
-                        </div>
-                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-emerald-500 rounded-full" style="width: 15%"></div>
-                        </div>
+                        <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">End Date</label>
+                        <input id="leave-end" type="date" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none" />
                     </div>
                 </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Reason</label>
+                    <textarea id="leave-reason" rows="3" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none resize-none"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t">
+                <button onclick="closeLeaveModal()" class="text-[12px] font-bold text-brand-500">Cancel</button>
+                <button onclick="submitLeave()" class="px-6 py-2.5 bg-brand-900 text-white text-[12px] font-bold rounded-xl shadow-lg">Submit Request</button>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    function openLeaveModal() { document.getElementById('leave-modal').classList.remove('hidden'); }
+    function closeLeaveModal() { document.getElementById('leave-modal').classList.add('hidden'); }
+
+    async function submitLeave() {
+        const payload = {
+            leaveType: document.getElementById('leave-type').value,
+            startDate: document.getElementById('leave-start').value,
+            endDate: document.getElementById('leave-end').value,
+            reason: document.getElementById('leave-reason').value
+        };
+
+        if(!payload.startDate || !payload.endDate) return alert('Select dates');
+
+        const res = await fetch('/api/staff/leave/apply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            alert('Request submitted');
+            location.reload();
+        } else {
+            alert('Failed to submit');
+        }
+    }
+</script>

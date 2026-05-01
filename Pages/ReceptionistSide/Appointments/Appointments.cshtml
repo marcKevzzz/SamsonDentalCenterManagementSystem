@@ -1,6 +1,6 @@
 @page "/Receptionist/Appointments"
 @namespace SamsonDentalCenterManagementSystem.Pages.ReceptionistSide
-@model AdminAppointmentsModel
+@model SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.Appointments.AppointmentsModel
 @{
 Layout = "AdminSide/_StaffLayout";
 }
@@ -68,34 +68,52 @@ Layout = "AdminSide/_StaffLayout";
   </div>
 
   <!-- Filter bar -->
-  <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 ">
-    <div class="relative flex-1 min-w-[240px]">
-      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-brand-300 text-[11px]"></i>
-      <input id="search-input" type="text" placeholder="Search by patient name, doctor, or service…"
-        oninput="filterTable()"
-        class="w-full text-[12px] pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white" />
-    </div>
-    
-    <div class="flex items-center gap-2">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Date:</span>
-      <input id="date-filter" type="date" onchange="filterTable()"
-        class="text-[12px] px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" />
-    </div>
-
-    <div class="flex items-center gap-2">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Status:</span>
-      <select id="status-filter" onchange="filterTable()"
-        class="text-[12px] px-4 md:px-8 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white min-w-[140px]">
+  <div class="flex flex-col gap-4 mb-6">
+    <!-- Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-1" id="appointment-tabs">
+      <button onclick="document.getElementById('status-filter').value=''; filterTable(); updateActiveTab(this)" class="tab-btn active px-4 py-2 text-[12px] font-bold text-brand border-b-2 border-brand transition-colors">All</button>
+      <button onclick="document.getElementById('status-filter').value='pending,waitlist'; filterTable(); updateActiveTab(this)" class="tab-btn px-4 py-2 text-[12px] font-bold text-slate-500 border-b-2 border-transparent hover:text-brand transition-colors">Pending / Waitlist</button>
+      <button onclick="document.getElementById('status-filter').value='confirmed,arrived'; filterTable(); updateActiveTab(this)" class="tab-btn px-4 py-2 text-[12px] font-bold text-slate-500 border-b-2 border-transparent hover:text-brand transition-colors">Checked-In / Confirmed</button>
+      <button onclick="document.getElementById('status-filter').value='completed'; filterTable(); updateActiveTab(this)" class="tab-btn px-4 py-2 text-[12px] font-bold text-slate-500 border-b-2 border-transparent hover:text-brand transition-colors">Completed</button>
+      <button onclick="document.getElementById('status-filter').value='cancelled'; filterTable(); updateActiveTab(this)" class="tab-btn px-4 py-2 text-[12px] font-bold text-slate-500 border-b-2 border-transparent hover:text-brand transition-colors">Cancelled</button>
+      
+      <!-- Hidden select for JS compatibility -->
+      <select id="status-filter" class="hidden">
         <option value="">All Statuses</option>
-        <option value="pending">Pending Approval</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="arrived">Arrived (In-Queue)</option>
+        <option value="pending,waitlist">Pending Approval</option>
+        <option value="confirmed,arrived">Arrived (In-Queue)</option>
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
-        <option value="waitlist">On Waitlist</option>
       </select>
     </div>
+
+    <!-- Search & Date -->
+    <div class="flex flex-wrap items-center gap-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+      <div class="relative flex-1 min-w-[240px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-brand-300 text-[11px]"></i>
+        <input id="search-input" type="text" placeholder="Search by patient name, doctor, or service…"
+          oninput="filterTable()"
+          class="w-full text-[12px] pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white" />
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Date:</span>
+        <input id="date-filter" type="date" onchange="filterTable()"
+          class="text-[12px] px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" />
+      </div>
+    </div>
   </div>
+
+  <script>
+    function updateActiveTab(btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('text-brand', 'border-brand', 'active');
+        b.classList.add('text-slate-500', 'border-transparent');
+      });
+      btn.classList.remove('text-slate-500', 'border-transparent');
+      btn.classList.add('text-brand', 'border-brand', 'active');
+    }
+  </script>
 
   <!-- Table -->
   <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
@@ -106,6 +124,7 @@ Layout = "AdminSide/_StaffLayout";
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Ref ID</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Patient</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Service & Doctor</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Source</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Schedule</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Status</th>
             <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Workflow Action</th>
@@ -139,6 +158,7 @@ Layout = "AdminSide/_StaffLayout";
             // Serialize appointment to JSON for JS
             var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
               id              = appt.Id,
+              source          = appt.Source,
               patientName     = appt.PatientName,
               patientEmail    = appt.PatientEmail,
               patientPhone    = appt.PatientPhone,
@@ -176,6 +196,28 @@ Layout = "AdminSide/_StaffLayout";
                   <i class="fa-solid fa-user-doctor text-[9px] mr-1"></i>
                   @(appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned")
                 </div>
+              </td>
+              <td class="px-4 py-4">
+                @if (string.Equals(appt.Source, "guest", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-user-secret text-[9px]"></i> Guest</span>
+                }
+                else if (string.Equals(appt.Source, "admin", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-[9px]"></i> Admin</span>
+                }
+                else if (string.Equals(appt.Source, "walk_in", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-person-walking text-[9px]"></i> Walk-in</span>
+                }
+                else if (string.Equals(appt.Source, "phone", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-phone text-[9px]"></i> Phone</span>
+                }
+                else
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-globe text-[9px]"></i> Online</span>
+                }
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentDate.ToString("MMM dd")</div>

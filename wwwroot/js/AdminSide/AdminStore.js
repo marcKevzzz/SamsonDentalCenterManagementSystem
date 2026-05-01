@@ -79,10 +79,61 @@ export const AdminStore = (() => {
     return cached ? cached.data : null;
   }
 
+  // ── SignalR Integration ──────────────────────────────────────────────
+  let connection = null;
+
+  function initSignalR() {
+    if (typeof signalR === "undefined") {
+      console.warn("SignalR library not found. Real-time updates disabled.");
+      return;
+    }
+
+    connection = new signalR.HubConnectionBuilder()
+      .withUrl("/adminHub")
+      .withAutomaticReconnect()
+      .build();
+
+    connection.on("ReceiveAppointmentUpdate", (data) => {
+      console.log("Real-time: Appointment updated", data);
+      clearCache("appointments");
+      window.dispatchEvent(new CustomEvent("admin:appointments:updated", { detail: data }));
+    });
+
+    connection.on("ReceiveInvoiceUpdate", (data) => {
+      console.log("Real-time: Invoice/Treatment updated", data);
+      clearCache("invoices");
+      clearCache("treatments");
+      clearCache("pending_invoices");
+      window.dispatchEvent(new CustomEvent("admin:invoices:updated", { detail: data }));
+      window.dispatchEvent(new CustomEvent("admin:treatments:updated", { detail: data }));
+    });
+
+    connection.on("ReceiveInquiryUpdate", (data) => {
+      console.log("Real-time: Inquiry updated", data);
+      clearCache("inquiries");
+      window.dispatchEvent(new CustomEvent("admin:inquiries:updated", { detail: data }));
+    });
+
+    connection.on("ReceiveActivityLog", (log) => {
+      window.dispatchEvent(new CustomEvent("admin:activity_log:received", { detail: log }));
+    });
+
+    connection.start()
+      .then(() => console.log("SignalR: Connected to AdminHub"))
+      .catch(err => console.error("SignalR: Connection failed", err));
+  }
+
+  // Initialize if in browser
+  if (typeof window !== "undefined") {
+    // Wait for DOM or just run if SignalR might be loaded via script tag
+    setTimeout(initSignalR, 1000);
+  }
+
   return {
     loadData,
     getData,
-    clearCache
+    clearCache,
+    invalidate: clearCache  // alias used by all modules
   };
 })();
 

@@ -37,7 +37,7 @@ function renderDynamicContent() {
                         <polyline points="6 9 12 15 18 9"/>
                     </svg>
                 </button>
-                <div id="faq-${i}" class="faq-answer bg-white px-6 hidden overflow-hidden transition-all duration-300">
+                <div id="faq-${i}" class="faq-answer bg-white px-6 overflow-hidden">
                     <p class="font-body text-[0.86rem] text-muted leading-relaxed pb-5 pt-1">${item.answer}</p>
                 </div>
             </div>`).join('');
@@ -199,22 +199,20 @@ function initReviewsScroll() {
   // Refresh ScrollTrigger after render
   ScrollTrigger.refresh();
   
-  const travelDistance = container.scrollWidth - section.offsetWidth;
-  if (travelDistance > 0) {
-    gsap.to(container, {
-      x: -travelDistance,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "#reviewsPin",
-        start: "top top",
-        end: () => `+=${travelDistance * 1.5}`,
-        pin: true,
-        scrub: 1.2,
-        onUpdate: (self) => {
-          const index = Math.round(self.progress * (cards.length - 1));
-          setActiveCard(index);
-        }
+  gsap.to(container, {
+    x: () => -(container.scrollWidth - section.offsetWidth),
+    ease: "none",
+    scrollTrigger: {
+      trigger: "#reviewsPin",
+      start: "top top",
+      end: () => `+=${(container.scrollWidth - section.offsetWidth) * 1.5}`,
+      pin: true,
+      scrub: 1.2,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        const index = Math.round(self.progress * (cards.length - 1));
+        setActiveCard(index);
       }
-    });
-  }
+    }
+  });
 }

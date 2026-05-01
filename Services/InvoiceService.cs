@@ -1,7 +1,8 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.SignalR;
+using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Models;
 
 namespace SamsonDentalCenterManagementSystem.Services
@@ -14,6 +15,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly string _serviceRoleKey;
         private readonly ActivityLogService _logs;
         private readonly NotificationService _notifs;
+        private readonly IHubContext<AdminHub> _hubContext;
 
         private static readonly JsonSerializerOptions _json = new()
         {
@@ -26,7 +28,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             string supabaseUrl,
             string serviceRoleKey,
             ActivityLogService logs,
-            NotificationService notifs
+            NotificationService notifs,
+            IHubContext<AdminHub> hubContext
         )
         {
             _supabase = supabase;
@@ -35,6 +38,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _serviceRoleKey = serviceRoleKey;
             _logs = logs;
             _notifs = notifs;
+            _hubContext = hubContext;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -101,6 +105,9 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var itemsRes = await _http.SendAsync(itemsReq);
             itemsRes.EnsureSuccessStatusCode();
+
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveInvoiceUpdate", new { action = "create", id = created.Id });
 
             await _logs.LogActionAsync(invoice.PatientId, "generated invoice", $"Total: {created.FinalAmount}", null, "Invoice", $"/Admin/Invoices?id={created.Id}");
 
@@ -172,6 +179,18 @@ namespace SamsonDentalCenterManagementSystem.Services
             return JsonSerializer.Deserialize<List<Invoice>>(json, _json) ?? new();
         }
 
+        public async Task<List<Invoice>> GetInvoicesByPatientIdAsync(string patientId)
+        {
+            var path =
+                $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&patient_id=eq.{patientId}&order=created_at.desc";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            var json = await res.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<Invoice>>(json, _json) ?? new();
+        }
+
         public async Task UpdateInvoiceStatusAsync(string invoiceId, string status)
         {
             var req = BuildRequest(HttpMethod.Patch, $"/invoices?id=eq.{invoiceId}");
@@ -182,6 +201,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             );
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
+
+            // Broadcast real-time update
+            await _hubContext.Clients.All.SendAsync("ReceiveInvoiceUpdate", new { action = "status_update", id = invoiceId, status = status });
 
             await _logs.LogActionAsync(null, "updated invoice status", $"ID: {invoiceId}, New Status: {status}", null, "Invoice", $"/Admin/Invoices?id={invoiceId}");
         }

@@ -75,11 +75,12 @@ public class AdminReceptionistsController : ControllerBase
 
     // ── PUT /api/admin/receptionists/{id} ─────────────────────────────────────
     [HttpPut("{id}")]
+    [Authorize(Roles = "admin,receptionist")]
     public async Task<IActionResult> UpdateReceptionist(string id, [FromBody] UpdateReceptionistRequest r)
     {
         try
         {
-            var result = await _svc.UpdateAsync(id, r.DeskLocation, r.IsActive);
+            var result = await _svc.UpdateAsync(id, r.DeskLocation, r.Bio, r.IsActive);
             return Ok(new { ok = true, data = result });
         }
         catch (Exception ex)
@@ -104,8 +105,24 @@ public class AdminReceptionistsController : ControllerBase
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
+    // ── PUT /api/admin/receptionists/{id}/availability ───────────────────────
+    [HttpPut("{id}/availability")]
+    [Authorize(Roles = "admin,receptionist")]
+    public async Task<IActionResult> UpdateAvailability(string id, [FromBody] List<ReceptionistAvailabilityDto> slots)
+    {
+        try
+        {
+            var result = await _svc.UpdateAvailabilityAsync(id, slots);
+            return Ok(new { ok = true, data = result });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "UpdateAvailability {Id} failed", id);
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
 }
 
 // ── Request DTOs ─────────────────────────────────────────────────────────────
 public record CreateReceptionistRequest(string ProfileId, string? DeskLocation, bool IsActive = true);
-public record UpdateReceptionistRequest(string? DeskLocation, bool IsActive = true);
+public record UpdateReceptionistRequest(string? DeskLocation, string? Bio, bool IsActive = true);

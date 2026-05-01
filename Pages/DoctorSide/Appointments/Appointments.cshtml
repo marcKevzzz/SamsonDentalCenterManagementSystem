@@ -1,6 +1,6 @@
 @page "/Doctor/Appointments"
-@namespace SamsonDentalCenterManagementSystem.Pages.Admin
-@model AdminAppointmentsModel
+@namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide
+@model SamsonDentalCenterManagementSystem.Pages.DoctorSide.Appointments.AppointmentsModel
 @{
 Layout = "AdminSide/_StaffLayout";
 }
@@ -105,10 +105,10 @@ Layout = "AdminSide/_StaffLayout";
           <tr>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Ref ID</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Patient</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Service & Doctor</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Service</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Source</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Schedule</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Status</th>
-            <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Workflow Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="appointments-body">
@@ -139,6 +139,7 @@ Layout = "AdminSide/_StaffLayout";
             // Serialize appointment to JSON for JS
             var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
               id              = appt.Id,
+              source          = appt.Source,
               patientName     = appt.PatientName,
               patientEmail    = appt.PatientEmail,
               patientPhone    = appt.PatientPhone,
@@ -172,10 +173,28 @@ Layout = "AdminSide/_StaffLayout";
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-medium text-brand-800">@appt.ServiceName</div>
-                <div class="text-[11px] text-brand-400">
-                  <i class="fa-solid fa-user-doctor text-[9px] mr-1"></i>
-                  @(appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned")
-                </div>
+              </td>
+              <td class="px-4 py-4">
+                @if (string.Equals(appt.Source, "guest", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-user-secret text-[9px]"></i> Guest</span>
+                }
+                else if (string.Equals(appt.Source, "admin", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-[9px]"></i> Admin</span>
+                }
+                else if (string.Equals(appt.Source, "walk_in", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-person-walking text-[9px]"></i> Walk-in</span>
+                }
+                else if (string.Equals(appt.Source, "phone", StringComparison.OrdinalIgnoreCase))
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-phone text-[9px]"></i> Phone</span>
+                }
+                else
+                {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-globe text-[9px]"></i> Online</span>
+                }
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentDate.ToString("MMM dd")</div>
@@ -186,107 +205,6 @@ Layout = "AdminSide/_StaffLayout";
                   @statusLabel
                 </span>
               </td>
-              <td class="px-4 py-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <!-- Context-Aware Workflow Button -->
-                  @if (appt.Status == "pending")
-                  {
-                    <button onclick='confirmAppt(@Html.Raw(apptJson))' 
-                            class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">
-                      Confirm
-                    </button>
-                  }
-                  else if (appt.Status == "confirmed")
-                  {
-                    <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
-                            class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">
-                      Check-In
-                    </button>
-                  }
-                  else if (appt.Status == "arrived")
-                  {
-                    <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
-                            class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">
-                      Checkout
-                    </button>
-                  }
-                  else if (appt.Status == "waitlist")
-                  {
-                    <button class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-bold hover:bg-purple-700 transition-colors shadow-sm">
-                      Promote
-                    </button>
-                  }
-  <div class=" inline-block text-left action-dropdown ">
-    <button onclick="toggleDropdown(event, this)" 
-            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
-      <i class="fa-solid fa-ellipsis-vertical"></i>
-    </button>
-
-    <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-50 overflow-hidden">
-      <div class="py-1">
-        @if (appt.Status == "pending")
-        {
-          <button onclick='confirmAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-check-circle w-4"></i> Confirm Booking
-          </button>
-        }
-
-        @if (appt.Status == "confirmed")
-        {
-          <button onclick='updateStatus(@Html.Raw(apptJson), "arrived")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
-          </button>
-        }
-
-        @if (appt.Status is "confirmed" or "arrived")
-        {
-          <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
-          </button>
-          
-          <button onclick='updateStatus(@Html.Raw(apptJson), "no_show")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
-          </button>
-        }
-        
-        <div class="h-px bg-slate-100 my-1"></div>
-
-        @if (appt.Status is "confirmed" or "pending" or "arrived")
-        {
-          <button onclick='openEditModal(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-rotate w-4"></i> Reschedule
-          </button>
-          
-          <button onclick='cancelAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-ban w-4"></i> Cancel
-          </button>
-        }
-
-        @if (appt.Status is "cancelled" or "no-show" or "completed")
-        {
-          <button onclick='openBookModal()' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-plus w-4"></i> Book Again
-          </button>
-        }
-
-        @if (appt.Status is "waitlist" or "no-show" or "cancelled" or "completed")
-        {
-          <button onclick='deleteAppt(@Html.Raw(apptJson))' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-trash-can w-4"></i> Remove Record
-          </button>
-        }
-      </div>
-    </div>
-  </div>
-</td>
             </tr>
           }
         </tbody>
@@ -376,21 +294,6 @@ Layout = "AdminSide/_StaffLayout";
                 <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
               </div>
             </div>
-            <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Assign Doctor</label>
-              <div class="relative">
-                <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
-                <select id="book-doctor"
-                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
-                  <option value="">Any available specialist</option>
-                  @foreach (var doc in Model.Doctors)
-                  {
-                    <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
-                  }
-                </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
-              </div>
-            </div>
             <div>
               <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Appointment Date *</label>
               <div class="relative">
@@ -459,20 +362,7 @@ Layout = "AdminSide/_StaffLayout";
       <input type="hidden" id="edit-appt-id" />
 
       <div class="p-6 space-y-5">
-        <div>
-          <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">Assigned Doctor</label>
-          <div class="relative">
-            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
-            <select id="edit-doctor"
-              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
-              <option value="">Any available specialist</option>
-              @foreach (var doc in Model.Doctors)
-              {
-                <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
-              }
-            </select>
-          </div>
-        </div>
+
         
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -528,23 +418,7 @@ Layout = "AdminSide/_StaffLayout";
             <p id="confirm-modal-message" class="text-[13px] text-emerald-800 leading-relaxed"></p>
         </div>
         
-        <div>
-          <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">Assign Dental Specialist *</label>
-          <div class="relative">
-            <i class="fa-solid fa-user-doctor absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
-            <select id="confirm-doctor"
-              class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-emerald-500 transition-all outline-none appearance-none">
-              <option value="">Select a doctor…</option>
-              @foreach (var doc in Model.Doctors)
-              {
-                <option value="@doc.Id" data-name="@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")" data-specialties="@(doc.Specialties != null ? string.Join(",", doc.Specialties) : "")">@(doc.Profile != null ? $"{doc.Title} {doc.Profile.FirstName} {doc.Profile.LastName}" : "Unknown")</option>
-              }
-            </select>
-          </div>
-          <p id="doctor-hint" class="text-[10px] text-brand-400 mt-2 ml-1 hidden italic">
-            <i class="fa-solid fa-circle-info mr-1"></i> Filtering by service specialty…
-          </p>
-        </div>
+
       </div>
 
       <input type="hidden" id="confirm-appt-id" />

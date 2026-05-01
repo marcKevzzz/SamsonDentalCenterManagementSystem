@@ -113,7 +113,7 @@ public class AdminDoctorsController : ControllerBase
 
     [HttpPost("{id}/availability")]
     public async Task<IActionResult> SetAvailability(
-        string id, [FromBody] List<DoctorAvailability> slots)
+        string id, [FromBody] List<StaffAvailability> slots)
     {
         try
         {

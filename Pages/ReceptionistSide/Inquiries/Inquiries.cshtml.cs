@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SamsonDentalCenterManagementSystem.Helpers;
 
-namespace SamsonDentalCenterManagementSystem.Pages.ReceptionistSide;
+namespace SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.Inquiries;
 
-public class AdminInquiriesModel : AdminPageModel
+public class InquiriesModel : AdminPageModel
 {
-    private readonly ILogger<AdminInquiriesModel> _logger;
+    private readonly ILogger<InquiriesModel> _logger;
 
-    public AdminInquiriesModel(ILogger<AdminInquiriesModel> logger, ProfileService profileService)
+    public InquiriesModel(ILogger<InquiriesModel> logger, ProfileService profileService)
         : base(profileService)
     {
         _logger = logger;
@@ -19,4 +19,3 @@ public class AdminInquiriesModel : AdminPageModel
     {
     }
 }
-

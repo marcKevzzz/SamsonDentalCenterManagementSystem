@@ -39,6 +39,34 @@ ViewData["Title"] = "Dashboard";
     </div>
   </div>
 
+  <!-- Claim Records Banner (Hidden by default, shown via JS) -->
+  <div id="claim-records-banner" class="hidden fade-up bg-blue-500 rounded-2xl p-6 relative overflow-hidden border border-blue-600/30">
+    <div class="absolute inset-0 opacity-[0.04]" style="
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 1) 1px, transparent 1px);
+        background-size: 32px 32px;
+      "></div>
+    <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-5">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+          <i class="fa-solid fa-link text-white text-xl"></i>
+        </div>
+        <div>
+          <h3 class="brand-font font-bold text-white text-[1.2rem] leading-tight mb-1">
+            We found past appointments for you!
+          </h3>
+          <p class="font-body text-[0.85rem] text-white/80 max-w-md">
+            It looks like you booked with us as a guest previously. Would you like to link those records to this account?
+          </p>
+        </div>
+      </div>
+      <button id="btn-claim-records" class="w-full sm:w-auto brand-font font-bold text-[0.75rem] tracking-wider uppercase bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors shadow-sm shrink-0 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Claim Records
+      </button>
+    </div>
+  </div>
+
   <!-- Stat cards -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 fade-up">
     <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb]">
@@ -71,7 +99,7 @@ ViewData["Title"] = "Dashboard";
 
     <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb]">
       <div class="flex items-start justify-between mb-3">
-        <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+        <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
            <i class="fa-solid fa-check text-primary"></i>
         </div>
       </div>
@@ -379,33 +407,7 @@ ViewData["Title"] = "Dashboard";
     </div>
   </div>
 
-  <!-- Promo banner -->
-  <div class="fade-up bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden">
-    <div class="flex flex-col sm:flex-row items-center gap-5 p-5">
-      <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shrink-0">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 12 20 22 4 22 4 12" />
-          <rect x="2" y="7" width="20" height="5" />
-          <path d="M12 22V7" />
-          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
-          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-        </svg>
-      </div>
-      <div class="flex-1 text-center sm:text-left">
-        <div class="brand-font font-bold text-brand text-[1rem]">
-          New Patient Promo — 20% OFF your next visit
-        </div>
-        <div class="font-body text-[0.82rem] text-muted mt-0.5">
-          Use code <strong class="text-brand font-semibold">NEW20</strong> when
-          booking. Valid until May 31, 2026.
-        </div>
-      </div>
-      <a href="/Appointments"
-        class="brand-font font-bold text-[0.75rem] tracking-wider uppercase bg-brand text-white px-6 py-3 rounded-xl hover:bg-primary transition-colors no-underline shrink-0">Book
-        Now →</a>
-    </div>
-  </div>
+ 
 </div>
 
 <script type="module" src="~/js/PatientSide/dashboard.js" asp-append-version="true"></script>

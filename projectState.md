@@ -121,9 +121,123 @@
 - **JSON Parsing Robustness**:
   - Hardened frontend `fetch` operations in `AdminStore.js`, `adminInquiries.js`, and `auth.js` to handle non-JSON or empty responses gracefully, preventing "Unexpected end of JSON input" errors.
   - Added status and content-type checks before calling `.json()` on all administrative and authentication API responses.
-- **Data Integrity Fixes**:
-  - Resolved "null patientId" in Admin dashboards by adding fallbacks to navigation property IDs in `AdminDataController.cs` (Appointments and Inquiries).
+- Resolved "null patientId" in Admin dashboards by adding fallbacks to navigation property IDs in `AdminDataController.cs` (Appointments and Inquiries).
   - Verified and ensured `InquiryService.cs` correctly projects patient identifiers even when primary IDs are missing in the base record.
 - **Inquiry UI Improvements**:
   - Implemented dynamic date separators in Admin chat messages ("Today", "Yesterday", or full date like "March 30") with horizontal lines for improved readability.
   - Fixed mobile keyboard focus and scroll behavior in admin inquiry view.
+* **Date**: 2026-04-30 (UI/UX Refinement & Stability)
+- **Settings Modularization**:
+  - Split the monolithic `Settings.cshtml` into four dedicated Razor Pages: `Identity`, `Availability`, `FAQs`, and `Photos` under `/Admin/Settings/`.
+  - Updated `AdminSettingsModel` to support partial section updates, preventing data loss when saving individual pages.
+  - Implemented a collapsible dropdown and popup menu for Settings in the sidebar, supporting both expanded and collapsed states.
+  - Refactored `adminSettings.js` to handle page-specific initialization and removed legacy tab logic.
+- **Cache Invalidation & Data Reactivity**:
+  - Replaced manual `window.location.reload()` calls with `AdminStore.invalidate()` across all management modules (Users, Services, Staff, Appointments).
+  - Ensured data changes are reflected instantly in grids by re-hydrating from `AdminStore` after mutations.
+- **Enhanced UX Flows**:
+  - Implemented "Discard Changes" confirmation modals across all major management forms using `Modal.open`.
+  - Standardized deletion guards with confirmation modals for FAQs, Photos, Staff, and Services.
+  - Fixed Inquiry timestamp discrepancies by standardizing UTC date parsing in `adminInquiries.js`, resolving the "now" display issue for older messages.
+- **Staff Portal Navigation**:
+  - Added "Profile" and "Sign Out" popup menu to the sidebar avatar for collapsed state.
+  - Synchronized sidebar active states with the new modular Settings routes.
+
+* **Date**: 2026-04-29
+- **Real-Time Infrastructure & Identity Tracking**:
+  - **SignalR Integration**:
+    - Implemented `AdminHub` for real-time broadcasts.
+    - Integrated SignalR into `AppointmentService`, `InvoiceService`, and `InquiryService` to broadcast state changes instantly.
+    - Updated `AdminStore.js` to act as a centralized SignalR client, managing cache invalidation and event dispatching (`admin:*:updated`).
+  - **Automated Identity Logging**:
+    - Refactored `ActivityLogService` to use `IHttpContextAccessor` for automatic performer identification.
+    - Enhanced audit logs to consistently display the name of the performing user (Staff/Doctor) instead of "System".
+  - **Reactive Admin UI**:
+    - Migrated `adminAppointment.js`, `doctorInvoice.js`, and `adminInquiries.js` to event-driven updates, removing legacy `location.reload()` calls.
+    - Replaced message polling in Inquiries with instant SignalR delivery.
+    - Implemented role-based invoice filtering: Doctors now only see their assigned patients, while Admins retain a master overview on the Transactions page.
+- **Analytics & Reporting (Chart.js)**:
+  - Included Chart.js CDN globally via `_StaffLayout.cshtml`.
+  - Refactored `/api/admin/data/stats` in `AdminDataController.cs` to aggregate dynamic chart data: Weekly Visits, Department Load, Monthly Revenue Trend, and Key Metrics.
+  - Replaced hardcoded dashboard elements with dynamic `canvas` components for Patient Visits (Bar Chart) and Department Load (Doughnut Chart).
+  - Built a new `/api/admin/data/reports-data` endpoint to calculate Big Three KPIs, Provider Utilization, Status Distribution, Demographics Heatmap, and Time Leak.
+  - Completely redesigned `Reports.cshtml` and `adminReports.js` to feature a Date Range Picker, Status Pie Chart, Location Heatmap, Provider utilization table, and Appointment Pulse Grid.
+- **Staff Profile Settings**:
+  - Implemented `/StaffProfile` page mapping directly to the `_StaffLayout.cshtml` allowing all staff roles (Admin, Doctor, Receptionist) to update their personal details, address, password, and avatar.
+  - Re-used existing API endpoints (`/api/settings/update-profile`, `/api/settings/update-password`, `/api/settings/upload-avatar`) providing uniform logic across Patient and Staff portals.
+  - Adapted the frontend script (`staffProfile.js`) to dynamically update the Staff Layout sidebar elements instead of the patient top navigation bar.
+
+* **Date**: 2026-04-30 (Bug Fixes)
+- **Doctor Key Mismatch (Staff Grid "undefined")**:
+  - Root cause 1: `AdminStore.invalidate` was undefined — callers silently failed, stale cache persisted. Fixed: added `invalidate: clearCache` alias to `AdminStore` exports.
+  - Root cause 2: `adminAppointment.js` used `/api/admin/doctors` (raw Supabase models) with cache key `"doctors"`, poisoning the shared cache with wrong-shape data. Fixed: changed to `/api/admin/data/doctors` (projected DTOs).
+  - Root cause 3: `adminStaff.js` `docJson` serialized `isActive: doc.is_active` (snake_case) but DTO uses camelCase `isActive` → always `undefined` in edit modal. Fixed: `doc.is_active` → `doc.isActive`.
+  - Removed leftover `console.log(doc)` debug line from `renderDoctorCard`.
+
+* **Date**: 2026-04-30 (Feature: Date Blocking)
+- **Soft Date Blocking for Appointments**:
+  - Added `blocked_dates` table (migration: `20260430_CreateBlockedDates.sql`). Fields: `id`, `blocked_date` (unique), `reason`, `blocked_by` (FK → profiles), `created_at`.
+  - Created `BlockedDate.cs` model with `[Table]`, `[Column]`, `[PrimaryKey]` attributes.
+  - Created `BlockedDateService.cs`: `GetAllAsync`, `IsDateBlockedAsync`, `BlockDateAsync`, `UnblockDateAsync`, `GetBlockedDateStringsAsync`.
+  - Registered `BlockedDateService` as `AddScoped` in `Program.cs`.
+  - Created `AdminBlockedDatesController.cs` (`/api/admin/blocked-dates`):
+    - `GET` — list all blocked dates (admin only)
+    - `GET /strings` — list date strings for calendar (anonymous — patient side)
+    - `POST` — block a date; returns `conflicts[]` + `conflictCount` of active appointments on that day
+    - `DELETE /{id}` — unblock a date
+  - Injected `BlockedDateService` into patient `AppointmentsController`: guards booking with 409 if date is blocked. Also exposed `GET /api/appointments/check-date?date=` for frontend calendar.
+  - Admin UI (`Appointments.cshtml`): added "Block Date" button to header; Block Date modal (date picker + reason + currently-blocked list with remove); Conflict modal (amber warning, lists affected patients with contact info).
+  - `adminAppointment.js`: `openBlockDateModal`, `closeBlockDateModal`, `submitBlockDate`, `showConflictModal`, `closeConflictModal`, `unblockDate`, `renderBlockedList`, `loadBlockedDates`. Conflict flow auto-triggers after successful block if `conflictCount > 0`.
+  - `schema.sql` updated with `blocked_dates` table + index.
+  - **Soft block behavior**: existing appointments are NOT cancelled. Admin sees the conflict list and handles them manually (notify/reschedule).
+
+* **Date**: 2026-04-30 (Staff Restructuring & Analytics Attribution)
+- **Staff Portal Modularization**:
+  - Split the monolithic `Staff.cshtml` into two separate pages: `Doctors/Index.cshtml` and `Receptionists/Index.cshtml`.
+  - Converted the "Staff" sidebar navigation item into a collapsible dropdown containing "Doctors" and "Receptionists".
+  - Split `adminStaff.js` into `adminDoctors.js` and `adminReceptionists.js` for independent logic and data hydration.
+- **Receptionist Schema Parity**:
+  - Added `bio` and `receptionist_availability` support mirroring the Doctor implementation.
+  - Updated `ReceptionistService.cs` and `/api/admin/receptionists` to handle full CRUD operations for both bio and availability.
+  - Unified `StaffModal.cshtml` fields so Bio and Availability Schedule are shared sections between Doctors and Receptionists.
+- **Appointment Source Tracking**:
+  - Added `source` column to `appointments` table (e.g., online, admin, walk_in, guest).
+  - Updated `AdminDataController` and frontend logic (`adminAppointment.js`, `Appointments.cshtml`) across Admin, Doctor, and Receptionist portals to display the source context badge within the scheduling table.
+
+* **Date**: 2026-04-30 (Bug Fixes & staff_availability Merge)
+- **BlockedDate PGRST204 Fix**: Added `[JsonIgnore]` to `BlockedByProfile` nav property in `BlockedDate.cs`.
+- **Activity Log IP Fix**: `ActivityLogService.cs` maps `::1` → `127.0.0.1`, strips `::ffff:` prefix.
+- **Inquiry Timestamp Fix**: `InquiryService.cs` uses ISO 8601 for `updated_at`; `adminInquiries.js` `timeAgo()` handles clock skew.
+- **Invoice 0 Amount Fix**: Force-bust services cache on load; re-lookup price from live `SERVICES[]` array in `doctorInvoice.js` instead of stale `data-price` attribute.
+- **Receptionist Availability Day Fix**: `adminReceptionists.js` `getAvailabilitySlots()` now uses snake_case keys matching backend DTO `[JsonPropertyName]`.
+- **staff_availability Schema Merge**:
+  - Migration: `20260430_MergeStaffAvailability.sql` — creates `staff_availability(staff_id, staff_type, ...)`, migrates rows, drops old tables.
+  - `Models/Doctor.cs`: `DoctorAvailability` → `StaffAvailability` (unified model).
+  - `Models/Receptionist.cs`: `ReceptionistAvailability` removed; uses shared `StaffAvailability`.
+  - `Services/DoctorService.cs`: Two-step fetch (no PostgREST embed). `FetchDoctorAvailabilityAsync()` queries `staff_availability?staff_type=eq.doctor`, merges by `staff_id`. Graceful fallback if table absent.
+  - `Services/ReceptionistService.cs`: Same pattern with `FetchReceptionistAvailabilityAsync()`.
+  - `Controller/AdminDoctorsController.cs`: `SetAvailability` takes `List<StaffAvailability>`.
+  - **ACTION REQUIRED**: Run `Backend/Migrations/20260430_MergeStaffAvailability.sql` in Supabase SQL Editor.
+- **Activity Logs UI Enhancements**:
+  - Moved `category` badge to the top of each log entry for better visibility.
+  - Implemented action-based color coding (Green: Add/Create, Red: Delete/Cancel, Amber: Update/Modify, Violet: Auth/Login).
+  - Added real-time filtering by search term and category.
+  - Improved layout with 2xl rounded corners and better typography.
+
+* **Date**: 2026-05-01 (Staff Portal Finalization)
+- **Portal Feature Parity & Segmentation**:
+  - Successfully finalized functionality for **Doctor** and **Receptionist** portals, ensuring visual and feature parity with the Administrative dashboard while maintaining strict role-based data isolation.
+  - **Inquiry Chats**: Enabled the full Chat-UI in both staff portals, allowing doctors and receptionists to handle patient inquiries directly with real-time updates via SignalR.
+  - **Activity Logs**: Integrated the Administrative activity log view into staff portals, providing staff with a history of system events filtered by their permissions.
+  - **Receptionist Dashboard**: Enhanced with interactive "Weekly Visits" and "Department Load" charts powered by Chart.js, providing front-desk analytics at a glance.
+- **Reporting & Data Scoping**:
+  - **Doctor-Specific Analytics**: Refactored the /api/admin/data/reports-data endpoint in AdminDataController.cs to automatically scope all KPIs (Completion Rate, Bookings, Utilization) to the logged-in doctor's profile.
+  - **Invoice Scoping**: Standardized the Invoices view for Doctors to only display their assigned arrived patients and historical invoices, while Receptionists retain the global clinic billing overview.
+  - **Dynamic Invoicing**: Overhauled the Doctor Invoices page to match the Admin's pre-selection and dynamic loading logic, including the ability to start treatments directly from the dashboard "Treatment Center".
+- **Infrastructure & Stability**:
+  - **JS Resiliency**: Implemented defensive null-check guards in dminAppointment.js and dminDashboard.js to prevent runtime TypeErrors on pages that omit specific dashboard elements (like stat cards or charts).
+  - **API Optimization**: Fixed a "300 Multiple Choices" ambiguity error in StaffLeaveService.cs by explicitly specifying foreign key hints in the Supabase query.
+  - **Modular Page Models**: Successfully separated and namespaced Razor Page models for all staff portals (SamsonDentalCenterManagementSystem.Pages.DoctorSide.* and SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.*) to prevent naming conflicts and improve maintainability.
+- **Availability & Leave Management**:
+  - Implemented a unified **My Schedule** page for all staff, featuring a dynamic calendar view and leave application workflow.
+  - Created staffAvailability.js to manage the lifecycle of leave requests and schedule visualization across all staff roles.

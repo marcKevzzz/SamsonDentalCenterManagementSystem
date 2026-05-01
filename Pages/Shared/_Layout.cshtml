@@ -27,16 +27,20 @@
   <script src="~/js/config.js" asp-append-version="true"></script>
 </head>
 
-<body class="bg-white">
+<body class="bg-white overflow-hidden">
   
-  <!-- Loading Screen -->
-  <div id="page-loader" class="fixed inset-0 z-[20000] bg-white flex flex-col items-center justify-center transition-opacity duration-700">
-    <div class="relative w-20 h-20 mb-4">
-      <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-      <div class="absolute inset-0 border-4 border-brand rounded-full animate-spin border-t-transparent"></div>
-      <img src="~/images/logo.svg" alt="logo" class="absolute inset-4 w-12 h-12 object-contain animate-pulse" />
+  <div id="page-loader" class="fixed inset-0 z-[20000] max-h-screen overflow-hidden bg-[#fcfcfc] flex flex-col items-center justify-center transition-all duration-700">
+    <div class="relative flex flex-col items-center gap-6">
+      <div class="relative flex items-center justify-center w-20 h-20">
+         <div class="absolute inset-0 rounded-full bg-primary/20 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+         <img src="~/images/logo.svg" alt="Samson Dental Center" class="relative w-14 h-14 object-contain opacity-90 drop-shadow-sm z-10 hover:scale-105 transition-transform" />
+      </div>
+      <div class="flex gap-1.5 mt-2">
+        <div class="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style="animation-delay: -0.3s"></div>
+        <div class="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style="animation-delay: -0.15s"></div>
+        <div class="w-2 h-2 rounded-full bg-primary animate-bounce"></div>
+      </div>
     </div>
-    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Samson Dental</span>
   </div>
 
   <script>
@@ -68,14 +72,13 @@
 
   <div id="profileBackdrop" class="fixed inset-0 z-40 hidden" onclick="closeProfile()"></div>
 
-  <div class="w-full min-h-screen main-class">
-    <main role="main">@RenderBody()</main>
+  <div class="w-full min-h-screen main-class overflow-x-hidden">
+    <main id="main-content" role="main" class="opacity-0 translate-y-6 transition-all duration-[800ms] ease-out">@RenderBody()</main>
   </div>
 
   <partial name="../PatientSide/Components/Footer" />
 
   <!-- Chat Bubble -->
-
   <partial name="../PatientSide/Components/Chatbot" />
 
   <!-- Toast Container -->
@@ -85,19 +88,49 @@
   <div id="modal-root"></div>
 
   <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
   <script type="module" src="~/js/site.js" asp-append-version="true"></script>
   <script src="~/js/PatientSide/chatbot.js" asp-append-version="true"></script>
 
   <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
 
-
   @await RenderSectionAsync("Scripts", required: false)
   <script>
     window.addEventListener('load', () => {
         const loader = document.getElementById('page-loader');
+        const main = document.getElementById('main-content');
+        
+        // Hide loader
         if (loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.remove(), 700);
+            loader.classList.replace('duration-700', 'duration-300');
+            loader.classList.add('opacity-0', 'scale-105');
+            
+            // Remove overflow immediately to restore scroll height for GSAP
+            document.body.classList.remove('overflow-hidden');
+            
+            setTimeout(() => {
+                loader.remove();
+            }, 300);
+        } else {
+            document.body.classList.remove('overflow-hidden');
+        }
+        
+        // Transition page in
+        if (main) {
+            // Slight delay to sync with loader fade
+            setTimeout(() => {
+                main.classList.remove('opacity-0', 'translate-y-6');
+                main.classList.add('opacity-100');
+                
+                // CRITICAL: CSS Transforms break GSAP's position: fixed for pins.
+                // We must remove the transition and translation completely once it finishes!
+                setTimeout(() => {
+                    main.classList.remove('transition-all', 'duration-[800ms]', 'ease-out', 'translate-y-0');
+                    main.style.transform = 'none'; // Force remove any residual transform
+                    main.style.transition = 'none';
+                    if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+                }, 850);
+            }, 50);
         }
     });
   </script>

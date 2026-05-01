@@ -5,32 +5,34 @@ using SamsonDentalCenterManagementSystem.Services;
 using SamsonDentalCenterManagementSystem.Helpers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide;
+namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Appointments;
 
 [IgnoreAntiforgeryToken]
-public class AdminAppointmentsModel : AdminPageModel
+public class AppointmentsModel : AdminPageModel
 {
     private readonly AppointmentService _appointments;
+    private readonly DoctorService _doctorService;
     private readonly DentalServiceService _services;
-    private readonly ILogger<AdminAppointmentsModel> _logger;
+    private readonly ILogger<AppointmentsModel> _logger;
     private readonly SessionHelper _sessionHelper;
 
-    public AdminAppointmentsModel(
+    public AppointmentsModel(
         AppointmentService appointments,
+        DoctorService doctorService,
         DentalServiceService services,
-        ILogger<AdminAppointmentsModel> logger,
+        ILogger<AppointmentsModel> logger,
         SessionHelper sessionHelper,
         ProfileService profileService)
         : base(profileService)
     {
         _appointments = appointments;
+        _doctorService = doctorService;
         _services     = services;
         _logger       = logger;
         _sessionHelper = sessionHelper;
     }
 
     public List<Appointment>    Appointments { get; set; } = new();
-    public List<Doctor>         Doctors      { get; set; } = new();
     public List<DentalService>  Services     { get; set; } = new();
 
     public int CountConfirmed => Appointments.Count(a => string.Equals(a.Status, "confirmed", StringComparison.OrdinalIgnoreCase));
@@ -38,27 +40,28 @@ public class AdminAppointmentsModel : AdminPageModel
     public int CountCancelled => Appointments.Count(a => string.Equals(a.Status, "cancelled", StringComparison.OrdinalIgnoreCase));
     public int CountWaitlist  => Appointments.Count(a => string.Equals(a.Status, "waitlist", StringComparison.OrdinalIgnoreCase));
 
-   public async Task<IActionResult> OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
         var token = await _sessionHelper.GetValidTokenAsync();
         
-        if (token == null)
+        if (token == null || (CurrentUserRole != "doctor" && CurrentUserRole != "admin"))
         {
-            return RedirectToPage("/Authentication/Signin");
+            return RedirectToPage("/Sign-in");
         }
 
         try
         {
-            var res = await _appointments.GetAllAsync();
-            Appointments = res.OrderByDescending(a => a.AppointmentDate).ToList();
+            var doc = await _doctorService.GetDoctorByProfileIdAsync(CurrentUserId);
+            if (doc != null)
+            {
+                var res = await _appointments.GetByDoctorIdAsync(doc.Id);
+                Appointments = res.OrderByDescending(a => a.AppointmentDate).ToList();
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load appointments");
+            _logger.LogError(ex, "Failed to load doctor appointments");
         }
-
-        try { Doctors = await _appointments.GetDoctors(); }
-        catch (Exception ex) { _logger.LogError(ex, "Failed to load doctors"); }
 
         try { Services = await _services.GetAll(); }
         catch (Exception ex) { _logger.LogError(ex, "Failed to load services"); }

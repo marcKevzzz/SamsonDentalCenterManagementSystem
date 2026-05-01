@@ -88,6 +88,24 @@ window.cancelAppointment = function(id) {
     });
 }
 
+window.rescheduleAppointment = function(id) {
+    Modal.open({
+        title: "Reschedule Appointment",
+        message: "Are you sure you want to reschedule this appointment? This will cancel your current booking and take you to the booking page.",
+        type: "warning",
+        confirmText: "Reschedule",
+        onConfirm: async () => {
+            try {
+                // We can cancel it, or just redirect to the booking page with a reschedule parameter
+                // We'll just redirect to the booking page for now
+                window.location.href = `/Appointments?rescheduleId=${id}`;
+            } catch (err) {
+                console.error("Reschedule Error:", err);
+            }
+        }
+    });
+}
+
 // ── Details Modal ─────────────────────────────────────────────────────────────
 window.viewApptDetails = (appt) => {
     const modal = document.getElementById('details-modal');

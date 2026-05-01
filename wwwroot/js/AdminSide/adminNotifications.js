@@ -29,6 +29,7 @@
     // Flash dot and re-fetch or prepend
     dot.classList.remove("hidden");
     fetchNotifications();
+    fetchCounts();
     Toast.show(`New: ${n.title}`, "info");
   });
 
@@ -41,6 +42,46 @@
       setTimeout(startSignalR, 5000);
     }
   }
+
+  async function fetchCounts() {
+      try {
+          const res = await fetch("/api/admin/data/counts");
+          const json = await res.json();
+          if (json.ok) {
+              updateBadges(json.data);
+          }
+      } catch (err) {
+          console.error("Failed to fetch counts:", err);
+      }
+  }
+
+  function updateBadges(data) {
+      const updateBadge = (id, count, containerId = null) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          
+          if (count > 0) {
+              el.textContent = count > 99 ? '99+' : count;
+              el.classList.remove('hidden');
+              if(containerId) {
+                 const container = document.getElementById(containerId);
+                 if (container) container.classList.add('has-badge');
+              }
+          } else {
+              el.classList.add('hidden');
+              if(containerId) {
+                 const container = document.getElementById(containerId);
+                 if (container) container.classList.remove('has-badge');
+              }
+          }
+      };
+
+      updateBadge('notif-appointments-count', data.pendingAppointments);
+      updateBadge('notif-inquiries-count', data.unreadInquiries);
+      updateBadge('notif-leaves-count', data.pendingLeaves);
+      updateBadge('notif-reviews-count', data.pendingReviews);
+  }
+
 
   function renderNotifications(notifs) {
     if (!notifs || notifs.length === 0) {
@@ -105,6 +146,11 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     fetchNotifications();
+    fetchCounts();
     startSignalR();
   });
+
+  // Listen for custom events to refresh counts
+  window.addEventListener('admin:leaves:updated', fetchCounts);
+  window.addEventListener('admin:inquiries:updated', fetchCounts);
 })();

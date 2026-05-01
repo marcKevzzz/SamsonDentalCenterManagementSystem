@@ -6,99 +6,181 @@ Layout = "AdminSide/_StaffLayout";
 
 
 <!-- ── REPORTS ── -->
-<div id="page-reports" class="page p-4 md:p-6">
-  <div class="mb-5">
-    <h2 class="font-display text-xl font-extrabold text-brand">Reports</h2>
-    <p class="text-[12px] text-brand-500 mt-0.5">
-      Analytics and performance insights
-    </p>
+<div id="page-reports" class="page p-4 md:p-6 xl:max-h-[calc(100vh-60px)] relative xl:overflow-hidden">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+    <div>
+      <h2 class="font-display text-xl font-extrabold text-brand">Reports</h2>
+      <p class="text-[12px] text-brand-500 mt-0.5">
+        Analytics and performance insights
+      </p>
+    </div>
+    
+    <!-- Section A: Date Range Picker -->
+    <div class="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-1">
+        <input type="date" id="report-start" class="text-[11px] font-medium text-brand border-none outline-none focus:ring-0 px-2 py-1.5 rounded-lg bg-transparent" />
+        <span class="text-slate-300 text-[10px]">to</span>
+        <input type="date" id="report-end" class="text-[11px] font-medium text-brand border-none outline-none focus:ring-0 px-2 py-1.5 rounded-lg bg-transparent" />
+        <button id="btn-update-reports" class="bg-primary text-white text-[10.5px] font-bold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors">Apply</button>
+    </div>
   </div>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <div class="bg-white rounded-2xl p-5 border border-slate-200">
-      <h3 class="font-display font-bold text-brand">Monthly Revenue</h3>
-      <p class="text-[10.5px] text-brand mt-0.5 mb-4">Jan – Mar 2026</p>
-      <div class="h-36 flex items-end gap-3">
-        <div class="cbar">
-          <div
-            class="cbar-inner"
-            style="
-              height: 55%;
-              background: linear-gradient(180deg, #1e40af, #3b82f6);
-            "
-          ></div>
-          <span class="text-[10.5px] text-brand">Jan</span>
+
+  <div id="reports-loading" class="py-20 text-center">
+    <i class="fa-solid fa-circle-notch fa-spin text-slate-300 text-3xl mb-3 block"></i>
+    <p class="text-[13px] font-medium text-slate-500">Generating reports...</p>
+  </div>
+
+  <div id="reports-content" class="hidden space-y-4">
+      <!-- 1. The "Big Three" Dashboard Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Total Bookings -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Bookings</h3>
+                <div class="font-display text-3xl font-extrabold text-brand" id="kpi-bookings">0</div>
+                <p class="text-[11px] text-brand-500 mt-1">Total volume in selected period</p>
+            </div>
         </div>
-        <div class="cbar">
-          <div
-            class="cbar-inner"
-            style="
-              height: 70%;
-              background: linear-gradient(180deg, #1e40af, #3b82f6);
-            "
-          ></div>
-          <span class="text-[10.5px] text-brand">Feb</span>
+        <!-- Completion Rate -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Completion Rate</h3>
+                <div class="font-display text-3xl font-extrabold text-emerald-600" id="kpi-completion">0%</div>
+                <p class="text-[11px] text-brand-500 mt-1">Completed vs. No-Shows</p>
+            </div>
         </div>
-        <div class="cbar">
-          <div
-            class="cbar-inner"
-            style="
-              height: 90%;
-              background: linear-gradient(180deg, #c0392b, #ef4444);
-              box-shadow: 0 0 10px rgba(192, 57, 43, 0.3);
-            "
-          ></div>
-          <span class="text-[10.5px] font-semibold text-orange-600">Mar</span>
-        </div>
-      </div>
-    </div>
-    <div class="bg-white rounded-2xl p-5 border border-slate-200">
-      <h3 class="font-display font-bold text-brand mb-4">Key Metrics</h3>
-      <div class="space-y-3.5">
-        <div>
-          <div class="flex justify-between text-[12px] mb-1.5">
-            <span class="text-brand-500">Bed Occupancy</span
-            ><span class="font-semibold text-brand">78%</span>
-          </div>
-          <div class="h-1.5 rounded-full bg-slate-100">
-            <div
-              class="h-1.5 rounded-full w-[78%] bg-gradient-to-r from-primary to-primary-light"
-            ></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-[12px] mb-1.5">
-            <span class="text-brand-500">Patient Satisfaction</span
-            ><span class="font-semibold text-brand">92%</span>
-          </div>
-          <div class="h-1.5 rounded-full bg-slate-100">
-            <div
-              class="h-1.5 rounded-full w-[92%] bg-gradient-to-r from-emerald-500 to-emerald-400"
-            ></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-[12px] mb-1.5">
-            <span class="text-brand-500">Appointment Completion</span
-            ><span class="font-semibold text-brand">85%</span>
-          </div>
-          <div class="h-1.5 rounded-full bg-slate-100">
-            <div
-              class="h-1.5 rounded-full w-[85%] bg-gradient-to-r from-violet-600 to-violet-400"
-            ></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-[12px] mb-1.5">
-            <span class="text-brand-500">Staff Utilization</span
-            ><span class="font-semibold text-brand">68%</span>
-          </div>
-          <div class="h-1.5 rounded-full bg-slate-100">
-            <div
-              class="h-1.5 rounded-full w-[68%] bg-gradient-to-r from-amber-500 to-amber-300"
-            ></div>
-          </div>
+        <!-- Peak Hours -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Peak Hours</h3>
+                <div class="font-display text-2xl font-extrabold text-brand mt-1" id="kpi-peak">N/A</div>
+                <p class="text-[11px] text-brand-500 mt-1.5">Most requested time slot</p>
+            </div>
         </div>
       </div>
-    </div>
+
+      <!-- 2. Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Status Distribution -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200">
+            <h3 class="font-display font-bold text-brand mb-1">Appointment Status Distribution</h3>
+            <p class="text-[11px] text-brand-500 mb-4">Breakdown of scheduling health</p>
+            <div class="h-64 w-full flex justify-center">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Demographics -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200">
+            <h3 class="font-display font-bold text-brand mb-1">Patient Loyalty & Demographics</h3>
+            <p class="text-[11px] text-brand-500 mb-4">First-time vs Returning & Location Heatmap</p>
+            
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <div class="text-[10px] font-bold text-brand-500 uppercase">First-Time</div>
+                    <div class="text-2xl font-bold text-primary" id="demo-first">0</div>
+                </div>
+                <div class="flex-1 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <div class="text-[10px] font-bold text-brand-500 uppercase">Returning</div>
+                    <div class="text-2xl font-bold text-emerald-600" id="demo-returning">0</div>
+                </div>
+            </div>
+
+            <h4 class="text-[12px] font-bold text-brand mb-2">Location Heatmap (Top 5)</h4>
+            <div class="space-y-2.5" id="heatmap-container">
+                <!-- Dynamic Heatmap Bars -->
+            </div>
+        </div>
+      </div>
+
+      <!-- 3. Tables & Pulse Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 xl:max-h-[calc(100vh-685px)]  xl:overflow-hidden">
+          <!-- Provider Utilization -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 xl:max-h-[calc(100vh-685px)] overflow-hidden relative">
+              <h3 class="font-display font-bold text-brand mb-1">Provider Utilization Report</h3>
+              <p class="text-[11px] text-brand-500 mb-4">Tracking doctor busyness and workload</p>
+              
+              <div class="w-full overflow-x-auto rounded-xl border border-slate-100 max-h-full">
+                  <table class="w-full text-left">
+                      <thead class="bg-slate-50 border-b border-slate-100">
+                          <tr>
+                              <th class="px-4 py-2 text-[10px] font-bold text-brand uppercase tracking-wider">Doctor Name</th>
+                              <th class="px-4 py-2 text-[10px] font-bold text-brand uppercase tracking-wider">Hours Booked</th>
+                              <th class="px-4 py-2 text-[10px] font-bold text-brand uppercase tracking-wider">Avg Appts/Day</th>
+                          </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100" id="provider-table-body">
+                          <!-- Dynamic Rows -->
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <!-- Section B: The Appointment Pulse -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 xl:max-h-[calc(100vh-685px)] overflow-x-auto">
+              <h3 class="font-display font-bold text-brand mb-1">The Appointment Pulse</h3>
+              <p class="text-[11px] text-brand-500 mb-4">Actionable insights to optimize clinic flow</p>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- No-Show Rate -->
+                  <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-rose-200 hover:shadow-sm transition-all group">
+                      <div class="flex items-center gap-2 mb-2">
+                          <div class="w-6 h-6 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-user-xmark text-[10px]"></i></div>
+                          <h4 class="text-[12px] font-bold text-brand">No-Show Rate</h4>
+                      </div>
+                      <div class="text-xl font-bold text-rose-600 mb-1" id="pulse-noshow">0%</div>
+                      <p class="text-[10px] text-slate-500 leading-tight">Patients who booked but didn't arrive. Identifies if more SMS reminders are needed.</p>
+                  </div>
+                  
+                  <!-- Busy Day -->
+                  <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all">
+                      <div class="flex items-center gap-2 mb-2">
+                          <div class="w-6 h-6 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-calendar-day text-[10px]"></i></div>
+                          <h4 class="text-[12px] font-bold text-brand">Busy Day</h4>
+                      </div>
+                      <div class="text-xl font-bold text-blue-600 mb-1" id="pulse-busyday">N/A</div>
+                      <p class="text-[10px] text-slate-500 leading-tight">Day with the most bookings. Helps in planning staff breaks and cleaning.</p>
+                  </div>
+
+                  <!-- Service Popularity -->
+                  <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-emerald-200 hover:shadow-sm transition-all">
+                      <div class="flex items-center gap-2 mb-2">
+                          <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-tooth text-[10px]"></i></div>
+                          <h4 class="text-[12px] font-bold text-brand">Top Service</h4>
+                      </div>
+                      <div class="text-xl font-bold text-emerald-600 mb-1 truncate" id="pulse-service">N/A</div>
+                      <p class="text-[10px] text-slate-500 leading-tight">The most booked procedure based on patient requests.</p>
+                  </div>
+
+                  <!-- Time Leak -->
+                  <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-amber-200 hover:shadow-sm transition-all">
+                      <div class="flex items-center gap-2 mb-2">
+                          <div class="w-6 h-6 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-hourglass-half text-[10px]"></i></div>
+                          <h4 class="text-[12px] font-bold text-brand">Time Leak</h4>
+                      </div>
+                      <div class="text-xl font-bold text-amber-600 mb-1" id="pulse-leak">0%</div>
+                      <p class="text-[10px] text-slate-500 leading-tight">Unbooked open hours. Measures how much of the clinic's time is left empty.</p>
+                  </div>
+              </div>
+          </div>
+      </div>
   </div>
 </div>
+
+@section Scripts {
+    <script type="module" src="~/js/AdminSide/adminReports.js" asp-append-version="true"></script>
+}

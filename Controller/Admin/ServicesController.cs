@@ -53,9 +53,9 @@ namespace SamsonDentalCenterManagementSystem.Controllers
             return Ok(categories);
         }
 
-        // GET /api/services/all — admin, includes inactive
+        // GET /api/services/all — admin/staff, includes inactive
         [HttpGet("all")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> GetAllAdmin()
         {
             var services = await _svcService.GetAll(activeOnly: false);

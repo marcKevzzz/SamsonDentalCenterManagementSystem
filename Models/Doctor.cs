@@ -35,20 +35,23 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("profiles")]
         public Profile? Profile { get; set; }
 
-        // ── Availability join — populated by .Select("*, profiles(*), doctor_availability(*)") ──
-        [JsonProperty("doctor_availability")]
-        public List<DoctorAvailability>? Availability { get; set; }
+        // ── Availability join ─────────────────────────────────────────────────────
+        [JsonProperty("staff_availability")]
+        public List<StaffAvailability>? Availability { get; set; }
     }
 
-    // ── DoctorAvailability model ──────────────────────────────────────────────
-    [Table("doctor_availability")]
-    public class DoctorAvailability : BaseModel
+    // ── StaffAvailability model (unified) ───────────────────────────────────────
+    [Table("staff_availability")]
+    public class StaffAvailability : BaseModel
     {
         [PrimaryKey("id", false)]
         public string Id { get; set; } = string.Empty;
 
-        [Column("doctor_id")]
-        public string DoctorId { get; set; } = string.Empty;
+        [Column("staff_id")]
+        public string StaffId { get; set; } = string.Empty;
+
+        [Column("staff_type")]
+        public string StaffType { get; set; } = string.Empty;
 
         // 0 = Sunday … 6 = Saturday
         [Column("day_of_week")]
@@ -63,7 +66,6 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
-        // ── Helper: short day abbreviation ────────────────────────────────────
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public string DayAbbr => DayOfWeek switch

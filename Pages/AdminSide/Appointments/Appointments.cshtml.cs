@@ -43,7 +43,7 @@ public class AdminAppointmentsModel : AdminPageModel
         var token = await _sessionHelper.GetValidTokenAsync();
         if (token == null)
         {
-            return RedirectToPage("/Authentication/Signin");
+            return RedirectToPage("/Sign-in");
         }
         return Page();
     }

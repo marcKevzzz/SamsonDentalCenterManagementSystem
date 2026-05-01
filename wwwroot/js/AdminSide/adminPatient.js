@@ -82,10 +82,13 @@ function renderTable() {
   const start = (currentPage - 1) * PAGE_SIZE;
   const items = filtered.slice(start, start + PAGE_SIZE);
 
+  const role = document.body.dataset.role || 'admin';
+  const basePath = role === 'admin' ? '/Admin' : (role === 'doctor' ? '/Doctor' : '/Receptionist');
+
   tbody.innerHTML = items
     .map(
       (p) => `
-            <tr class="group hover:bg-slate-50/80 border-b border-slate-100 transition-colors last:border-0">
+            <tr onclick="window.location.href='${basePath}/Patients/Details?id=${p.id || ''}'" class="group hover:bg-slate-50/80 border-b border-slate-100 transition-colors last:border-0 cursor-pointer">
                 <td class="px-4 py-3.5">
                     <div class="flex items-center gap-3">
                         ${
@@ -94,7 +97,7 @@ function renderTable() {
                             : `<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold font-display ring-1 ring-primary/20">${p.initials}</div>`
                         }
                         <div>
-                            <a href="/Admin/Patients/Details?id=${p.id || ''}" class="text-[13.5px] font-semibold text-brand-900 hover:text-primary transition-colors block leading-tight">
+                            <a href="${basePath}/Patients/Details?id=${p.id || ''}" class="text-[13.5px] font-semibold text-brand-900 hover:text-primary transition-colors block leading-tight">
                                 ${p.firstName} ${p.lastName}
                             </a>
                             <span class="text-[10px] font-mono text-brand-400 uppercase tracking-tight">#P-${(p.id || "00000").slice(0, 5)}</span>
@@ -120,7 +123,7 @@ function renderTable() {
                     </span>
                 </td>
                 <td class="px-4 py-3.5 text-right">
-                    <a href="/Admin/Patients/Details?id=${p.id}" 
+                    <a href="${basePath}/Patients/Details?id=${p.id}" 
                        class="inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-bold text-primary hover:bg-primary/5 rounded-md transition-all">
                        View Profile
                     </a>
