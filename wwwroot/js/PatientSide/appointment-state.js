@@ -1,9 +1,7 @@
 // ── appointment-state.js ──────────────────────────────────────────────────────
 
-export const ALL_SLOTS = [
-    "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-    "1:00 PM",  "2:00 PM",  "3:00 PM",  "4:00 PM",  "5:00 PM"
-];
+// ALL_SLOTS is now dynamically generated based on clinic hours and service duration.
+export const ALL_SLOTS = []; 
 
 export const CATEGORIES = ["General Dentistry", "Cosmetic", "Specialized"];
 export const RESTRICTED_CATEGORIES = ["Specialized"];
@@ -46,8 +44,22 @@ export const STATE = {
         otherDob:       ""
     },
     patient: readServerUser(),  // from server — never from localStorage
-    ref:     ""
+    ref:     "",
+    blockedDates: []
 };
+
+// ── Fetch Blocked Dates ────────────────────────────────────────────────────────
+async function loadBlockedDates() {
+    try {
+        const res = await fetch("/api/appointments/blocked-dates");
+        if (res.ok) {
+            STATE.blockedDates = await res.json();
+        }
+    } catch (err) {
+        console.error("Failed to load blocked dates:", err);
+    }
+}
+loadBlockedDates();
 
 // ── FIX Bug 1: Availability cache keyed by serviceId+date ─────────────────────
 // Was: { "2026-04-20": { ... } }  ← shared across ALL services — WRONG

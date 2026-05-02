@@ -27,7 +27,7 @@ ViewData["Title"] = "Home page";
     }));
 </script>
 
-<section id="hero" class="relative h-screen max-h-[900px] flex items-center overflow-hidden bg-[var(--brand-dark)]">
+<section id="hero" class="relative h-[95vh] min-h-[700px] flex items-center overflow-hidden bg-[var(--brand-dark)]">
     <!-- Skeleton Loader -->
     <div class="hero-skeleton" id="heroSkeleton"></div>
 
@@ -40,68 +40,61 @@ ViewData["Title"] = "Home page";
     <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-0 w-full flex flex-col lg:flex-row lg:items-center justify-between gap-12 ">
         <div class="max-w-3xl xl:w-1/2">
             <span class="hp-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6 border border-white/5">
-                Welcome to Samson Dental Center
+                Established 1964
             </span>
 
-            <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.9] text-white mb-6 flex flex-col"
-                style="font-size: clamp(2.2rem, 5vw, 4.2rem);">
-                <span class="line flex flex-wrap gap-x-[0.3em] overflow-hidden">
-                    <span class="flex gap-x-[0.3em] flex-wrap">
-                     <span class="hp-word inline-block">Your</span>
-                    <span class="hp-word inline-block ">Smile</span>
-                    </span>
-                   
-                    <!-- <br class="sm :block xl:hidden hidden" /> -->
-                      <span class="flex gap-x-[0.3em]">
-                    <span class="hp-word inline-block ">Is</span>
-                    <span class="hp-word inline-block">Our</span>
-                    </span>
+            <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.95] text-white mb-6 flex flex-col"
+                style="font-size: clamp(2.5rem, 6vw, 4.8rem);">
+                <span class="hp-reveal overflow-hidden">
+                    <span class="hp-word inline-block">Crafting</span>
                 </span>
-                <span class="line flex flex-wrap gap-x-[0.3em] overflow-hidden">
-                    <span class="hp-word inline-block text-primary brightness-115">First</span>
-                    <span class="hp-word inline-block text-primary brightness-115">Priority.</span>
+                <span class="hp-reveal overflow-hidden">
+                    <span class="hp-word inline-block text-primary brightness-115">Generations</span>
+                </span>
+                <span class="hp-reveal overflow-hidden">
+                    <span class="hp-word inline-block">of Smiles.</span>
                 </span>
             </h1>
 
-            <p class="hp-reveal-late font-body text-base text-white/80 max-w-[430px] leading-relaxed sm:mb-10 mb-6">
-                Experience world-class dental care with state-of-the-art technology and a team dedicated to your oral health and aesthetic goals.
+            <p class="hp-reveal-late font-body text-base text-white/60 max-w-[430px] leading-relaxed sm:mb-10 mb-6">
+                Samson Dental Center: Pioneer on dental advancements in expertise, facilities and equipments over the years. Skill, experience and technology under one roof.
             </p>
 
             <div class="hp-reveal-late flex flex-wrap gap-2">
                 <a href="/Appointments"
-                    class="brand-font font-bold text-xs sm:text-sm bg-[var(--primary)] text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-full hover:scale-105 hover:shadow-[0_10px_20px_rgba(30,64,175,0.3)] transition-all duration-300 no-underline flex items-center gap-2 group">
-                    Make an Appointment
+                    class="brand-font font-bold text-xs sm:text-sm bg-[var(--primary)] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:scale-105 hover:shadow-[0_10px_20px_rgba(30,64,175,0.3)] transition-all duration-300 no-underline flex items-center gap-2 group">
+                    Book Treatment
                     <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
-                <a href="/Services"
-                    class="brand-font font-bold text-xs sm:text-sm border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-full hover:bg-white hover:text-[var(--brand-dark)] hover:scale-105 hover:shadow-[0_10px_20px_rgba(255,255,255,0.2)] transition-all duration-300 no-underline">
-                    Explore Services
+                <a href="/About"
+                    class="brand-font font-bold text-xs sm:text-sm border-2 border-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:border-white hover:scale-105 transition-all duration-300 no-underline">
+                    Our History
                 </a>
             </div>
         </div>
 
-        <!-- Right side: Doctor Portrait (Visible on LG screens) -->
+        <!-- Right side: Doctor Portrait -->
         <div class="xl:w-1/2 hidden xl:flex justify-end items-end relative h-full">
             <div class="hero-doctor-container relative">
-                <!-- Soft glow behind the doctor -->
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[100px] rounded-full -z-10 animate-pulse"></div>
+                <img src="~/images/hero_doc1-remove.png" alt="Dentist" class="hp-doctor-img h-full w-auto object-contain object-bottom cursor-follow-target" />
                 
-                <img src="~/images/hero_doc1-remove.png" alt="Dentist" class="hp-doctor-img h-full w-auto object-contain object-bottom" />
-                
-                <!-- Glassmorphism Badge -->
                 <div class="hp-glass-badge absolute top-3/4 -left-6 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-2xl flex items-center gap-3">
                     <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-award text-white text-lg"></i>
+                        <i class="fa-solid fa-clock-rotate-left text-white text-lg"></i>
                     </div>
                     <div>
-                        <div class="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/40">Multi-Awarded</div>
-                        <div class="text-[0.88rem] font-bold text-white">#1 Dental Team 2024</div>
+                        <div class="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/40">Since 1964</div>
+                        <div class="text-[0.88rem] font-bold text-white">60 Years of Trust</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Wavy Transition -->
+<div class="wavy-transition"></div>
 
 <!-- ------------------------------------
      THE SAMSON STANDARD (Why Choose Us)
@@ -114,57 +107,86 @@ ViewData["Title"] = "Home page";
       <div class="max-w-2xl">
         <div class="flex items-center gap-2 font-body text-[0.65rem] font-bold tracking-[0.2em] uppercase text-[var(--primary)] mb-4">
           <span class="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-pulse"></span>
-          Our Commitment to Excellence
+          Why Choose Us?
         </div>
         <h2 class="brand-font font-extrabold leading-[1.1] text-[var(--brand-dark)]" style="font-size:clamp(2.2rem, 5vw, 3.5rem);">
-          Why Patients <br><span class="text-gradient">Choose Us</span>
+          Pioneering <br><span class="text-gradient">Dental Care</span>
         </h2>
       </div>
-      <p class="font-body text-[0.95rem] text-muted leading-relaxed max-w-[400px]">
-        We combine clinical expertise with a compassionate approach to deliver results that last a lifetime.
+      <p class="font-body text-[0.95rem] text-muted leading-relaxed max-w-[420px]">
+        Samson Dental Center has its roots since 1964. Now on its 3rd generation, we incorporate skill, experience and technology under one roof.
       </p>
     </div>
 
     <!-- Feature grid -->
-    <div class="reveal-up grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Feature 1 -->
-      <div class="hp-feature-card group bg-white p-8 rounded-[2.5rem] border border-blue-50 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
-          <i class="fa-solid fa-user-doctor text-white text-xl"></i>
+    <div class="reveal-up grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Feature 1: History -->
+      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+        <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-landmark text-white text-lg"></i>
         </div>
-        <h3 class="brand-font font-bold text-xl mb-4 text-[var(--brand-dark)]">Expert Specialists</h3>
-        <p class="font-body text-[0.9rem] text-muted leading-relaxed">
-          Our team consists of board-certified dentists with specialized training in restorative and aesthetic procedures.
+        <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Heritage & Trust</h3>
+        <p class="font-body text-[0.82rem] text-muted leading-relaxed">
+          Pioneer of dental advancements in Baguio since 1964, building trust across generations.
         </p>
       </div>
 
-      <!-- Feature 2: Technology -->
-      <div class="hp-feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
-          <i class="fa-solid fa-microscope text-white text-xl"></i>
+      <!-- Feature 2: Ortho -->
+      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+        <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-teeth-brushing text-white text-lg"></i>
         </div>
-        <h3 class="brand-font font-bold text-xl mb-4 text-[var(--brand-dark)]">Modern Technology</h3>
-        <p class="font-body text-[0.9rem] text-muted leading-relaxed">
-          From digital x-rays to intraoral cameras, we use state-of-the-art equipment for precise diagnosis and comfort.
+        <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Orthodontics</h3>
+        <p class="font-body text-[0.82rem] text-muted leading-relaxed">
+          Straightening teeth for all ages. We make your dream of a perfect smile a reality.
         </p>
       </div>
 
-      <!-- Feature 3: Safety -->
-      <div class="hp-feature-card group bg-white rounded-[2rem] p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--primary)]/10 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-24 h-24 bg-[var(--primary)]/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-        <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform">
-          <i class="fa-solid fa-shield-virus text-white text-xl"></i>
+      <!-- Feature 3: Implants -->
+      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+        <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-tooth text-white text-lg"></i>
         </div>
-        <h3 class="brand-font font-bold text-xl mb-4 text-[var(--brand-dark)]">Safety & Hygiene</h3>
-        <p class="font-body text-[0.9rem] text-muted leading-relaxed">
-          We strictly adhere to international sterilization protocols to ensure the safety and well-being of every patient.
+        <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Dental Implants</h3>
+        <p class="font-body text-[0.82rem] text-muted leading-relaxed">
+          Mimic the look and feel of natural teeth with our experienced restorative specialists.
+        </p>
+      </div>
+
+      <!-- Feature 4: General -->
+      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+        <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
+        </div>
+        <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">General Care</h3>
+        <p class="font-body text-[0.82rem] text-muted leading-relaxed">
+          From cleanings to extractions, we promise a comfortable and positive experience.
         </p>
       </div>
 
     </div>
   </div>
+</section>
+
+<!-- ------------------------------------
+     GALLERY (Detroit Style)
+------------------------------------- -->
+<section id="gallery" class="bg-white py-32 overflow-hidden">
+    <div class="max-w mx-auto px-8">
+        <div class="flex flex-col items-center text-center mb-24">
+            <h2 id="galleryText" class="brand-font font-extrabold text-brand leading-none" style="font-size: clamp(3rem, 10vw, 8rem);">
+                THE CLINIC
+            </h2>
+        </div>
+        
+        <div class="relative h-[600px] w-full gallery-scroll-area">
+             <!-- Images pop up here via JS ScrollTrigger -->
+             <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" class="gallery-img-pop absolute w-64 h-80 object-cover rounded-3xl shadow-2xl opacity-0" data-x="-30%" data-y="-20%" />
+             <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-img-pop absolute w-72 h-56 object-cover rounded-3xl shadow-2xl opacity-0" data-x="35%" data-y="10%" />
+             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-img-pop absolute w-60 h-72 object-cover rounded-3xl shadow-2xl opacity-0" data-x="-25%" data-y="40%" />
+             <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=800&q=80" class="gallery-img-pop absolute w-80 h-60 object-cover rounded-3xl shadow-2xl opacity-0" data-x="20%" data-y="-45%" />
+        </div>
+    </div>
 </section>
 
 
@@ -172,66 +194,73 @@ ViewData["Title"] = "Home page";
      REVIEWS (Scroll Triggered)
      Pinned section that scrolls horizontally
 ------------------------------------- -->
-<section id="reviews" class="bg-[var(--brand-dark)] py-4 overflow-hidden">
-    <div id="reviewsPin" class="h-screen flex items-center">
-      <div class="max-w mx-auto px-8 w-full flex md:flex-row flex-col items-center gap-12">
-        
-        <!-- Left Side: Header -->
-        <div class="reveal-up md:w-[400px] w-full shrink-0 flex flex-col items-center md:items-start text-center md:text-left">
-          <div class="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-[0.6rem] font-bold tracking-widest uppercase md:mb-4">
-            Patient Testimonials
-          </div>
-          <h2 class="brand-font font-extrabold text-white leading-[1.1] mb-6" style="font-size:clamp(2.5rem,5vw,4rem);">
-            What makes<br><span class="text-primary font-extrabold italic">us smile?</span>
-          </h2>
-          <p class="text-white/60 text-sm mb-8 max-w-sm">
-            Join thousands of happy patients who have experienced the Samson Dental standard of care.
-          </p>
-          <div class="flex gap-4 mb-8">
-            <div class="flex flex-col">
-              <span class="text-white font-bold text-2xl">@Model.AverageRating.ToString("0.0")/5</span>
-              <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Google Rating</span>
-            </div>
-            <div class="w-px h-10 bg-white/10"></div>
-            <div class="flex flex-col">
-              <span class="text-white font-bold text-2xl">@(Model.TotalReviews / 1000)k+</span>
-              <span class="text-white/40 text-[0.6rem] uppercase tracking-tighter">Happy Patients</span>
-            </div>
-          </div>
-          <!-- Progress dots -->
-          <div id="reviewDots" class="flex gap-2 md:flex hidden"></div>
+<section id="reviews" class="bg-[var(--brand-dark)] py-32 overflow-hidden relative">
+    <div class="max-w mx-auto px-8 relative z-10 mb-16 text-center">
+        <h2 class="brand-font font-extrabold text-white" style="font-size: clamp(2.5rem, 5vw, 4rem);">
+            Trusted by <span class="text-primary italic">Thousands.</span>
+        </h2>
+    </div>
+
+    <!-- 2-Way Marquee -->
+    <div class="flex flex-col gap-6">
+        <!-- Row 1: Right to Left -->
+        <div class="marquee-track">
+            @foreach(var r in Model.Reviews.Take(Math.Max(5, Model.Reviews.Count/2))) {
+                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
+                        <div>
+                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
+                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
+                        </div>
+                    </div>
+                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
+                </div>
+            }
+            <!-- Duplicate for infinite effect -->
+             @foreach(var r in Model.Reviews.Take(Math.Max(5, Model.Reviews.Count/2))) {
+                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
+                        <div>
+                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
+                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
+                        </div>
+                    </div>
+                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
+                </div>
+            }
         </div>
 
-        <!-- Right Side: Cards Slider -->
-        <div class="horizontal-scroll-section w-full relative">
-          <!-- Fade masks -->
-          <div class="scroll-fade-left"></div>
-          <div class="scroll-fade-right"></div>
-          <div id="reviewsContainer" class="horizontal-scroll-wrapper"></div>
+        <!-- Row 2: Left to Right -->
+        <div class="marquee-track-reverse">
+            @foreach(var r in Model.Reviews.Skip(Model.Reviews.Count/2)) {
+                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
+                        <div>
+                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
+                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
+                        </div>
+                    </div>
+                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
+                </div>
+            }
+            <!-- Duplicate -->
+            @foreach(var r in Model.Reviews.Skip(Model.Reviews.Count/2)) {
+                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
+                        <div>
+                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
+                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
+                        </div>
+                    </div>
+                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
+                </div>
+            }
         </div>
-
-      </div>
     </div>
-</section>
-
-
-<!-- ----------------------------------
-     FAQ
------------------------------------ -->
-<section class="bg-white">
-  <div class="max-w mx-auto px-8 lg:px-12 pt-12">
-
-    <div class="text-center mb-12 fade-up">
-      <h2 class="brand-font font-extrabold text-[var(--brand-dark)] mb-3" style="font-size:clamp(1.8rem,3.5vw,2.5rem);">
-        Frequently Asked Questions
-      </h2>
-      <p class="font-body text-[0.9rem] text-muted">Common questions from our patients.</p>
-    </div>
-    <div class="space-y-3 fade-up max-w-3xl mx-auto" id="faqList"></div>
-
-  </div>
-
-  </div>
 </section>
 
 

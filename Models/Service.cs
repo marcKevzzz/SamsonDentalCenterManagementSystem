@@ -131,6 +131,12 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("duration")]
         public string? Duration { get; set; }
 
+        [Column("duration_minutes")]
+        public int DurationMinutes { get; set; } = 60;
+
+        [Column("buffer_minutes")]
+        public int BufferMinutes { get; set; } = 15;
+
         [Column("recovery")]
         public string? Recovery { get; set; }
 

@@ -191,7 +191,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
               <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand/50">Pricing & Logistics</h4>
             </div>
 
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-[11px] font-bold text-brand/60 mb-1.5 ml-1">Price *</label>
                 <div class="relative">
@@ -201,14 +201,33 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 </div>
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-brand/60 mb-1.5 ml-1">Duration</label>
+                <label class="block text-[11px] font-bold text-brand/60 mb-1.5 ml-1">Display Duration</label>
                 <div class="relative">
                   <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                   <input id="mDuration" type="text" placeholder="e.g. 45 min"
                     class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
                 </div>
               </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
               <div>
+                <label class="block text-[11px] font-bold text-brand/60 mb-1.5 ml-1">Duration (Minutes) *</label>
+                <div class="relative">
+                  <i class="fa-solid fa-hourglass-start absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
+                  <input id="mDurationMinutes" type="number" placeholder="e.g. 60"
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-brand/60 mb-1.5 ml-1">Buffer (Minutes) *</label>
+                <div class="relative">
+                  <i class="fa-solid fa-shield-halved absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
+                  <input id="mBufferMinutes" type="number" placeholder="e.g. 15"
+                    class="w-full text-[13px] pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+                </div>
+              </div>
+              <div class="col-span-2">
                 <label class="block text-[11px] font-bold text-brand/60 mb-1.5 ml-1">Recovery</label>
                 <div class="relative">
                   <i class="fa-solid fa-bed absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>

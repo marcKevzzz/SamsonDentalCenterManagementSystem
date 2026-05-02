@@ -104,18 +104,21 @@ function applyFilter() {
 window.markRead = async function(el, id) {
   if (el.getAttribute("data-read") === "true") return;
 
-  el.setAttribute("data-read", "true");
-  el.classList.remove("bg-blue-50/40");
-  const dot = el.querySelector(".unread-dot");
-  if (dot) dot.remove();
-  
   try {
       await fetch(`/api/patient/data/notifications/read/${id}`, { method: 'POST' });
   } catch (err) {
       console.error(err);
   }
-  
-  updateBadge();
+
+  // Animate out then remove
+  el.style.transition = "opacity 0.25s, transform 0.25s";
+  el.style.opacity = "0";
+  el.style.transform = "translateX(12px)";
+  setTimeout(() => {
+    el.remove();
+    applyFilter();
+    updateBadge();
+  }, 260);
 }
 
 function updateBadge() {

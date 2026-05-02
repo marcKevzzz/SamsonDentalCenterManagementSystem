@@ -44,11 +44,11 @@ export function renderStep4() {
             </div>
         </div>
         <div class="flex flex-wrap gap-4 mt-4 pt-4 border-t border-white/10">
-            ${s?.duration ? `
+            ${(s?.durationMinutes || s?.duration) ? `
             <div class="flex items-center gap-1.5 font-body text-[.74rem] text-white/55">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>${s.duration}
+                </svg>${s.durationMinutes ? s.durationMinutes + ' min' : s.duration}
             </div>` : ""}
             ${s?.recovery ? `
             <div class="flex items-center gap-1.5 font-body text-[.74rem] text-white/55">
@@ -154,7 +154,7 @@ export async function confirmBooking() {
             patientEmail:    d.email,
             patientPhone:    d.phone,
             patientSex:      d.sex   || null,
-            patientDob:      d.dob   ? new Date(d.dob + "T00:00:00").toISOString() : null,
+            patientDob:      d.dob   ? new Date(d.dob + "T12:00:00").toISOString() : null,
             patientType:     d.patientType ?? "New Patient",
             isGuest:         !loggedIn,
             isForOther:      d.isForOther,
@@ -163,12 +163,12 @@ export async function confirmBooking() {
             otherEmail:      d.otherEmail || null,
             otherPhone:      d.otherPhone || null,
             otherSex:        d.otherSex  || null,
-            otherDob:        d.otherDob  ? new Date(d.otherDob + "T00:00:00").toISOString() : null,
+            otherDob:        d.otherDob  ? new Date(d.otherDob + "T12:00:00").toISOString() : null,
             serviceId:       STATE.service?.id   ?? "",
             serviceName:     STATE.service?.name ?? "",
             doctorId:        STATE.doctor?.id    ?? null,
             doctorName:      STATE.doctor?.name  ?? null,
-            appointmentDate: STATE.date ? new Date(STATE.date + "T00:00:00").toISOString() : "",
+            appointmentDate: STATE.date ? new Date(STATE.date + "T12:00:00").toISOString() : "",
             appointmentTime: STATE.time ?? "",
             isWaitlist:      STATE.isWaitlist,
             notes:           d.notes || null

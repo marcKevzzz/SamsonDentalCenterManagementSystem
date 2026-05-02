@@ -5,65 +5,53 @@ ViewData["Title"] = "About page";
 }
 
 <section class="pt-[68px] relative overflow-hidden h-[400px] bg-brand bg-ani">
-
-  <!-- <div class="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] via-[#49494b] to-[#414147]"></div> -->
   <div class="absolute inset-0 opacity-[0.04]"
     style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;">
   </div>
-  <!-- <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div> -->
-
-
   <div class=" max-w mx-auto px-8 lg:px-12 py-16 relative z-10 ">
     <h1 class="about-hero-text brand-font font-extrabold leading-[1.05]  text-[clamp(2.6rem,6vw,4.2rem)] text-white mb-3">
       About Us
     </h1>
-    <p class="about-hero-text font-body text-[0.92rem] text-white/45  leading-relaxed">
+    <p class="about-hero-text font-body text-[0.92rem] text-white/45  leading-relaxed max-w-xl">
       @(Model.ClinicSettings.AboutText ?? "Discover the story, mission, and people behind Samson Dental Center's commitment to excellence.")
     </p>
   </div>
-
 </section>
-
 
 <!-- ══════════════════════════════════
      OUR STORY
 ═══════════════════════════════════ -->
 <section class="bg-white">
   <div class="max-w mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
     <!-- Text -->
     <div class="reveal-up">
-      <div
-        class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
+      <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-5">
         <span class="w-2 h-2 rounded-full bg-primary"></span>
         Our Story
       </div>
       <h2 class="brand-font font-extrabold leading-[1.1] text-brand mb-6" style="font-size:clamp(2rem,4vw,2.8rem);">
-        Redefining the<br>Dental Experience.
+        A Legacy of Dental <br>Excellence Since 1964.
       </h2>
       <p class="font-body text-[0.93rem] text-muted leading-relaxed mb-4">
-        Founded in 2008, Samson Dental Center started with a singular vision: to bridge the gap between world-class
-        medical precision and the comfort of a hospitality-driven experience.
+        Samson Dental Center has its roots since 1964. Now on its 3rd generation of management, it has lived up to its commitment of being the pioneer on dental advancements both in expertise, facilities and equipments over the years.
       </p>
       <p class="font-body text-[0.93rem] text-muted leading-relaxed">
-        We believe that a visit to the dentist shouldn't be a chore, but a step towards a healthier, more confident you.
-        Our clinic combines architectural elegance with cutting-edge technology, ensuring that every patient feels
-        valued, understood, and cared for.
+        It is unique and distinctive because we incorporate skill, experience and technology under one roof. Our clinic branch at Porta Vaga and our main center at S Building continue to provide services based on the highest standards of professionalism.
       </p>
 
       <!-- Stats -->
       <div class="grid grid-cols-3 gap-4 mt-10">
         <div class="stats-item bg-offwhite rounded-2xl p-5 text-center">
-          <div class="brand-font font-extrabold text-[1.9rem] text-brand leading-none">16+</div>
-          <div class="font-body text-[0.7rem] text-muted mt-1.5 leading-snug">Years of<br>Excellence</div>
+          <div class="brand-font font-extrabold text-[1.9rem] text-brand leading-none">60</div>
+          <div class="font-body text-[0.7rem] text-muted mt-1.5 leading-snug">Years of<br>Trust</div>
         </div>
         <div class="stats-item bg-offwhite rounded-2xl p-5 text-center">
-          <div class="brand-font font-extrabold text-[1.9rem] text-brand leading-none">2K+</div>
-          <div class="font-body text-[0.7rem] text-muted mt-1.5 leading-snug">Happy<br>Patients</div>
+          <div class="brand-font font-extrabold text-[1.9rem] text-brand leading-none">3rd</div>
+          <div class="font-body text-[0.7rem] text-muted mt-1.5 leading-snug">Generation<br>Leadership</div>
         </div>
         <div class="stats-item bg-offwhite rounded-2xl p-5 text-center">
-          <div class="brand-font font-extrabold text-[1.9rem] text-brand leading-none">12</div>
-          <div class="font-body text-[0.7rem] text-muted mt-1.5 leading-snug">Expert<br>Specialists</div>
+          <div class="brand-font font-extrabold text-[1.9rem] text-brand leading-none">2</div>
+          <div class="font-body text-[0.7rem] text-muted mt-1.5 leading-snug">Premium<br>Branches</div>
         </div>
       </div>
     </div>
@@ -71,435 +59,221 @@ ViewData["Title"] = "About page";
     <!-- Image -->
     <div class="reveal-up relative group">
       <div class="relative rounded-2xl shadow-xl overflow-hidden h-[440px]">
-        
-        <img 
-          src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" 
-          alt="Clinic interior" 
-          id="aboutimg1"
-          class="w-full h-full object-cover will-change-transform rounded-2xl" 
-        />
-
-        <div 
-          class="absolute -bottom-[2%] left-0 right-0 bg-gradient-to-t from-brand/90 to-transparent p-8 pt-20" 
-          id="aboutimg"
-        >
-          <div class="brand-font font-bold text-white text-[1.1rem]">Est. 2008</div>
+        <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" alt="Clinic interior" id="aboutimg1" class="w-full h-full object-cover will-change-transform rounded-2xl" />
+        <div class="absolute -bottom-[2%] left-0 right-0 bg-gradient-to-t from-brand/90 to-transparent p-8 pt-20" id="aboutimg">
+          <div class="brand-font font-bold text-white text-[1.1rem]">Est. 1964</div>
           <div class="font-body text-white/55 text-[0.78rem] mt-0.5 uppercase tracking-widest">
-            @(Model.ClinicSettings.LocationAddress ?? "Quezon City, Philippines")
+            @(Model.ClinicSettings.LocationAddress ?? "Baguio City, Philippines")
           </div>
         </div>
       </div>
-
       <div class="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-primary flex flex-col items-center justify-center shadow-lg z-10">
         <div class="brand-font font-extrabold text-white text-[0.9rem] leading-none">#1</div>
         <div class="font-body text-white/80 text-[0.52rem] text-center leading-tight mt-0.5">Rated<br>Clinic</div>
       </div>
     </div>
-
   </div>
 </section>
 
+<!-- ══════════════════════════════════
+     OUR JOURNEY (Timeline)
+═══════════════════════════════════ -->
+<section class="bg-offwhite py-24">
+    <div class="max-w mx-auto px-8 lg:px-12">
+        <div class="text-center mb-16 reveal-up">
+            <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                The Time Frame
+            </div>
+            <h2 class="brand-font font-extrabold text-brand" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">Our Journey</h2>
+        </div>
+
+        <div class="relative max-w-4xl mx-auto pl-8 border-l-2 border-primary/20 space-y-12">
+            @{
+                var milestones = new[] {
+                    new { Year = "1965 – 1966", Event = "First Company Retainer Dentist of Saint Louis Boy’s High School." },
+                    new { Year = "1968 – 1978", Event = "Company Dentist of Baguio Benguet Incorporated" },
+                    new { Year = "1970 – 2000", Event = "Retainer Dentist of the Philippine National Bank (PNB)" },
+                    new { Year = "1970 – 2003", Event = "Retainer Dentist of Development Bank of the Philippines (DBP)" },
+                    new { Year = "1978 – 1982", Event = "First Retainer Dentist of Pines Hotel" },
+                    new { Year = "1986 – 1988", Event = "Company Retainer Dentist of Export Processing Zone Authority (EPZA)" },
+                    new { Year = "1988 – 1997", Event = "Company Retainer Dentist of Baguio Country Club" },
+                    new { Year = "1986 – Present", Event = "Texas Instrument Philippines, Baguio City" },
+                    new { Year = "2006 – Present", Event = "Health Partners" }
+                };
+            }
+
+            @foreach (var m in milestones) {
+                <div class="milestone-item relative reveal-up">
+                    <div class="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-white border-4 border-primary shadow-sm"></div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        <span class="brand-font font-bold text-primary text-sm mb-1 block">@m.Year</span>
+                        <p class="font-body text-[0.88rem] text-brand font-medium leading-relaxed">@m.Event</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
 
 <!-- ══════════════════════════════════
      MISSION & VALUES
 ═══════════════════════════════════ -->
-<section class="bg-offwhite">
+<section class="bg-white">
   <div class="max-w mx-auto px-8 lg:px-12 py-20">
-
     <div class="text-center mb-14 reveal-up">
-      <div
-        class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
+      <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
         <span class="w-2 h-2 rounded-full bg-primary"></span>
         What Drives Us
       </div>
       <h2 class="brand-font font-extrabold text-brand" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">
-        Our Mission & Values
+        Mission & Vision
       </h2>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mission-section">
-
-      <div class="mission-card bg-white rounded-2xl p-8 shadow-sm h-full">
-        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-5">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      <div class="mission-card bg-offwhite rounded-3xl p-10 h-full hover:bg-white hover:shadow-xl transition-all duration-500 border border-transparent hover:border-slate-100">
+        <div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+             <i class="fa-solid fa-eye text-white text-xl"></i>
         </div>
-        <h3 class="brand-font font-bold text-[1.1rem] text-brand mb-3">Patient-First Care</h3>
-        <p class="font-body text-[0.86rem] text-muted leading-relaxed">
-          Every decision we make centers on patient comfort, safety, and outcomes. We treat each visit as a partnership.
+        <h3 class="brand-font font-extrabold text-2xl text-brand mb-4">Our Vision</h3>
+        <p class="font-body text-[0.95rem] text-muted leading-relaxed">
+          To be the leading provider of high-standard professional dental services, continuously innovating and preserving our legacy of excellence for generations to come.
         </p>
       </div>
 
-      <div class="mission-card bg-white rounded-2xl p-8 shadow-sm h-full">
-        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-5">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8v4l3 3" />
-          </svg>
+      <div class="mission-card bg-offwhite rounded-3xl p-10 h-full hover:bg-white hover:shadow-xl transition-all duration-500 border border-transparent hover:border-slate-100">
+        <div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+             <i class="fa-solid fa-bullseye text-white text-xl"></i>
         </div>
-        <h3 class="brand-font font-bold text-[1.1rem] text-brand mb-3">Clinical Excellence</h3>
-        <p class="font-body text-[0.86rem] text-muted leading-relaxed">
-          We invest continuously in the latest dental technology and evidence-based techniques to deliver superior
-          results.
+        <h3 class="brand-font font-extrabold text-2xl text-brand mb-4">Our Mission</h3>
+        <p class="font-body text-[0.95rem] text-muted leading-relaxed">
+          Incorporating skill, experience, and technology under one roof to ensure complete patient care and satisfaction in every treatment.
         </p>
       </div>
-
-      <div class="mission-card bg-white rounded-2xl p-8 shadow-sm h-full">
-        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-5">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-        </div>
-        <h3 class="brand-font font-bold text-[1.1rem] text-brand mb-3">Community Commitment</h3>
-        <p class="font-body text-[0.86rem] text-muted leading-relaxed">
-          We believe healthy smiles transform communities. Our outreach programs bring quality dental care to those in
-          need.
-        </p>
-      </div>
-
     </div>
   </div>
 </section>
-
 
 <!-- ══════════════════════════════════
      OUR DEDICATED TEAM
 ═══════════════════════════════════ -->
-<section class="bg-brand bg-ani">
-  <div class="max-w mx-auto px-8 lg:px-12 py-24">
-
-    <div class="text-center mb-14 reveal-up">
-      <h2 class="brand-font font-extrabold text-white mb-3" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">
+<section class="bg-brand bg-ani py-32">
+  <div class="max-w mx-auto px-8 lg:px-12">
+    <div class="text-center mb-20 reveal-up">
+       <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-white/50 mb-4">
+        <span class="w-2 h-2 rounded-full bg-primary"></span>
+        Expert Specialists
+      </div>
+      <h2 class="brand-font font-extrabold text-white mb-6" style="font-size:clamp(2.5rem,5vw,4rem);">
         Our Dedicated Team
       </h2>
-      <p class="font-body text-[0.9rem] text-white/45 max-w-md mx-auto leading-relaxed">
-        Behind every smile is a team of passionate professionals dedicated to your comfort and care.
+      <p class="font-body text-[0.95rem] text-white/40 max-w-lg mx-auto leading-relaxed">
+        Our team functions on the sole purpose of ensuring complete patient care and satisfaction, and this dedication is what sets us apart.
       </p>
     </div>
 
-    <!-- Featured doctor card -->
-    <div id="teamCard"
-      class="reveal-up bg-white rounded-[2rem] p-8 lg:p-12 flex flex-col-reverse lg:flex-row gap-10 items-center max-w-4xl mx-auto mb-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] border border-[#f0f2f5]">
-
-      <div class="flex-1 min-w-0">
-        <div
-          class="flex items-center gap-2 font-body text-[0.62rem] font-semibold tracking-[0.13em] uppercase text-muted mb-5">
-          <span class="w-2 h-2 rounded-full bg-primary"></span>
-          <span id="teamRole">Chief Oral Surgeon</span>
-        </div>
-        <h3 id="teamName" class="brand-font font-extrabold text-brand mb-4" style="font-size:clamp(1.5rem,3vw,2rem);">
-          Dr. Marcus Rivera
-        </h3>
-        <blockquote id="teamQuote"
-          class="border-l-2 border-primary pl-4 font-body text-[0.87rem] text-muted italic leading-relaxed mb-6">
-          "Surgery is an art where precision meets compassion. My goal is to ensure safety and comfort in every
-          procedure."
-        </blockquote>
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <div
-              class="flex items-center gap-1.5 font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted mb-2">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-              </svg>
-              Education
+    <!-- Doctor Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @foreach (var doc in Model.Doctors) {
+            <div class="doctor-card-premium group bg-white rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-500 hover:-translate-y-2 reveal-up">
+                <div class="relative h-[340px] overflow-hidden">
+                    <img src="@(string.IsNullOrEmpty(doc.Profile?.AvatarUrl) ? "https://ui-avatars.com/api/?name=" + doc.Profile?.FirstName + "&size=400" : doc.Profile.AvatarUrl)" alt="@doc.FullName" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-brand/80 via-transparent to-transparent opacity-60"></div>
+                    <div class="absolute bottom-6 left-6">
+                        <span class="bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">@doc.Title</span>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <h3 class="brand-font font-extrabold text-brand text-2xl mb-2">@doc.Profile?.FirstName @doc.Profile?.LastName</h3>
+                    <p class="font-body text-[0.8rem] text-muted font-semibold uppercase tracking-widest mb-4">@string.Join(" • ", doc.Specialties)</p>
+                    <p class="font-body text-[0.88rem] text-muted leading-relaxed line-clamp-3 italic mb-6">"@doc.Bio"</p>
+                    <div class="flex items-center gap-4 pt-6 border-t border-slate-100">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-muted uppercase font-bold tracking-tighter">Experience</span>
+                            <span class="text-sm font-bold text-brand">15+ Years</span>
+                        </div>
+                        <div class="w-px h-8 bg-slate-100"></div>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-muted uppercase font-bold tracking-tighter">Education</span>
+                            <span class="text-sm font-bold text-brand truncate">Specialist</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="teamEdu" class="font-body text-[0.82rem] text-brand font-medium leading-snug">DMD, UP Manila |
-              Residency at Mount Sinai</div>
-          </div>
-          <div>
-            <div
-              class="flex items-center gap-1.5 font-body text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted mb-2">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4l3 3" />
-              </svg>
-              Experience
-            </div>
-            <div id="teamExp" class="font-body text-[0.82rem] text-brand font-medium">16 Years Experience</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="shrink-0">
-        <img id="teamImg" src="https://randomuser.me/api/portraits/men/46.jpg" alt="Dr. Marcus Rivera"
-          class="w-48 h-56 object-cover rounded-xl shadow-lg" />
-      </div>
+        }
     </div>
-
-    <!-- Thumbnail selector -->
-    <div class="flex justify-center gap-4">
-      <img src="https://randomuser.me/api/portraits/men/46.jpg" id="teamThumb1"
-        class="team-thumb w-14 h-14 rounded-full cursor-pointer transition-all" />
-      <img src="https://randomuser.me/api/portraits/women/44.jpg" id="teamThumb2"
-        class="team-thumb w-14 h-14 rounded-full cursor-pointer transition-all" />
-      <img src="https://randomuser.me/api/portraits/men/32.jpg" id="teamThumb3"
-        class="team-thumb w-14 h-14 rounded-full cursor-pointer transition-all" />
-    </div>
-
   </div>
 </section>
-
 
 <!-- ══════════════════════════════════
      FACILITIES & OFFERS
 ═══════════════════════════════════ -->
-<section class="bg-white">
-  <div class="max-w mx-auto px-8 lg:px-12 py-24">
-
-    <!-- Header row -->
-    <div class="flex items-end justify-between mb-10 reveal-up">
-      <div>
-        <div
-          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-3">
-          <span class="w-2 h-2 rounded-full bg-primary"></span>
-          Inside Samson Dental Center
+<section class="bg-white py-32">
+  <div class="max-w mx-auto px-8 lg:px-12">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 mb-20">
+        <div class="max-w-2xl reveal-up">
+            <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                State of the Art
+            </div>
+            <h2 class="brand-font font-extrabold text-brand leading-[1.1]" style="font-size:clamp(2rem,4.5vw,3rem);">
+                Professional Dental Care <br><span class="text-primary italic">Tailored to Your Needs.</span>
+            </h2>
         </div>
-        <h2 class="brand-font font-extrabold text-brand" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">
-          Facilities &amp; Offers
-        </h2>
-      </div>
-      <!-- Carousel nav buttons -->
-      <div class="flex gap-3 shrink-0">
-        <button id="facPrev" 
-          class="w-11 h-11 rounded-full border border-[#e5e7eb] flex items-center justify-center hover:border-brand hover:bg-brand hover:text-white transition-all cursor-pointer bg-white text-brand">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <button id="facNext" 
-          class="w-11 h-11 rounded-full border border-[#e5e7eb] flex items-center justify-center hover:border-brand hover:bg-brand hover:text-white transition-all cursor-pointer bg-white text-brand">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-      </div>
+        <p class="font-body text-[0.95rem] text-muted leading-relaxed max-w-sm reveal-up">
+            Our highly competent doctors, coupled with the latest technology, ensure that each patient is treated with the highest standards.
+        </p>
     </div>
 
-    <!-- Carousel track -->
-    <div class="overflow-hidden reveal-up sm:p-4">
-      <div id="facTrack" class="flex gap-5 transition-transform duration-500 ease-in-out"
-        style="will-change:transform;">
-
-        <!-- Card 1 -->
-        <div
-          class="fac-card shrink-0 w-[calc(33.333%-14px)] rounded-[22px] overflow-hidden relative cursor-pointer group"
-          style="aspect-ratio:3/4;min-width:280px;">
-          <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80" alt="Executive Lounge"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-55" />
-          <!-- badge -->
-          <div
-            class="absolute top-4 right-4 font-body text-[0.6rem] font-bold tracking-[0.12em] uppercase bg-white/90 text-brand px-3 py-1.5 rounded-full backdrop-blur-sm">
-            Facility</div>
-          <!-- base title overlay -->
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-          <div
-            class="absolute bottom-0 left-0 right-0 p-6 transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-4">
-            <h3 class="brand-font font-extrabold text-white text-[1.4rem] leading-tight">Executive Lounge</h3>
-          </div>
-          <!-- hover detail overlay -->
-          <div
-            class="absolute inset-0 bg-brand/92 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="font-body text-[0.6rem] font-bold tracking-[0.14em] uppercase text-primary mb-2">Facility</div>
-            <h3 class="brand-font font-extrabold text-white text-[1.3rem] leading-tight mb-3">Executive Lounge</h3>
-            <p class="font-body text-[0.82rem] text-white/65 leading-relaxed mb-5">Unwind before your procedure in our
-              hospitality-inspired waiting lounge — designed with premium finishes, curated reading materials, and
-              complimentary refreshments.</p>
-            <div class="flex flex-wrap gap-2">
-              <span
-                class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Premium
-                Seating</span>
-              <span
-                class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Refreshments</span>
-              <span class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Free
-                Wi-Fi</span>
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div class="flex gap-6 reveal-up">
+            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-medal text-primary text-2xl"></i>
             </div>
-          </div>
+            <div>
+                <h3 class="brand-font font-bold text-xl text-brand mb-3">Quality Care</h3>
+                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                    Our quality of dental care is outstanding. Our main clinic is located at a new modern facility in S Building, Baguio City.
+                </p>
+            </div>
         </div>
-
-        <!-- Card 2 -->
-        <div
-          class="fac-card shrink-0 w-[calc(33.333%-14px)] rounded-[22px] overflow-hidden relative cursor-pointer group"
-          style="aspect-ratio:3/4;min-width:280px;">
-          <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=700&q=80" alt="New Patient Special"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-55" />
-          <div
-            class="absolute top-4 right-4 font-body text-[0.6rem] font-bold tracking-[0.12em] uppercase bg-primary text-white px-3 py-1.5 rounded-full">
-            Limited Offer</div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-          <div
-            class="absolute bottom-0 left-0 right-0 p-6 group-hover:opacity-0 group-hover:translate-y-4 transition-all duration-300">
-            <h3 class="brand-font font-extrabold text-white text-[1.4rem] leading-tight">New Patient Special</h3>
-          </div>
-          <div
-            class="absolute inset-0 bg-brand/92 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="font-body text-[0.6rem] font-bold tracking-[0.14em] uppercase text-primary mb-2">Limited Offer
+        <div class="flex gap-6 reveal-up">
+            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-bolt text-primary text-2xl"></i>
             </div>
-            <h3 class="brand-font font-extrabold text-white text-[1.3rem] leading-tight mb-3">New Patient Special</h3>
-            <p class="font-body text-[0.82rem] text-white/65 leading-relaxed mb-4">Get 20% off your first comprehensive
-              exam, X-rays, and professional cleaning. Available for first-time patients booking before the end of the
-              month.</p>
-            <div class="flex items-center justify-between pt-3 border-t border-white/15">
-              <div>
-                <div class="font-body text-[0.6rem] uppercase tracking-wider text-white/40 mb-0.5">Promo Code</div>
-                <div class="brand-font font-bold text-white tracking-widest text-[0.85rem]">NEW20</div>
-              </div>
-              <div class="brand-font font-extrabold text-primary text-[1.4rem]">20% OFF</div>
+            <div>
+                <h3 class="brand-font font-bold text-xl text-brand mb-3">Fast Service</h3>
+                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                    We make efforts to accommodate you and your scheduling needs and desires, ensuring prompt and efficient treatment.
+                </p>
             </div>
-          </div>
         </div>
-
-        <!-- Card 3 -->
-        <div
-          class="fac-card shrink-0 w-[calc(33.333%-14px)] rounded-[22px] overflow-hidden relative cursor-pointer group"
-          style="aspect-ratio:3/4;min-width:280px;">
-          <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=700&q=80" alt="3D Diagnostic Suite"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-55" />
-          <div
-            class="absolute top-4 right-4 font-body text-[0.6rem] font-bold tracking-[0.12em] uppercase bg-white/90 text-brand px-3 py-1.5 rounded-full backdrop-blur-sm">
-            Technology</div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-          <div
-            class="absolute bottom-0 left-0 right-0 p-6 group-hover:opacity-0 group-hover:translate-y-4 transition-all duration-300">
-            <h3 class="brand-font font-extrabold text-white text-[1.4rem] leading-tight">3D Diagnostic Suite</h3>
-          </div>
-          <div
-            class="absolute inset-0 bg-brand/92 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="font-body text-[0.6rem] font-bold tracking-[0.14em] uppercase text-primary mb-2">Technology
+        <div class="flex gap-6 reveal-up">
+            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-tags text-primary text-2xl"></i>
             </div>
-            <h3 class="brand-font font-extrabold text-white text-[1.3rem] leading-tight mb-3">3D Diagnostic Suite</h3>
-            <p class="font-body text-[0.82rem] text-white/65 leading-relaxed mb-5">Our CBCT 3D imaging system provides
-              ultra-precise scans for implant planning, orthodontics, and complex surgical cases — ensuring the highest
-              accuracy in treatment.</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">CBCT
-                Scanning</span>
-              <span class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Low
-                Radiation</span>
-              <span
-                class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Digital
-                Records</span>
+            <div>
+                <h3 class="brand-font font-bold text-xl text-brand mb-3">Affordable Prices</h3>
+                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                    Our prices are substantially affordable. We provide high-end care without the high-end price tag.
+                </p>
             </div>
-          </div>
         </div>
-
-        <!-- Card 4 -->
-        <div
-          class="fac-card shrink-0 w-[calc(33.333%-14px)] rounded-[22px] overflow-hidden relative cursor-pointer group"
-          style="aspect-ratio:3/4;min-width:280px;">
-          <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=700&q=80" alt="Teeth Whitening"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-55" />
-          <div
-            class="absolute top-4 right-4 font-body text-[0.6rem] font-bold tracking-[0.12em] uppercase bg-primary text-white px-3 py-1.5 rounded-full">
-            Limited Offer</div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-          <div
-            class="absolute bottom-0 left-0 right-0 p-6 group-hover:opacity-0 group-hover:translate-y-4 transition-all duration-300">
-            <h3 class="brand-font font-extrabold text-white text-[1.4rem] leading-tight">Teeth Whitening Deal</h3>
-          </div>
-          <div
-            class="absolute inset-0 bg-brand/92 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="font-body text-[0.6rem] font-bold tracking-[0.14em] uppercase text-primary mb-2">Limited Offer
+        <div class="flex gap-6 reveal-up">
+            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-heart text-primary text-2xl"></i>
             </div>
-            <h3 class="brand-font font-extrabold text-white text-[1.3rem] leading-tight mb-3">Teeth Whitening Deal</h3>
-            <p class="font-body text-[0.82rem] text-white/65 leading-relaxed mb-4">Save ₱100 on our professional
-              in-office whitening treatment. Brighten your smile by up to 8 shades in a single 90-minute session.</p>
-            <div class="flex items-center justify-between pt-3 border-t border-white/15">
-              <div>
-                <div class="font-body text-[0.6rem] uppercase tracking-wider text-white/40 mb-0.5">Promo Code</div>
-                <div class="brand-font font-bold text-white tracking-widest text-[0.85rem]">BRIGHT100</div>
-              </div>
-              <div class="brand-font font-extrabold text-primary text-[1.4rem]">₱100 OFF</div>
+            <div>
+                <h3 class="brand-font font-bold text-xl text-brand mb-3">Patient Priority</h3>
+                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                    We strive to make the patient our priority. We work hard to see you promptly and achieve your complete satisfaction.
+                </p>
             </div>
-          </div>
         </div>
-
-        <!-- Card 5 -->
-        <div
-          class="fac-card shrink-0 w-[calc(33.333%-14px)] rounded-[22px] overflow-hidden relative cursor-pointer group"
-          style="aspect-ratio:3/4;min-width:280px;">
-          <img src="https://images.unsplash.com/photo-1629909615184-74f495363b67?w=700&q=80" alt="Sterilization Center"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-55" />
-          <div
-            class="absolute top-4 right-4 font-body text-[0.6rem] font-bold tracking-[0.12em] uppercase bg-white/90 text-brand px-3 py-1.5 rounded-full backdrop-blur-sm">
-            Facility</div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-          <div
-            class="absolute bottom-0 left-0 right-0 p-6 group-hover:opacity-0 group-hover:translate-y-4 transition-all duration-300">
-            <h3 class="brand-font font-extrabold text-white text-[1.4rem] leading-tight">Sterilization Center</h3>
-          </div>
-          <div
-            class="absolute inset-0 bg-brand/92 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="font-body text-[0.6rem] font-bold tracking-[0.14em] uppercase text-primary mb-2">Facility</div>
-            <h3 class="brand-font font-extrabold text-white text-[1.3rem] leading-tight mb-3">Sterilization Center</h3>
-            <p class="font-body text-[0.82rem] text-white/65 leading-relaxed mb-5">Hospital-grade sterilization
-              protocols are followed for every instrument and surface. Your safety is our highest non-negotiable
-              standard.</p>
-            <div class="flex flex-wrap gap-2">
-              <span
-                class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Autoclave
-                System</span>
-              <span class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">ISO
-                Compliant</span>
-              <span
-                class="font-body text-[0.68rem] font-semibold text-white/60 bg-white/10 px-3 py-1 rounded-full">Hospital
-                Grade</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 6 -->
-        <div
-          class="fac-card shrink-0 w-[calc(33.333%-14px)] rounded-[22px] overflow-hidden relative cursor-pointer group"
-          style="aspect-ratio:3/4;min-width:280px;">
-          <img src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=700&q=80"
-            alt="Invisalign Consultation"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-55" />
-          <div
-            class="absolute top-4 right-4 font-body text-[0.6rem] font-bold tracking-[0.12em] uppercase bg-[#059669] text-white px-3 py-1.5 rounded-full">
-            Free</div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-          <div
-            class="absolute bottom-0 left-0 right-0 p-6 group-hover:opacity-0 group-hover:translate-y-4 transition-all duration-300">
-            <h3 class="brand-font font-extrabold text-white text-[1.4rem] leading-tight">Invisalign Consultation</h3>
-          </div>
-          <div
-            class="absolute inset-0 bg-brand/92 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="font-body text-[0.6rem] font-bold tracking-[0.14em] uppercase text-[#34d399] mb-2">Free</div>
-            <h3 class="brand-font font-extrabold text-white text-[1.3rem] leading-tight mb-3">Invisalign Consultation
-            </h3>
-            <p class="font-body text-[0.82rem] text-white/65 leading-relaxed mb-4">Book a complimentary Invisalign
-              assessment with our orthodontic specialist. Includes a digital smile simulation so you can preview your
-              results before committing.</p>
-            <div class="flex items-center justify-between pt-3 border-t border-white/15">
-              <div>
-                <div class="font-body text-[0.6rem] uppercase tracking-wider text-white/40 mb-0.5">Promo Code</div>
-                <div class="brand-font font-bold text-white tracking-widest text-[0.85rem]">SMILEFREE</div>
-              </div>
-              <div class="brand-font font-extrabold text-[#34d399] text-[1.4rem]">FREE</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
-
-    <!-- Dot indicators -->
-    <div id="facDots" class="flex justify-center gap-2 mt-8"></div>
-
   </div>
 </section>
-
 
 <script type="module" src="~/js/PatientSide/about.js"></script>

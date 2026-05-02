@@ -30,6 +30,14 @@ public class AppointmentsController : ControllerBase
         return Ok(new { ok = true, blocked });
     }
 
+    // GET /api/appointments/blocked-dates
+    [HttpGet("blocked-dates")]
+    public async Task<IActionResult> GetBlockedDates()
+    {
+        var dates = await _blockedDates.GetBlockedDateStringsAsync();
+        return Ok(dates);
+    }
+
     // GET /api/appointments/doctors?category=Cosmetic
     [HttpGet("doctors")]
     public async Task<IActionResult> GetDoctors([FromQuery] string? category)
@@ -52,13 +60,14 @@ public class AppointmentsController : ControllerBase
     [HttpGet("availability")]
     public async Task<IActionResult> GetAvailability(
         [FromQuery] string category,
-        [FromQuery] string date)
+        [FromQuery] string date,
+        [FromQuery] string? serviceId = null)
     {
 
         if (!DateTime.TryParse(date, out var parsedDate))
             return BadRequest(new { ok = false, error = "Invalid date format." });
 
-        var availability = await _apptService.GetAvailability(category, parsedDate);
+        var availability = await _apptService.GetAvailability(category, parsedDate, serviceId);
         return Ok(availability);
     }
 

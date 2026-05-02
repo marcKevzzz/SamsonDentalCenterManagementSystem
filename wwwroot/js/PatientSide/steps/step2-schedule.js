@@ -6,6 +6,7 @@ import {
   formatDate,
   isDateFullyBooked,
   isSlotAvailable,
+  availCacheKey,
 } from "../appointment-state.js";
 
 const CAL = { year: new Date().getFullYear(), month: new Date().getMonth() };
@@ -36,14 +37,15 @@ export function renderStep2() {
 
 // ── Fetch availability for a month ───────────────────────────────────────────
 async function fetchAvailabilityForDate(dateStr) {
-  if (AVAILABILITY_CACHE[dateStr]) return; // already cached
   if (!STATE.service) return;
+  const key = availCacheKey(STATE.service.id, dateStr);
+  if (AVAILABILITY_CACHE[key]) return; // already cached
 
   try {
     const res = await fetch(
-      `/api/appointments/availability?category=${encodeURIComponent(STATE.service.category)}&date=${dateStr}`,
+      `/api/appointments/availability?category=${encodeURIComponent(STATE.service.category)}&date=${dateStr}&serviceId=${STATE.service.id}`,
     );
-    AVAILABILITY_CACHE[dateStr] = await res.json();
+    AVAILABILITY_CACHE[key] = await res.json();
   } catch (err) {
     console.error("[step2] Availability fetch failed:", err);
   }
@@ -68,7 +70,8 @@ const dt = new Date(y, m, d); // Keep this for isPast and isSun checks
     const isToday = dt.toDateString() === today.toDateString();
     const isSel = STATE.date === dstr;
     const isFull = isDateFullyBooked(dstr);
-    const disabled = isPast || isSun;
+    const isBlocked = STATE.blockedDates.includes(dstr);
+    const disabled = isPast || isSun || isBlocked;
 
     let cls = "cal-day ";
     if (disabled) cls += "disabled";
@@ -133,7 +136,7 @@ export async function pickDate(dateStr) {
   const timeWidget = document.getElementById("timeWidget");
   if (timeWidget)
     timeWidget.innerHTML = `
-        <div class="flex items-center justify-center h-36">
+        <div class="flex items-center justify-center h-full">
             <div class="text-center">
                 <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                 <p class="font-body text-[.8rem] text-muted">Loading availability…</p>
@@ -209,7 +212,8 @@ export function renderTimeSlots(dateStr) {
     month: "long",
     day: "numeric",
   });
-  const slots = AVAILABILITY_CACHE[dateStr] ?? {};
+  const key = availCacheKey(STATE.service?.id, dateStr);
+  const slots = AVAILABILITY_CACHE[key] ?? {};
 
   widget.innerHTML = `
     <div class="brand-font font-bold text-[.88rem] text-brand mb-1">${dl}</div>
@@ -217,21 +221,24 @@ export function renderTimeSlots(dateStr) {
         Select a time. Greyed slots are fully booked — <span class="font-semibold">numbers show available doctors</span>.
     </p>
     <div class="grid grid-cols-3 gap-2">
-        ${ALL_SLOTS.map((t) => {
-          const info = slots[t];
-          const avail = info?.available ?? true;
-          const count = info?.doctorCount ?? 0;
-          const isSel = STATE.time === t;
-          const isBooked = !avail;
+        ${Object.keys(slots).length > 0 
+          ? Object.keys(slots).map((t) => {
+              const info = slots[t];
+              const avail = info?.available ?? true;
+              const count = info?.doctorCount ?? 0;
+              const isSel = STATE.time === t;
+              const isBooked = !avail;
 
-          return `<button type="button"
-                onclick="${!isBooked ? `pickTime('${t}')` : ""}"
-                class="time-btn ${isSel ? "selected" : isBooked ? "booked" : ""}"
-                ${isBooked ? "disabled" : ""}>
-                ${t}
-                ${!isBooked && count > 0 ? `<span class="block text-[9px] opacity-60 mt-0.5">${count} dr${count > 1 ? "s" : ""}</span>` : ""}
-            </button>`;
-        }).join("")}
+              return `<button type="button"
+                    onclick="${!isBooked ? `pickTime('${t}')` : ""}"
+                    class="time-btn ${isSel ? "selected" : isBooked ? "booked" : ""}"
+                    ${isBooked ? "disabled" : ""}>
+                    ${t}
+                    ${!isBooked && count > 0 ? `<span class="block text-[9px] opacity-60 mt-0.5">${count} dr${count > 1 ? "s" : ""}</span>` : ""}
+                </button>`;
+            }).join("")
+          : `<p class="col-span-3 text-center py-4 text-muted font-body text-[.8rem]">No available slots for this date.</p>`
+        }
     </div>`;
 }
 

@@ -137,11 +137,11 @@ function renderServiceList() {
                     </div>
                     <div class="flex items-center gap-4 mt-3">
                         ${
-                          s.duration
+                          (s.durationMinutes || s.duration)
                             ? `<span class="flex items-center gap-1 font-body text-[.72rem] text-muted">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                            </svg>${s.duration}</span>`
+                            </svg>${s.durationMinutes ? s.durationMinutes + ' min' : s.duration}</span>`
                             : ""
                         }
                         ${

@@ -35,7 +35,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             "9:00 AM",
             "10:00 AM",
             "11:00 AM",
-            "12:00 PM",
             "1:00 PM",
             "2:00 PM",
             "3:00 PM",
@@ -133,26 +132,26 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         // ── FIX Bug 1: Get booked slots scoped to service + doctor + date ────
         // Previously only filtered by doctor+date, allowing cross-service conflicts.
-        public async Task<List<string>> GetBookedSlots(string doctorId, DateTime date)
+        public async Task<List<Appointment>> GetBookedAppointments(string doctorId, DateTime date)
         {
             try
             {
-                var res = await _supabase
-                    .From<Appointment>()
-                    .Where(a => a.DoctorId == doctorId)
-                    .Where(a => a.Status != "cancelled") // ← was a.EmailStatus
-                    .Where(a => a.IsWaitlist == false)
-                    .Get();
+                var path = $"/appointments?select=*,Service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&status=neq.cancelled&is_waitlist=eq.false";
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
+                res.EnsureSuccessStatusCode();
+
+                var json = await res.Content.ReadAsStringAsync();
+                var all = JsonSerializer.Deserialize<List<Appointment>>(json, _jsonOptions) ?? new();
 
                 var dateStr = date.ToString("yyyy-MM-dd");
-                return res
-                    .Models.Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr)
-                    .Select(a => a.AppointmentTime)
+                return all
+                    .Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr)
                     .ToList();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[GetBookedSlots] {ex.Message}");
+                Console.WriteLine($"[GetBookedAppointments] {ex.Message}");
                 return new();
             }
         }
@@ -160,28 +159,120 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Availability per service + date ───────────────────────────────────
         public async Task<Dictionary<string, object>> GetAvailability(
             string category,
-            DateTime date
+            DateTime date,
+            string? serviceId = null
         )
         {
-            var doctors = await GetDoctorsForService(category);
-            var result = new Dictionary<string, object>();
+            // 0. Check if date is blocked
+            if (await _blockedDates.IsDateBlockedAsync(date)) return new();
 
-            foreach (var slot in ALL_SLOTS)
+            var settings = await _clinic.GetSettingsAsync();
+            var dayName = date.DayOfWeek.ToString();
+            var hours = settings.ClinicalHours.FirstOrDefault(h => h.Day.Equals(dayName, StringComparison.OrdinalIgnoreCase));
+            
+            if (hours == null || hours.Closed) return new();
+
+            // 1. Get Service Duration and Buffer
+            int duration = 60;
+            int buffer = 15;
+            if (!string.IsNullOrEmpty(serviceId))
             {
-                var availableDoctorIds = new List<string>();
-                foreach (var doc in doctors)
+                var svcRes = await _supabase.From<DentalService>().Where(s => s.Id == serviceId).Get();
+                var svc = svcRes.Models.FirstOrDefault();
+                if (svc != null) 
                 {
-                    // FIX Bug 1: pass serviceId so slots are scoped per service
-                    var booked = await GetBookedSlots(doc.Id, date);
-                    if (!booked.Contains(slot))
-                        availableDoctorIds.Add(doc.Id);
+                    duration = svc.DurationMinutes;
+                    buffer = svc.BufferMinutes;
+                }
+            }
+
+            int totalBlock = duration + buffer;
+
+            // 2. Parse Clinic Hours
+            if (!DateTime.TryParse(hours.Open, out var openDt) || !DateTime.TryParse(hours.Close, out var closeDt))
+                return new();
+
+            var openTime = openDt.TimeOfDay;
+            var closeTime = closeDt.TimeOfDay;
+            
+            TimeSpan? noonStart = null;
+            TimeSpan? noonEnd = null;
+            if (DateTime.TryParse(hours.NoonStart, out var ns)) noonStart = ns.TimeOfDay;
+            if (DateTime.TryParse(hours.NoonEnd, out var ne)) noonEnd = ne.TimeOfDay;
+
+            var doctors = await GetDoctorsForService(category);
+            var bookedMap = new Dictionary<string, List<Appointment>>();
+            foreach(var doc in doctors)
+            {
+                bookedMap[doc.Id] = await GetBookedAppointments(doc.Id, date);
+            }
+
+            var result = new Dictionary<string, object>();
+            var currentTime = openTime;
+
+            // Past time check for TODAY
+            var nowTime = DateTime.Now.TimeOfDay;
+            bool isToday = date.Date == DateTime.Today;
+
+            // SPACING: The user wants the slots to reflect duration + buffer
+            int step = totalBlock; 
+
+            while (currentTime.Add(TimeSpan.FromMinutes(duration)) <= closeTime)
+            {
+                // Skip if it's today and the time has already passed
+                if (isToday && currentTime <= nowTime)
+                {
+                    currentTime = currentTime.Add(TimeSpan.FromMinutes(step));
+                    continue;
                 }
 
-                result[slot] = new
+                var slotEnd = currentTime.Add(TimeSpan.FromMinutes(duration));
+                var slotLabel = DateTime.Today.Add(currentTime).ToString("h:mm tt");
+
+                // Check if slot overlaps with noon break
+                bool overlapsNoon = false;
+                if (noonStart.HasValue && noonEnd.HasValue)
                 {
-                    available = availableDoctorIds.Count > 0,
-                    doctorCount = availableDoctorIds.Count,
-                };
+                    if (currentTime < noonEnd.Value && slotEnd > noonStart.Value)
+                        overlapsNoon = true;
+                }
+
+                if (!overlapsNoon)
+                {
+                    var availableDoctorIds = new List<string>();
+                    foreach (var doc in doctors)
+                    {
+                        var booked = bookedMap[doc.Id];
+                        bool isBusy = false;
+                        foreach (var b in booked)
+                        {
+                            if (DateTime.TryParse(b.AppointmentTime, out var bStartDt))
+                            {
+                                var bStart = bStartDt.TimeOfDay;
+                                var bBuffer = b.Service?.BufferMinutes ?? 15;
+                                var bEnd = bStart.Add(TimeSpan.FromMinutes(b.DurationMinutes + bBuffer));
+
+                                // Overlap check: (StartA < EndB) AND (EndA > StartB)
+                                if (currentTime < bEnd && slotEnd.Add(TimeSpan.FromMinutes(buffer)) > bStart)
+                                {
+                                    isBusy = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!isBusy) availableDoctorIds.Add(doc.Id);
+                    }
+
+                    result[slotLabel] = new
+                    {
+                        available = availableDoctorIds.Count > 0,
+                        doctorCount = availableDoctorIds.Count,
+                        time24 = currentTime.ToString(@"hh\:mm")
+                    };
+                }
+
+                currentTime = currentTime.Add(TimeSpan.FromMinutes(step));
             }
 
             return result;
@@ -258,9 +349,33 @@ namespace SamsonDentalCenterManagementSystem.Services
                 if (!string.IsNullOrEmpty(p.DoctorId))
                 {
                     // Check conflicts (double-booking)
-                    var booked = await GetBookedSlots(p.DoctorId, p.AppointmentDate);
-                    if (booked.Contains(p.AppointmentTime))
-                        throw new Exception("This time slot is already booked for this specialist.");
+                    var booked = await GetBookedAppointments(p.DoctorId, p.AppointmentDate);
+                    
+                    // Fetch service for duration and buffer
+                    var svcRes = await _supabase.From<DentalService>().Where(s => s.Id == p.ServiceId).Get();
+                    var svc = svcRes.Models.FirstOrDefault();
+                    int duration = svc?.DurationMinutes ?? 60;
+                    int buffer = svc?.BufferMinutes ?? 15;
+
+                    if (DateTime.TryParse(p.AppointmentTime, out var newStartDt))
+                    {
+                        var newStart = newStartDt.TimeOfDay;
+                        var newEnd = newStart.Add(TimeSpan.FromMinutes(duration));
+
+                        foreach (var b in booked)
+                        {
+                            if (DateTime.TryParse(b.AppointmentTime, out var bStartDt))
+                            {
+                                var bStart = bStartDt.TimeOfDay;
+                                var bBuffer = b.Service?.BufferMinutes ?? 15;
+                                var bEnd = bStart.Add(TimeSpan.FromMinutes(b.DurationMinutes + bBuffer));
+
+                                // Overlap check: (StartA < EndB) AND (EndA > StartB)
+                                if (newStart < bEnd && newEnd.Add(TimeSpan.FromMinutes(buffer)) > bStart)
+                                    throw new Exception("This time slot overlaps with an existing appointment for this specialist.");
+                            }
+                        }
+                    }
 
                     // Check doctor's scheduled availability
                     var dow = (int)p.AppointmentDate.DayOfWeek;
@@ -359,6 +474,14 @@ namespace SamsonDentalCenterManagementSystem.Services
                 ConfirmationToken = token,
                 ConfirmedAt = status == "confirmed" ? DateTime.UtcNow : null
             };
+
+            // Capture duration and buffer at time of booking
+            var dentalSvcRes = await _supabase.From<DentalService>().Where(s => s.Id == p.ServiceId).Get();
+            var dentalSvc = dentalSvcRes.Models.FirstOrDefault();
+            if (dentalSvc != null)
+            {
+                appt.DurationMinutes = dentalSvc.DurationMinutes;
+            }
 
             var res = await _supabase.From<Appointment>().Insert(appt);
             var created = res.Models.First();
@@ -599,7 +722,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&id=eq.{id}&limit=1";
+                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&id=eq.{id}&limit=1";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 if (!res.IsSuccessStatusCode)
@@ -684,7 +807,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    "/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&order=appointment_date.desc";
+                    "/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -707,7 +830,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
+                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -729,7 +852,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var path = $"/appointments?select=*,dental_service:dental_services(*),doctor:doctors(*,profile:profiles(*))&doctor_id=eq.{doctorId}&order=appointment_date.desc";
+                var path = $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&doctor_id=eq.{doctorId}&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -785,8 +908,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                             Id = dto.DentalService.Id,
                             Name = dto.DentalService.Name,
                             Price = dto.DentalService.Price,
-                            Category = dto.DentalService.Category,
+                            Category = dto.DentalService.Category ?? string.Empty,
                             Duration = dto.DentalService.Duration,
+                            DurationMinutes = dto.DentalService.DurationMinutes,
                         }
                         : null,
 
@@ -1388,6 +1512,9 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         [JsonPropertyName("duration")]
         public string? Duration { get; set; }
+
+        [JsonPropertyName("duration_minutes")]
+        public int DurationMinutes { get; set; } = 60;
     }
 
     public class AppointmentDto

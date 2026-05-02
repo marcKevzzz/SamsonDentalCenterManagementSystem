@@ -5,14 +5,19 @@
 }
 
 
-<section class="bg-brand pt-[68px] h-[300px] md:h-[400px] relative overflow-hidden">
+<section class="bg-brand pt-[68px] h-[360px] md:h-[420px] relative overflow-hidden">
   <div class="absolute inset-0 opacity-[0.04]"
          style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
-  <div class="max-w mx-auto px-8 lg:px-12 py-16 contact-reveal">
-    
-    <h1 class="brand-font font-extrabold leading-[1.05]  text-[clamp(2.6rem,6vw,4.2rem)] text-white mb-3">Contact Us</h1>
-    <p class="font-body text-[0.92rem] text-white/45 max-w-sm leading-relaxed">
-      We'd love to hear from you. Reach out to schedule an appointment or ask any questions.
+  <div class="max-w mx-auto px-8 lg:px-12 py-16 contact-reveal relative z-10">
+    <div class="flex items-center gap-2 font-body text-[0.65rem] font-bold tracking-[0.2em] uppercase text-white/40 mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        Get in Touch
+    </div>
+    <h1 class="brand-font font-extrabold leading-[1.05] text-[clamp(2.8rem,7vw,4.5rem)] text-white mb-4">
+        Connect with <br><span class="text-white/40 italic font-medium">Samson Dental.</span>
+    </h1>
+    <p class="font-body text-[0.95rem] text-white/45 max-w-sm leading-relaxed">
+      Whether it's a routine check-up or a complex procedure, our team is here to guide your dental journey.
     </p>
   </div>
 </section>
@@ -56,7 +61,7 @@
           </svg>
         </div>
         <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">Samson Dental</div>
-        <div class="font-body text-[0.78rem] text-muted">@(Model.ClinicSettings.LocationAddress ?? "7 Himlayan Rd, Tandang Sora, QC")</div>
+        <div class="font-body text-[0.78rem] text-muted line-clamp-1">@(Model.ClinicSettings.LocationAddress ?? "Baguio City, Philippines")</div>
       </div>
  
       <!-- Status -->
@@ -234,17 +239,17 @@
       </div>
  
       <!-- Directions link -->
-      <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
-         class="flex items-center justify-between bg-offwhite hover:bg-red-50 rounded-2xl px-6 py-4 transition-colors group no-underline">
+      <a href="https://www.google.com/maps/dir//Samson+Dental+Center" target="_blank"
+         class="flex items-center justify-between bg-offwhite hover:bg-white hover:shadow-lg rounded-2xl px-6 py-4 transition-all duration-300 group no-underline border border-transparent hover:border-slate-100">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm group-hover:bg-primary transition-colors">
+            <svg class="group-hover:stroke-white transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="3 11 22 2 13 21 11 13 3 11"/>
             </svg>
           </div>
           <div>
             <div class="brand-font font-bold text-[0.85rem] text-brand">Get Directions</div>
-            <div class="font-body text-[0.74rem] text-muted">@(Model.ClinicSettings.LocationAddress ?? "7 Himlayan Rd, QC")</div>
+            <div class="font-body text-[0.74rem] text-muted">Navigate to our clinic</div>
           </div>
         </div>
         <svg class="w-4 h-4 text-muted group-hover:text-primary transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

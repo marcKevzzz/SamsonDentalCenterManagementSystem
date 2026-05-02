@@ -235,9 +235,41 @@
   - **Invoice Scoping**: Standardized the Invoices view for Doctors to only display their assigned arrived patients and historical invoices, while Receptionists retain the global clinic billing overview.
   - **Dynamic Invoicing**: Overhauled the Doctor Invoices page to match the Admin's pre-selection and dynamic loading logic, including the ability to start treatments directly from the dashboard "Treatment Center".
 - **Infrastructure & Stability**:
-  - **JS Resiliency**: Implemented defensive null-check guards in dminAppointment.js and dminDashboard.js to prevent runtime TypeErrors on pages that omit specific dashboard elements (like stat cards or charts).
+  - **JS Resiliency**: Implemented defensive null-check guards in  dminAppointment.js and  dminDashboard.js to prevent runtime TypeErrors on pages that omit specific dashboard elements (like stat cards or charts).
   - **API Optimization**: Fixed a "300 Multiple Choices" ambiguity error in StaffLeaveService.cs by explicitly specifying foreign key hints in the Supabase query.
   - **Modular Page Models**: Successfully separated and namespaced Razor Page models for all staff portals (SamsonDentalCenterManagementSystem.Pages.DoctorSide.* and SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.*) to prevent naming conflicts and improve maintainability.
 - **Availability & Leave Management**:
   - Implemented a unified **My Schedule** page for all staff, featuring a dynamic calendar view and leave application workflow.
   - Created staffAvailability.js to manage the lifecycle of leave requests and schedule visualization across all staff roles.
+
+* **Date**: 2026-05-02 (Appointment Scheduling Fixes)
+- **Date/Time Mismatch Fix**:
+  - Root cause: `new Date(STATE.date + "T00:00:00").toISOString()` in PH timezone (UTC+8) converted local midnight to UTC, rolling the date back one day before sending to backend.
+  - Fix: Changed all date constructions in `step4-review.js` to use `T12:00:00` (noon anchor) so UTC conversion stays on the same calendar day.
+- **12PM Slot Removed (Clinic Lunch Policy)**:
+  - Removed `"12:00 PM"` from `ALL_SLOTS` in both `appointment-state.js` (client) and `AppointmentService.cs` (server).
+  - Clinic hours now: 9AM, 10AM, 11AM, 1PM, 2PM, 3PM, 4PM, 5PM.
+- **Service Duration → Numerical**:
+  - Migration: `20260502_AddDurationMinutesToServices.sql` — adds `duration_minutes INTEGER` to `dental_services`, populates from policy.
+  - Policy durations: General Dentistry=45min, Teeth Cleaning=60min, Tooth Extraction=60min, Dental Fillings=45min, Teeth Whitening=90min, Orthodontic Braces=60min, Root Canal=90min, Dental Veneers=60min.
+  - Added `DurationMinutes` int property to `DentalService` model and `DentalServiceDto`.
+  - Updated `step1-service.js` and `step4-review.js` to display `X min` format.
+  - Updated `MyAppointments.cshtml` to show duration in appointment date/time card.
+- **Notifications Auto-Remove on Read**:
+  - `notifications.js` `markRead()` now animates out (opacity+translateX) and removes the DOM element after marking read.
+  - Empty state shown automatically when all notifications are read.
+  - **ACTION REQUIRED**: Run `Backend/Migrations/20260502_AddDurationMinutesToServices.sql` in Supabase SQL Editor.
+
+* **Date**: 2026-05-02 (Dynamic Appointment Scheduling)
+- **Dynamic Slot Generation**:
+  - Replaced hardcoded `ALL_SLOTS` with a dynamic generation algorithm in `AppointmentService.cs`.
+  - Slots are now calculated based on `ClinicHour` (Open, Close, Noon break), `DentalService.DurationMinutes`, and `ClinicSettings.BufferMinutes`.
+  - Implemented overlap validation that considers the full duration of existing appointments plus the required buffer time.
+- **Clinic Settings Enhancement**:
+  - Migration: `20260502_AddBufferMinutesToSettings.sql` — adds `buffer_minutes` to `clinic_settings`.
+  - Added `BufferMinutes` to `ClinicSettings` model.
+- **API & Frontend Synchronization**:
+  - Updated `AppointmentsController.GetAvailability` to accept `serviceId` for accurate duration-based slotting.
+  - Refactored `step2-schedule.js` to fetch and render dynamic slots from the API.
+  - Added empty state handling for dates with no available slots (e.g., clinic closed or fully booked).
+  - **ACTION REQUIRED**: Run `Backend/Migrations/20260502_AddBufferMinutesToSettings.sql` in Supabase SQL Editor.
