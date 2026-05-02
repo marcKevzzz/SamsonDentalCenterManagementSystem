@@ -1,10 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\",
+  "WorkspaceRootPath": "E:\\SamsonDentalCenterManagementSystem\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SamsonDentalCenterManagementSystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+      "AbsoluteMoniker": "D:0:0:{722DDEFA-9C9F-3A2E-ED94-210C5B0E3C40}|SamsonDentalCenterManagementSystem.csproj|e:\\samsondentalcentermanagementsystem\\samsondentalcentermanagementsystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{722DDEFA-9C9F-3A2E-ED94-210C5B0E3C40}|SamsonDentalCenterManagementSystem.csproj|solutionrelative:samsondentalcentermanagementsystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,19 +18,11 @@
           "Children": [
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+              "Name": "ST:1:0:{f2bd8fb8-fc94-3dae-a733-fd993c73cc87}"
             },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{26341fe2-71dd-46fd-bb1b-2e51a92a0d64}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:1:0:{f2bd8fb8-fc94-3dae-a733-fd993c73cc87}"
             }
           ]
         },
@@ -42,9 +34,9 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "SamsonDentalCenterManagementSystem.csproj",
-              "DocumentMoniker": "C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
+              "DocumentMoniker": "E:\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
               "RelativeDocumentMoniker": "SamsonDentalCenterManagementSystem.csproj",
-              "ToolTip": "C:\\Users\\chris\\OneDrive\\Desktop\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
+              "ToolTip": "E:\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
               "RelativeToolTip": "SamsonDentalCenterManagementSystem.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
