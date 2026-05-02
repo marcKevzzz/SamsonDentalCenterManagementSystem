@@ -68,12 +68,6 @@ namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Treatments
                 ArrivedAppointments = allAppts
                     .Where(a => a.Status == "arrived")
                     .ToList();
-                    Console.WriteLine("Arrived Appointments:");
-                    foreach (var appt in ArrivedAppointments) 
-            { 
-                // This replaces appt.ToJson()
-                Console.WriteLine(JsonSerializer.Serialize(appt)); 
-            }
             }
             else
             {

@@ -6,64 +6,75 @@ let isNavScrollDisabled = false;
 
 // ── Navbar scroll behavior ────────────────────
 
-export function toggleNavbar(isActive) {
+let lastScrollY = window.scrollY;
+let isNavHidden = false;
+
+export function toggleNavbar() {
   const navbar = document.getElementById("navbar");
   if (!navbar) return;
-  const logo = document.getElementById("logo");
-  const navLinks = document.querySelectorAll(".nav-link");
-  const profileChevron = document.getElementById("profileChevron");
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const logoLast = document.getElementById("logo-last");
+  
+  const isScrolled = window.scrollY > 50;
+  
+  // Scrolled style (island shrinking slightly or changing bg)
+  if (isScrolled) {
+    navbar.classList.add("nav-scrolled");
+  } else {
+    navbar.classList.remove("nav-scrolled");
+  }
 
-  if (isActive) {
-    navbar.classList.add("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
-    navbar.classList.remove("border-transparent");
+  // Hide/Show logic
+  if (window.scrollY > 400) {
+      if (window.scrollY > lastScrollY && !isNavHidden) {
+          // Scrolling Down -> Hide
+          navbar.classList.add("nav-hidden");
+          isNavHidden = true;
+      } else if (window.scrollY < lastScrollY && isNavHidden) {
+          // Scrolling Up -> Show
+          navbar.classList.remove("nav-hidden");
+          isNavHidden = false;
+      }
+  } else {
+      navbar.classList.remove("nav-hidden");
+      isNavHidden = false;
+  }
+  
+  lastScrollY = window.scrollY;
+
+  // Theme logic (dark text for island)
+  const navLinks = document.querySelectorAll(".nav-link");
+  const logo = document.getElementById("logo");
+  const logoLast = document.getElementById("logo-last");
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  
+  const path = window.location.pathname.toLowerCase();
+  const isDarkPage = path.includes("about") || path.includes("contacts");
+
+  if (!isScrolled && isDarkPage) {
+    // Transparent state on dark background pages
+    navbar.classList.remove("text-brand");
+    logo?.classList.remove("text-brand");
+    logo?.classList.add("text-white");
+    hamburgerBtn?.classList.remove("text-brand");
+    hamburgerBtn?.classList.add("text-white");
+    navLinks.forEach(link => {
+      link.classList.remove("text-brand");
+      link.classList.add("text-white");
+    });
+    logoLast?.classList.remove("text-gray-600");
+    logoLast?.classList.add("text-white/50");
+  } else {
+    // Scrolled or light pages
+    navbar.classList.add("text-brand");
     logo?.classList.add("text-brand");
     logo?.classList.remove("text-white");
     hamburgerBtn?.classList.add("text-brand");
     hamburgerBtn?.classList.remove("text-white");
     navLinks.forEach(link => {
-        link.classList.add("text-brand");
-        link.classList.remove("text-white");
+      link.classList.add("text-brand");
+      link.classList.remove("text-white");
     });
-    profileChevron?.classList.add("text-brand");
-    profileChevron?.classList.remove("text-white");
-    const guestAvatar = document.getElementById("guestAvatar");
-    guestAvatar?.classList.add("text-brand");
-    guestAvatar?.classList.remove("text-white");
-    logoLast?.classList.remove("text-gray-400");
+    logoLast?.classList.remove("text-white/50");
     logoLast?.classList.add("text-gray-600");
-  } else {
-    navbar.classList.remove("bg-white/90", "backdrop-blur-xl", "border-slate-100", "shadow-sm");
-    navbar.classList.add("border-transparent");
-    
-    // Only turn white if we're on a page with a dark hero (like Home or About)
-    const hasDarkHero = document.querySelector(".bg-brand, #hero");
-    if (hasDarkHero) {
-        logo?.classList.add("text-white");
-        logo?.classList.remove("text-brand");
-        logoLast?.classList.remove("text-gray-600");
-        logoLast?.classList.add("text-gray-400");
-        hamburgerBtn?.classList.add("text-white");
-        hamburgerBtn?.classList.remove("text-brand");
-        navLinks.forEach(link => {
-            link.classList.add("text-white");
-            link.classList.remove("text-brand");
-        });
-        profileChevron?.classList.add("text-white");
-        profileChevron?.classList.remove("text-brand");
-        const guestAvatar = document.getElementById("guestAvatar");
-        guestAvatar?.classList.add("text-white");
-        guestAvatar?.classList.remove("text-brand");
-    } else {
-        logo?.classList.add("text-brand");
-        logoLast?.classList.add("text-gray-600");
-        hamburgerBtn?.classList.add("text-brand");
-        navLinks.forEach(link => link.classList.add("text-brand"));
-        profileChevron?.classList.add("text-brand");
-        const guestAvatar = document.getElementById("guestAvatar");
-        guestAvatar?.classList.add("text-brand");
-    }
   }
 }
 
@@ -117,7 +128,7 @@ export function syncActiveLink() {
     setActive("nav-contacts");
   } else if (path.startsWith("/profile")) {
     isNavScrollDisabled = true;
-    toggleNavbar(true);
+    toggleNavbar();
     syncProfileLinks();
   }
 }
@@ -181,7 +192,7 @@ export function initMobileMenu() {
         document.body.style.overflow = "hidden";
         
         // Force navbar to "active" style so burger is visible against white bg
-        toggleNavbar(true);
+        toggleNavbar();
         
         gsap.to(mobileMenu, { opacity: 1, duration: 0.5, ease: "power2.out" });
 
@@ -337,7 +348,7 @@ export function initNavbar() {
   window.__navbarInitialized = true;
 
   loadDynamicServices();
-  toggleNavbar(false);
+  toggleNavbar();
   syncActiveLink();
   initServicesMenu();
   initMobileMenu();
@@ -347,16 +358,7 @@ export function initNavbar() {
   // Scroll listener
 
   window.addEventListener("scroll", () => {
-    // 1. If scrolling is disabled, STOP everything and exit the function immediately
-    if (isNavScrollDisabled) return;
-
-    // 2. Otherwise, handle the toggle
-    const isScrolled = window.scrollY > 60;
-    toggleNavbar(isScrolled);
-
-    document
-      .getElementById("navbar")
-      ?.classList.toggle("scrolled", window.scrollY > 20);
+    toggleNavbar();
   });
 }
 

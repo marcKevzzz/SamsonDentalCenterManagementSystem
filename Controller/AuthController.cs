@@ -62,7 +62,6 @@ public class AuthController : ControllerBase
                 (firstName.Length > 0 ? firstName[0].ToString() : "")
                 + (lastName.Length > 0 ? lastName[0].ToString() : "");
 
-            Console.WriteLine($"[ConfirmEmail] User confirmed: {user.Email} as {role}");
 
             return Ok(
                 new

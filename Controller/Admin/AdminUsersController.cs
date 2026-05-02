@@ -213,9 +213,7 @@ public class AdminUsersController : ControllerBase
     {
         try
         {
-            Console.WriteLine(
-                $"[ToggleActive] Attempting to toggle active status for ID: {id} to {isActive}"
-            );
+            
 
             await _profileService.ToggleUserActive(id, isActive);
 

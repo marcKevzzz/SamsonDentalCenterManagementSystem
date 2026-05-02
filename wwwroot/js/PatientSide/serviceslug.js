@@ -38,9 +38,10 @@ function playEntranceAnimations() {
           gsap.set(this.targets(), { clearProps: "all" });
         }
       },
-      "-=0.6",
-    )
-    .fromTo(
+      "-=0.6"
+    );
+
+    gsap.fromTo(
       ".stats-item",
       {
         autoAlpha: 0,
@@ -50,8 +51,13 @@ function playEntranceAnimations() {
         autoAlpha: 1,
         y: 0,
         duration: 1,
+        delay: 0.5,
         stagger: 0.15,
         ease: "back.out(1.4)",
+        scrollTrigger: {
+          trigger: ".stats-container",
+          start: "top 80%",
+        },
         onComplete: function() {
           this.targets().forEach(el => el.classList.add('revealed'));
           gsap.set(this.targets(), { clearProps: "all" });

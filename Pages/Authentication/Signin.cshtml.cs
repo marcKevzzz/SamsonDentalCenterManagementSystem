@@ -60,11 +60,7 @@ public class SigninModel : PageModel
         // 1. Manually pull the rememberMe value from the Form collection
         // This avoids the "Multiple Handlers" conflict
         bool rememberMe = Request.Form["rememberMe"] == "true";
-        // Log for debugging - ensures the Model Binder is working
-        Console.WriteLine(
-            $"[Signin Debug] Email: {Input.Email}, Password Length: {Input.Password?.Length ?? 0}"
-        );
-
+        
         if (string.IsNullOrEmpty(Input.Email) || string.IsNullOrEmpty(Input.Password))
         {
             return new JsonResult(

@@ -10,6 +10,8 @@
   --text-muted: #64748b;
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
+  --island-bg: rgba(255, 255, 255, 0.85);
+  --island-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 @import url("https://fonts.cdnfonts.com/css/optima");
@@ -68,12 +70,37 @@ html {
   }
 }
 
-/* Navbar transition */
+/* Island Navbar */
+.nav-island {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1200px;
+  background: var(--island-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 100px;
+  box-shadow: var(--island-shadow);
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-island.nav-hidden {
+  transform: translate(-50%, -120%);
+  opacity: 0;
+}
+
+.nav-island.nav-scrolled {
+  top: 10px;
+  width: 95%;
+  background: rgba(255, 255, 255, 0.95);
+}
+
 #navbar {
-  transition:
-    background 0.35s ease,
-    box-shadow 0.35s ease,
-    backdrop-filter 0.35s ease;
+  transition: transform 0.4s ease, opacity 0.4s ease, background 0.4s ease;
 }
 
 .nav-link {
@@ -772,7 +799,53 @@ textarea.form-input {
   }
 }
 
-/* ── Service cards ── */
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.marquee-track-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 40s linear infinite;
+}
+
+.marquee-track:hover, .marquee-track-reverse:hover {
+  animation-play-state: paused;
+}
+
+/* Wavy Section Transition */
+.wavy-transition {
+  position: relative;
+  height: 60px;
+  width: 100%;
+  background: var(--brand-dark);
+}
+
+.wavy-transition::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23f8fafc' fill-opacity='1' d='M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
 .asvc-card {
   display: block;
   background: white;

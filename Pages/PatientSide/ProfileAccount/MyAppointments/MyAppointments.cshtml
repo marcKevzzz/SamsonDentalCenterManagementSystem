@@ -105,7 +105,8 @@ ViewData["Title"] = "My Appointments page";
             date = appt.AppointmentDate.ToString("MMM dd, yyyy"),
             time = appt.AppointmentTime,
             status = appt.Status,
-            notes = appt.Notes
+            notes = appt.Notes,
+            durationMinutes = appt.Service?.DurationMinutes ?? 60
         });
 
         var s = appt.Status.ToLower();
@@ -195,12 +196,18 @@ ViewData["Title"] = "My Appointments page";
                 <div class="w-11 h-11 rounded-full bg-primary/40 flex items-center justify-center shrink-0">
                     <i class="fa-regular fa-calendar text-primary text-lg"></i>
                 </div>
-                <div>
-                    <div class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Date & Time</div>
+                <div class="flex-1">
+                    <div class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Date &amp; Time</div>
                     <div class="text-[0.9rem] font-semibold text-slate-800">
                         @appt.AppointmentDate.ToString("dddd, MMMM dd, yyyy") <span class="mx-1 text-slate-300">•</span> @appt.AppointmentTime
                     </div>
                 </div>
+                @if (appt.Service?.DurationMinutes > 0) {
+                <div class="shrink-0 flex items-center gap-1 text-[0.72rem] font-semibold text-slate-400">
+                    <i class="fa-regular fa-clock text-[0.65rem]"></i>
+                    <span>@appt.Service.DurationMinutes min</span>
+                </div>
+                }
             </div>
 
             <!-- Actions -->

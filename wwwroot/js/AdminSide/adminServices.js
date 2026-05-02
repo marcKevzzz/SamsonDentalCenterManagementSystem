@@ -215,6 +215,8 @@ function getSvcFormState() {
     s: document.getElementById("mSummary").value,
     p: document.getElementById("mPrice").value,
     d: document.getElementById("mDuration").value,
+    dm: document.getElementById("mDurationMinutes").value,
+    bm: document.getElementById("mBufferMinutes").value,
     r: document.getElementById("mRecovery").value,
     a: document.getElementById("mIsActive").checked,
     i: document.getElementById("mIcon").value,
@@ -249,6 +251,8 @@ function openEditModal(id) {
   document.getElementById("mSummary").value = s.summary ?? "";
   document.getElementById("mPrice").value = s.price;
   document.getElementById("mDuration").value = s.duration ?? "";
+  document.getElementById("mDurationMinutes").value = s.durationMinutes ?? 60;
+  document.getElementById("mBufferMinutes").value = s.bufferMinutes ?? 15;
   document.getElementById("mRecovery").value = s.recovery ?? "";
   document.getElementById("mIsActive").checked = s.isActive;
   document.getElementById("mHero").value = s.hero ?? "";
@@ -326,6 +330,8 @@ async function saveService() {
       hero: heroUrl, // Final URL (either old one or the one we just uploaded)
       price: document.getElementById("mPrice").value.trim(),
       duration: document.getElementById("mDuration").value.trim(),
+      durationMinutes: parseInt(document.getElementById("mDurationMinutes").value) || 60,
+      bufferMinutes: parseInt(document.getElementById("mBufferMinutes").value) || 15,
       recovery: document.getElementById("mRecovery").value.trim(),
       isActive: document.getElementById("mIsActive").checked,
       icon: document.getElementById("mIcon").value.trim(),
@@ -563,7 +569,7 @@ function closeModal() {
   });
 }
 function clearModalFields() {
-  ["mName", "mTagline", "mSummary", "mPrice", "mDuration", "mRecovery", "mIcon"].forEach(
+  ["mName", "mTagline", "mSummary", "mPrice", "mDuration", "mDurationMinutes", "mBufferMinutes", "mRecovery", "mIcon"].forEach(
     (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("mCategory").value = "General Dentistry";
