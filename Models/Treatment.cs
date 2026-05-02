@@ -21,6 +21,12 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("tooth_numbers")]
         public string? ToothNumbers { get; set; }
 
+        [Column("tooth_data")]
+        public string? ToothData { get; set; } // JSON string of odontogram status
+
+        [Column("xray_data")]
+        public string? XrayData { get; set; } // JSON string of x-ray info
+
         [Column("procedure_details")]
         public string? ProcedureDetails { get; set; }
 

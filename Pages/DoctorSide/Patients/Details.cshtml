@@ -124,7 +124,73 @@
                         <button @@click="tab = 'timeline'" :class="tab === 'timeline' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Timeline</button>
                     }
                     <button @@click="tab = 'appointments'" :class="tab === 'appointments' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Appointments</button>
+                    <button @@click="tab = 'evaluation'" :class="tab === 'evaluation' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Evaluation</button>
                     <button @@click="tab = 'notes'" :class="tab === 'notes' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Notes</button>
+                </div>
+
+                <!-- Tab: Evaluation -->
+                <div x-show="tab === 'evaluation'" x-transition class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-md font-bold text-brand-900 font-display">Oral Health Evaluation</h4>
+                        <button onclick="saveEvaluation()" class="px-4 py-1.5 bg-primary/10 text-primary text-[12px] font-bold rounded-lg hover:bg-primary hover:text-white transition-all">Save Evaluation</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Score -->
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center">
+                            <div class="text-[11px] font-bold text-brand-400 uppercase tracking-widest mb-4">Health Score</div>
+                            <div class="relative w-28 h-28 flex items-center justify-center">
+                                <svg class="w-full h-full -rotate-90">
+                                    <circle cx="56" cy="56" r="50" fill="none" stroke="#e2e8f0" stroke-width="8"></circle>
+                                    <circle cx="56" cy="56" r="50" fill="none" stroke="currentColor" stroke-width="8" stroke-dasharray="314" :stroke-dashoffset="314 - (314 * (parseInt(document.getElementById('health-score-input')?.value || 0) / 100))" class="text-primary transition-all duration-1000"></circle>
+                                </svg>
+                                <input type="number" id="health-score-input" value="@(p?.OralHealthScore ?? 85)" min="0" max="100" class="absolute text-2xl font-bold text-brand-900 bg-transparent text-center w-16 outline-none" />
+                                <span class="absolute bottom-6 text-[10px] font-bold text-brand-400">/ 100</span>
+                            </div>
+                        </div>
+
+                        <!-- Metrics -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[12px] font-bold text-brand-600">Gum Health</span>
+                                <select id="eval-gum" class="text-[11px] font-bold px-3 py-1 rounded-lg border border-slate-200 bg-white outline-none">
+                                    <option value="Healthy">Healthy</option>
+                                    <option value="Gingivitis">Gingivitis</option>
+                                    <option value="Periodontitis">Periodontitis</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[12px] font-bold text-brand-600">Cavity Risk</span>
+                                <select id="eval-cavity" class="text-[11px] font-bold px-3 py-1 rounded-lg border border-slate-200 bg-white outline-none">
+                                    <option value="Low">Low</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[12px] font-bold text-brand-600">Enamel Status</span>
+                                <select id="eval-enamel" class="text-[11px] font-bold px-3 py-1 rounded-lg border border-slate-200 bg-white outline-none">
+                                    <option value="Strong">Strong</option>
+                                    <option value="Thinning">Thinning</option>
+                                    <option value="Eroded">Eroded</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[12px] font-bold text-brand-600">Plaque Level</span>
+                                <select id="eval-plaque" class="text-[11px] font-bold px-3 py-1 rounded-lg border border-slate-200 bg-white outline-none">
+                                    <option value="None">None</option>
+                                    <option value="Mild">Mild</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Heavy">Heavy</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <label class="block text-[11px] font-bold text-brand-400 uppercase mb-2">Doctor's Recommendations</label>
+                        <textarea id="eval-notes" class="w-full p-4 rounded-xl border border-slate-200 bg-white text-[13px] outline-none focus:border-primary resize-none" rows="3" placeholder="Add specific advice for the patient dashboard...">Continue daily flossing and use fluoride mouthwash.</textarea>
+                    </div>
                 </div>
 
                 <!-- Tab: Timeline -->
@@ -256,6 +322,64 @@
         const patientId = "@p?.Id";
         window.location.href = `/Doctor/Appointments?patientId=${patientId}&openModal=true`;
     }
+    async function saveEvaluation() {
+        const btn = event.target;
+        const originalText = btn.innerText;
+        
+        const payload = {
+            patientId: "@p?.Id",
+            score: parseInt(document.getElementById('health-score-input').value),
+            gumHealth: document.getElementById('eval-gum').value,
+            cavityRisk: document.getElementById('eval-cavity').value,
+            enamelStatus: document.getElementById('eval-enamel').value,
+            plaqueLevel: document.getElementById('eval-plaque').value,
+            notes: document.getElementById('eval-notes').value
+        };
+
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/doctor/evaluate-oral-health', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.ok) {
+                btn.innerText = "Saved!";
+                btn.classList.replace('bg-primary/10', 'bg-emerald-500');
+                btn.classList.replace('text-primary', 'text-white');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.replace('bg-emerald-500', 'bg-primary/10');
+                    btn.classList.replace('text-white', 'text-primary');
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                alert("Failed to save: " + result.error);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            alert("Network error.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Pre-fill evaluation if exists
+    document.addEventListener('DOMContentLoaded', () => {
+        const summaryJson = `@Html.Raw(p?.OralHealthSummary ?? "{}")`;
+        try {
+            const summary = JSON.parse(summaryJson);
+            if (summary.gumHealth) document.getElementById('eval-gum').value = summary.gumHealth;
+            if (summary.cavityRisk) document.getElementById('eval-cavity').value = summary.cavityRisk;
+            if (summary.enamelStatus) document.getElementById('eval-enamel').value = summary.enamelStatus;
+            if (summary.plaqueLevel) document.getElementById('eval-plaque').value = summary.plaqueLevel;
+            if (summary.notes) document.getElementById('eval-notes').value = summary.notes;
+        } catch(e) {}
+    });
 </script>
 
 <style>

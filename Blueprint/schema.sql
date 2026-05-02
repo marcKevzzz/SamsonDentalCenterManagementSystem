@@ -96,6 +96,8 @@ CREATE TABLE public.dental_services (
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  duration_minutes integer NOT NULL DEFAULT 60,
+  buffer_minutes integer NOT NULL DEFAULT 15,
   CONSTRAINT dental_services_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.doctors (
@@ -120,6 +122,7 @@ CREATE TABLE public.inquiries (
   guest_first_name text,
   guest_last_name text,
   guest_phone text,
+  is_read boolean NOT NULL DEFAULT false,
   CONSTRAINT inquiries_pkey PRIMARY KEY (id),
   CONSTRAINT inquiries_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
 );
@@ -175,6 +178,29 @@ CREATE TABLE public.notifications (
   CONSTRAINT notifications_pkey PRIMARY KEY (id),
   CONSTRAINT notifications_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.patient_medical_info (
+  patient_id uuid NOT NULL,
+  blood_type text,
+  height numeric,
+  weight numeric,
+  is_smoker boolean DEFAULT false,
+  allergies jsonb DEFAULT '[]'::jsonb,
+  medications jsonb DEFAULT '[]'::jsonb,
+  history jsonb DEFAULT '{}'::jsonb,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT patient_medical_info_pkey PRIMARY KEY (patient_id),
+  CONSTRAINT patient_medical_info_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.patient_tooth_status (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  patient_id uuid NOT NULL,
+  tooth_number integer NOT NULL,
+  status text NOT NULL DEFAULT 'healthy'::text,
+  notes text,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT patient_tooth_status_pkey PRIMARY KEY (id),
+  CONSTRAINT patient_tooth_status_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.payments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   invoice_id uuid NOT NULL,
@@ -204,6 +230,8 @@ CREATE TABLE public.profiles (
   is_active boolean NOT NULL DEFAULT true,
   reactivation_requested boolean NOT NULL DEFAULT false,
   requires_merge_review boolean DEFAULT false,
+  oral_health_score integer,
+  oral_health_summary jsonb,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
@@ -241,12 +269,29 @@ CREATE TABLE public.staff_availability (
   is_active boolean NOT NULL DEFAULT true,
   CONSTRAINT staff_availability_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.staff_leaves (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  profile_id uuid,
+  leave_type character varying NOT NULL,
+  start_date date NOT NULL,
+  end_date date NOT NULL,
+  reason text,
+  status character varying DEFAULT 'pending'::character varying,
+  approved_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT staff_leaves_pkey PRIMARY KEY (id),
+  CONSTRAINT staff_leaves_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id),
+  CONSTRAINT staff_leaves_approved_by_fkey FOREIGN KEY (approved_by) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.treatments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   invoice_id uuid NOT NULL,
   service_id uuid,
   service_name text NOT NULL,
   tooth_numbers text,
+  tooth_data jsonb,
+  xray_data jsonb,
   procedure_details text,
   diagnosis text,
   status text NOT NULL DEFAULT 'completed'::text CHECK (status = ANY (ARRAY['completed'::text, 'in-progress'::text, 'planned'::text])),
@@ -255,27 +300,4 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_pkey PRIMARY KEY (id),
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
-);
-CREATE TABLE public.patient_medical_info (
-  patient_id uuid NOT NULL PRIMARY KEY,
-  blood_type text,
-  height numeric,
-  weight numeric,
-  is_smoker boolean DEFAULT false,
-  allergies jsonb DEFAULT '[]'::jsonb,
-  medications jsonb DEFAULT '[]'::jsonb,
-  history jsonb DEFAULT '{}'::jsonb,
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT patient_medical_info_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
-);
-CREATE TABLE public.patient_tooth_status (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  patient_id uuid NOT NULL,
-  tooth_number integer NOT NULL,
-  status text NOT NULL DEFAULT 'healthy',
-  notes text,
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT patient_tooth_status_pkey PRIMARY KEY (id),
-  CONSTRAINT patient_tooth_status_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
-  UNIQUE(patient_id, tooth_number)
 );

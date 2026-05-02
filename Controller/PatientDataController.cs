@@ -15,16 +15,20 @@ public class PatientDataController : ControllerBase
     private readonly NotificationService _notificationService;
     private readonly InvoiceService _invoiceService;
 
+    private readonly RecordService _recordService;
+
     public PatientDataController(
         ProfileService profileService,
         AppointmentService appointmentService,
         NotificationService notificationService,
-        InvoiceService invoiceService)
+        InvoiceService invoiceService,
+        RecordService recordService)
     {
         _profileService = profileService;
         _appointmentService = appointmentService;
         _notificationService = notificationService;
         _invoiceService = invoiceService;
+        _recordService = recordService;
     }
 
     [HttpGet("check-shadow")]
@@ -89,6 +93,7 @@ public class PatientDataController : ControllerBase
             var appointments = await _appointmentService.GetByPatient(userId);
             var unreadNotifs = await _notificationService.GetUnreadCountAsync(userId);
             var invoices = await _invoiceService.GetInvoicesByPatientIdAsync(userId);
+            var treatments = await _recordService.GetTreatmentsByPatientAsync(userId);
 
             return Ok(new {
                 ok = true,
@@ -136,4 +141,5 @@ public class PatientDataController : ControllerBase
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
+
 }

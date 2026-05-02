@@ -1,6 +1,9 @@
 import { toggleFaq } from "../site.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+// We use window 'load' instead of DOMContentLoaded to ensure:
+// 1. All images (like the hero portrait) are loaded (setting correct heights).
+// 2. Tailwind CDN has finished parsing and applying classes (setting correct widths/margins).
+window.addEventListener("load", () => {
   // Background reveal logic
   const bg = document.getElementById("heroBg");
   if (bg) {
@@ -19,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initGalleryPin();
   initReviewsPin();
   renderDynamicContent();
+  
+  // Final refresh to lock in positions
+  ScrollTrigger.refresh();
 });
 
 function renderDynamicContent() {
@@ -46,7 +52,7 @@ function renderDynamicContent() {
     gsap.from(".hours-row", {
       scrollTrigger: {
         trigger: "#location",
-        start: "top 80%",
+        start: "top 92%", // More forgiving for big screens
       },
       x: -20,
       opacity: 0,
@@ -54,6 +60,9 @@ function renderDynamicContent() {
       stagger: 0.1,
       ease: "power2.out",
     });
+
+    // Recalculate everything because the page just got longer
+    ScrollTrigger.refresh();
   }
 }
 
@@ -81,7 +90,7 @@ function initScrollAnimations() {
     {
       scrollTrigger: {
         trigger: "#features",
-        start: "top 90%",
+        start: "top 55%", // Lower threshold ensures it triggers even on short desktops
         once: true,
       },
       autoAlpha: 1,
@@ -102,7 +111,7 @@ function initScrollAnimations() {
         y: 0,
         duration: 1,
         ease: "power2.out",
-        scrollTrigger: { trigger: el, start: "top 90%", once: true },
+        scrollTrigger: { trigger: el, start: "top 95%", once: true },
       },
     );
   });
@@ -117,7 +126,7 @@ function initHeroAnimations() {
   tl.fromTo(
     ".hp-reveal",
     { autoAlpha: 0, y: 40, skewY: 5 },
-    { autoAlpha: 1, y: 0, skewY: 0, duration: 2, delay: 1, stagger: 0.2 },
+    { autoAlpha: 1, y: 0, skewY: 0, duration: 1, delay: 1, stagger: 0.2 },
   )
     .fromTo(
       ".hp-word",
@@ -259,8 +268,8 @@ function initReviewsPin() {
     },
   });
 
-  tl.to(track1, { x: "-200%", duration: 8, ease: "none" }, 0);
-  tl.to(track2, { x: "0", duration: 8, ease: "none" }, 0);
+  tl.to(track1, { x: "-150%", duration: 6, ease: "none" }, 0);
+  tl.to(track2, { x: "0", duration: 6, ease: "none" }, 0);
 
   // Scale cards on active
   gsap.utils.toArray(".review-card").forEach((card) => {

@@ -111,16 +111,64 @@ ViewData["Title"] = "Dashboard";
       </div>
     </div>
 
-    <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb]">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-9 h-9 rounded-xl bg-[#fef3c7] flex items-center justify-center">
-          <i class="fa-solid fa-star text-star"></i>
+    <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb] group hover:border-primary/30 transition-all">
+      <div class="flex items-start justify-between mb-2">
+        <div class="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center">
+          <i class="fa-solid fa-tooth text-primary"></i>
         </div>
+        <div class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">Good</div>
       </div>
-      <div class="brand-font font-extrabold text-brand text-[1.8rem] leading-none">
-        4.8
+      <div class="flex items-end gap-1">
+        <div class="brand-font font-extrabold text-brand text-[1.8rem] leading-none">
+          @(Model.Profile?.OralHealthScore ?? 85)
+        </div>
+        <div class="text-[11px] font-bold text-muted mb-0.5">/ 100</div>
       </div>
-      <div class="font-body text-[0.73rem] text-muted mt-1.5">Avg. Rating</div>
+
+  <!-- Oral Health Summary -->
+  <div class="fade-up bg-white rounded-3xl p-6 border border-[#e5e7eb] shadow-sm">
+      <div class="flex items-center justify-between mb-6">
+          <h3 class="brand-font font-bold text-brand text-[1.1rem]">Oral Health Summary</h3>
+          <span class="text-[10px] font-bold text-muted uppercase tracking-widest">Last Evaluated: @(Model.Profile?.UpdatedAt.ToString("MMM dd, yyyy") ?? "N/A")</span>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          @{
+              var summaryJson = Model.Profile?.OralHealthSummary ?? "{}";
+              var summary = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(summaryJson);
+              
+              string GetVal(string key) => summary.TryGetProperty(key, out var prop) ? prop.GetString() ?? "Healthy" : "N/A";
+          }
+          
+          <div class="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+              <div class="text-[10px] font-bold text-muted uppercase mb-1">Gum Health</div>
+              <div class="text-[13px] font-bold text-brand">@GetVal("gumHealth")</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+              <div class="text-[10px] font-bold text-muted uppercase mb-1">Cavity Risk</div>
+              <div class="text-[13px] font-bold text-brand">@GetVal("cavityRisk")</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+              <div class="text-[10px] font-bold text-muted uppercase mb-1">Enamel Status</div>
+              <div class="text-[13px] font-bold text-brand">@GetVal("enamelStatus")</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+              <div class="text-[10px] font-bold text-muted uppercase mb-1">Plaque Level</div>
+              <div class="text-[13px] font-bold text-brand">@GetVal("plaqueLevel")</div>
+          </div>
+      </div>
+      
+      @if (summary.TryGetProperty("notes", out var notesProp) && !string.IsNullOrEmpty(notesProp.GetString())) {
+          <div class="mt-6 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+              <div class="flex items-center gap-2 mb-2">
+                  <i class="fa-solid fa-user-doctor text-primary text-[0.8rem]"></i>
+                  <span class="text-[11px] font-bold text-primary uppercase tracking-wider">Doctor's Recommendation</span>
+              </div>
+              <p class="text-[13px] text-brand-600 leading-relaxed font-medium">"@notesProp.GetString()"</p>
+          </div>
+      }
+  </div>
+      <div class="font-body text-[0.73rem] text-muted mt-1.5">Oral Health Score</div>
     </div>
   </div>
 

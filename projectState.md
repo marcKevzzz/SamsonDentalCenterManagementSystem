@@ -273,3 +273,38 @@
   - Refactored `step2-schedule.js` to fetch and render dynamic slots from the API.
   - Added empty state handling for dates with no available slots (e.g., clinic closed or fully booked).
   - **ACTION REQUIRED**: Run `Backend/Migrations/20260502_AddBufferMinutesToSettings.sql` in Supabase SQL Editor.
+
+* **Date**: 2026-05-02 (Animation Consistency Fixes)
+- **Animation Trigger Stability**:
+  - Resolved "instantly triggering" on small screens and "not triggering" on big screens by migrating GSAP initialization from `DOMContentLoaded` to `window.load`.
+  - Added `ScrollTrigger.refresh()` to `_Layout.cshtml` and `home.js` to handle layout shifts caused by Tailwind CDN and dynamic content (Hours/Services).
+  - Softened `ScrollTrigger` start points (from `90%` to `95%`) to ensure better reachability on high-resolution monitors where sections might be near the scroll limit.
+  - Verified that `overflow-hidden` on `body` is cleared before GSAP calculates scroll positions.
+
+* **Date**: 2026-05-02 (Patient Portal UI Refinement)
+- **Split-View Appointments**:
+  - Refactored `MyAppointments.cshtml` to a premium Master-Detail layout, replacing modal interactions with a persistent detail pane.
+  - Updated `myAppointments.js` with dynamic detail injection and active item highlighting.
+- **Design Standardization**:
+  - Unified **Settings** and **Notifications** with high-end typography (Syne), premium cards, and standardized `premium-input` styles in `site.css`.
+  - Implemented `isNavScrollDisabled` logic in `site.js` to force a white navbar background on all `/Profile/*` pages for consistent contrast.
+- **Animations**:
+  - Added GSAP staggered entrance animations for appointments and notifications to enhance the premium feel.
+- **Bug Fixes (Notifications)**:
+  - Resolved "Invalid Date" display by adding defensive parsing for `createdAt`.
+  - Fixed notification logic to keep items in the list after being read (previously they were removed).
+  - Synchronized the profile "red dot" to only indicate unread notifications, ensuring it disappears when all items are read.
+* **Date**: 2026-05-02 (Patient Portal Dental Records & UI Finalization)
+- **Dental Records Split-Pane Overhaul**:
+  - Refactored `Records.cshtml` into a modern **Master-Detail** split-pane layout with category navigation (Profile, Medical, Treatments, Imaging, Chart).
+  - Implemented a digital **Odontogram (Tooth Chart)** with high-end visual mapping, hover states, and premium color tokens for clinical statuses.
+  - Standardized all profile pages (Records, Dashboard, Appointments, Settings, Notifications) to use consistent `Syne` typography and premium card styling.
+- **Unread Treatment Tracking**:
+  - Added `is_read` logic to the `treatments` table to track patient interaction with clinical records.
+  - Implemented `MarkRecordsRead` API in `PatientDataController` and `RecordService` to handle bulk read-state updates.
+  - Integrated real-time unread indicators (pulsing red dots) in the sidebar and treatment log, synchronized with the global notification system.
+- **Premium Layout Refinements**:
+  - Overhauled the global **Navbar** with a glassy, transparent-to-blur transition and high-end micro-interactions.
+  - Refined the **Profile Sidebar** with premium active states, badge placeholders, and improved typography.
+  - Decoupled notification badges to focus purely on unread system alerts, removing clutter from the appointments view.
+  - Standardized **MyAppointments** with a persistent detail pane and enhanced card styles.

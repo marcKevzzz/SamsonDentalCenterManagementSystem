@@ -603,5 +603,22 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             return _supabase.Storage.From(bucket).GetPublicUrl(path);
         }
+
+        public async Task UpdateProfilePartial(string userId, Dictionary<string, object> payload)
+        {
+            await _supabase.InitializeAsync();
+            
+            var req = new HttpRequestMessage(HttpMethod.Patch, $"{_supabaseUrl}/rest/v1/profiles?id=eq.{userId}");
+            req.Headers.Add("apikey", _serviceRoleKey);
+            req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+            req.Content = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(payload),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+        }
     }
 }

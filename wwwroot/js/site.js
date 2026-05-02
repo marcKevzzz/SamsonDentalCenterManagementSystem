@@ -13,7 +13,7 @@ export function toggleNavbar() {
   const navbar = document.getElementById("navbar-wrapper");
   if (!navbar) return;
   
-  const isScrolled = window.scrollY > 50;
+  const isScrolled = window.scrollY > 50 || isNavScrollDisabled;
   
   if (isScrolled) {
     navbar.classList.add("nav-scrolled");
@@ -61,15 +61,15 @@ function syncProfileLinks() {
   const allProfileLinks = document.querySelectorAll(".side-link, .menu-link");
   
   allProfileLinks.forEach(link => {
-    link.classList.remove("active", "bg-primary/10", "text-primary");
+    link.classList.remove("active");
     const href = link.getAttribute("href")?.toLowerCase();
     if (!href) return;
 
-    if (path.includes("dashboard") && href.includes("dashboard")) link.classList.add("active", "bg-primary/10", "text-primary");
-    if (path.includes("myappointments") && href.includes("myappointments")) link.classList.add("active", "bg-primary/10", "text-primary");
-    if (path.includes("records") && href.includes("records")) link.classList.add("active", "bg-primary/10", "text-primary");
-    if (path.includes("notifications") && href.includes("notifications")) link.classList.add("active", "bg-primary/10", "text-primary");
-    if (path.includes("settings") && href.includes("settings")) link.classList.add("active", "bg-primary/10", "text-primary");
+    if (path.includes("dashboard") && href.includes("dashboard")) link.classList.add("active");
+    if (path.includes("myappointments") && href.includes("myappointments")) link.classList.add("active");
+    if (path.includes("records") && href.includes("records")) link.classList.add("active");
+    if (path.includes("notifications") && href.includes("notifications")) link.classList.add("active");
+    if (path.includes("settings") && href.includes("settings")) link.classList.add("active");
   });
 }
 
@@ -245,7 +245,7 @@ export function initScrollAnimations() {
       ease: "power2.out",
       scrollTrigger: {
         trigger: el,
-        start: "top 88%",
+        start: "top 94%", // Softened for better reachability on all screens
         toggleActions: "play none none none",
       },
     });
@@ -324,6 +324,6 @@ export function initNavbar() {
   });
 }
 
-// ── Bootstrap on DOM ready ────────────────────
-
-document.addEventListener("DOMContentLoaded", initNavbar);
+// ── Bootstrap on window load ────────────────────
+// We wait for 'load' to ensure Tailwind CDN and images have finalized the layout height.
+window.addEventListener("load", initNavbar);

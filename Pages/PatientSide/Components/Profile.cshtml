@@ -17,7 +17,7 @@
         class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 border-2 border-primary avatar-ring flex items-center justify-center !text-white">
         <span id="navInitials" class="brand-font font-bold !text-white text-[0.78rem]"></span>
       </div>
-      <span id="notif-total-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+      <span id="notif-total-badge" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full hidden unread-dot"></span>
     </div>
 
     <svg id="profileChevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -121,7 +121,6 @@
             <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
           My Appointments
-          <span id="notif-patient-appointments-count" class="ml-auto bg-primary/20 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
         </a>
 
         <a href="/Profile/Records" class="menu-link" id="nav-records">
@@ -143,7 +142,7 @@
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           Notifications
-          <span id="notif-patient-general-count" class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+          <span id="notif-patient-general-count" class="ml-auto w-2.5 h-2.5 bg-red-500 rounded-full hidden unread-dot"></span>
         </a>
 
         <a href="/Profile/Settings" class="menu-link" id="nav-settings">

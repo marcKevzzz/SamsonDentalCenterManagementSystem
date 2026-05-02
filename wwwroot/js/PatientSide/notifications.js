@@ -39,7 +39,12 @@ function renderNotifications(notifs) {
             ? `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" /><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round" /></svg>`
             : `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" /><polyline points="14 2 14 8 20 8" stroke-width="2" /><line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round" /><line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round" /></svg>`;
         
-        const time = new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Defensive Date Parsing
+        const dateObj = n.createdAt ? new Date(n.createdAt) : new Date();
+        const isValidDate = !isNaN(dateObj.getTime());
+        
+        const time = isValidDate ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
+        const date = isValidDate ? dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' }) : "Just now";
 
         html += `
         <div class="notif-item flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer ${bgClass}"
@@ -53,7 +58,8 @@ function renderNotifications(notifs) {
             <div class="flex items-start justify-between gap-2">
               <p class="text-sm font-semibold text-brand">${n.title}</p>
               <div class="flex items-center gap-2 flex-shrink-0">
-                <span class="text-xs text-muted">${time}</span>
+                <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">${date}</span>
+                <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">${time}</span>
                 ${!isRead ? `<div class="w-2 h-2 rounded-full bg-primary unread-dot"></div>` : ''}
               </div>
             </div>
@@ -110,15 +116,14 @@ window.markRead = async function(el, id) {
       console.error(err);
   }
 
-  // Animate out then remove
-  el.style.transition = "opacity 0.25s, transform 0.25s";
-  el.style.opacity = "0";
-  el.style.transform = "translateX(12px)";
-  setTimeout(() => {
-    el.remove();
-    applyFilter();
-    updateBadge();
-  }, 260);
+  // Update UI to 'read' state without removing
+  el.classList.remove("bg-blue-50/40");
+  el.setAttribute("data-read", "true");
+  
+  const dot = el.querySelector(".unread-dot");
+  if (dot) dot.remove();
+
+  updateBadge();
 }
 
 function updateBadge() {

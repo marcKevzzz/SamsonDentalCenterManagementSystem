@@ -88,16 +88,16 @@ html {
 
 .nav-island {
   pointer-events: auto;
-  background: rgba(15, 23, 42, 0.2); /* Dark background on top */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4); /* Glassy dark on top */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 100px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   padding: 8px 24px;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.1s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: background, backdrop-filter;
   color: white;
 }
@@ -108,10 +108,12 @@ html {
 
 /* Scrolled State */
 .nav-scrolled .nav-island {
-  background: rgba(255, 255, 255, 0.5); /* Glassy white on scroll */
-  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.65); /* Glassy white on scroll */
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.5);
   color: var(--brand-dark);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
 }
 
 .nav-scrolled .nav-island-container {
@@ -866,7 +868,7 @@ textarea.form-input {
 } */
 
 #track-2 {
-  transform: translateX(-200%); 
+  transform: translateX(-150%); 
 }
 
 .review-card {
@@ -1413,36 +1415,6 @@ textarea.form-input {
   color: #e5e7eb;
 }
 
-/* Sidebar nav link */
-.side-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.85rem;
-  color: #6b7280;
-  text-decoration: none;
-  transition:
-    background 0.15s,
-    color 0.15s;
-}
-
-.side-link:hover {
-  background: #f5f5f7;
-  color: #1a1a2e;
-}
-
-.side-link.active {
-  background: #f5f5f7;
-  color: var(--primary);
-  font-weight: 500;
-}
-
-.side-link.active svg {
-  color: var(--primary);
-}
 
 .action-card {
   transition: all 0.2s;
@@ -1548,62 +1520,35 @@ textarea.form-input {
   transform: translateY(-2px);
 }
 
-/* Tooth chart cell */
-.tooth-cell {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 600;
-  font-family: "DM Sans", sans-serif;
-  cursor: default;
-  border: 1.5px solid #e5e7eb;
-  transition: transform 0.15s;
+/* Tooth chart v2 - Digital Odontogram */
+.tooth-v2 {
+    width: 32px;
+    height: 42px;
+    border-radius: 8px 8px 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1);
 }
 
-.tooth-cell:hover {
-  transform: scale(1.15);
-  z-index: 2;
+.tooth-v2:hover {
+    transform: translateY(-4px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1), inset 0 -4px 0 rgba(0,0,0,0.1);
+    z-index: 10;
 }
 
-.tooth-healthy {
-  background: #f0fdf4;
-  color: #15803d;
-  border-color: #bbf7d0;
-}
-
-.tooth-filled {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #bfdbfe;
-}
-
-.tooth-crown {
-  background: #fef9c3;
-  color: #a16207;
-  border-color: #fde68a;
-}
-
-.tooth-extracted {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fecaca;
-}
-
-.tooth-rct {
-  background: #fdf4ff;
-  color: #7c3aed;
-  border-color: #e9d5ff;
-}
-
-.tooth-missing {
-  background: #f9fafb;
-  color: #d1d5db;
-  border-color: #e5e7eb;
-}
+.tooth-healthy { background: #10b981; }
+.tooth-filled { background: #3b82f6; }
+.tooth-crown { background: #f59e0b; }
+.tooth-rct { background: #ef4444; }
+.tooth-extracted { background: #94a3b8; }
 
 /* X-ray placeholder shimmer */
 @keyframes shimmer {
@@ -2031,3 +1976,186 @@ textarea.form-input {
 .hero-doctor-container {
   perspective: 1000px;
 }
+
+/* ── Profile & Appointments Split View ──────────────────── */
+.side-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none !important;
+}
+
+.side-link svg {
+    transition: transform 0.25s ease;
+}
+
+.side-link:hover {
+    background: var(--bg-soft);
+    color: var(--brand-dark);
+}
+
+.side-link:hover svg {
+    transform: translateX(2px);
+}
+
+.side-link.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.side-link.active i {
+    color: var(--primary);
+}
+
+.record-nav-btn {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.record-nav-btn.active {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* Appointment Master-Detail */
+.appt-master-container {
+    display: flex;
+    gap: 24px;
+    height: calc(100vh - 220px);
+    min-height: 500px;
+}
+
+.appt-list-pane {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.appt-detail-pane {
+    width: 420px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+
+.appt-item-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.appt-item-card:hover {
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.appt-item-card.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 10px 25px rgba(30, 64, 175, 0.08);
+}
+
+.appt-item-card.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+}
+
+.status-pill {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Custom Scrollbar for Panes */
+.appt-list-pane::-webkit-scrollbar {
+    width: 4px;
+}
+
+.appt-list-pane::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.appt-list-pane::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+/* Settings Enhancements */
+.settings-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+
+.input-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.premium-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    color: var(--brand-dark);
+    transition: all 0.2s ease;
+}
+
+.premium-input:focus {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    outline: none;
+}
+
+/* Notifications */
+.notif-card {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.notif-card.unread {
+    background: var(--primary-light);
+    border-left-color: var(--primary);
+}
+
+.notif-card:hover {
+    background: #f8fafc;
+}
+

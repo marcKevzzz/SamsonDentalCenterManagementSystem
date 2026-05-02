@@ -5,60 +5,52 @@ ViewData["Title"] = "Notifications";
 }
 
 <section class="flex-1 min-w-0 fade-up">
-  <div class="mb-6">
-    <div class="flex items-center gap-2 ">
-      <div
-        class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
-        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Notifications
-      </div>
-      <div class="ml-auto flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
-        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-        Patient since Jan 2024
+  <div class="mb-8">
+    <div class="flex items-center gap-2 mb-2">
+      <div class="flex items-center gap-2 font-body text-[0.67rem] font-bold tracking-[0.2em] uppercase text-primary/60">
+        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Communications
       </div>
     </div>
-    <h1 class="font-extrabold text-3xl text-brand" style="font-family:'Syne',sans-serif">Your Notifications</h1>
-    <p class="text-muted text-sm mt-1">Stay updated on your appointments, records, and clinic announcements.</p>
+    <h1 class="font-extrabold text-[2rem] text-brand leading-tight" style="font-family:'Syne',sans-serif">Notification Center</h1>
+    <p class="text-muted text-sm mt-1">Stay synchronized with your clinical progress and upcoming sessions.</p>
   </div>
 
   <!-- Filter tabs + actions -->
-  <div class="flex items-center justify-between border-b-2 border-gray-200 mb-6">
+  <div class="flex items-center justify-between border-b border-gray-100 mb-8 overflow-x-auto no-scrollbar">
     <div class="flex">
       <button onclick="filterTab('all')" id="ftab-all"
-        class="px-5 py-2.5 font-bold text-xs max-w-full truncate sm:tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-primary border-primary"
+        class="px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 -mb-px transition-all text-primary border-primary whitespace-nowrap"
         style="font-family:'Syne',sans-serif">
-        All
+        All Messages
       </button>
 
       <button onclick="filterTab('appointments')" id="ftab-appointments"
-        class="px-5 py-2.5 font-bold text-xs max-w-full truncate sm:tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand"
+        class="px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 -mb-px transition-all text-muted border-transparent hover:text-brand whitespace-nowrap"
         style="font-family:'Syne',sans-serif">
         Appointments
       </button>
       <button onclick="filterTab('system')" id="ftab-system"
-        class="px-5 py-2.5 font-bold text-xs max-w-full truncate sm:tracking-widest uppercase border-b-2 -mb-0.5 transition-all text-muted border-transparent hover:text-brand"
+        class="px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 -mb-px transition-all text-muted border-transparent hover:text-brand whitespace-nowrap"
         style="font-family:'Syne',sans-serif">
-        System
+        System Alerts
       </button>
     </div>
   </div>
 
   <!-- Notification list -->
-  <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden" id="notifList">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden" id="notifList">
+      <!-- Content injected by notifications.js -->
   </div>
 
-  <!-- Empty state (hidden by default) -->
-  <div id="emptyState" class="hidden bg-white rounded-2xl border border-gray-200 py-16"
-    style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-    <div class="w-14 h-14 bg-offwhite rounded-full flex items-center justify-center mb-4">
-      <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round" />
-      </svg>
+  <!-- Empty state -->
+  <div id="emptyState" class="hidden py-32 flex-col items-center justify-center text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
+    <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6">
+        <i class="fa-regular fa-bell-slash text-slate-200 text-3xl"></i>
     </div>
-    <p class="font-bold text-sm text-brand mb-1" style="font-family:'Syne',sans-serif">No notifications here</p>
-    <p class="text-xs text-muted">You're all caught up! Check back later.</p>
+    <h3 class="font-bold text-lg text-brand mb-2" style="font-family:'Syne',sans-serif">All Caught Up!</h3>
+    <p class="text-sm text-muted max-w-xs mx-auto">You have no new notifications at the moment. We'll alert you here for any updates.</p>
   </div>
 </section>
 
 <script type="module" src="~/js/site.js"></script>
-<script src="~/js/PatientSide/notifications.js"></script>
+<script src="~/js/PatientSide/notifications.js"></script>

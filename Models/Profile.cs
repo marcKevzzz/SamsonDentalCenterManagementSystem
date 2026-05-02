@@ -48,6 +48,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
@@ -56,6 +59,12 @@ namespace SamsonDentalCenterManagementSystem.Models
 
         [Column("requires_merge_review")]
         public bool RequiresMergeReview { get; set; } = false;
+
+        [Column("oral_health_score")]
+        public int? OralHealthScore { get; set; }
+
+        [Column("oral_health_summary")]
+        public string? OralHealthSummary { get; set; } // JSON: { gumHealth, cavityRisk, plaqueLevel, enamelStatus }
 
         [JsonIgnore]
         [Newtonsoft.Json.JsonIgnore]

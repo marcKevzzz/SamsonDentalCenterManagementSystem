@@ -255,6 +255,9 @@ window.switchTab = function(tab) {
             return;
         }
 
+        // Check Medical Info
+        checkMedicalInfo(patientId);
+
         billing.classList.add('hidden');
         treatment.classList.remove('hidden');
         tabT.classList.add('text-primary', 'border-primary');
@@ -267,6 +270,59 @@ window.switchTab = function(tab) {
         submitBtn.classList.remove('hidden');
 
         renderTreatmentForms();
+    }
+}
+
+async function checkMedicalInfo(patientId) {
+    const res = await fetch(`/api/doctor/medical-info/${patientId}`);
+    const result = await res.json();
+    
+    const medContainer = document.getElementById('medical-info-check-container');
+    if (!medContainer) return;
+
+    if (!result.exists) {
+        medContainer.innerHTML = `
+            <div class="p-5 bg-rose-50 border-2 border-rose-100 rounded-2xl mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm">
+                        <i class="fa-solid fa-file-medical text-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-[14px] font-bold text-brand-900 leading-tight">Missing Medical Information</h6>
+                        <p class="text-[11px] text-brand-400">Please complete the patient's medical profile before submitting treatments.</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Blood Type</label>
+                        <select id="med-blood" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white">
+                            <option value="">Unknown</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 pt-4">
+                        <input type="checkbox" id="med-smoker" class="w-4 h-4 rounded border-slate-300 text-primary" />
+                        <label for="med-smoker" class="text-[12px] font-bold text-brand-600">Is Smoker?</label>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Known Allergies</label>
+                    <textarea id="med-allergies" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none resize-none bg-white" rows="2" placeholder="List any drug or food allergies..."></textarea>
+                </div>
+            </div>
+        `;
+        window.HAS_MEDICAL_INFO = false;
+    } else {
+        medContainer.innerHTML = '';
+        window.HAS_MEDICAL_INFO = true;
     }
 }
 
@@ -361,36 +417,134 @@ function calculateTotals() {
 function renderTreatmentForms() {
     const container = document.getElementById('treatment-body');
     
-    container.innerHTML = addedItems.map((item, idx) => `
-        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-4">
+    container.innerHTML = addedItems.map((item, idx) => {
+        // Simple logic to detect if x-ray or tooth-related
+        const nameLower = item.name.toLowerCase();
+        const isXRay = nameLower.includes("x-ray") || nameLower.includes("xray") || nameLower.includes("radiograph");
+        const isTooth = !isXRay; // Default to tooth chart for most services
+
+        let extraUI = "";
+
+        if (isXRay) {
+            extraUI = `
+                <div class="mt-4 p-4 border border-brand-100 bg-white rounded-xl">
+                    <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider mb-3">X-Ray Details</h6>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 mb-1">X-Ray Type</label>
+                            <select class="inv-treat-xray-type w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-primary">
+                                <option value="Panoramic">Panoramic</option>
+                                <option value="Periapical">Periapical</option>
+                                <option value="Cephalometric">Cephalometric</option>
+                                <option value="CBCT">CBCT</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 mb-1">Upload File (Optional)</label>
+                            <input type="file" class="inv-treat-xray-file text-[11px] file:mr-2 file:py-1 file:px-2 file:border-0 file:rounded-md file:bg-primary/10 file:text-primary file:font-semibold" />
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1">Findings / Radiographic Report</label>
+                        <textarea class="inv-treat-xray-notes w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none resize-none" rows="2" placeholder="Describe findings..."></textarea>
+                    </div>
+                </div>
+            `;
+        } else if (isTooth) {
+            // Build simple FDI Odontogram Grid
+            const upperRight = [18,17,16,15,14,13,12,11];
+            const upperLeft = [21,22,23,24,25,26,27,28];
+            const lowerRight = [48,47,46,45,44,43,42,41];
+            const lowerLeft = [31,32,33,34,35,36,37,38];
+            
+            const renderRow = (arr) => arr.map(t => `<button type="button" onclick="toggleToothStatus(this, ${t})" data-tooth="${t}" data-status="Healthy" class="tooth-btn w-6 h-8 text-[9px] font-bold rounded border border-slate-200 bg-white text-slate-500 hover:border-primary transition-colors flex items-center justify-center">${t}</button>`).join('');
+
+            extraUI = `
+                <div class="mt-4 p-4 border border-brand-100 bg-white rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider">Tooth Chart (Odontogram)</h6>
+                        <span class="text-[9px] font-bold text-slate-400">Click tooth to cycle status: Healthy → Filled → Crown → RCT → Extracted → Missing → Decay</span>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <!-- Upper -->
+                        <div class="flex gap-4">
+                            <div class="flex gap-1">${renderRow(upperRight)}</div>
+                            <div class="flex gap-1">${renderRow(upperLeft)}</div>
+                        </div>
+                        <div class="w-full h-px bg-slate-200 my-1"></div>
+                        <!-- Lower -->
+                        <div class="flex gap-4">
+                            <div class="flex gap-1">${renderRow(lowerRight)}</div>
+                            <div class="flex gap-1">${renderRow(lowerLeft)}</div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" class="inv-treat-tooth-data" value="{}" />
+                </div>
+            `;
+        }
+
+        return `
+        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-4 treatment-block">
             <div class="flex items-center justify-between">
                 <h5 class="text-[13px] font-bold text-brand flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-[10px]">${idx + 1}</span>
                     ${item.name}
                 </h5>
+                <select class="inv-treat-status text-[11px] px-3 py-1.5 rounded-lg border border-slate-200 outline-none font-bold text-brand">
+                    <option value="completed">Completed</option>
+                    <option value="in-progress">In-Progress</option>
+                    <option value="planned">Planned</option>
+                </select>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Tooth Number(s)</label>
-                    <input type="text" class="inv-treat-tooth w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 focus:border-primary outline-none" placeholder="e.g. 14, 15 or 'Upper Right'" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Status</label>
-                    <select class="inv-treat-status w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none">
-                        <option value="completed">Completed</option>
-                        <option value="in-progress">In-Progress</option>
-                        <option value="planned">Planned</option>
-                    </select>
-                </div>
-            </div>
+            
+            ${extraUI}
+
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Procedure Details</label>
-                <textarea class="inv-treat-proc w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none resize-none" rows="2" placeholder="What was done?"></textarea>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Procedure Notes</label>
+                <textarea class="inv-treat-proc w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none resize-none bg-white" rows="2" placeholder="What was done?"></textarea>
             </div>
             <input type="hidden" class="inv-treat-svc-id" value="${item.serviceId}" />
             <input type="hidden" class="inv-treat-svc-name" value="${item.name}" />
+            <input type="hidden" class="inv-treat-is-xray" value="${isXRay}" />
         </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+// Global toggle for Odontogram
+window.toggleToothStatus = function(btn, toothNum) {
+    const statuses = ['Healthy', 'Filled', 'Crown', 'RCT', 'Extracted', 'Missing', 'Decay'];
+    const colors = {
+        'Healthy': 'bg-white text-slate-500 border-slate-200',
+        'Filled': 'bg-blue-100 text-blue-700 border-blue-300',
+        'Crown': 'bg-purple-100 text-purple-700 border-purple-300',
+        'RCT': 'bg-emerald-100 text-emerald-700 border-emerald-300',
+        'Extracted': 'bg-slate-200 text-slate-400 border-slate-300 line-through',
+        'Missing': 'bg-red-50 text-red-300 border-red-200 opacity-50',
+        'Decay': 'bg-red-100 text-red-700 border-red-300'
+    };
+
+    let current = btn.getAttribute('data-status');
+    let nextIdx = (statuses.indexOf(current) + 1) % statuses.length;
+    let next = statuses[nextIdx];
+    
+    btn.setAttribute('data-status', next);
+    btn.className = `tooth-btn w-6 h-8 text-[9px] font-bold rounded border flex items-center justify-center transition-colors ${colors[next]}`;
+    
+    // Update hidden data
+    const block = btn.closest('.treatment-block');
+    const input = block.querySelector('.inv-treat-tooth-data');
+    let data = {};
+    try { data = JSON.parse(input.value); } catch(e){}
+    
+    if (next === 'Healthy') {
+        delete data[toothNum];
+    } else {
+        data[toothNum] = next;
+    }
+    input.value = JSON.stringify(data);
 }
 
 /** ── SUBMISSION ──────────────────────────────────────────────────────────── */
@@ -408,13 +562,31 @@ window.submitInvoice = async function() {
 
     // Gather treatments
     const treatmentBlocks = document.querySelectorAll('#treatment-body > div');
-    const treatments = Array.from(treatmentBlocks).map(block => ({
-        serviceId: block.querySelector('.inv-treat-svc-id').value,
-        serviceName: block.querySelector('.inv-treat-svc-name').value,
-        toothNumbers: block.querySelector('.inv-treat-tooth').value,
-        procedure: block.querySelector('.inv-treat-proc').value,
-        status: block.querySelector('.inv-treat-status').value
-    }));
+    const treatments = Array.from(treatmentBlocks).map(block => {
+        const isXRay = block.querySelector('.inv-treat-is-xray').value === "true";
+        let toothData = {};
+        let xrayData = {};
+
+        if (isXRay) {
+            xrayData = {
+                type: block.querySelector('.inv-treat-xray-type')?.value,
+                notes: block.querySelector('.inv-treat-xray-notes')?.value
+            };
+        } else {
+            try {
+                toothData = JSON.parse(block.querySelector('.inv-treat-tooth-data')?.value || '{}');
+            } catch(e){}
+        }
+
+        return {
+            serviceId: block.querySelector('.inv-treat-svc-id').value,
+            serviceName: block.querySelector('.inv-treat-svc-name').value,
+            toothData: JSON.stringify(toothData),
+            xrayData: JSON.stringify(xrayData),
+            procedure: block.querySelector('.inv-treat-proc').value,
+            status: block.querySelector('.inv-treat-status').value
+        };
+    });
 
     const payload = {
         appointmentId: apptId,
@@ -435,6 +607,21 @@ window.submitInvoice = async function() {
     submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving…';
 
     try {
+        // 1. If medical info was missing and filled out, save it first
+        if (window.HAS_MEDICAL_INFO === false) {
+            const medPayload = {
+                patientId: patientId,
+                bloodType: document.getElementById('med-blood').value,
+                isSmoker: document.getElementById('med-smoker').checked,
+                allergiesJson: JSON.stringify(document.getElementById('med-allergies').value.split(',').map(s => s.trim()).filter(s => s))
+            };
+            await fetch('/api/doctor/save-medical-info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(medPayload)
+            });
+        }
+
         const response = await fetch('/api/invoice/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

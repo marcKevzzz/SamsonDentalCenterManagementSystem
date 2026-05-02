@@ -74,8 +74,17 @@ async function checkUrlParams() {
         document.getElementById('book-patient-email').value = patient.email;
         document.getElementById('book-patient-phone').value = patient.phone || '';
         
+        // Auto-assign doctor from past appointments
+        if (ALL_APPT && ALL_APPT.length > 0) {
+          const pastAppt = ALL_APPT.find(a => a.patientId === patient.id && a.doctorId);
+          if (pastAppt && pastAppt.doctorId) {
+            const docEl = document.getElementById('book-doctor');
+            if (docEl) docEl.value = pastAppt.doctorId;
+          }
+        }
+
         if (openModal === 'true') {
-          window.openBookModal(true); // pass true to skip reset
+          window.openBookModal(true);
         }
       }
     }
@@ -425,6 +434,26 @@ window.openBookModal = (skipReset = false) => {
       if(el) el.value = "";
     });
   }
+
+  // Bind patient email blur event for auto-assign doctor
+  const emailInput = document.getElementById("book-patient-email");
+  if (emailInput && !emailInput.hasAttribute('data-bound')) {
+    emailInput.setAttribute('data-bound', 'true');
+    emailInput.addEventListener('blur', () => {
+      const email = emailInput.value.trim().toLowerCase();
+      if (email && ALL_APPT && ALL_APPT.length > 0) {
+        const pastAppt = ALL_APPT.find(a => a.patientEmail && a.patientEmail.toLowerCase() === email && a.doctorId);
+        if (pastAppt && pastAppt.doctorId) {
+          const docEl = document.getElementById('book-doctor');
+          if (docEl && !docEl.value) { // only auto-assign if currently empty
+            docEl.value = pastAppt.doctorId;
+            Toast.show("Auto-selected previous doctor.", "info");
+          }
+        }
+      }
+    });
+  }
+
   initialBookFormState = getBookFormState();
   showModal("book-modal");
 };
@@ -732,26 +761,27 @@ window.toggleDropdown = (event, btn) => {
   // Close all other menus
   document
     .querySelectorAll(".dropdown-menu")
-    .forEach((m) => m.classList.add("hidden"));
+    .forEach((m) => {
+      m.classList.add("hidden");
+      m.style.position = ""; // reset fixed style
+    });
 
   if (isHidden) {
     menu.classList.remove("hidden");
 
-    // --- Smart Positioning ---
-    const rect = menu.getBoundingClientRect();
+    // --- Smart Positioning using Fixed to escape overflow clip ---
+    const btnRect = btn.getBoundingClientRect();
     const winH = window.innerHeight;
+    
+    menu.style.position = "fixed";
+    menu.style.left = `${btnRect.right - menu.offsetWidth}px`;
+    menu.style.margin = "0";
 
     // If it goes off the bottom, flip it to the top
-    if (rect.bottom > winH - 20) {
-      menu.style.bottom = "100%";
-      menu.style.top = "auto";
-      menu.classList.add("mb-2");
-      menu.classList.remove("mt-2");
+    if (btnRect.bottom + menu.offsetHeight > winH - 20) {
+      menu.style.top = `${btnRect.top - menu.offsetHeight - 5}px`;
     } else {
-      menu.style.bottom = "auto";
-      menu.style.top = "100%";
-      menu.classList.add("mt-2");
-      menu.classList.remove("mb-2");
+      menu.style.top = `${btnRect.bottom + 5}px`;
     }
   }
 };

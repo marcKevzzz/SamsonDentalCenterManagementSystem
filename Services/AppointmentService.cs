@@ -444,6 +444,29 @@ namespace SamsonDentalCenterManagementSystem.Services
                 }
             }
 
+            // --- Auto Assign Previous Doctor ---
+            if (string.IsNullOrEmpty(p.DoctorId) && !string.IsNullOrEmpty(p.PatientId))
+            {
+                try
+                {
+                    var pastRes = await _supabase.From<Appointment>()
+                        .Select("doctor_id")
+                        .Where(a => a.PatientId == p.PatientId)
+                        .Order(a => a.CreatedAt, Supabase.Postgrest.Constants.Ordering.Descending)
+                        .Get();
+                        
+                    var pastAppt = pastRes.Models.FirstOrDefault(a => !string.IsNullOrEmpty(a.DoctorId));
+                    if (pastAppt != null && !string.IsNullOrEmpty(pastAppt.DoctorId))
+                    {
+                        p.DoctorId = pastAppt.DoctorId;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AutoAssignDoctor] {ex.Message}");
+                }
+            }
+
             var appt = new Appointment
             {
                 Id = Guid.NewGuid().ToString(),

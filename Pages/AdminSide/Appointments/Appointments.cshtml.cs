@@ -41,10 +41,27 @@ public class AdminAppointmentsModel : AdminPageModel
     public async Task<IActionResult> OnGetAsync()
     {
         var token = await _sessionHelper.GetValidTokenAsync();
+        
         if (token == null)
         {
             return RedirectToPage("/Sign-in");
         }
+
+        try
+        {
+            var res = await _appointments.GetAllAsync();
+            Appointments = res.OrderByDescending(a => a.AppointmentDate).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load appointments");
+        }
+
+        try { Doctors = await _appointments.GetDoctors(); }
+        catch (Exception ex) { _logger.LogError(ex, "Failed to load doctors"); }
+
+        try { Services = await _services.GetAll(); }
+        catch (Exception ex) { _logger.LogError(ex, "Failed to load services"); }
         return Page();
     }
 

@@ -23,6 +23,7 @@ public class DashboardModel : PageModel
     public int CompletedCount => Appointments.Count(a => a.Status == "completed" || (a.Status == "confirmed" && a.AppointmentDate.Date < DateTime.Today));
 
     public string PatientName { get; set; } = "Patient";
+    public Profile? Profile { get; set; }
 
     public async Task OnGetAsync([FromQuery] string? uid)
     {
@@ -31,6 +32,7 @@ public class DashboardModel : PageModel
         if (!string.IsNullOrEmpty(patientId))
         {
             Appointments = await _appointmentService.GetByPatient(patientId);
+            Profile = await _appointmentService._supabase.From<Profile>().Where(x => x.Id == patientId).Single();
             
             // Sort to find the next one
             NextAppointment = Appointments
@@ -39,7 +41,11 @@ public class DashboardModel : PageModel
                 .ThenBy(a => a.AppointmentTime)
                 .FirstOrDefault();
 
-            if (Appointments.Any())
+            if (Profile != null)
+            {
+                PatientName = Profile.FirstName;
+            }
+            else if (Appointments.Any())
             {
                 PatientName = Appointments.First().PatientName;
             }

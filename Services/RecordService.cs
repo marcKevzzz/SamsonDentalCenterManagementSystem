@@ -68,5 +68,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             return treatmentRes.Models.OrderByDescending(t => t.CreatedAt).ToList();
         }
+
+        }
     }
-}

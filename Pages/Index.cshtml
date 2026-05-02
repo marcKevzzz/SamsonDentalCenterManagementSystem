@@ -211,7 +211,7 @@ ViewData["Title"] = "Home page";
 <!-- ------------------------------------
      REVIEWS (Scroll Triggered)
 ------------------------------------- -->
-<section id="reviews-pin" class="bg-[var(--brand-dark)] overflow-hidden relative py-24">
+<section id="reviews-pin" class="bg-[var(--brand-dark)] overflow-hidden relative ">
     <div class="reviews-wrapper h-screen flex flex-col justify-center">
         <div class="max-w mx-auto px-8 relative z-10 mb-12 text-center">
             <h2 class="brand-font font-extrabold text-white mb-4" style="font-size: clamp(2.5rem, 5vw, 4rem);">
@@ -240,7 +240,7 @@ ViewData["Title"] = "Home page";
             </div>
             
             <!-- Row 2 -->
-            <div id="track-2" class="flex gap-8 px-24 translate-x-[-10%]">
+            <div id="track-2" class="flex gap-8 px-24">
                 @foreach(var r in Model.Reviews.Take(Math.Max(1, Model.Reviews.Count))) {
                     <div class="review-card bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-[2.5rem] w-[400px] shrink-0 transition-all duration-500">
                         <div class="flex items-center gap-4 mb-4">

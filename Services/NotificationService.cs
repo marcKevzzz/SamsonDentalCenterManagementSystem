@@ -100,7 +100,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 System.Text.Encoding.UTF8,
                 "application/json"
             );
-            await _http.SendAsync(req);
+            var res = await _http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
         }
 
         public async Task<int> GetUnreadCountAsync(string profileId)

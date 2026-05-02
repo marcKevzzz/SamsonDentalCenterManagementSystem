@@ -69,33 +69,25 @@ async function updatePatientCounts() {
     const elements = {
       total: document.getElementById("notif-total-badge"),
       dashboard: document.getElementById("notif-patient-dashboard-count"),
-      appointments: document.getElementById("notif-patient-appointments-count"),
       records: document.getElementById("notif-patient-records-count"),
       general: document.getElementById("notif-patient-general-count"),
     };
 
-    const total = data.pendingAppointments + data.unreadNotifications;
+    // Total unread notifications (User requested removal of appointment count from global badge)
+    const total = data.unreadNotifications;
 
     if (elements.total) {
-      elements.total.innerText = total;
       elements.total.classList.toggle("hidden", total === 0);
     }
 
-    if (elements.appointments) {
-      elements.appointments.innerText = data.pendingAppointments;
-      elements.appointments.classList.toggle("hidden", data.pendingAppointments === 0);
-    }
-
     if (elements.general) {
-      elements.general.innerText = data.unreadNotifications;
       elements.general.classList.toggle("hidden", data.unreadNotifications === 0);
     }
 
-    // Records (Treatments) - we show the total count if > 0 as a "status" indicator or just keep it simple
-    // User said "indicate the number of items inside that page"
+    // Dental Records currently don't have an 'unread' state in the DB.
+    // User requested badges indicate unread/pending, not total data.
     if (elements.records) {
-        elements.records.innerText = data.totalRecords;
-        elements.records.classList.toggle("hidden", data.totalRecords === 0);
+        elements.records.classList.add("hidden");
     }
 
   } catch (err) {

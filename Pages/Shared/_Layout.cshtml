@@ -107,13 +107,19 @@
             // Remove overflow immediately to restore scroll height for GSAP
             document.body.classList.remove('overflow-hidden');
             
+            // Wait a tiny bit for the browser to calculate scrollbar width/layout
             setTimeout(() => {
+                if (typeof ScrollTrigger !== 'undefined') {
+                    ScrollTrigger.refresh();
+                }
                 loader.remove();
             }, 50);
         } else {
             document.body.classList.remove('overflow-hidden');
+            if (typeof ScrollTrigger !== 'undefined') {
+                ScrollTrigger.refresh();
+            }
         }
-        
     });
   </script>
 </body>

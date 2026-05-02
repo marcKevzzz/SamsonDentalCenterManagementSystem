@@ -33,7 +33,7 @@ function initEntranceAnimations() {
         duration: 1.5,
         delay: 1,
         ease: "power2.out",
-        scrollTrigger: { trigger: el, start: "top 90%", once: true },
+        scrollTrigger: { trigger: el, start: "top 80%", once: true },
       },
     );
   });

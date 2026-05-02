@@ -1,32 +1,40 @@
 import { Modal, Toast } from "../ui.js";
 
-// Animation for cards
-document.querySelectorAll(".fade-up").forEach((el, i) => {
-  setTimeout(() => el.classList.add("animate"), i * 80);
+// ── Initialization ──────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    // Entrance animation for list items
+    if (typeof gsap !== "undefined") {
+        gsap.from(".fade-up-item", {
+            opacity: 0,
+            y: 20,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out",
+            clearProps: "all"
+        });
+    }
 });
 
-// ── Search Logic ──────────────────────────────────────────────────────────────
+// ── Search & Filter Logic ──────────────────────────────────────────────────────────────
 window.searchAppts = function(val) {
   const q = val.toLowerCase().trim();
-  const filter = document.querySelector(".filter-tab.active").dataset.filter;
+  const filterElement = document.querySelector(".filter-tab.active");
+  const filter = filterElement ? filterElement.dataset.filter : "all";
   applyFilters(q, filter);
 }
 
-// ── Filter Logic ──────────────────────────────────────────────────────────────
 window.filterAppts = function(filter) {
-  // Update active tab UI
   document.querySelectorAll(".filter-tab").forEach((t) => {
     t.classList.toggle("active", t.dataset.filter === filter);
-    t.classList.toggle("border-primary", t.dataset.filter === filter);
-    t.classList.toggle("text-primary", t.dataset.filter === filter);
   });
 
-  const q = document.getElementById("apptSearch").value;
+  const searchInput = document.getElementById("apptSearch");
+  const q = searchInput ? searchInput.value : "";
   applyFilters(q, filter);
 }
 
 function applyFilters(q, filter) {
-  const cards = document.querySelectorAll(".appt-card");
+  const cards = document.querySelectorAll(".appt-item-card");
   let visibleCount = 0;
 
   cards.forEach((card) => {
@@ -43,23 +51,79 @@ function applyFilters(q, filter) {
   });
 
   const noResults = document.getElementById("noResults");
-  const apptList = document.getElementById("apptList");
-
-  if (visibleCount === 0) {
-      noResults.classList.remove("hidden");
-      // If there are no cards at all (not just filtered out), hide the list
-      // but if we are just filtering, we want the "no results" state
-  } else {
-      noResults.classList.add("hidden");
+  if (noResults) {
+      if (visibleCount === 0) {
+          noResults.classList.remove("hidden");
+      } else {
+          noResults.classList.add("hidden");
+      }
   }
 }
 
 window.clearFilters = function() {
-    document.getElementById("apptSearch").value = "";
+    const searchInput = document.getElementById("apptSearch");
+    if (searchInput) searchInput.value = "";
     window.filterAppts("all");
 }
 
-// ── Cancellation Logic ────────────────────────────────────────────────────────
+// ── Details Interaction ─────────────────────────────────────────────────────────────
+window.viewApptDetails = (appt, el) => {
+    // 1. Highlight active item
+    document.querySelectorAll(".appt-item-card").forEach(c => c.classList.remove("active"));
+    if (el) el.classList.add("active");
+
+    // 2. Show Detail Content
+    const empty = document.getElementById('detailEmpty');
+    const content = document.getElementById('detailContent');
+    
+    if (empty) empty.classList.add('hidden');
+    if (content) content.classList.remove('hidden');
+
+    // 3. Update DOM
+    document.getElementById('det-service').textContent = appt.serviceName;
+    document.getElementById('det-id').textContent = `#${appt.id.substring(0, 8).toUpperCase()}`;
+    document.getElementById('det-date').textContent = appt.date;
+    document.getElementById('det-time').textContent = appt.time;
+    document.getElementById('det-doctor').textContent = appt.doctorName || 'Assigned on arrival';
+    document.getElementById('det-notes').textContent = appt.notes || 'No specific instructions provided.';
+    
+    // Status Badge
+    const badge = document.getElementById('det-status-badge');
+    if (badge) {
+        badge.textContent = appt.status;
+        const s = appt.status.toLowerCase();
+        const statusColors = {
+            'confirmed': 'bg-emerald-100 text-emerald-600',
+            'completed': 'bg-slate-100 text-slate-600',
+            'cancelled': 'bg-red-100 text-red-600',
+            'pending': 'bg-amber-100 text-amber-600'
+        };
+        badge.className = `status-pill ${statusColors[s] || 'bg-blue-100 text-primary'}`;
+    }
+
+    // Actions
+    const activeActions = document.getElementById('activeActions');
+    const completedActions = document.getElementById('completedActions');
+    
+    if (activeActions && completedActions) {
+        const s = appt.status.toLowerCase();
+        if (s === 'completed' || s === 'cancelled') {
+            activeActions.classList.add('hidden');
+            completedActions.classList.toggle('hidden', s === 'cancelled');
+        } else {
+            activeActions.classList.remove('hidden');
+            completedActions.classList.add('hidden');
+        }
+    }
+
+    // Bind Button Events
+    const btnReschedule = document.getElementById('btnReschedule');
+    const btnCancel = document.getElementById('btnCancel');
+    if (btnReschedule) btnReschedule.onclick = () => rescheduleAppointment(appt.id);
+    if (btnCancel) btnCancel.onclick = () => cancelAppointment(appt.id);
+};
+
+// ── Actions Logic ──────────────────────────────────────────────────────────────
 window.cancelAppointment = function(id) {
     Modal.open({
         title: "Cancel Appointment",
@@ -68,14 +132,10 @@ window.cancelAppointment = function(id) {
         confirmText: "Yes, Cancel",
         onConfirm: async () => {
             try {
-                const res = await fetch(`/api/appointments/${id}/cancel`, {
-                    method: "DELETE"
-                });
+                const res = await fetch(`/api/appointments/${id}/cancel`, { method: "DELETE" });
                 const data = await res.json();
-
                 if (data.ok) {
                     Toast.show("Appointment cancelled successfully", "success");
-                    // Refresh the page or update the card status
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
                     Toast.show(data.error || "Failed to cancel appointment", "danger");
@@ -91,51 +151,11 @@ window.cancelAppointment = function(id) {
 window.rescheduleAppointment = function(id) {
     Modal.open({
         title: "Reschedule Appointment",
-        message: "Are you sure you want to reschedule this appointment? This will cancel your current booking and take you to the booking page.",
+        message: "Are you sure you want to reschedule? Your current slot will be released and you'll be redirected to pick a new time.",
         type: "warning",
         confirmText: "Reschedule",
-        onConfirm: async () => {
-            try {
-                // We can cancel it, or just redirect to the booking page with a reschedule parameter
-                // We'll just redirect to the booking page for now
-                window.location.href = `/Appointments?rescheduleId=${id}`;
-            } catch (err) {
-                console.error("Reschedule Error:", err);
-            }
+        onConfirm: () => {
+            window.location.href = `/Appointments?rescheduleId=${id}`;
         }
     });
 }
-
-// ── Details Modal ─────────────────────────────────────────────────────────────
-window.viewApptDetails = (appt) => {
-    const modal = document.getElementById('details-modal');
-    const box = document.getElementById('details-modal-box');
-    
-    document.getElementById('det-service').textContent = appt.serviceName;
-    document.getElementById('det-id').textContent = `#${appt.id.substring(0, 8).toUpperCase()}`;
-    document.getElementById('det-date').textContent = appt.date;
-    document.getElementById('det-time').textContent = appt.time;
-    document.getElementById('det-doctor').textContent = appt.doctorName || 'Not Assigned';
-    document.getElementById('det-notes').textContent = appt.notes || 'No additional notes provided.';
-    
-    const badge = document.getElementById('det-status-badge');
-    badge.textContent = appt.status;
-    
-    const s = appt.status.toLowerCase();
-    badge.className = 'inline-flex px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase ' + 
-        (s === 'confirmed' ? 'bg-emerald-100 text-emerald-600' : 
-         s === 'completed' ? 'bg-emerald-100 text-emerald-600' : 
-         s === 'cancelled' ? 'bg-red-100 text-red-600' : 
-         s === 'arrived'   ? 'bg-blue-100 text-blue-600' : 
-         s === 'no-show'   ? 'bg-slate-100 text-slate-600' : 'bg-orange-100 text-orange-600');
-
-    modal.classList.remove('hidden');
-    requestAnimationFrame(() => box.classList.remove('scale-95', 'opacity-0'));
-};
-
-window.closeDetailsModal = () => {
-    const box = document.getElementById('details-modal-box');
-    box.classList.add('scale-95', 'opacity-0');
-    setTimeout(() => document.getElementById('details-modal').classList.add('hidden'), 200);
-};
-
