@@ -16,72 +16,79 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initAnimations() {
-
   // Hero section reveal
-  gsap.fromTo(".service-reveal h1, .service-reveal p", 
+  gsap.fromTo(
+    ".service-reveal h1, .service-reveal p",
     { autoAlpha: 0, y: 30 },
     {
       autoAlpha: 1,
       y: 0,
-      duration: 1,
-      stagger: 0.2,
+      duration: 1.5,
+      delay: 1,
+      stagger: 0.25,
       ease: "expo.out",
-      onComplete: function() {
-        this.targets().forEach(el => el.classList.add('revealed'));
+      onComplete: function () {
+        this.targets().forEach((el) => el.classList.add("revealed"));
         gsap.set(this.targets(), { clearProps: "all" });
-      }
-    }
+      },
+    },
   );
 
   // Reveal Category Sections
-  ["#section-general", "#section-cosmetic", "#section-specialized"].forEach((id) => {
-    const section = document.querySelector(id);
-    if (!section) return;
+  ["#section-general", "#section-cosmetic", "#section-specialized"].forEach(
+    (id) => {
+      const section = document.querySelector(id);
+      if (!section) return;
 
-    // Header reveal
-    gsap.fromTo(section.querySelector(".reveal-up"), 
-      { autoAlpha: 0, x: -30 },
-      {
-        autoAlpha: 1,
-        x: 0,
-        duration: 1,
-        ease: "expo.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 85%",
-          once: true
+      // Header reveal
+      gsap.fromTo(
+        section.querySelector(".reveal-up"),
+        { autoAlpha: 0, x: -30 },
+        {
+          autoAlpha: 1,
+          x: 0,
+          duration: 1,
+          delay: 0.25,
+          ease: "expo.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            once: true,
+          },
+          onComplete: function () {
+            const el = section.querySelector(".reveal-up");
+            if (el) {
+              el.classList.add("revealed");
+              gsap.set(el, { clearProps: "all" });
+            }
+          },
         },
-        onComplete: function() {
-          const el = section.querySelector(".reveal-up");
-          if (el) {
-            el.classList.add('revealed');
-            gsap.set(el, { clearProps: "all" });
-          }
-        }
-      }
-    );
+      );
 
-    // Cards reveal (staggered)
-    gsap.fromTo(section.querySelectorAll(".service-card-item"), 
-      { autoAlpha: 0, y: 30 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 75%",
-          once: true
+      // Cards reveal (staggered)
+      gsap.fromTo(
+        section.querySelectorAll(".service-card-item"),
+        { autoAlpha: 0, y: 30 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 1,
+          delay: 0.25,
+          stagger: 0.2,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 75%",
+            once: true,
+          },
+          onComplete: function () {
+            this.targets().forEach((el) => el.classList.add("revealed"));
+            gsap.set(this.targets(), { clearProps: "all" });
+          },
         },
-        onComplete: function() {
-          this.targets().forEach(el => el.classList.add('revealed'));
-          gsap.set(this.targets(), { clearProps: "all" });
-        }
-      }
-    );
-  });
+      );
+    },
+  );
 }
 
 function initEvents() {

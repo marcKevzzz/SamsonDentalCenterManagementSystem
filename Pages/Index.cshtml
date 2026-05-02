@@ -27,7 +27,7 @@ ViewData["Title"] = "Home page";
     }));
 </script>
 
-<section id="hero" class="relative h-[95vh] min-h-[700px] flex items-center overflow-hidden bg-[var(--brand-dark)]">
+<section id="hero" class="relative h-[105vh] min-h-[700px] flex items-center overflow-hidden bg-[var(--brand-dark)] relative ">
     <!-- Skeleton Loader -->
     <div class="hero-skeleton" id="heroSkeleton"></div>
 
@@ -37,27 +37,28 @@ ViewData["Title"] = "Home page";
     <div class="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/80 to-brand/60"></div>
 
     <!-- Content -->
-    <div id="heroContent" class="relative z-10 max-w mx-auto px-8 lg:px-0 w-full flex flex-col lg:flex-row lg:items-center justify-between gap-12 ">
+    <div id="heroContent" class="relative z-10 max-w mx-auto px-8 md:px-4 2xl:px-8 w-full flex flex-col lg:flex-row lg:items-center justify-between gap-12 ">
         <div class="max-w-3xl xl:w-1/2">
-            <span class="hp-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-6 border border-white/5">
+            <span class="hp-reveal inline-block w-fit font-body text-[0.68rem] font-medium tracking-[0.15em] uppercase text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-full mb-4 border border-white/5">
                 Established 1964
             </span>
 
             <h1 id="heroTitle" class="brand-font font-extrabold leading-[0.95] text-white mb-6 flex flex-col"
-                style="font-size: clamp(2.5rem, 6vw, 4.8rem);">
+                style="font-size: clamp(2rem, 5vw, 3.8rem);">
                 <span class="hp-reveal overflow-hidden">
-                    <span class="hp-word inline-block">Crafting</span>
+                    <span class="hp-word inline-block">Unlock a World</span>
                 </span>
                 <span class="hp-reveal overflow-hidden">
-                    <span class="hp-word inline-block text-primary brightness-115">Generations</span>
+                    <span class="hp-word inline-block">of Radiant</span>
                 </span>
                 <span class="hp-reveal overflow-hidden">
-                    <span class="hp-word inline-block">of Smiles.</span>
+                    <span class="hp-word inline-block text-primary brightness-115">Smiles</span>
                 </span>
+                
             </h1>
 
             <p class="hp-reveal-late font-body text-base text-white/60 max-w-[430px] leading-relaxed sm:mb-10 mb-6">
-                Samson Dental Center: Pioneer on dental advancements in expertise, facilities and equipments over the years. Skill, experience and technology under one roof.
+                Exceptional Dental Care Powered by Expertise, Innovation and Advanced Technology. Trusted by companies and individuals for over 60 years.
             </p>
 
             <div class="hp-reveal-late flex flex-wrap gap-2">
@@ -66,35 +67,46 @@ ViewData["Title"] = "Home page";
                     Book Treatment
                     <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
-                <a href="/About"
+                <a href="/Services"
                     class="brand-font font-bold text-xs sm:text-sm border-2 border-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:border-white hover:scale-105 transition-all duration-300 no-underline">
-                    Our History
+                    Our Services
                 </a>
             </div>
         </div>
 
         <!-- Right side: Doctor Portrait -->
         <div class="xl:w-1/2 hidden xl:flex justify-end items-end relative h-full">
-            <div class="hero-doctor-container relative">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[100px] rounded-full -z-10 animate-pulse"></div>
-                <img src="~/images/hero_doc1-remove.png" alt="Dentist" class="hp-doctor-img h-full w-auto object-contain object-bottom cursor-follow-target" />
+            <div id="doctor-interaction-area" class="hero-doctor-container relative h-[90%] flex items-end">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[120px] rounded-full -z-10 animate-pulse"></div>
+                <img src="~/images/hero_doc1-remove.png" alt="Dentist" class="hp-doctor-img h-[95%] w-auto object-contain object-bottom" />
                 
-                <div class="hp-glass-badge absolute top-3/4 -left-6 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-2xl flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-clock-rotate-left text-white text-lg"></i>
+                <div id="doctor-pill" class="hp-glass-badge absolute top-[60%] -left-12 bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-3xl shadow-2xl flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-star text-white text-xl"></i>
                     </div>
                     <div>
-                        <div class="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/40">Since 1964</div>
-                        <div class="text-[0.88rem] font-bold text-white">60 Years of Trust</div>
+                        <div class="text-[0.65rem] font-black uppercase tracking-[0.25em] text-white/50 mb-1">Top Rated</div>
+                        <div class="text-[1.1rem] font-extrabold text-white leading-none" style="text-shadow: 
+                          -0.5px -0.5px 0 #545e6d,  
+                          0.5px -0.5px 0 #545e6d,
+                          -0.5px  0.5px 0 #545e6d,
+                          0.5px  0.5px 0 #545e6d;
+                      ">Pioneer Care</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+<div class="absolute bottom-[-1px] left-0 w-[150%] overflow-hidden z-10 scale-x-[-1] rotate-180 pointer-events-none">
+    <svg class="relative block w-[150%] lg:w-full h-[60px] lg:h-[120px] fill-[#f8fafc]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5,73.84-4.36,147.54,16.88,218.2,35.26,69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113,2,1200,40V0Z" opacity=".45"></path>
+        <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-20V0Z" opacity=".5"></path>
+        <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-60V0Z"></path>
+    </svg>
+</div>
 </section>
 
 <!-- Wavy Transition -->
-<div class="wavy-transition"></div>
 
 <!-- ------------------------------------
      THE SAMSON STANDARD (Why Choose Us)
@@ -119,11 +131,11 @@ ViewData["Title"] = "Home page";
     </div>
 
     <!-- Feature grid -->
-    <div class="reveal-up grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="reveal-up grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Feature 1: History -->
-      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+      <div class="hp-feature-card group bg-white p-6 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
         <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <i class="fa-solid fa-landmark text-white text-lg"></i>
+          <i class="fa-solid fa-landmark text-white text-lg group-hover:scale-1.1 group-hover:rotate-[15deg] transition-transform duration-300"></i>
         </div>
         <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Heritage & Trust</h3>
         <p class="font-body text-[0.82rem] text-muted leading-relaxed">
@@ -132,9 +144,9 @@ ViewData["Title"] = "Home page";
       </div>
 
       <!-- Feature 2: Ortho -->
-      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+      <div class="hp-feature-card group bg-white p-6 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
         <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <i class="fa-solid fa-teeth-brushing text-white text-lg"></i>
+          <i class="fa-solid fa-teeth text-white text-lg group-hover:scale-1.1 group-hover:rotate-[15deg] transition-transform duration-300"></i>
         </div>
         <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Orthodontics</h3>
         <p class="font-body text-[0.82rem] text-muted leading-relaxed">
@@ -143,9 +155,9 @@ ViewData["Title"] = "Home page";
       </div>
 
       <!-- Feature 3: Implants -->
-      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+      <div class="hp-feature-card group bg-white p-6 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
         <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <i class="fa-solid fa-tooth text-white text-lg"></i>
+          <i class="fa-solid fa-tooth text-white text-lg group-hover:scale-1.1 group-hover:rotate-[15deg] transition-transform duration-300"></i>
         </div>
         <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Dental Implants</h3>
         <p class="font-body text-[0.82rem] text-muted leading-relaxed">
@@ -154,9 +166,9 @@ ViewData["Title"] = "Home page";
       </div>
 
       <!-- Feature 4: General -->
-      <div class="hp-feature-card group bg-white p-8 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+      <div class="hp-feature-card group bg-white p-6 rounded-[2rem] border border-blue-50 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
         <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
+          <i class="fa-solid fa-heart-pulse text-white text-lg group-hover:scale-1.1 group-hover:rotate-[15deg] transition-transform duration-300"></i>
         </div>
         <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">General Care</h3>
         <p class="font-body text-[0.82rem] text-muted leading-relaxed">
@@ -169,22 +181,28 @@ ViewData["Title"] = "Home page";
 </section>
 
 <!-- ------------------------------------
-     GALLERY (Detroit Style)
+     GALLERY (Scattered & Pinned)
 ------------------------------------- -->
-<section id="gallery" class="bg-white py-32 overflow-hidden">
-    <div class="max-w mx-auto px-8">
-        <div class="flex flex-col items-center text-center mb-24">
-            <h2 id="galleryText" class="brand-font font-extrabold text-brand leading-none" style="font-size: clamp(3rem, 10vw, 8rem);">
-                THE CLINIC
-            </h2>
-        </div>
+<section id="gallery-pin" class="bg-[var(--bg-soft)] py-0 overflow-hidden">
+    <div class="gallery-wrapper relative h-screen flex flex-col items-center justify-center">
+        <h2 id="galleryText" class="brand-font font-black text-brand leading-none opacity-20 pointer-events-none" style="font-size: clamp(4rem, 15vw, 12rem);">
+            THE CLINIC
+        </h2>
         
-        <div class="relative h-[600px] w-full gallery-scroll-area">
-             <!-- Images pop up here via JS ScrollTrigger -->
-             <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" class="gallery-img-pop absolute w-64 h-80 object-cover rounded-3xl shadow-2xl opacity-0" data-x="-30%" data-y="-20%" />
-             <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-img-pop absolute w-72 h-56 object-cover rounded-3xl shadow-2xl opacity-0" data-x="35%" data-y="10%" />
-             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-img-pop absolute w-60 h-72 object-cover rounded-3xl shadow-2xl opacity-0" data-x="-25%" data-y="40%" />
-             <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=800&q=80" class="gallery-img-pop absolute w-80 h-60 object-cover rounded-3xl shadow-2xl opacity-0" data-x="20%" data-y="-45%" />
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+             <!-- Scattered Images -->
+             <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" class="gallery-item absolute w-64 h-80 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 1%; left: 35%;" />
+             <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-item absolute w-72 h-56 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 20%; right: 10%;" />
+             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-item absolute w-60 h-72 object-cover rounded-3xl shadow-2xl opacity-0" style="bottom: 5%; left: 80%;" />
+             <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=800&q=80" class="gallery-item absolute w-80 h-60 object-cover rounded-3xl shadow-2xl opacity-0" style="bottom: 10%; right: 15%;" />
+             <img src="https://images.unsplash.com/photo-1445527815219-ecbfec67492e?w=800&q=80" class="gallery-item absolute w-56 h-72 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 3%; left: 5%;" />
+             <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80" class="gallery-item absolute w-64 h-56 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 40%; right: 5%;" />
+             <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" class="gallery-item absolute w-64 h-80 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 70%; left: 35%;" />
+             <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-item absolute w-72 h-56 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 60%; right: 10%;" />
+             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-item absolute w-60 h-72 object-cover rounded-3xl shadow-2xl opacity-0" style="bottom: 15%; left: 20%;" />
+             <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=800&q=80" class="gallery-item absolute w-80 h-60 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 5%; right: 5%;" />
+             <img src="https://images.unsplash.com/photo-1445527815219-ecbfec67492e?w=800&q=80" class="gallery-item absolute w-56 h-72 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 45%; left: 5%;" />
+             <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80" class="gallery-item absolute w-64 h-56 object-cover rounded-3xl shadow-2xl opacity-0" style="top: 30%; right: 45%;" />
         </div>
     </div>
 </section>
@@ -192,73 +210,50 @@ ViewData["Title"] = "Home page";
 
 <!-- ------------------------------------
      REVIEWS (Scroll Triggered)
-     Pinned section that scrolls horizontally
 ------------------------------------- -->
-<section id="reviews" class="bg-[var(--brand-dark)] py-32 overflow-hidden relative">
-    <div class="max-w mx-auto px-8 relative z-10 mb-16 text-center">
-        <h2 class="brand-font font-extrabold text-white" style="font-size: clamp(2.5rem, 5vw, 4rem);">
-            Trusted by <span class="text-primary italic">Thousands.</span>
-        </h2>
-    </div>
-
-    <!-- 2-Way Marquee -->
-    <div class="flex flex-col gap-6">
-        <!-- Row 1: Right to Left -->
-        <div class="marquee-track">
-            @foreach(var r in Model.Reviews.Take(Math.Max(5, Model.Reviews.Count/2))) {
-                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
-                        <div>
-                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
-                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
-                        </div>
-                    </div>
-                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
-                </div>
-            }
-            <!-- Duplicate for infinite effect -->
-             @foreach(var r in Model.Reviews.Take(Math.Max(5, Model.Reviews.Count/2))) {
-                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
-                        <div>
-                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
-                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
-                        </div>
-                    </div>
-                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
-                </div>
-            }
+<section id="reviews-pin" class="bg-[var(--brand-dark)] overflow-hidden relative py-24">
+    <div class="reviews-wrapper h-screen flex flex-col justify-center">
+        <div class="max-w mx-auto px-8 relative z-10 mb-12 text-center">
+            <h2 class="brand-font font-extrabold text-white mb-4" style="font-size: clamp(2.5rem, 5vw, 4rem);">
+                Trusted by <span class="text-primary italic">Thousands.</span>
+            </h2>
+            <p class="text-white/40 font-body text-sm max-w-xl mx-auto uppercase tracking-widest">
+                Our patients' smiles are our greatest achievement. Hear from those who have experienced the Samson Standard.
+            </p>
         </div>
 
-        <!-- Row 2: Left to Right -->
-        <div class="marquee-track-reverse">
-            @foreach(var r in Model.Reviews.Skip(Model.Reviews.Count/2)) {
-                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
-                        <div>
-                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
-                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
+        <div class="review-tracks-container flex flex-col gap-8">
+            <!-- Row 1 -->
+            <div id="track-1" class="flex gap-8 px-24">
+                @foreach(var r in Model.Reviews.Take(Math.Max(1, Model.Reviews.Count))) {
+                    <div class="review-card bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-[2.5rem] w-[400px] shrink-0 transition-all duration-500">
+                        <div class="flex items-center gap-4 mb-4">
+                            <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-12 h-12 rounded-full border-2 border-primary/30" />
+                            <div>
+                                <div class="text-white text-base font-bold">@r.AuthorName</div>
+                                <div class="text-white/40 text-[10px] uppercase tracking-[0.2em] font-black">Verified Patient</div>
+                            </div>
                         </div>
+                        <p class="text-white/40 text-sm leading-relaxed italic">"@r.ReviewText"</p>
                     </div>
-                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
-                </div>
-            }
-            <!-- Duplicate -->
-            @foreach(var r in Model.Reviews.Skip(Model.Reviews.Count/2)) {
-                <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-3xl w-[320px] mx-3 shrink-0">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-10 h-10 rounded-full" />
-                        <div>
-                            <div class="text-white text-sm font-bold">@r.AuthorName</div>
-                            <div class="text-white/40 text-[10px] uppercase tracking-widest">Verified Patient</div>
+                }
+            </div>
+            
+            <!-- Row 2 -->
+            <div id="track-2" class="flex gap-8 px-24 translate-x-[-10%]">
+                @foreach(var r in Model.Reviews.Take(Math.Max(1, Model.Reviews.Count))) {
+                    <div class="review-card bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-[2.5rem] w-[400px] shrink-0 transition-all duration-500">
+                        <div class="flex items-center gap-4 mb-4">
+                            <img src="@(string.IsNullOrEmpty(r.AuthorAvatar) ? "https://ui-avatars.com/api/?name=" + r.AuthorName : r.AuthorAvatar)" class="w-12 h-12 rounded-full border-2 border-primary/30" />
+                            <div>
+                                <div class="text-white text-base font-bold">@r.AuthorName</div>
+                                <div class="text-white/40 text-[10px] uppercase tracking-[0.2em] font-black">Verified Patient</div>
+                            </div>
                         </div>
+                        <p class="text-white/80 text-sm leading-relaxed italic">"@r.ReviewText"</p>
                     </div>
-                    <p class="text-white/70 text-xs leading-relaxed line-clamp-3">"@r.ReviewText"</p>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </section>
@@ -300,13 +295,13 @@ ViewData["Title"] = "Home page";
           @if (!string.IsNullOrEmpty(Model.ClinicSettings.Landline)) { <span> | @Model.ClinicSettings.Landline</span> }
         </p>
         <a href="https://maps.google.com/?q=Tandang+Sora+Ave+Quezon+City" target="_blank"
-          class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-[var(--brand-dark)] border-b-2 border-[var(--primary)] pb-0.5 hover:text-[var(--primary)] transition-colors no-underline">
-          GET DIRECTIONS ?
+          class="brand-font font-bold text-[0.74rem] tracking-[0.1em] uppercase text-[var(--brand-dark)] border-b-2 border-[var(--primary)] pb-0.5 hover:text-[var(--primary)] transition-colors no-underline group">
+          GET DIRECTIONS <i class="fa-solid fa-arrow-right-long ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
         </a>
       </div>
 
     <!-- Right: Map -->
-    <div class="reveal-up relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 group h-[500px]">
+    <div class="reveal-up relative rounded-[1rem] overflow-hidden shadow-2xl border border-white/10 group h-[500px]">
       @if (!string.IsNullOrEmpty(Model.ClinicSettings.MapsUrl) && (Model.ClinicSettings.MapsUrl.Contains("google.com/maps/embed") || Model.ClinicSettings.MapsUrl.Contains("pb=")))
       {
           <iframe class="w-full h-full border-0"

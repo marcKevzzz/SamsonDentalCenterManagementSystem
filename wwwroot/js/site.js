@@ -10,12 +10,11 @@ let lastScrollY = window.scrollY;
 let isNavHidden = false;
 
 export function toggleNavbar() {
-  const navbar = document.getElementById("navbar");
+  const navbar = document.getElementById("navbar-wrapper");
   if (!navbar) return;
   
   const isScrolled = window.scrollY > 50;
   
-  // Scrolled style (island shrinking slightly or changing bg)
   if (isScrolled) {
     navbar.classList.add("nav-scrolled");
   } else {
@@ -25,11 +24,9 @@ export function toggleNavbar() {
   // Hide/Show logic
   if (window.scrollY > 400) {
       if (window.scrollY > lastScrollY && !isNavHidden) {
-          // Scrolling Down -> Hide
           navbar.classList.add("nav-hidden");
           isNavHidden = true;
       } else if (window.scrollY < lastScrollY && isNavHidden) {
-          // Scrolling Up -> Show
           navbar.classList.remove("nav-hidden");
           isNavHidden = false;
       }
@@ -39,43 +36,8 @@ export function toggleNavbar() {
   }
   
   lastScrollY = window.scrollY;
-
-  // Theme logic (dark text for island)
-  const navLinks = document.querySelectorAll(".nav-link");
-  const logo = document.getElementById("logo");
-  const logoLast = document.getElementById("logo-last");
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
   
-  const path = window.location.pathname.toLowerCase();
-  const isDarkPage = path.includes("about") || path.includes("contacts");
-
-  if (!isScrolled && isDarkPage) {
-    // Transparent state on dark background pages
-    navbar.classList.remove("text-brand");
-    logo?.classList.remove("text-brand");
-    logo?.classList.add("text-white");
-    hamburgerBtn?.classList.remove("text-brand");
-    hamburgerBtn?.classList.add("text-white");
-    navLinks.forEach(link => {
-      link.classList.remove("text-brand");
-      link.classList.add("text-white");
-    });
-    logoLast?.classList.remove("text-gray-600");
-    logoLast?.classList.add("text-white/50");
-  } else {
-    // Scrolled or light pages
-    navbar.classList.add("text-brand");
-    logo?.classList.add("text-brand");
-    logo?.classList.remove("text-white");
-    hamburgerBtn?.classList.add("text-brand");
-    hamburgerBtn?.classList.remove("text-white");
-    navLinks.forEach(link => {
-      link.classList.add("text-brand");
-      link.classList.remove("text-white");
-    });
-    logoLast?.classList.remove("text-white/50");
-    logoLast?.classList.add("text-gray-600");
-  }
+  // Theme logic removed since we now use CSS for dark/light islands
 }
 
 // ── Active nav link ───────────────────────────

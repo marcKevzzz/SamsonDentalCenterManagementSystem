@@ -4,34 +4,32 @@
     ViewData["Title"] = "Contacts page";
 }
 
-
 <section class="bg-brand pt-[68px] h-[360px] md:h-[420px] relative overflow-hidden">
   <div class="absolute inset-0 opacity-[0.04]"
          style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;"></div>
   <div class="max-w mx-auto px-8 lg:px-12 py-16 contact-reveal relative z-10">
-    <div class="flex items-center gap-2 font-body text-[0.65rem] font-bold tracking-[0.2em] uppercase text-white/40 mb-4">
+    <div class="flex items-center gap-2 font-body text-[0.65rem] font-bold tracking-[0.2em] uppercase text-white/40">
         <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
         Get in Touch
     </div>
-    <h1 class="brand-font font-extrabold leading-[1.05] text-[clamp(2.8rem,7vw,4.5rem)] text-white mb-4">
-        Connect with <br><span class="text-white/40 italic font-medium">Samson Dental.</span>
+    <h1 class="brand-font font-extrabold leading-[1.05] text-[clamp(2.8rem,7vw,4.5rem)] text-white mb-4 flex flex-col">
+        Connect with <br><span class="text-white/40 italic text-[clamp(1rem,4vw,2rem)] font-medium">Samson Dental.</span>
     </h1>
     <p class="font-body text-[0.95rem] text-white/45 max-w-sm leading-relaxed">
       Whether it's a routine check-up or a complex procedure, our team is here to guide your dental journey.
     </p>
   </div>
 </section>
- 
- 
+
 <!-- ══════════════════════════════════
      QUICK INFO CARDS
 ═══════════════════════════════════ -->
 <section class="bg-offwhite">
   <div class="max-w mx-auto px-8 lg:px-12 py-14">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
- 
+
       <!-- Phone -->
-      <div class="mission-card reveal-up bg-white rounded-2xl p-6 shadow-sm">
+      <div class="mission-card contact-info-item reveal-up bg-white rounded-2xl p-6 shadow-sm">
         <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.95-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -40,9 +38,9 @@
         <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">@(Model.ClinicSettings.ContactPhone ?? "+63 2 8888 1234")</div>
         <div class="font-body text-[0.78rem] text-muted">@(Model.ClinicSettings.Landline ?? "Mon–Sat, 8 AM – 6 PM")</div>
       </div>
- 
+
       <!-- Email -->
-      <div class="mission-card reveal-up bg-white rounded-2xl p-6 shadow-sm">
+      <div class="mission-card contact-info-item reveal-up bg-white rounded-2xl p-6 shadow-sm">
         <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -52,9 +50,9 @@
         <div class="brand-font font-bold text-[0.95rem]  text-brand mb-0.5 truncate">@(Model.ClinicSettings.ContactEmail ?? "support@samson.com")</div>
         <div class="font-body text-[0.78rem] text-muted">Typical reply within 24 hours</div>
       </div>
- 
+
       <!-- Location -->
-      <div class="mission-card reveal-up bg-white rounded-2xl p-6 shadow-sm">
+      <div class="mission-card contact-info-item reveal-up bg-white rounded-2xl p-6 shadow-sm">
         <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
@@ -63,9 +61,9 @@
         <div class="brand-font font-bold text-[0.95rem] text-brand mb-0.5">Samson Dental</div>
         <div class="font-body text-[0.78rem] text-muted line-clamp-1">@(Model.ClinicSettings.LocationAddress ?? "Baguio City, Philippines")</div>
       </div>
- 
+
       <!-- Status -->
-      <div class="mission-card reveal-up bg-white rounded-2xl p-6 shadow-sm">
+      <div class="mission-card contact-info-item reveal-up bg-white rounded-2xl p-6 shadow-sm">
         <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -80,18 +78,17 @@
             <div class="font-body text-[0.78rem] text-muted italic">Syncing with schedule...</div>
         </div>
       </div>
- 
+
     </div>
   </div>
 </section>
- 
- 
+
 <!-- ══════════════════════════════════
      CONTACT FORM + MAP
 ═══════════════════════════════════ -->
 <section class="bg-white" id="contactSection">
   <div class="max-w mx-auto px-8 lg:px-12 py-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
- 
+
     <!-- LEFT: Form -->
     <div class="reveal-up flex flex-col h-full">
       <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
@@ -142,7 +139,7 @@
               </button>
           </div>
       </div>
-  
+
       <form id="contactForm" onsubmit="handleSubmit(event)" class="@(hasActive ? "hidden" : "") space-y-4">
         <input type="hidden" id="patientId" value="@Model.CurrentPatientId" />
         <script>
@@ -156,7 +153,7 @@
             }));
         </script>
         <!-- Name row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 form-group">
           <div>
             <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">First Name</label>
             <input type="text" id="firstName" class="form-input" placeholder="Juan" required/>
@@ -166,9 +163,9 @@
             <input type="text" id="lastName" class="form-input" placeholder="Dela Cruz" required/>
           </div>
         </div>
-  
+
         <!-- Email + Phone -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 form-group">
           <div>
             <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Email Address</label>
             <input type="email" id="email" class="form-input" placeholder="juan@email.com" required/>
@@ -178,9 +175,9 @@
             <input type="tel" id="phone" class="form-input" placeholder="+63 9XX XXX XXXX"/>
           </div>
         </div>
-  
+
         <!-- Subject -->
-        <div class="relative">
+        <div class="relative form-group">
           <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Subject</label>
           <select id="subject" class="form-input pr-10" required>
             <option value="" disabled selected>What is this about?</option>
@@ -192,52 +189,29 @@
           </select>
           <i class="fa-solid fa-chevron-down absolute right-4 top-[2.85rem] text-[10px] text-slate-400 pointer-events-none"></i>
         </div>
-  
+
         <!-- Message -->
-        <div>
+        <div class="form-group">
           <label class="block font-body text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Your Message</label>
           <textarea id="message" class="form-input resize-none" rows="5" placeholder="Write your message here..." required></textarea>
         </div>
-  
+
         <!-- Submit -->
         <button type="submit" id="submitBtn"
-          class="submit-btn w-full brand-font font-bold text-[0.88rem] tracking-wider uppercase bg-brand text-white py-4 rounded-xl hover:bg-primary transition-all duration-200 cursor-pointer mt-2 shadow-xl shadow-brand/10">
+          class="submit-btn form-group w-full brand-font font-bold text-[0.88rem] tracking-wider uppercase bg-brand text-white py-4 rounded-xl hover:bg-primary transition-all duration-200 cursor-pointer mt-2 shadow-xl shadow-brand/10">
           Send Message
         </button>
-  
+
         <p class="font-body text-[0.74rem] text-muted text-center leading-relaxed">
           By submitting, you agree to our <a href="#" class="text-primary hover:underline">Privacy Policy</a>.
         </p>
- 
+
       </form>
     </div>
- 
+
     <!-- RIGHT: Map + Hours -->
-    <div class="reveal-up space-y-6">
- 
-      <div class="map-wrap shadow-xl h-[340px]">
-        @if (!string.IsNullOrEmpty(Model.ClinicSettings.MapsUrl) && (Model.ClinicSettings.MapsUrl.Contains("google.com/maps/embed") || Model.ClinicSettings.MapsUrl.Contains("pb=")))
-        {
-            <iframe class="w-full h-full border-0"
-              src="@Model.ClinicSettings.MapsUrl"
-              allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-        }
-        else
-        {
-            <div class="w-full h-full bg-slate-100 flex flex-col items-center justify-center p-8 text-center">
-                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
-                    <i class="fa-solid fa-map-location-dot text-brand text-2xl"></i>
-                </div>
-                <p class="font-body text-[0.78rem] text-slate-500 max-w-[180px] mb-6">Interactive map requires an Embed URL from Google Maps.</p>
-                <a href="@(Model.ClinicSettings.MapsUrl ?? "https://maps.google.com/?q=Samson+Dental+Center")" target="_blank"
-                   class="px-6 py-2 bg-brand text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-md shadow-brand/10">
-                    Open Map Link
-                </a>
-            </div>
-        }
-      </div>
- 
+    <div class="reveal-up space-y-6 pt-6">
+
       <!-- Directions link -->
       <a href="https://www.google.com/maps/dir//Samson+Dental+Center" target="_blank"
          class="flex items-center justify-between bg-offwhite hover:bg-white hover:shadow-lg rounded-2xl px-6 py-4 transition-all duration-300 group no-underline border border-transparent hover:border-slate-100">
@@ -256,7 +230,7 @@
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
- 
+
       <!-- Hours card -->
       <div class="bg-offwhite rounded-2xl overflow-hidden">
         <div class="flex items-center gap-2 px-6 pt-5 pb-3">
@@ -271,7 +245,7 @@
            <div class="py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest">Loading hours...</div>
         </div>
       </div>
- 
+
       <!-- Social / quick contacts -->
       <div class="grid grid-cols-2 gap-4">
         <a href="tel:@(Model.ClinicSettings.ContactPhone)"
@@ -300,7 +274,7 @@
           </div>
         </a>
       </div>
- 
+
     </div>
   </div>
 </section>

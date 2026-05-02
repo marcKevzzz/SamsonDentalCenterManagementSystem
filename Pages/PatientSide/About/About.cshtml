@@ -4,7 +4,7 @@
 ViewData["Title"] = "About page";
 }
 
-<section class="pt-[68px] relative overflow-hidden h-[400px] bg-brand bg-ani">
+<section class="pt-[68px] relative overflow-hidden h-[400px] bg-brand">
   <div class="absolute inset-0 opacity-[0.04]"
     style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;">
   </div>
@@ -21,7 +21,7 @@ ViewData["Title"] = "About page";
 <!-- ══════════════════════════════════
      OUR STORY
 ═══════════════════════════════════ -->
-<section class="bg-white">
+<section class="bg-offwhite">
   <div class="max-w mx-auto px-8 lg:px-12 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
     <!-- Text -->
     <div class="reveal-up">
@@ -76,22 +76,64 @@ ViewData["Title"] = "About page";
 </section>
 
 <!-- ══════════════════════════════════
-     OUR JOURNEY (Timeline)
+     OUR JOURNEY (Snake Timeline)
 ═══════════════════════════════════ -->
-<section class="bg-offwhite py-24">
-    <div class="max-w mx-auto px-8 lg:px-12">
-        <div class="text-center mb-16 reveal-up">
-            <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
-                <span class="w-2 h-2 rounded-full bg-primary"></span>
-                The Time Frame
-            </div>
-            <h2 class="brand-font font-extrabold text-brand" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">Our Journey</h2>
-        </div>
+<section id="journey-section" class="bg-offwhite overflow-hidden relative" style="height: 100vh;">
 
-        <div class="relative max-w-4xl mx-auto pl-8 border-l-2 border-primary/20 space-y-12">
+    <!-- Title (scrolls away before pin kicks in — move inside pinned area if needed) -->
+    <div class="text-center pt-24 pb-12 reveal-up">
+        <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted">
+            <span class="w-2 h-2 rounded-full bg-primary"></span>
+            The Time Frame
+        </div>
+        <h2 class="brand-font font-extrabold text-brand" style="font-size:clamp(2rem,4vw,3rem);">Our Journey</h2>
+    </div>
+
+    <!-- Fixed snake SVG — positioned over the centre of the section, does NOT scroll -->
+   <svg id="snake-svg"
+     class="absolute left-0 w-full pointer-events-none z-0"
+     style="top: 65%; transform: translateY(-50%); height: 4px; overflow: visible;"
+     viewBox="0 0 6000 4">
+        <defs>
+            <linearGradient id="snake-gradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#4f7df3" stop-opacity="0.2"/>
+                <stop offset="5%"   stop-color="#4f7df3" stop-opacity="1"/>
+                <stop offset="95%"  stop-color="#4f7df3" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#4f7df3" stop-opacity="0.2"/>
+            </linearGradient>
+        </defs>
+        <!-- Background 'static' line (dashed/faded) -->
+        <path id="snake-path-bg"
+              fill="none"
+              stroke="#4f7df3"
+              stroke-opacity="0.1"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-dasharray="8 12"
+              d="M 0,2 L 6000,2" />
+              
+        <!-- Foreground 'active' line (solid/bright) -->
+        <path id="snake-path"
+              fill="none"
+              stroke="url(#snake-gradient)"
+              stroke-width="3"
+              stroke-linecap="round"
+              d="M 0,2 L 6000,2" />
+              
+    </svg>
+
+    <!-- Horizontally scrolling cards track -->
+    <div id="timeline-track"
+         class="absolute inset-0 flex items-center z-10"
+         style="top: 65%; transform: translateY(-50%);">
+
+        <div id="timeline-container"
+             class="flex items-center"
+             style="padding-left: 40vw; padding-right: 40vw; gap: 0;">
+
             @{
                 var milestones = new[] {
-                    new { Year = "1965 – 1966", Event = "First Company Retainer Dentist of Saint Louis Boy’s High School." },
+                    new { Year = "1965 – 1966", Event = "First Company Retainer Dentist of Saint Louis Boy's High School." },
                     new { Year = "1968 – 1978", Event = "Company Dentist of Baguio Benguet Incorporated" },
                     new { Year = "1970 – 2000", Event = "Retainer Dentist of the Philippine National Bank (PNB)" },
                     new { Year = "1970 – 2003", Event = "Retainer Dentist of Development Bank of the Philippines (DBP)" },
@@ -103,12 +145,32 @@ ViewData["Title"] = "About page";
                 };
             }
 
-            @foreach (var m in milestones) {
-                <div class="milestone-item relative reveal-up">
-                    <div class="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-white border-4 border-primary shadow-sm"></div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                        <span class="brand-font font-bold text-primary text-sm mb-1 block">@m.Year</span>
-                        <p class="font-body text-[0.88rem] text-brand font-medium leading-relaxed">@m.Event</p>
+            @for (int i = 0; i < milestones.Length; i++) {
+                var m = milestones[i];
+                var isTop = i % 2 == 0;
+                <div class="milestone-item relative flex-shrink-0 flex flex-col items-center justify-center"
+                     style="width: 300px; height: 400px;">
+
+                    <!-- Dot on the centre line -->
+                    <div class="connector-dot absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                                w-3.5 h-3.5 rounded-full bg-white border-[3px] border-primary shadow-md z-20"
+                         style="opacity: 0; transform: translate(-50%, -50%) scale(0); transition: opacity .3s, transform .3s;">
+                    </div>
+
+                    <!-- Card — alternates above / below -->
+                    <div class="milestone-card absolute left-1/2 -translate-x-1/2 z-10"
+                         style="@(isTop ? "bottom: calc(50% + 28px);" : "top: calc(50% + 28px);")
+                                opacity: 0;
+                                transform: translateY(@(isTop ? "12px" : "-12px"));
+                                transition: opacity .4s ease, transform .4s ease;">
+                        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 hover:shadow-2xl
+                                    transition-all duration-300 hover:-translate-y-1"
+                             style="width: 240px; padding: 1.5rem;">
+                            <span class="brand-font font-black text-primary uppercase tracking-widest mb-2 block"
+                                  style="font-size: 0.7rem;">@m.Year</span>
+                            <p class="font-body font-bold leading-relaxed text-brand"
+                               style="font-size: 0.82rem;">@m.Event</p>
+                        </div>
                     </div>
                 </div>
             }
@@ -119,8 +181,8 @@ ViewData["Title"] = "About page";
 <!-- ══════════════════════════════════
      MISSION & VALUES
 ═══════════════════════════════════ -->
-<section class="bg-white">
-  <div class="max-w mx-auto px-8 lg:px-12 py-20">
+<section class="bg-offwhite">
+  <div class="max-w mx-auto px-8 lg:px-12 py-20 mb-12">
     <div class="text-center mb-14 reveal-up">
       <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
         <span class="w-2 h-2 rounded-full bg-primary"></span>
@@ -132,22 +194,22 @@ ViewData["Title"] = "About page";
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-      <div class="mission-card bg-offwhite rounded-3xl p-10 h-full hover:bg-white hover:shadow-xl transition-all duration-500 border border-transparent hover:border-slate-100">
-        <div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
-             <i class="fa-solid fa-eye text-white text-xl"></i>
+      <div class="amission-card group bg-white p-6 rounded-[2rem] border border-blue-50 shadow-md hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+        <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-eye text-white text-lg group-hover:scale-1.1 group-hover:rotate-[15deg] transition-transform duration-300"></i>
         </div>
-        <h3 class="brand-font font-extrabold text-2xl text-brand mb-4">Our Vision</h3>
-        <p class="font-body text-[0.95rem] text-muted leading-relaxed">
-          To be the leading provider of high-standard professional dental services, continuously innovating and preserving our legacy of excellence for generations to come.
+        <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Our Vision</h3>
+        <p class="font-body text-[0.82rem] text-muted leading-relaxed">
+           To be the leading provider of high-standard professional dental services, continuously innovating and preserving our legacy of excellence for generations to come.
         </p>
       </div>
 
-      <div class="mission-card bg-offwhite rounded-3xl p-10 h-full hover:bg-white hover:shadow-xl transition-all duration-500 border border-transparent hover:border-slate-100">
-        <div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
-             <i class="fa-solid fa-bullseye text-white text-xl"></i>
+      <div class="amission-card group bg-white p-6 rounded-[2rem] border border-blue-50 shadow-md hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+        <div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-bullseye text-white text-lg group-hover:scale-1.1 group-hover:rotate-[15deg] transition-transform duration-300"></i>
         </div>
-        <h3 class="brand-font font-extrabold text-2xl text-brand mb-4">Our Mission</h3>
-        <p class="font-body text-[0.95rem] text-muted leading-relaxed">
+        <h3 class="brand-font font-bold text-lg mb-3 text-[var(--brand-dark)]">Our Mission</h3>
+        <p class="font-body text-[0.82rem] text-muted leading-relaxed">
           Incorporating skill, experience, and technology under one roof to ensure complete patient care and satisfaction in every treatment.
         </p>
       </div>
@@ -156,118 +218,142 @@ ViewData["Title"] = "About page";
 </section>
 
 <!-- ══════════════════════════════════
-     OUR DEDICATED TEAM
+     OUR DEDICATED TEAM (Carousel)
 ═══════════════════════════════════ -->
-<section class="bg-brand bg-ani py-32">
-  <div class="max-w mx-auto px-8 lg:px-12">
-    <div class="text-center mb-20 reveal-up">
-       <div class="flex items-center justify-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-white/50 mb-4">
-        <span class="w-2 h-2 rounded-full bg-primary"></span>
-        Expert Specialists
-      </div>
-      <h2 class="brand-font font-extrabold text-white mb-6" style="font-size:clamp(2.5rem,5vw,4rem);">
-        Our Dedicated Team
-      </h2>
-      <p class="font-body text-[0.95rem] text-white/40 max-w-lg mx-auto leading-relaxed">
-        Our team functions on the sole purpose of ensuring complete patient care and satisfaction, and this dedication is what sets us apart.
-      </p>
+<section id="doctor-section" class="bg-brand py-32 overflow-hidden relative">
+  <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+  
+  <div class="max-w mx-auto px-8 lg:px-12 relative z-10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 reveal-up">
+        <div class="max-w-2xl">
+            <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-white/50 mb-4">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                Expert Specialists
+            </div>
+            <h2 class="brand-font font-extrabold text-white leading-tight" style="font-size:clamp(2.5rem,5vw,4rem);">
+                Our Dedicated Team
+            </h2>
+        </div>
+        <p class="font-body text-[0.95rem] text-white/40 max-w-sm leading-relaxed">
+            Our team functions on the sole purpose of ensuring complete patient care and satisfaction.
+        </p>
     </div>
 
-    <!-- Doctor Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        @foreach (var doc in Model.Doctors) {
-            <div class="doctor-card-premium group bg-white rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-500 hover:-translate-y-2 reveal-up">
-                <div class="relative h-[340px] overflow-hidden">
-                    <img src="@(string.IsNullOrEmpty(doc.Profile?.AvatarUrl) ? "https://ui-avatars.com/api/?name=" + doc.Profile?.FirstName + "&size=400" : doc.Profile.AvatarUrl)" alt="@doc.FullName" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-brand/80 via-transparent to-transparent opacity-60"></div>
-                    <div class="absolute bottom-6 left-6">
-                        <span class="bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">@doc.Title</span>
-                    </div>
-                </div>
-                <div class="p-8">
-                    <h3 class="brand-font font-extrabold text-brand text-2xl mb-2">@doc.Profile?.FirstName @doc.Profile?.LastName</h3>
-                    <p class="font-body text-[0.8rem] text-muted font-semibold uppercase tracking-widest mb-4">@string.Join(" • ", doc.Specialties)</p>
-                    <p class="font-body text-[0.88rem] text-muted leading-relaxed line-clamp-3 italic mb-6">"@doc.Bio"</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-slate-100">
-                        <div class="flex flex-col">
-                            <span class="text-[10px] text-muted uppercase font-bold tracking-tighter">Experience</span>
-                            <span class="text-sm font-bold text-brand">15+ Years</span>
+    <div class="doctor-carousel-wrapper" id="doctor-carousel">
+        <div class="overflow-hidden">
+            <div id="doctor-track"
+                 class="flex gap-5 transition-transform duration-[450ms] ease-[cubic-bezier(.25,.46,.45,.94)] will-change-transform cursor-grab active:cursor-grabbing">
+                @foreach (var doc in Model.Doctors) {
+                    <div class="doctor-card shrink-0 w-[280px]">
+                        <div class="group bg-white/[0.04] border border-white/[0.08] rounded-[20px] overflow-hidden
+                                    hover:border-white/20 hover:-translate-y-1 transition-all duration-300 h-full">
+                            <div class="relative h-[300px] overflow-hidden">
+                                <img src="@(string.IsNullOrEmpty(doc.Profile?.AvatarUrl) ? "https://ui-avatars.com/api/?name=" + doc.Profile?.FirstName + "+" + doc.Profile?.LastName + "&size=400&background=2d3a6e&color=fff" : doc.Profile.AvatarUrl)"
+                                     alt="@doc.FullName"
+                                     class="w-full h-full object-cover grayscale-[60%] group-hover:grayscale-0 transition-all duration-500" />
+                                <div class="absolute bottom-3.5 left-3.5">
+                                    <span class="bg-primary text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full">@doc.Title</span>
+                                </div>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-extrabold text-white text-[16px] mb-1 tracking-tight">@doc.Profile?.FirstName @doc.Profile?.LastName</h3>
+                                <p class="text-[11px] text-white/40 font-semibold uppercase tracking-wider mb-4">@string.Join(" • ", doc.Specialties)</p>
+                                <div class="flex gap-0 border-t border-white/[0.07] pt-3.5">
+                                    <div class="flex-1 flex flex-col gap-0.5">
+                                        <span class="text-[9px] font-bold uppercase tracking-wider text-white/30">Experience</span>
+                                        <span class="text-[12px] font-bold text-white/85">10+ Years</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col gap-0.5 pl-3.5 border-l border-white/[0.07]">
+                                        <span class="text-[9px] font-bold uppercase tracking-wider text-white/30">Education</span>
+                                        <span class="text-[12px] font-bold text-white/85 truncate">Specialist</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="w-px h-8 bg-slate-100"></div>
-                        <div class="flex flex-col">
-                            <span class="text-[10px] text-muted uppercase font-bold tracking-tighter">Education</span>
-                            <span class="text-sm font-bold text-brand truncate">Specialist</span>
-                        </div>
                     </div>
-                </div>
+                }
             </div>
-        }
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-between mt-10">
+            <div id="doctor-dots" class="flex gap-2 items-center"></div>
+            <div class="flex gap-3">
+                <button id="doctor-prev" class="w-10 h-10 rounded-full border border-white/10 text-white/50 flex items-center justify-center hover:bg-white/5 hover:border-white/30 transition-all duration-200 active:scale-95">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <button id="doctor-next" class="w-10 h-10 rounded-full border border-white/10 text-white/50 flex items-center justify-center hover:bg-white/5 hover:border-white/30 transition-all duration-200 active:scale-95">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+                </button>
+            </div>
+        </div>
     </div>
   </div>
 </section>
 
 <!-- ══════════════════════════════════
-     FACILITIES & OFFERS
+     FACILITIES & OFFERS (State of the Art)
 ═══════════════════════════════════ -->
-<section class="bg-white py-32">
-  <div class="max-w mx-auto px-8 lg:px-12">
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 mb-20">
+<section class="bg-white py-32 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
+  
+  <div class="max-w mx-auto px-8 lg:px-12 relative z-10">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 mb-24">
         <div class="max-w-2xl reveal-up">
             <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-4">
                 <span class="w-2 h-2 rounded-full bg-primary"></span>
                 State of the Art
             </div>
-            <h2 class="brand-font font-extrabold text-brand leading-[1.1]" style="font-size:clamp(2rem,4.5vw,3rem);">
+            <h2 class="brand-font font-extrabold text-brand leading-[1.1]" style="font-size:clamp(2.5rem,4.5vw,3.5rem);">
                 Professional Dental Care <br><span class="text-primary italic">Tailored to Your Needs.</span>
             </h2>
         </div>
-        <p class="font-body text-[0.95rem] text-muted leading-relaxed max-w-sm reveal-up">
+        <p class="font-body text-[1rem] text-muted/60 leading-relaxed max-w-sm reveal-up">
             Our highly competent doctors, coupled with the latest technology, ensure that each patient is treated with the highest standards.
         </p>
     </div>
 
-    <!-- Features Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div class="flex gap-6 reveal-up">
-            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-medal text-primary text-2xl"></i>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
+        <div class="group flex gap-8 reveal-up">
+            <div class="w-20 h-20 rounded-[2rem] bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-primary transition-all duration-500 shadow-sm group-hover:shadow-xl group-hover:shadow-primary/20">
+                <i class="fa-solid fa-medal text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-xl text-brand mb-3">Quality Care</h3>
-                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Quality Care</h3>
+                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
                     Our quality of dental care is outstanding. Our main clinic is located at a new modern facility in S Building, Baguio City.
                 </p>
             </div>
         </div>
-        <div class="flex gap-6 reveal-up">
-            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-bolt text-primary text-2xl"></i>
+        <div class="group flex gap-8 reveal-up">
+            <div class="w-20 h-20 rounded-[2rem] bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-primary transition-all duration-500 shadow-sm group-hover:shadow-xl group-hover:shadow-primary/20">
+                <i class="fa-solid fa-bolt text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-xl text-brand mb-3">Fast Service</h3>
-                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Fast Service</h3>
+                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
                     We make efforts to accommodate you and your scheduling needs and desires, ensuring prompt and efficient treatment.
                 </p>
             </div>
         </div>
-        <div class="flex gap-6 reveal-up">
-            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-tags text-primary text-2xl"></i>
+        <div class="group flex gap-8 reveal-up">
+            <div class="w-20 h-20 rounded-[2rem] bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-primary transition-all duration-500 shadow-sm group-hover:shadow-xl group-hover:shadow-primary/20">
+                <i class="fa-solid fa-tags text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-xl text-brand mb-3">Affordable Prices</h3>
-                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Affordable Prices</h3>
+                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
                     Our prices are substantially affordable. We provide high-end care without the high-end price tag.
                 </p>
             </div>
         </div>
-        <div class="flex gap-6 reveal-up">
-            <div class="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-heart text-primary text-2xl"></i>
+        <div class="group flex gap-8 reveal-up">
+            <div class="w-20 h-20 rounded-[2rem] bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-primary transition-all duration-500 shadow-sm group-hover:shadow-xl group-hover:shadow-primary/20">
+                <i class="fa-solid fa-heart text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-xl text-brand mb-3">Patient Priority</h3>
-                <p class="font-body text-[0.9rem] text-muted leading-relaxed">
+                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Patient Priority</h3>
+                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
                     We strive to make the patient our priority. We work hard to see you promptly and achieve your complete satisfaction.
                 </p>
             </div>
