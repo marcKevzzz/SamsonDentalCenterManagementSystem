@@ -9,7 +9,7 @@ Layout = "AdminSide/_StaffLayout";
 <div id="page-patients" class="page p-4 md:p-6">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <div>
-      <h2 class="font-display text-xl font-extrabold text-brand-900">
+      <h2 class="font-display text-xl font-bold text-brand-900">
         Patients
       </h2>
       <p class="text-[12px] text-brand-500 mt-0.5">
@@ -17,7 +17,7 @@ Layout = "AdminSide/_StaffLayout";
       </p>
     </div>
     <button
-      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
         stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="5" x2="12" y2="19" />

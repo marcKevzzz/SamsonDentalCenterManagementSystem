@@ -18,7 +18,7 @@ export function renderStep2b() {
 
   const intro = document.getElementById("wlIntro");
   if (intro)
-    intro.innerHTML = `<span class="font-semibold text-brand">${dl}</span> is fully booked. Sign up for the waitlist and we'll reach out as soon as a slot opens.`;
+    intro.innerHTML = `<span class="font-medium text-brand">${dl}</span> is fully booked. Sign up for the waitlist and we'll reach out as soon as a slot opens.`;
 
   const summary = document.getElementById("wlSummary");
   if (summary)
@@ -27,15 +27,15 @@ export function renderStep2b() {
     <div class="flex flex-col gap-3">
         <div class="flex justify-between">
             <span class="font-body text-[.82rem] text-muted">Service</span>
-            <span class="font-body text-[.82rem] font-semibold text-brand">${STATE.service?.name}</span>
+            <span class="font-body text-[.82rem] font-medium text-brand">${STATE.service?.name}</span>
         </div>
         <div class="flex justify-between">
             <span class="font-body text-[.82rem] text-muted">Requested Date</span>
-            <span class="font-body text-[.82rem] font-semibold text-brand">${dl}</span>
+            <span class="font-body text-[.82rem] font-medium text-brand">${dl}</span>
         </div>
         <div class="flex justify-between items-center">
             <span class="font-body text-[.82rem] text-muted">Status</span>
-            <span class="font-body text-[.75rem] font-semibold uppercase tracking-wider text-[#b45309] bg-[#fef3c7] px-2.5 py-1 rounded-full">
+            <span class="font-body text-[.75rem] font-medium uppercase tracking-wider text-[#b45309] bg-[#fef3c7] px-2.5 py-1 rounded-full">
                 Waitlist
             </span>
         </div>

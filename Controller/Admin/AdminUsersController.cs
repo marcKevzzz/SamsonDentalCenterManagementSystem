@@ -78,7 +78,7 @@ public class AdminUsersController : ControllerBase
             var id = json.RootElement.GetProperty("id").GetString()!;
 
             // 2. Trigger Recovery Email (Invitation)
-            // This sends the standard Supabase recovery email which acts as a "Set Password" link
+            // Headers already set above on line 51-53
             await _http.PostAsync($"{_supabaseUrl}/auth/v1/recover",
                 new StringContent(System.Text.Json.JsonSerializer.Serialize(new { email = p.Email }), System.Text.Encoding.UTF8, "application/json"));
 
@@ -235,10 +235,18 @@ public class AdminUsersController : ControllerBase
             if (profile == null) return NotFound();
 
             // Trigger Supabase recovery email (Set Password flow)
+            _http.DefaultRequestHeaders.Clear();
+            _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+
             var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/recover",
                 new StringContent(System.Text.Json.JsonSerializer.Serialize(new { email = profile.Email }), System.Text.Encoding.UTF8, "application/json"));
 
-            if (!res.IsSuccessStatusCode) return BadRequest(new { ok = false, error = "Failed to send recovery email." });
+            if (!res.IsSuccessStatusCode) 
+            {
+                var err = await res.Content.ReadAsStringAsync();
+                return BadRequest(new { ok = false, error = $"Failed to send recovery email: {err}" });
+            }
 
             await _logs.LogActionAsync(id, "resent invitation", $"User: {profile.FullName}", null, "Admin", $"/Admin/Users");
             return Ok(new { ok = true });

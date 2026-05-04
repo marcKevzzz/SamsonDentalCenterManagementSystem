@@ -99,14 +99,14 @@ export const Modal = (() => {
 
     root.innerHTML = `
       <div id="modal-overlay"
-           class="fixed inset-0 bg-black/50 flex items-center justify-center z-[250]">
+           class="fixed inset-0 bg-black/50 flex items-center justify-center z-[550]">
 
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6
                     transform scale-95 opacity-0 transition-all duration-300">
 
           <div class="flex items-center gap-3 mb-4">
             <i class="${icon} ${color} text-2xl"></i>
-            <h2 class="text-lg font-semibold">${title}</h2>
+            <h2 class="text-lg font-medium">${title}</h2>
           </div>
 
           <p class="text-gray-600 mb-6">${message}</p>

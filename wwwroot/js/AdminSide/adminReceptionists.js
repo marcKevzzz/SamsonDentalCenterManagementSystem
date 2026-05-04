@@ -69,7 +69,7 @@ function renderDoctorCard(doc) {
       <div data-role="doctor" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${doc.isActive ? "" : "opacity-60"}">
         <div class="flex items-center justify-between px-4 py-1.5 ${doc.isActive ? "bg-blue-50" : "bg-slate-100"}">
           <span class="text-[10px] font-bold uppercase tracking-wider ${doc.isActive ? "text-primary" : "text-slate-400"}"><i class="fa-solid fa-user-doctor mr-1"></i> Doctor</span>
-          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${doc.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${doc.isActive ? "Active" : "Inactive"}</span>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${doc.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${doc.isActive ? "Active" : "Inactive"}</span>
         </div>
         <div class="p-5">
           <div class="flex items-start gap-3 mb-4">
@@ -84,7 +84,7 @@ function renderDoctorCard(doc) {
             <button onclick='openStaffModal(${docJson})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
           </div>
           <div class="flex flex-wrap gap-1.5 mb-3">
-            ${specList.slice(0, 3).map(s => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 font-semibold">${s.trim()}</span>`).join('')}
+            ${specList.slice(0, 3).map(s => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 font-medium">${s.trim()}</span>`).join('')}
             ${specList.length > 3 ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">+${specList.length - 3} more</span>` : ''}
           </div>
           <p class="text-[11.5px] text-slate-500 leading-tight line-clamp-2">${doc.bio || ""}</p>
@@ -120,7 +120,7 @@ function renderReceptionistCard(rec) {
       <div data-role="receptionist" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${rec.isActive ? "" : "opacity-60"}">
         <div class="flex items-center justify-between px-4 py-1.5 ${rec.isActive ? "bg-purple-50" : "bg-slate-100"}">
           <span class="text-[10px] font-bold uppercase tracking-wider ${rec.isActive ? "text-purple-600" : "text-slate-400"}"><i class="fa-solid fa-headset mr-1"></i> Receptionist</span>
-          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${rec.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${rec.isActive ? "Active" : "Inactive"}</span>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${rec.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${rec.isActive ? "Active" : "Inactive"}</span>
         </div>
         <div class="p-5">
           <div class="flex items-start gap-3 mb-4">
@@ -135,7 +135,7 @@ function renderReceptionistCard(rec) {
             <button onclick='openStaffModal(null, ${recJson})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
           </div>
           <p class="text-[11.5px] text-slate-500 leading-tight line-clamp-2 mb-3">${rec.bio || ""}</p>
-          ${rec.deskLocation ? `<div class="flex flex-wrap gap-1.5"><span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 font-semibold"><i class="fa-solid fa-location-dot mr-1"></i> Desk: ${rec.deskLocation}</span></div>` : ''}
+          ${rec.deskLocation ? `<div class="flex flex-wrap gap-1.5"><span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 font-medium"><i class="fa-solid fa-location-dot mr-1"></i> Desk: ${rec.deskLocation}</span></div>` : ''}
           <div class="border-t border-slate-100 pt-2 mt-2">
             <p class="text-[10px] font-bold uppercase tracking-wider text-brand-400 mb-1">Availability</p>
             <div class="flex flex-row gap-1">
@@ -199,7 +199,7 @@ function renderSpecialtyDropdown() {
     _specialtyOptions.forEach((name) => {
         const checked = _selectedSpecialties.includes(name);
         const item = document.createElement("label");
-        item.className = `flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 text-[12.5px] ${checked ? "text-primary font-semibold" : "text-slate-700"}`;
+        item.className = `flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 text-[12.5px] ${checked ? "text-primary font-medium" : "text-slate-700"}`;
         item.innerHTML = `
             <input type="checkbox" class="w-3.5 h-3.5 rounded text-primary border-slate-300"
                    ${checked ? "checked" : ""} />
@@ -223,7 +223,7 @@ function renderSpecialtyPills() {
     container.innerHTML = "";
     _selectedSpecialties.forEach((name) => {
         const pill = document.createElement("span");
-        pill.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold";
+        pill.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-medium";
         pill.innerHTML = `${name}<button type="button" class="ml-0.5 text-primary/50 hover:text-primary" onclick="removeSpecialty('${name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-xmark text-[8px]"></i></button>`;
         container.appendChild(pill);
     });
@@ -333,15 +333,15 @@ window.switchStaffRole = function (role) {
     const saveBtn   = document.getElementById("staffSaveBtn");
 
     if (role === "doctor") {
-        doctorBtn.className = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all border-primary bg-primary/5 text-primary";
-        recBtn.className    = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all border-slate-200 bg-white text-slate-500 hover:border-slate-300";
+        doctorBtn.className = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all border-primary bg-primary/5 text-primary";
+        recBtn.className    = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all border-slate-200 bg-white text-slate-500 hover:border-slate-300";
         docFields.classList.remove("hidden");
         recFields.classList.add("hidden");
         hintLabel.textContent = "(Doctor / Admin role)";
         saveBtn.textContent   = "Save Doctor";
     } else {
-        recBtn.className    = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all border-primary bg-primary/5 text-primary";
-        doctorBtn.className = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all border-slate-200 bg-white text-slate-500 hover:border-slate-300";
+        recBtn.className    = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all border-primary bg-primary/5 text-primary";
+        doctorBtn.className = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all border-slate-200 bg-white text-slate-500 hover:border-slate-300";
         recFields.classList.remove("hidden");
         docFields.classList.add("hidden");
         hintLabel.textContent = "(Receptionist role)";

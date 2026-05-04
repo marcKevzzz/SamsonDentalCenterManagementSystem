@@ -8,7 +8,7 @@
 <div class="page p-6">
     <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-            <h2 class="text-2xl font-extrabold text-brand tracking-tight">Billing & Invoices</h2>
+            <h2 class="text-2xl font-bold text-brand tracking-tight">Billing & Invoices</h2>
             <p class="text-[13px] text-brand/40 mt-1">Manage and track your generated treatment billings</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
@@ -112,13 +112,17 @@
                             {
                                 <span class="px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Cancelled</span>
                             }
+                            else if (invoice.Status == "partial")
+                            {
+                                <span title="Partial: Procedure done, payment partially collected" class="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-[10px] font-bold uppercase tracking-wider cursor-help">Partial</span>
+                            }
                             else
                             {
                                 <span class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Pending</span>
                             }
                         </td>
                         <td class="px-6 py-4 text-right">
-                            @if (invoice.Status != "paid")
+                            @if (invoice.Status != "paid" && invoice.Status != "cancelled")
                             {
                                 <button onclick="openPaymentModal('@invoice.Id', '@(invoice.Patient?.FullName ?? "Patient")', @invoice.FinalAmount)" 
                                     class="w-8 h-8 rounded-lg border border-emerald-100 text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all mr-1" title="Confirm Payment">
@@ -149,7 +153,7 @@
             <div class="p-8">
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h3 class="text-xl font-extrabold text-brand">Confirm Payment</h3>
+                        <h3 class="text-xl font-bold text-brand">Confirm Payment</h3>
                         <p id="payment-patient-name" class="text-[12px] text-brand/40 mt-1 font-medium"></p>
                     </div>
                     <button onclick="closePaymentModal()" class="text-slate-300 hover:text-slate-600">
@@ -159,14 +163,16 @@
 
                 <div class="space-y-4">
                     <input type="hidden" id="pay-invoice-id" />
+                    <input type="hidden" id="pay-invoice-total" />
                     
                     <div>
                         <label class="block text-[11px] font-bold text-brand uppercase tracking-wider mb-1.5">Amount Paid (₱)</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 translate-half text-slate-400 font-bold">₱</span>
-                            <input type="number" id="pay-amount" step="0.01"
+                            <input type="number" id="pay-amount" step="0.01" min="0.01"
                                 class="w-full pl-9 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[15px] font-bold text-brand outline-none focus:bg-white focus:border-primary transition-all" />
                         </div>
+                        <p id="pay-amount-hint" class="text-[10px] text-brand/40 mt-1 ml-1"></p>
                     </div>
 
                     <div>
@@ -180,10 +186,13 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-brand uppercase tracking-wider mb-1.5">Reference Number</label>
-                        <input type="text" id="pay-ref" placeholder="Optional..."
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-medium text-brand outline-none focus:bg-white focus:border-primary transition-all" />
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                        <label class="block text-[10px] font-bold text-brand/40 uppercase tracking-wider mb-1">Generated Reference</label>
+                        <div class="flex items-center justify-between">
+                            <span id="pay-ref-display" class="text-[15px] font-mono font-bold text-brand tracking-widest">--------</span>
+                            <i class="fa-solid fa-barcode text-slate-300"></i>
+                        </div>
+                        <input type="hidden" id="pay-ref" />
                     </div>
 
                     <div>
@@ -205,10 +214,26 @@
 </div>
 
 <script>
+    function generateRef() {
+        return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
     function openPaymentModal(id, name, amount) {
+        const ref = generateRef();
         document.getElementById('pay-invoice-id').value = id;
+        document.getElementById('pay-invoice-total').value = amount;
         document.getElementById('payment-patient-name').innerText = "Invoice for " + name;
-        document.getElementById('pay-amount').value = amount;
+        document.getElementById('pay-amount').value = amount.toFixed ? amount.toFixed(2) : amount;
+        document.getElementById('pay-amount-hint').textContent = `Total due: ₱${parseFloat(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
+        
+        // Auto-set ref
+        const refInput = document.getElementById('pay-ref');
+        refInput.value = ref;
+        
+        // Show ref in UI (optional, but good for transparency)
+        const refDisplay = document.getElementById('pay-ref-display');
+        if (refDisplay) refDisplay.textContent = ref;
+
         document.getElementById('payment-modal').classList.remove('hidden');
     }
 
@@ -218,16 +243,28 @@
 
     async function submitPayment() {
         const btn = document.getElementById('btn-submit-payment');
+        if (btn.disabled) return; // double-click guard
+
         const id = document.getElementById('pay-invoice-id').value;
-        const amount = document.getElementById('pay-amount').value;
+        const amount = parseFloat(document.getElementById('pay-amount').value);
+        const total = parseFloat(document.getElementById('pay-invoice-total').value);
         const method = document.getElementById('pay-method').value;
         const ref = document.getElementById('pay-ref').value;
         const notes = document.getElementById('pay-notes').value;
 
-        if (!amount || amount <= 0) return alert("Enter valid amount");
+        const fullPaymentMethods = ['Cash', 'GCash', 'Maya', 'Bank Transfer'];
+        if (fullPaymentMethods.includes(method) && amount < total) {
+            window.Toast?.show(`${method} requires full payment of ₱${total.toFixed(2)}.`, 'warning');
+            return;
+        }
+
+        if (amount > total) {
+            window.Toast?.show(`Payment (₱${amount.toFixed(2)}) exceeds invoice total (₱${total.toFixed(2)}). Please correct the amount.`, 'danger');
+            return;
+        }
 
         btn.disabled = true;
-        btn.innerText = "Processing...";
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Processing…';
 
         try {
             const res = await fetch('/api/invoice/pay', {
@@ -235,7 +272,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     invoiceId: id,
-                    amount: parseFloat(amount),
+                    amount: amount,
                     paymentMethod: method,
                     referenceNumber: ref,
                     notes: notes
@@ -244,18 +281,18 @@
 
             const data = await res.json();
             if (data.ok) {
-                if (window.Toast) window.Toast.show("Payment recorded successfully", "success");
-                setTimeout(() => window.location.reload(), 1000);
+                window.Toast?.show('Payment recorded successfully', 'success');
+                setTimeout(() => window.location.reload(), 900);
             } else {
-                if (window.Toast) window.Toast.show(data.error || "Payment failed", "danger");
+                window.Toast?.show(data.error || 'Payment failed', 'danger');
                 btn.disabled = false;
-                btn.innerText = "Record Payment";
+                btn.innerHTML = 'Record Payment';
             }
         } catch (err) {
-            console.error("[RecordPayment Error]", err);
-            if (window.Toast) window.Toast.show("Network error or server failure", "danger");
+            console.error('[RecordPayment Error]', err);
+            window.Toast?.show('Network error — please try again.', 'danger');
             btn.disabled = false;
-            btn.innerText = "Record Payment";
+            btn.innerHTML = 'Record Payment';
         }
     }
 

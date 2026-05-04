@@ -56,7 +56,7 @@ function renderNotifications(notifs) {
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-2">
-              <p class="text-sm font-semibold text-brand">${n.title}</p>
+              <p class="text-sm font-medium text-brand">${n.title}</p>
               <div class="flex items-center gap-2 flex-shrink-0">
                 <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">${date}</span>
                 <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-tighter">${time}</span>

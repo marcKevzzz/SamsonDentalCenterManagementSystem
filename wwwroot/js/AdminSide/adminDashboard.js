@@ -4,17 +4,21 @@ import { AdminStore } from './AdminStore.js';
  * Samson Dental Center - Admin Dashboard Module
  */
 document.addEventListener('DOMContentLoaded', async () => {
+    const role = document.getElementById('currentUserRole')?.value?.toLowerCase() || 'admin';
+    
     // Dashboard needs stats and a few items
     const stats = await AdminStore.loadData('stats', '/api/admin/data/stats');
     const appts = await AdminStore.loadData('appointments', '/api/admin/data/appointments');
     const logs = await AdminStore.loadData('activity-logs', '/api/admin/data/activity-logs');
-    const leaves = await AdminStore.loadData('leaves', '/api/staff/leave/all');
+    const leaves = role === 'admin' ? await AdminStore.loadData('leaves', '/api/staff/leave/all') : [];
+    const inqs = await AdminStore.loadData('inquiries', '/api/admin/data/inquiries');
     
     hydrateDashboard({
         stats: stats,
         appointments: appts,
         logs: logs,
-        leaves: leaves
+        leaves: leaves,
+        inquiries: inqs
     });
 });
 
@@ -37,10 +41,17 @@ function hydrateDashboard(data) {
         if (monthlyRevenue && stats.monthlyRevenue !== undefined) monthlyRevenue.textContent = `₱${stats.monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
         // Trends (Now using real logic or approximations from key metrics)
-        if (stats.totalPatients !== undefined) document.getElementById('stat-patients-trend').textContent = `Total registered patients`;
-        if (stats.activeDoctors !== undefined) document.getElementById('stat-doctors-trend').textContent = `${stats.activeDoctors} specialists active`;
-        if (document.getElementById('stat-appts-trend')) document.getElementById('stat-appts-trend').textContent = `Today's schedule`;
-        if (stats.monthlyRevenue !== undefined) document.getElementById('stat-revenue-trend').textContent = `Current month`;
+        const trendPatients = document.getElementById('stat-patients-trend');
+        if (trendPatients && stats.totalPatients !== undefined) trendPatients.textContent = `Total registered patients`;
+        
+        const trendDoctors = document.getElementById('stat-doctors-trend');
+        if (trendDoctors && stats.activeDoctors !== undefined) trendDoctors.textContent = `${stats.activeDoctors} specialists active`;
+        
+        const trendAppts = document.getElementById('stat-appts-trend');
+        if (trendAppts) trendAppts.textContent = `Today's schedule`;
+        
+        const trendRevenue = document.getElementById('stat-revenue-trend');
+        if (trendRevenue && stats.monthlyRevenue !== undefined) trendRevenue.textContent = `Current month`;
 
         // Initialize Charts
         if (stats.weeklyVisits) {
@@ -174,6 +185,37 @@ function hydrateDashboard(data) {
                         </td>
                     </tr>`;
             }).join('');
+        }
+    }
+
+    // 5. Hydrate Inquiries
+    const inqsBody = document.getElementById('dashboard-inquiries-body');
+    if (inqsBody) {
+        const unread = (data.inquiries || [])
+            .filter(i => !i.isRead)
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 5);
+
+        const role = document.getElementById('currentUserRole')?.value?.toLowerCase() || 'admin';
+        const basePath = role === 'admin' ? '/Admin' : (role === 'doctor' ? '/Doctor' : '/Receptionist');
+
+        if (unread.length === 0) {
+            inqsBody.innerHTML = `<div class="py-12 text-center text-slate-400 text-[12px] italic">No new messages.</div>`;
+        } else {
+            inqsBody.innerHTML = unread.map(inq => `
+                <a href="${basePath}/Inquiries" class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all group">
+                    <div class="w-9 h-9 rounded-xl bg-primary/5 text-primary flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-envelope-open-text text-[13px]"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-[12.5px] font-bold text-brand truncate">${inq.fullName}</span>
+                            <span class="text-[9px] text-slate-400 font-medium whitespace-nowrap">${timeAgo(inq.createdAt)}</span>
+                        </div>
+                        <p class="text-[11px] text-brand-500 line-clamp-1 mt-0.5">${inq.message}</p>
+                    </div>
+                </a>
+            `).join('');
         }
     }
 }

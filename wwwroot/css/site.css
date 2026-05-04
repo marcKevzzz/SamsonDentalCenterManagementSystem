@@ -17,7 +17,10 @@
 @import url("https://fonts.cdnfonts.com/css/optima");
 
 body {
-  font-family: "Syne", sans-serif;
+  font-family: "coolvetica", sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
   color: var(--text-main);
   background-color: var(--bg-soft);
 }
@@ -27,7 +30,8 @@ h2,
 h3,
 h4,
 .brand-font {
-  font-family: "Syne", sans-serif;
+  font-family: "coolvetica", sans-serif;
+  font-weight: 500;
 }
 
 .logo-font {
@@ -78,7 +82,7 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000;
+  z-index: 100;
   pointer-events: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
@@ -111,7 +115,7 @@ html {
   background: rgba(255, 255, 255, 0.4); /* Glassy white on scroll */
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.35);
   color: var(--brand-dark);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
 }
@@ -128,9 +132,9 @@ html {
 
 .nav-link {
   position: relative;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: inherit;
   padding: 8px 0;
@@ -864,11 +868,11 @@ textarea.form-input {
 }
 
 /* #track-1 {
-  transform: translateX(0%); 
+  transform: translateX(50%); 
 } */
 
 #track-2 {
-  transform: translateX(-150%); 
+  transform: translateX(-50%); 
 }
 
 .review-card {
@@ -1634,12 +1638,8 @@ textarea.form-input {
 .milestone-card {
   width: 320px;
   flex-shrink: 0;
-  background: white;
   padding: 2rem;
   border-radius: 1.5rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
 }
 
 .milestone-card:hover {

@@ -120,6 +120,7 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         provider.GetRequiredService<ClinicService>(),
         provider.GetRequiredService<BlockedDateService>(),
         provider.GetRequiredService<ProfileService>(),
+        provider.GetRequiredService<RecordService>(),
         provider.GetRequiredService<IDistributedCache>()
     );
 });
@@ -310,7 +311,7 @@ builder
                     res.Cookies.Delete("sb-access-token");
                     res.Cookies.Delete("sb-refresh-token");
                     var returnUrl = Uri.EscapeDataString(req.Path + req.QueryString);
-                    res.Redirect($"/Authentication/Signin?expired=1&returnUrl={returnUrl}");
+                    res.Redirect($"/Sign-in?expired=1&returnUrl={returnUrl}");
                 }
             },
         };

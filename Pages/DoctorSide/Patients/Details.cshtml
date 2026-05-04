@@ -15,13 +15,13 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
             </a>
             <div>
-                <h2 class="text-xl font-extrabold text-brand-900 font-display">Patient Profile</h2>
+                <h2 class="text-xl font-bold text-brand-900 font-display">Patient Profile</h2>
                 <div class="flex items-center gap-2 text-[11px] text-brand-400">
                     <span>Doctor</span>
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
                     <span>Patients</span>
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-                    <span class="text-brand-600 font-semibold">@p?.FirstName @p?.LastName</span>
+                    <span class="text-brand-600 font-medium">@p?.FirstName @p?.LastName</span>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
                         @if (!string.IsNullOrEmpty(p?.AvatarUrl)) {
                             <img src="@p.AvatarUrl" class="w-24 h-24 rounded-3xl object-cover ring-4 ring-slate-50 shadow-lg" />
                         } else {
-                            <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-3xl font-bold font-display shadow-lg ring-4 ring-slate-50">
+                            <div class="w-24 h-24 rounded-3xl bg-primary flex items-center justify-center text-white text-3xl font-bold font-display shadow-lg ring-4 ring-slate-50">
                                 @initials
                             </div>
                         }
@@ -117,19 +117,25 @@
                 }
             </div>
 
-            <!-- Tabs -->
-            <div x-data="{ tab: '@(Model.ClinicalTimeline.Any() ? "timeline" : "appointments")' }" class="space-y-4">
-                <div class="flex gap-1 bg-white p-1 rounded-2xl border border-slate-200/60 shadow-sm w-fit">
-                    @if (Model.ClinicalTimeline.Any()) {
-                        <button @@click="tab = 'timeline'" :class="tab === 'timeline' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Timeline</button>
-                    }
-                    <button @@click="tab = 'appointments'" :class="tab === 'appointments' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Appointments</button>
-                    <button @@click="tab = 'evaluation'" :class="tab === 'evaluation' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Evaluation</button>
-                    <button @@click="tab = 'notes'" :class="tab === 'notes' ? 'bg-primary text-white shadow-lg' : 'text-brand-500 hover:bg-slate-50'" class="px-6 py-2 rounded-xl text-[12.5px] font-bold transition-all">Notes</button>
+            <!-- Tabs Module -->
+            <div class="space-y-5">
+                <!-- Tab Bar -->
+                <div class="flex items-center justify-between">
+                    <div id="tab-bar" class="flex gap-1.5 bg-white p-1 rounded-xl border border-slate-200/60 shadow-sm">
+                        <button onclick="switchTab('timeline')" data-tab="timeline" class="tab-btn active px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">History</button>
+                        <button onclick="switchTab('appointments')" data-tab="appointments" class="tab-btn text-brand-400 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Visits</button>
+                        <button onclick="switchTab('evaluation')" data-tab="evaluation" class="tab-btn text-brand-400 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Evaluation</button>
+                        <button onclick="switchTab('notes')" data-tab="notes" class="tab-btn text-brand-400 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Notes</button>
+                    </div>
+                    
+                    <div class="hidden md:flex items-center gap-3 text-[10px] font-bold text-brand-400">
+                        <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Stable</div>
+                        <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-brand-900"></span> Active</div>
+                    </div>
                 </div>
 
-                <!-- Tab: Evaluation -->
-                <div x-show="tab === 'evaluation'" x-transition class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm space-y-6">
+                <!-- Tab Content: Evaluation -->
+                <div id="content-evaluation" class="tab-content hidden bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm space-y-6">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="text-md font-bold text-brand-900 font-display">Oral Health Evaluation</h4>
                         <button onclick="saveEvaluation()" class="px-4 py-1.5 bg-primary/10 text-primary text-[12px] font-bold rounded-lg hover:bg-primary hover:text-white transition-all">Save Evaluation</button>
@@ -193,8 +199,8 @@
                     </div>
                 </div>
 
-                <!-- Tab: Timeline -->
-                <div x-show="tab === 'timeline'" x-transition class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
+                <!-- Tab Content: Timeline -->
+                <div id="content-timeline" class="tab-content hidden bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
                     <h4 class="text-md font-bold text-brand-900 mb-6 font-display flex items-center gap-2">
                         Clinical History
                         <span class="px-2 py-0.5 bg-slate-100 text-[10px] text-brand-400 rounded-full">@Model.ClinicalTimeline.Count records</span>
@@ -230,8 +236,8 @@
                     </div>
                 </div>
 
-                <!-- Tab: Appointments -->
-                <div x-show="tab === 'appointments'" x-transition class="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
+                <!-- Tab Content: Appointments -->
+                <div id="content-appointments" class="tab-content hidden bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
                     @if (Model.Appointments.Any()) {
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 border-b border-slate-100">
@@ -273,8 +279,8 @@
                     }
                 </div>
 
-                <!-- Tab: Notes -->
-                <div x-show="tab === 'notes'" x-transition class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
+                <!-- Tab Content: Notes -->
+                <div id="content-notes" class="tab-content hidden bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="text-md font-bold text-brand-900 font-display">Clinical Notes</h4>
                         <button onclick="saveNotes()" class="px-4 py-1.5 bg-primary/10 text-primary text-[12px] font-bold rounded-lg hover:bg-primary hover:text-white transition-all">Save Changes</button>
@@ -369,10 +375,38 @@
     }
 
     // Pre-fill evaluation if exists
+    
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        const target = document.getElementById('content-' + tabId);
+        if (target) target.classList.remove('hidden');
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        switchTab('@(Model.ClinicalTimeline.Any() ? "timeline" : "appointments")');
+    });
 
 </script>
 
 <style>
     [x-cloak] { display: none !important; }
     .font-display { font-family: 'Syne', sans-serif; }
+    
+    .tab-btn {
+        color: #64748b; /* slate-500 */
+        transition: all 0.2s ease;
+    }
+    .tab-btn:hover:not(.active) {
+        background-color: #f8fafc; /* slate-50 */
+        color: #0f172a; /* brand-900 */
+    }
+    .tab-btn.active {
+        background-color: #0f172a; /* brand-900 */
+        color: white !important;
+        box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.15);
+    }
 </style>

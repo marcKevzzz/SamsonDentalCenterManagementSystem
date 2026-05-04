@@ -17,17 +17,17 @@
 
             <!-- ── Role Toggle ─────────────────────────────────────────────── -->
             <div id="roleToggleGroup" class="flex flex-col gap-1.5 mb-4">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Staff Role <span class="text-red-400">*</span></label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Staff Role <span class="text-red-400">*</span></label>
                 <div class="flex gap-2">
                     <button type="button" id="roleBtnDoctor"
                         onclick="switchStaffRole('doctor')"
-                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all
+                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all
                                border-primary bg-primary/5 text-primary">
                         <i class="fa-solid fa-user-doctor mr-1.5"></i> Doctor
                     </button>
                     <button type="button" id="roleBtnReceptionist"
                         onclick="switchStaffRole('receptionist')"
-                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all
+                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all
                                border-slate-200 bg-white text-slate-500 hover:border-slate-300">
                         <i class="fa-solid fa-headset mr-1.5"></i> Receptionist
                     </button>
@@ -36,7 +36,7 @@
 
             <!-- ── User Select ─────────────────────────────────────────────── -->
             <div class="flex flex-col gap-1.5 mb-4" id="userSelectGroup">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">
                     Select User <span id="roleHintLabel" class="text-brand-400">(Doctor role)</span>
                     <span class="text-red-400">*</span>
                 </label>
@@ -49,14 +49,14 @@
             <!-- ── Doctor-only fields ──────────────────────────────────────── -->
             <div id="doctorFields">
                 <div class="flex flex-col gap-1.5 mb-4">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Title <span class="text-red-400">*</span></label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Title <span class="text-red-400">*</span></label>
                     <input id="staffTitle" type="text" placeholder="e.g. Dr." value="Dr."
                            class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
 
                 <!-- ── Specialties Multi-select ────────────────────────────── -->
                 <div class="flex flex-col gap-1.5 mb-4">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Specialties</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Specialties</label>
                     <!-- Selected pills -->
                     <div id="specialtyPills" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
                     <!-- Dropdown toggle -->
@@ -80,7 +80,7 @@
             <!-- ── Receptionist-only fields ────────────────────────────────── -->
             <div id="receptionistFields" class="hidden">
                 <div class="flex flex-col gap-1.5 mb-4">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Desk Location</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Desk Location</label>
                     <input id="staffDeskLocation" type="text" placeholder="e.g. Front Desk, 2nd Floor"
                            class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
@@ -88,7 +88,7 @@
 
             <!-- ── Shared fields ───────────────────────────────────────────── -->
             <div class="flex flex-col gap-1.5 mb-4">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Bio</label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Bio</label>
                 <textarea id="staffBio" rows="3" placeholder="Short biography..."
                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 resize-none"></textarea>
             </div>
@@ -96,9 +96,9 @@
             <!-- ── Availability Editor ─────────────────────────────────── -->
             <div id="availabilitySection" class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Availability Schedule</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Availability Schedule</label>
                     <button type="button" onclick="addAvailabilityRow()"
-                        class="text-[11px] font-semibold text-primary hover:text-primary/80 flex items-center gap-1">
+                        class="text-[11px] font-medium text-primary hover:text-primary/80 flex items-center gap-1">
                         <i class="fa-solid fa-plus text-[9px]"></i> Add Slot
                     </button>
                 </div>
@@ -118,10 +118,10 @@
         </div>
 
         <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
-            <button onclick="closeStaffModal()" class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+            <button onclick="closeStaffModal()" class="px-4 py-2 text-[12.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
                 Cancel
             </button>
-            <button onclick="saveStaff()" id="staffSaveBtn" class="px-5 py-2 text-[12.5px] font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2">
+            <button onclick="saveStaff()" id="staffSaveBtn" class="px-5 py-2 text-[12.5px] font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2">
                 Save Doctor
             </button>
         </div>

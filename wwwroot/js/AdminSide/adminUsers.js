@@ -245,14 +245,14 @@ function renderPaginationBtns(totalPages) {
   const container = document.getElementById("paginationBtns");
   let html = `
         <button data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}
-            class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+            class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
             ← Prev
         </button>`;
 
   for (let i = 1; i <= totalPages; i++) {
     html += `
         <button data-page="${i}"
-            class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg ${
+            class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg ${
               i === currentPage
                 ? "bg-primary text-white"
                 : "border border-slate-200 text-brand-500 hover:bg-slate-50"
@@ -263,7 +263,7 @@ function renderPaginationBtns(totalPages) {
 
   html += `
         <button data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}
-            class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+            class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
             Next →
         </button>`;
 

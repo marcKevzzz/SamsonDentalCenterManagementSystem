@@ -101,7 +101,7 @@ const dt = new Date(y, m, d); // Keep this for isPast and isSun checks
         </button>
     </div>
     <div class="grid grid-cols-7 mb-1">
-        ${DAYS.map((d) => `<div class="w-9 h-7 flex items-center justify-center font-body text-[.65rem] font-semibold uppercase text-muted">${d}</div>`).join("")}
+        ${DAYS.map((d) => `<div class="w-9 h-7 flex items-center justify-center font-body text-[.65rem] font-medium uppercase text-muted">${d}</div>`).join("")}
     </div>
     <div class="grid grid-cols-7 gap-y-1">${cells}</div>
     <div class="flex items-center gap-4 mt-4 pt-4 border-t border-[#e5e7eb]">
@@ -157,12 +157,12 @@ export async function pickDate(dateStr) {
             <div class="brand-font font-bold text-[.88rem] text-brand">
                 ${formatDate(dateStr, { weekday: "long", month: "long", day: "numeric" })}
             </div>
-            <span class="font-body text-[.65rem] font-semibold uppercase tracking-wider bg-[#fef3c7] text-[#b45309] px-2 py-1 rounded-full">
+            <span class="font-body text-[.65rem] font-medium uppercase tracking-wider bg-[#fef3c7] text-[#b45309] px-2 py-1 rounded-full">
                 Fully Booked
             </span>
         </div>
         <p class="font-body text-[.82rem] text-muted leading-relaxed">
-            All time slots are taken. Join the <span class="text-primary font-semibold">waitlist</span> below.
+            All time slots are taken. Join the <span class="text-primary font-medium">waitlist</span> below.
         </p>`;
 
     if (fullyBar) {
@@ -218,7 +218,7 @@ export function renderTimeSlots(dateStr) {
   widget.innerHTML = `
     <div class="brand-font font-bold text-[.88rem] text-brand mb-1">${dl}</div>
     <p class="font-body text-[.74rem] text-muted mb-4">
-        Select a time. Greyed slots are fully booked — <span class="font-semibold">numbers show available doctors</span>.
+        Select a time. Greyed slots are fully booked — <span class="font-medium">numbers show available doctors</span>.
     </p>
     <div class="grid grid-cols-3 gap-2">
         ${Object.keys(slots).length > 0 

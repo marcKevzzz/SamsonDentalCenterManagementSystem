@@ -37,5 +37,9 @@ namespace SamsonDentalCenterManagementSystem.Models
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Newtonsoft.Json.JsonProperty("invoice")]
+        [System.Text.Json.Serialization.JsonPropertyName("invoice")]
+        public Invoice? Invoice { get; set; }
     }
 }

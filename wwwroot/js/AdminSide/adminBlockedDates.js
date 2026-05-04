@@ -66,7 +66,7 @@ function renderGrid() {
         <div class="flex items-center gap-4">
           <div class="w-11 h-11 rounded-xl ${isToday ? 'bg-red-100 text-red-600' : isPast ? 'bg-slate-100 text-slate-400' : 'bg-red-50 text-red-500'} flex items-center justify-center flex-shrink-0">
             <div class="text-center leading-none">
-              <div class="text-[15px] font-extrabold font-display">${d.getDate()}</div>
+              <div class="text-[15px] font-bold font-display">${d.getDate()}</div>
               <div class="text-[8px] font-bold uppercase tracking-wider">${d.toLocaleDateString("en-PH", { month: "short" })}</div>
             </div>
           </div>

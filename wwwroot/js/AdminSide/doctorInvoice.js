@@ -8,7 +8,7 @@ let SERVICES = [];
 
 async function refreshData(force = false) {
     const appts    = await AdminStore.loadData('appointments', '/api/admin/data/appointments', { force });
-    const treatments = await AdminStore.loadData('treatments', '/api/admin/data/invoices', { force });
+    const treatments = await AdminStore.loadData('treatments', '/api/admin/data/treatments', { force });
     // Always force-fresh services so price is never stale from a pre-auth-fix cache
     const services = await AdminStore.loadData('services', '/api/services/all', { force: true });
     
@@ -76,7 +76,7 @@ function hydrateUI() {
 
     if (ARRIVED_APPTS.length === 0) {
         cardContainer.innerHTML = `
-            <div class="col-span-full py-20 text-center">
+            <div class="col-span-full py-8 text-center">
                 <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
                     <i class="fa-solid fa-chair text-slate-200 text-2xl"></i>
                 </div>
@@ -117,11 +117,11 @@ function hydrateUI() {
     if (loadingInvoices) loadingInvoices.closest('tr')?.remove();
 
     if (RECENT_TREATMENTS.length === 0) {
-        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-file-invoice text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand-400 font-medium">No treatment records found yet.</p></td></tr>`;
+        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-tooth text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand-400 font-medium">No treatment records found yet.</p></td></tr>`;
     } else {
-        invoiceTbody.innerHTML = RECENT_TREATMENTS.map(inv => {
-            const date = new Date(inv.createdAt);
-            const statusClass = inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : inv.status === 'cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100';
+        invoiceTbody.innerHTML = RECENT_TREATMENTS.map(treat => {
+            const date = new Date(treat.createdAt);
+            const statusClass = treat.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : treat.status === 'planned' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-amber-50 text-amber-600 border-amber-100';
             return `
                 <tr class="hover:bg-slate-50/50 transition-colors group">
                     <td class="px-6 py-4">
@@ -130,11 +130,11 @@ function hydrateUI() {
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full overflow-hidden shadow-sm">
-                                ${inv.patient?.avatarUrl 
-                                    ? `<img src="${inv.patient.avatarUrl}" class="w-full h-full object-cover" />`
+                            <div class="w-8 h-8 rounded-full overflow-hidden shadow-sm bg-slate-100">
+                                ${treat.patientAvatarUrl 
+                                    ? `<img src="${treat.patientAvatarUrl}" class="w-full h-full object-cover" />`
                                     : (() => {
-                                        const name = inv.patientName || inv.patient?.fullName || 'P';
+                                        const name = treat.patientName || 'P';
                                         const parts = name.split(' ').filter(p => p.length > 0);
                                         const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0]?.[0] || 'P').toUpperCase();
                                         return `<div class="w-full h-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">${initials}</div>`;
@@ -142,26 +142,22 @@ function hydrateUI() {
                                 }
                             </div>
                             <div>
-                                <div class="text-[13px] font-bold text-brand-900">${inv.patientName || inv.patient?.fullName || 'Unknown'}</div>
-                                <div class="text-[10px] text-brand-400">#${inv.id.slice(0, 8)}</div>
+                                <div class="text-[13px] font-bold text-brand-900">${treat.patientName || 'Unknown Patient'}</div>
+                                <div class="text-[10px] text-brand-400">#${treat.id.slice(0, 8)}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="flex flex-wrap gap-1 max-w-[200px]">
-                            ${(inv.items || []).slice(0, 2).map(i => `<span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand-600 font-medium">${i.description}</span>`).join('')}
-                            ${inv.items?.length > 2 ? `<span class="px-2 py-0.5 bg-brand-50 rounded-md text-[10px] text-brand-600 font-bold">+${inv.items.length - 2}</span>` : ''}
-                        </div>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand-600 font-medium">${treat.serviceName}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <div class="text-[13px] font-bold text-brand-900">₱${inv.finalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                        ${inv.discountAmount > 0 ? `<div class="text-[10px] text-emerald-500 font-bold">-₱${inv.discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} Disc.</div>` : ''}
+                        <div class="text-[13px] font-bold text-brand-900">₱${treat.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 ${statusClass} border rounded-full text-[10px] font-bold uppercase tracking-wider">${inv.status}</span>
+                        <span class="px-3 py-1 ${statusClass} border rounded-full text-[10px] font-bold uppercase tracking-wider">${treat.status}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-eye text-xs"></i></button>
+                        <button onclick="openViewTreatmentModal('${treat.id}')" class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-eye text-xs"></i></button>
                         <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-print text-xs"></i></button>
                     </td>
                 </tr>`;
@@ -480,7 +476,7 @@ function renderTreatmentForms() {
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 mb-1">Upload File (Optional)</label>
-                            <input type="file" class="inv-treat-xray-file text-[11px] file:mr-2 file:py-1 file:px-2 file:border-0 file:rounded-md file:bg-primary/10 file:text-primary file:font-semibold" />
+                            <input type="file" class="inv-treat-xray-file text-[11px] file:mr-2 file:py-1 file:px-2 file:border-0 file:rounded-md file:bg-primary/10 file:text-primary file:font-medium" />
                         </div>
                     </div>
                     <div class="mt-3">
@@ -500,9 +496,20 @@ function renderTreatmentForms() {
 
             extraUI = `
                 <div class="mt-4 p-4 border border-brand-100 bg-white rounded-xl">
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-2">
                         <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider">Tooth Chart (Odontogram)</h6>
-                        <span class="text-[9px] font-bold text-slate-400">Click tooth to cycle status: Healthy → Filled → Crown → RCT → Extracted → Missing → Decay</span>
+                        <span class="text-[9px] font-bold text-slate-400">Click tooth to cycle status</span>
+                    </div>
+
+                    <!-- Color Legend -->
+                    <div class="flex flex-wrap gap-2 mb-3 pb-3 border-b border-slate-100">
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-slate-500"><span class="w-3 h-3 rounded border border-slate-200 bg-white inline-block"></span>Healthy</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-blue-600"><span class="w-3 h-3 rounded border border-blue-300 bg-blue-100 inline-block"></span>Filled</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-purple-600"><span class="w-3 h-3 rounded border border-purple-300 bg-purple-100 inline-block"></span>Crown</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-emerald-600"><span class="w-3 h-3 rounded border border-emerald-300 bg-emerald-100 inline-block"></span>RCT</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-slate-400"><span class="w-3 h-3 rounded border border-slate-300 bg-slate-200 inline-block"></span>Extracted</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-red-300"><span class="w-3 h-3 rounded border border-red-200 bg-red-50 inline-block opacity-60"></span>Missing</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-red-600"><span class="w-3 h-3 rounded border border-red-300 bg-red-100 inline-block"></span>Decay</span>
                     </div>
                     
                     <div class="flex flex-col gap-1 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
@@ -704,3 +711,54 @@ function showToast(msg, type) {
         alert(msg);
     }
 }
+
+window.openViewTreatmentModal = function(treatmentId) {
+    const treat = RECENT_TREATMENTS.find(t => t.id === treatmentId);
+    if (!treat) return;
+
+    const modal = document.getElementById('view-treatment-modal');
+    if (!modal) return;
+
+    // Set Header Info
+    document.getElementById('view-treat-patient').textContent = treat.patientName || 'Unknown Patient';
+    document.getElementById('view-treat-date').textContent = new Date(treat.createdAt).toLocaleDateString('en-PH', { month: 'long', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('view-treat-id').textContent = `#${treat.id.slice(0, 8)}`;
+
+    // Render Treatment
+    const container = document.getElementById('view-treat-body');
+    container.innerHTML = `
+        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-3">
+            <div class="flex items-center justify-between">
+                <h5 class="text-[13px] font-bold text-brand flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-[10px]">1</span>
+                    ${treat.serviceName}
+                </h5>
+                <span class="px-2 py-0.5 ${treat.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} text-[9px] font-bold rounded-md uppercase tracking-wider">${treat.status}</span>
+            </div>
+            ${treat.diagnosis ? `
+            <div class="bg-white/50 p-3 rounded-xl border border-slate-100/50">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Diagnosis</label>
+                <p class="text-[12px] text-brand-600 italic">${treat.diagnosis}</p>
+            </div>
+            ` : ''}
+            <div class="text-[12px] text-brand-600 bg-white/50 p-3 rounded-xl border border-slate-100/50 italic">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Procedure Details</label>
+                ${treat.procedureDetails || "No specific procedure details recorded."}
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        const box = document.getElementById('view-treatment-box');
+        box.classList.remove('scale-95', 'opacity-0');
+    }, 10);
+};
+
+window.closeViewTreatmentModal = function() {
+    const box = document.getElementById('view-treatment-box');
+    box.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        document.getElementById('view-treatment-modal').classList.add('hidden');
+    }, 300);
+};

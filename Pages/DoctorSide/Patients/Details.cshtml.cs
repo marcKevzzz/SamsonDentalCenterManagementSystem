@@ -8,18 +8,21 @@ namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Patients;
 
 public class PatientDetailsModel : AdminPageModel
 {
-    private readonly AppointmentService _appointmentService;
+    private readonly RecordService _recordService;
     private readonly InvoiceService _invoiceService;
     private readonly ProfileService _profileService;
+    private readonly AppointmentService _appointmentService;
 
     public PatientDetailsModel(
         ProfileService profileService,
         AppointmentService appointmentService,
-        InvoiceService invoiceService) : base(profileService)
+        InvoiceService invoiceService,
+        RecordService recordService) : base(profileService)
     {
         _profileService = profileService;
         _appointmentService = appointmentService;
         _invoiceService = invoiceService;
+        _recordService = recordService;
     }
 
     public Profile? Patient { get; set; }
@@ -37,6 +40,12 @@ public class PatientDetailsModel : AdminPageModel
 
         Patient = await _profileService.GetProfileById(id);
         if (Patient == null) return NotFound();
+
+        // Fetch exact email from auth.users
+        var authEmail = await _profileService.GetAuthUserEmail(id);
+        if (!string.IsNullOrEmpty(authEmail)) {
+            Patient.Email = authEmail;
+        }
 
         // 1. Appointments
         Appointments = await _appointmentService.GetByPatient(id);
@@ -57,17 +66,8 @@ public class PatientDetailsModel : AdminPageModel
         OutstandingBalance = Invoices.Where(i => i.Status != "paid" && i.Status != "cancelled").Sum(i => i.FinalAmount);
 
         // 3. Clinical Timeline (Treatments)
-        if (Invoices.Any())
-        {
-            var invoiceIds = Invoices.Select(i => i.Id).ToList();
-            var treatmentsRes = await _invoiceService._supabase.From<Treatment>()
-                .Where(t => invoiceIds.Contains(t.InvoiceId))
-                .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
-                .Get();
-            
-            ClinicalTimeline = treatmentsRes.Models;
-            LastTreatmentDate = ClinicalTimeline.FirstOrDefault()?.CreatedAt;
-        }
+        ClinicalTimeline = await _recordService.GetTreatmentsByPatientAsync(id);
+        LastTreatmentDate = ClinicalTimeline.FirstOrDefault()?.CreatedAt;
 
         return Page();
     }

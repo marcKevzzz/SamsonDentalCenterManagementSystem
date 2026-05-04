@@ -38,6 +38,9 @@ public class DashboardModel : AdminPageModel
     public int PendingAppointmentsCount { get; set; }
     public int ConfirmedTodayCount { get; set; }
     public int ArrivedTodayCount { get; set; }
+    public int TotalPatients { get; set; }
+    public int ActiveDoctorsCount { get; set; }
+    public decimal MonthlyRevenue { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
@@ -54,9 +57,14 @@ public class DashboardModel : AdminPageModel
             PendingAppointmentsCount = appointments.Count(a => a.Status == "pending");
             ConfirmedTodayCount = TodayAppointments.Count(a => a.Status == "confirmed");
             ArrivedTodayCount = TodayAppointments.Count(a => a.Status == "arrived");
+            TotalPatients = appointments.Select(a => a.PatientId).Distinct().Count();
 
             var allInvoices = await _invoiceService.GetAllInvoicesAsync();
             RecentInvoices = allInvoices.OrderByDescending(i => i.CreatedAt).Take(5).ToList();
+            MonthlyRevenue = allInvoices.Where(i => i.CreatedAt.Month == today.Month && i.CreatedAt.Year == today.Year && i.Status == "paid").Sum(i => i.FinalAmount);
+
+            var doctors = await HttpContext.RequestServices.GetRequiredService<DoctorService>().GetAllWithProfilesAsync();
+            ActiveDoctorsCount = doctors.Count(d => d.IsActive);
 
             RecentLogs = await _logService.GetAllLogsAsync();
             RecentLogs = RecentLogs.Take(10).ToList();

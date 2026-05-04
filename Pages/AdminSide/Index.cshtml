@@ -9,12 +9,12 @@ Layout = "AdminSide/_StaffLayout";
 <div id="page-dashboard" class="page active p-4 md:p-6 ">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
-            <h2 class="font-display text-[clamp(17px,3vw,22px)] font-extrabold text-brand">Good morning, @Model.CurrentUserName 👋
+            <h2 class="font-display text-[clamp(17px,3vw,22px)] font-bold text-brand">Good morning, @Model.CurrentUserName 👋
             </h2>
             <p class="text-[12px] text-brand-500 mt-0.5">Here's what's happening at your clinic today.</p>
         </div>
         <!-- <button
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow whitespace-nowrap">
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow whitespace-nowrap">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -27,7 +27,7 @@ Layout = "AdminSide/_StaffLayout";
     <!-- Stat cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
         <div
-            class="stat-card stat-blue relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            class="stat-card stat-blue relative bg-white rounded-2xl p-4 border border-slate-200 transition-all">
             <div class="flex items-start justify-between mb-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><svg width="18"
                         height="18" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2"
@@ -37,14 +37,14 @@ Layout = "AdminSide/_StaffLayout";
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                     </svg></div>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-blue-50 text-primary">+12%</span>
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-blue-50 text-primary">+12%</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand" id="stat-total-patients">...</div>
+            <div class="font-display text-3xl font-bold text-brand" id="stat-total-patients">...</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Total Patients</div>
             <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-patients-trend">Loading...</div>
         </div>
         <div
-            class="stat-card stat-teal relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            class="stat-card stat-teal relative bg-white rounded-2xl p-4 border border-slate-200 transition-all">
             <div class="flex items-start justify-between mb-3">
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><svg width="18"
                         height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"
@@ -55,14 +55,14 @@ Layout = "AdminSide/_StaffLayout";
                         <circle cx="7" cy="7" r="3" />
                     </svg></div>
                 <span
-                    class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">Active</span>
+                    class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">Active</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand" id="stat-active-doctors">...</div>
+            <div class="font-display text-3xl font-bold text-brand" id="stat-active-doctors">...</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Doctors on Staff</div>
             <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-doctors-trend">Loading...</div>
         </div>
         <div
-            class="stat-card stat-red relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            class="stat-card stat-red relative bg-white rounded-2xl p-4 border border-slate-200 transition-all">
             <div class="flex items-start justify-between mb-3">
                 <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center"><svg width="18" height="18"
                         viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"
@@ -72,14 +72,14 @@ Layout = "AdminSide/_StaffLayout";
                         <line x1="8" y1="2" x2="8" y2="6" />
                         <line x1="3" y1="10" x2="21" y2="10" />
                     </svg></div>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-red-50 text-red-700">Today</span>
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-red-50 text-red-700">Today</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand" id="stat-today-appts">...</div>
+            <div class="font-display text-3xl font-bold text-brand" id="stat-today-appts">...</div>
             <div class="text-[12px] text-brand-500 mt-0.5">Appointments Today</div>
             <div class="text-[11px] text-red-500 mt-1.5" id="stat-appts-trend">Loading...</div>
         </div>
         <div
-            class="stat-card stat-purple relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            class="stat-card stat-purple relative bg-white rounded-2xl p-4 border border-slate-200 transition-all">
             <div class="flex items-start justify-between mb-3">
                 <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><svg width="18"
                         height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"
@@ -87,9 +87,9 @@ Layout = "AdminSide/_StaffLayout";
                         <line x1="12" y1="1" x2="12" y2="23" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg></div>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700">+8%</span>
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700">+8%</span>
             </div>
-            <div class="font-display text-3xl font-extrabold text-brand" id="stat-monthly-revenue">₱0</div>
+            <div class="font-display text-3xl font-bold text-brand" id="stat-monthly-revenue">₱0</div>
             <div class="text-[12px] text-brand-500 mt-0.5">This Month Revenue</div>
             <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-revenue-trend">Loading...</div>
         </div>
@@ -105,9 +105,9 @@ Layout = "AdminSide/_StaffLayout";
                     <p class="text-[10.5px] text-brand-500 mt-0.5">Weekly overview — March 2026</p>
                 </div>
                 <div class="flex gap-1.5">
-                    <button class="px-3 py-1 text-[10.5px] font-semibold rounded-lg bg-primary text-white">Week</button>
+                    <button class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white">Week</button>
                     <button
-                        class="px-3 py-1 text-[10.5px] font-semibold rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors">Month</button>
+                        class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors">Month</button>
                 </div>
             </div>
             <div class="h-48 w-full mt-4">
@@ -131,7 +131,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden max-h-[50vh] overflow-auto">
             <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
                 <h3 class="font-display text-[13.5px] font-bold text-brand">Upcoming Appointments</h3>
-                <button class="text-[10.5px] font-semibold text-primary hover:underline"
+                <button class="text-[10.5px] font-medium text-primary hover:underline"
                     onclick="navigate('appointments',document.querySelector('[onclick*=appointments]'))">View All
                     →</button>
             </div>
@@ -171,7 +171,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="bg-white rounded-2xl p-5 border border-slate-200 max-h-[50vh] overflow-auto">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-display text-[13.5px] font-bold text-brand">Activity Logs</h3>
-                <a href="/Admin/ActivityLogs" class="text-[10.5px] font-semibold text-primary hover:underline">View All →</a>
+                <a href="/Admin/ActivityLogs" class="text-[10.5px] font-medium text-primary hover:underline">View All →</a>
             </div>
             <div class="space-y-3" id="dashboard-activity-body">
                 <div class="py-10 text-center">

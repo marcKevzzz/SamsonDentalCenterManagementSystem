@@ -2,81 +2,294 @@
 @model SamsonDentalCenterManagementSystem.Helpers.AdminPageModel
 @{
     Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "My Schedule";
 }
 
-<div id="page-availability" class="page p-4 md:p-6">
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <div>
-      <h2 class="font-display text-xl font-extrabold text-brand-900">My Schedule & Leave</h2>
-      <p class="text-[12px] text-brand-500 mt-0.5">Manage your availability and leave requests</p>
-    </div>
-    <button onclick="document.getElementById('leave-modal').classList.remove('hidden')" class="bg-primary text-white text-[12px] font-bold px-4 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-sm flex items-center gap-2">
-      <i class="fa-solid fa-plus"></i> Request Leave
-    </button>
-  </div>
-  
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Schedule Calendar -->
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
-        <h3 class="font-display font-bold text-brand mb-4">My Upcoming Schedule</h3>
-        <div id="schedule-container" class="space-y-3">
-            <div class="py-8 text-center text-brand-400 text-[12px]"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading schedule...</div>
+<div id="page-availability" class="page p-4 md:p-6 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <div>
+            <h2 class="font-display text-xl font-bold text-brand-900">My Schedule</h2>
+            <p class="text-[12px] text-brand-500 mt-0.5">Manage your weekly working hours and leave requests.</p>
         </div>
-    </div>
-    
-    <!-- Leave Requests -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-5">
-        <h3 class="font-display font-bold text-brand mb-4">My Leave Requests</h3>
-        <div id="leaves-container" class="space-y-3 divide-y divide-slate-100">
-             <div class="py-8 text-center text-brand-400 text-[12px]"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading leaves...</div>
-        </div>
-    </div>
-  </div>
-</div>
-
-<!-- Request Leave Modal -->
-<div id="leave-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-                <h3 class="font-display font-bold text-brand">Request Leave</h3>
-                <p class="text-[11px] text-brand-400 mt-0.5">Submit a new leave request for approval</p>
-            </div>
-            <button onclick="document.getElementById('leave-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
-                <i class="fa-solid fa-times"></i>
+        <div class="flex items-center gap-2">
+            <button onclick="openLeaveModal()" class="bg-white border border-slate-200 text-brand-900 text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                Request Leave
+            </button>
+            <button onclick="saveAvailability()" id="save-avail-btn" class="bg-primary text-white text-[12.5px] font-bold px-6 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20 hidden">
+                Save Changes
             </button>
         </div>
-        <div class="p-6 space-y-4">
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Availability Section -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8">
+                    <div class="w-12 h-12 rounded-2xl bg-brand/5 text-brand flex items-center justify-center">
+                        <i class="fa-solid fa-calendar-clock text-lg"></i>
+                    </div>
+                </div>
+                
+                <h3 class="font-display font-bold text-brand-900 text-lg mb-1">Weekly Hours</h3>
+                <p class="text-[12.5px] text-brand-400 mb-8">Set your recurring weekly working schedule.</p>
+
+                <div id="availability-rows" class="space-y-3">
+                    <div class="py-12 text-center text-brand-300 italic text-[13px]">
+                        <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading schedule...
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+                    <button onclick="addAvailabilityRow()" class="text-primary text-[12.5px] font-bold hover:underline flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle"></i> Add another slot
+                    </button>
+                    <p class="text-[11px] text-slate-400 italic">Admin approval may be required for major changes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Section -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-[32px] border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-display font-bold text-brand-900">Recent Leaves</h3>
+                    <span class="text-[10px] font-bold text-brand-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded">History</span>
+                </div>
+                
+                <div id="leaves-container" class="space-y-4">
+                    <div class="py-8 text-center text-brand-300 italic text-[12px]">Loading...</div>
+                </div>
+            </div>
+            
+            <!-- Quick Help -->
+            <div class="bg-brand-900 rounded-[32px] p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <h4 class="font-display font-bold text-[15px] mb-2">Need help?</h4>
+                    <p class="text-white/60 text-[12px] leading-relaxed mb-4">If you need to block specific dates or holidays, please contact the clinic administrator.</p>
+                    <a href="/Receptionist/Inquiries" class="inline-flex items-center gap-2 text-[12px] font-bold text-primary-300 hover:text-white transition-colors">
+                        Message Admin <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+                <i class="fa-solid fa-question-circle absolute -bottom-4 -right-4 text-white/5 text-7xl rotate-12"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Modal -->
+<div id="leave-modal" class="hidden fixed inset-0 bg-brand-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div class="p-8 pb-4">
+            <h3 class="font-display font-bold text-2xl text-brand-900">Request Leave</h3>
+            <p class="text-[12.5px] text-brand-500 mt-1">Submit your request for administrative review.</p>
+        </div>
+        <div class="p-8 space-y-5">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Start Date</label>
-                    <input type="date" id="leave-start" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary transition-all text-brand" />
+                    <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-wider mb-2 ml-1">Start Date</label>
+                    <input type="date" id="leave-start" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all font-medium" />
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">End Date</label>
-                    <input type="date" id="leave-end" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary transition-all text-brand" />
+                    <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-wider mb-2 ml-1">End Date</label>
+                    <input type="date" id="leave-end" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all font-medium" />
                 </div>
             </div>
             <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Leave Type</label>
-                <select id="leave-type" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary transition-all text-brand">
+                <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-wider mb-2 ml-1">Leave Type</label>
+                <select id="leave-type" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all font-bold">
                     <option value="Sick">Sick Leave</option>
                     <option value="Vacation">Vacation</option>
                     <option value="Emergency">Emergency</option>
-                    <option value="Other">Other</option>
+                    <option value="Personal">Personal</option>
                 </select>
             </div>
             <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Reason</label>
-                <textarea id="leave-reason" rows="3" placeholder="Briefly describe your reason..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary transition-all text-brand resize-none"></textarea>
+                <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-wider mb-2 ml-1">Reason</label>
+                <textarea id="leave-reason" rows="3" placeholder="Brief explanation..." class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all resize-none"></textarea>
             </div>
-            <button onclick="submitLeave()" class="w-full bg-primary text-white text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-all shadow-sm">
-                Submit Request
-            </button>
+            <div class="flex items-center gap-3 pt-2">
+                <button onclick="closeLeaveModal()" class="flex-1 text-[13px] font-bold text-brand-400 hover:text-brand-900 transition-colors">Cancel</button>
+                <button onclick="submitLeave()" class="flex-1 bg-primary text-white text-[13px] font-bold py-3.5 rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                    Submit Request
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script type="module" src="~/js/AdminSide/staffAvailability.js"></script>
+    <script type="module">
+        const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        let initialSlots = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAvailability();
+            loadLeaves();
+        });
+
+        async function loadAvailability() {
+            const container = document.getElementById('availability-rows');
+            try {
+                const res = await fetch('/api/admin/data/my-availability');
+                const json = await res.json();
+                const data = json.data || [];
+                initialSlots = JSON.parse(JSON.stringify(data));
+                renderAvailability(data);
+            } catch (e) {
+                container.innerHTML = '<div class="py-12 text-center text-red-400 text-[13px]">Failed to load schedule.</div>';
+            }
+        }
+
+        function renderAvailability(slots) {
+            const container = document.getElementById('availability-rows');
+            if (slots.length === 0) {
+                container.innerHTML = '<div class="py-12 text-center text-brand-300 italic text-[13px]">No working hours set yet.</div>';
+                return;
+            }
+            container.innerHTML = '';
+            slots.forEach((s, idx) => addRowUI(s, idx));
+        }
+
+        window.addAvailabilityRow = function() {
+            addRowUI({ dayOfWeek: 1, startTime: '09:00', endTime: '17:00' }, Date.now());
+            checkChanges();
+        };
+
+        function addRowUI(slot, id) {
+            const container = document.getElementById('availability-rows');
+            if (container.querySelector('.italic')) container.innerHTML = '';
+            
+            const row = document.createElement('div');
+            row.className = "flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 group";
+            row.dataset.id = id;
+            row.innerHTML = `
+                <div class="flex-1 min-w-[120px]">
+                    <select class="avail-day w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-bold text-brand outline-none focus:border-primary/50" onchange="checkChanges()">
+                        ${DAY_LABELS.map((d, i) => `<option value="${i}" ${i === slot.dayOfWeek ? 'selected' : ''}>${d}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="time" class="avail-start bg-white border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-medium text-brand outline-none focus:border-primary/50" value="${slot.startTime}" onchange="checkChanges()" />
+                    <span class="text-slate-300 text-[11px] font-bold">TO</span>
+                    <input type="time" class="avail-end bg-white border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-medium text-brand outline-none focus:border-primary/50" value="${slot.endTime}" onchange="checkChanges()" />
+                </div>
+                <button onclick="this.parentElement.remove(); checkChanges()" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-500 hover:border-rose-200 transition-all ml-auto">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+
+        window.checkChanges = function() {
+            const current = getSlots();
+            const changed = JSON.stringify(current) !== JSON.stringify(initialSlots);
+            document.getElementById('save-avail-btn').classList.toggle('hidden', !changed);
+        };
+
+        function getSlots() {
+            return Array.from(document.querySelectorAll('#availability-rows [data-id]')).map(row => ({
+                dayOfWeek: parseInt(row.querySelector('.avail-day').value),
+                startTime: row.querySelector('.avail-start').value,
+                endTime: row.querySelector('.avail-end').value
+            }));
+        }
+
+        window.saveAvailability = async function() {
+            const btn = document.getElementById('save-avail-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const resStaff = await fetch('/api/admin/data/receptionists');
+                const jsonStaff = await resStaff.json();
+                const profileId = '@Model.CurrentUserId';
+                const staff = (jsonStaff.data || jsonStaff).find(s => s.profileId === profileId);
+
+                if (!staff) throw new Error("Receptionist record not found");
+
+                const res = await fetch(`/api/admin/receptionists/${staff.id}/availability`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(getSlots())
+                });
+
+                if (res.ok) {
+                    initialSlots = getSlots();
+                    checkChanges();
+                    if (window.Toast) window.Toast.show('Schedule updated successfully', 'success');
+                    else alert('Schedule updated');
+                }
+            } catch (e) {
+                alert('Failed to save: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Save Changes';
+            }
+        };
+
+        window.openLeaveModal = () => document.getElementById('leave-modal').classList.remove('hidden');
+        window.closeLeaveModal = () => document.getElementById('leave-modal').classList.add('hidden');
+
+        async function loadLeaves() {
+            const container = document.getElementById('leaves-container');
+            try {
+                const res = await fetch('/api/staff/leave/my-leaves');
+                const json = await res.json();
+                const data = json.data || [];
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="py-8 text-center text-brand-300 italic text-[12px]">No requests found.</div>';
+                    return;
+                }
+
+                container.innerHTML = data.map(l => {
+                    const statusClass = l.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : 
+                                      l.status === 'rejected' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600';
+                    return `
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[13px] font-bold text-brand-900">${l.leaveType}</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${statusClass}">${l.status}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-[11px] text-brand-400">
+                                <i class="fa-regular fa-calendar"></i>
+                                <span>${new Date(l.startDate).toLocaleDateString()} - ${new Date(l.endDate).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) { container.innerHTML = 'Error loading leaves.'; }
+        }
+
+        window.submitLeave = async function() {
+            const payload = {
+                startDate: document.getElementById('leave-start').value,
+                endDate: document.getElementById('leave-end').value,
+                leaveType: document.getElementById('leave-type').value,
+                reason: document.getElementById('leave-reason').value
+            };
+
+            if (!payload.startDate || !payload.endDate) return alert('Dates required');
+
+            const res = await fetch('/api/staff/leave/apply', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                closeLeaveModal();
+                loadLeaves();
+            } else {
+                alert('Failed to submit');
+            }
+        };
+    </script>
 }

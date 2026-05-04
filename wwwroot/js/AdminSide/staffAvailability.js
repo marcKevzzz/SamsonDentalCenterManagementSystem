@@ -12,10 +12,17 @@ async function loadMyAvailability() {
     try {
         const res = await fetch('/api/admin/data/my-availability');
         const json = await res.json();
+
+        // Admin role — no personal availability
+        if (json.message === 'admin') {
+            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand-400 text-[12px]"><i class="fa-solid fa-circle-info mr-2"></i>Availability schedules are managed per doctor and receptionist.</div>';
+            return;
+        }
+
         const data = json.data || [];
         
         if (data.length === 0) {
-            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand-400 text-[12px]">No availability schedule set.</div>';
+            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand-400 text-[12px]"><i class="fa-solid fa-calendar-xmark mr-2"></i>No availability schedule set. Contact an admin to configure your schedule.</div>';
             return;
         }
 

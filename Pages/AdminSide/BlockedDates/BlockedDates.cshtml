@@ -10,11 +10,11 @@ Layout = "AdminSide/_StaffLayout";
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
-      <h2 class="font-display text-xl font-extrabold text-brand">Blocked Dates</h2>
+      <h2 class="font-display text-xl font-bold text-brand">Blocked Dates</h2>
       <p class="text-[12px] text-brand-400 mt-0.5">Manage clinic closures and date restrictions</p>
     </div>
     <button onclick="openAddBlockModal()"
-      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-red-500 shadow-md shadow-red-500/25 hover:bg-red-600 transition-colors">
+      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-red-500 shadow-md shadow-red-500/25 hover:bg-red-600 transition-colors">
       <i class="fa-solid fa-ban text-[11px]"></i>
       Block a Date
     </button>
@@ -27,7 +27,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
           <i class="fa-solid fa-ban text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand" id="stat-total-blocked">-</div>
+        <div class="font-display text-2xl font-bold text-brand" id="stat-total-blocked">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Total Blocked</div>
     </div>
@@ -36,7 +36,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
           <i class="fa-solid fa-calendar-day text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand" id="stat-upcoming-blocked">-</div>
+        <div class="font-display text-2xl font-bold text-brand" id="stat-upcoming-blocked">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Upcoming</div>
     </div>
@@ -45,7 +45,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
           <i class="fa-solid fa-calendar-xmark text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand" id="stat-past-blocked">-</div>
+        <div class="font-display text-2xl font-bold text-brand" id="stat-past-blocked">-</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Past</div>
     </div>
@@ -82,7 +82,7 @@ Layout = "AdminSide/_StaffLayout";
             <i class="fa-solid fa-ban text-red-500"></i>
           </div>
           <div>
-            <h3 class="font-display font-extrabold text-[17px] text-brand">Block a Date</h3>
+            <h3 class="font-display font-bold text-[17px] text-brand">Block a Date</h3>
             <p class="text-[11px] text-brand-400 font-bold uppercase tracking-wider mt-0.5">Prevent new bookings</p>
           </div>
         </div>
@@ -127,7 +127,7 @@ Layout = "AdminSide/_StaffLayout";
             <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
           </div>
           <div>
-            <h3 class="font-display font-extrabold text-[17px] text-brand">Date Blocked — Action Required</h3>
+            <h3 class="font-display font-bold text-[17px] text-brand">Date Blocked — Action Required</h3>
             <p id="bd-conflict-summary" class="text-[12px] text-amber-700 mt-0.5"></p>
           </div>
         </div>

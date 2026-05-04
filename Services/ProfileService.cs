@@ -117,78 +117,88 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<string> CreateShadowProfile(string firstName, string lastName, string email, string phone, string? sex, DateTime? dob, bool requiresReview)
         {
+            string newId;
             try
             {
-                // 1. Create the shadow user in auth.users via GoTrue Admin API
-                // This satisfies the profiles_id_fkey constraint.
-                var authPayload = new
+                // 0. Check if user already exists in auth.users by email
+                string? existingId = await GetUserIdByEmail(email);
+                if (!string.IsNullOrEmpty(existingId))
                 {
-                    email = email,
-                    password = Guid.NewGuid().ToString() + "A1!",
-                    email_confirm = true,
-                    user_metadata = new { first_name = firstName, last_name = lastName }
-                };
-
-                var reqAuth = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users");
-                reqAuth.Headers.Add("apikey", _serviceRoleKey);
-                reqAuth.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
-                reqAuth.Content = new StringContent(
-                    System.Text.Json.JsonSerializer.Serialize(authPayload),
-                    System.Text.Encoding.UTF8,
-                    "application/json"
-                );
-
-                var resAuth = await _http.SendAsync(reqAuth);
-                string newId;
-
-                if (!resAuth.IsSuccessStatusCode)
-                {
-                    var errAuth = await resAuth.Content.ReadAsStringAsync();
-                    
-                    // If email already exists in auth.users (but somehow wasn't in profiles to be matched),
-                    // we create a purely synthetic shadow email so the FK constraint is satisfied without crashing.
-                    if (errAuth.Contains("already registered", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var shadowEmail = $"shadow_{Guid.NewGuid().ToString().Substring(0, 8)}@shadow.local";
-                        var retryPayload = new
-                        {
-                            email = shadowEmail,
-                            password = Guid.NewGuid().ToString() + "A1!",
-                            email_confirm = true,
-                            user_metadata = new { first_name = firstName, last_name = lastName }
-                        };
-                        var reqRetry = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users");
-                        reqRetry.Headers.Add("apikey", _serviceRoleKey);
-                        reqRetry.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
-                        reqRetry.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(retryPayload), System.Text.Encoding.UTF8, "application/json");
-                        
-                        var resRetry = await _http.SendAsync(reqRetry);
-                        if (!resRetry.IsSuccessStatusCode)
-                        {
-                            var errRetry = await resRetry.Content.ReadAsStringAsync();
-                            throw new Exception($"Auth user creation (retry) failed: {errRetry}");
-                        }
-                        var retryJson = await resRetry.Content.ReadAsStringAsync();
-                        newId = System.Text.Json.JsonDocument.Parse(retryJson).RootElement.GetProperty("id").GetString()!;
-                    }
-                    else
-                    {
-                        throw new Exception($"Auth user creation failed: {errAuth}");
-                    }
+                    Console.WriteLine($"[CreateShadowProfile] User already exists in auth.users: {existingId}");
+                    newId = existingId;
                 }
                 else
                 {
-                    var authJson = await resAuth.Content.ReadAsStringAsync();
-                    newId = System.Text.Json.JsonDocument.Parse(authJson).RootElement.GetProperty("id").GetString()!;
+                    // 1. Create the shadow user in auth.users via GoTrue Admin API
+                    var authPayload = new
+                    {
+                        email = email,
+                        password = Guid.NewGuid().ToString() + "A1!",
+                        email_confirm = true,
+                        user_metadata = new { first_name = firstName, last_name = lastName }
+                    };
+
+                    var reqAuth = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users");
+                    reqAuth.Headers.Add("apikey", _serviceRoleKey);
+                    reqAuth.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                    reqAuth.Content = new StringContent(
+                        System.Text.Json.JsonSerializer.Serialize(authPayload),
+                        System.Text.Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    var resAuth = await _http.SendAsync(reqAuth);
+
+                    if (!resAuth.IsSuccessStatusCode)
+                    {
+                        var errAuth = await resAuth.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[CreateShadowProfile] Auth creation failed: {errAuth}");
+                        
+                        bool isDuplicate = errAuth.Contains("email_exists", StringComparison.OrdinalIgnoreCase) || 
+                                          errAuth.Contains("already registered", StringComparison.OrdinalIgnoreCase);
+
+                        if (isDuplicate)
+                        {
+                            Console.WriteLine($"[CreateShadowProfile] Duplicate email detected, falling back to shadow email.");
+                            var shadowEmail = $"shadow_{Guid.NewGuid().ToString().Substring(0, 8)}@shadow.local";
+                            var retryPayload = new
+                            {
+                                email = shadowEmail,
+                                password = Guid.NewGuid().ToString() + "A1!",
+                                email_confirm = true,
+                                user_metadata = new { first_name = firstName, last_name = lastName }
+                            };
+                            var reqRetry = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users");
+                            reqRetry.Headers.Add("apikey", _serviceRoleKey);
+                            reqRetry.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                            reqRetry.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(retryPayload), System.Text.Encoding.UTF8, "application/json");
+                            
+                            var resRetry = await _http.SendAsync(reqRetry);
+                            if (!resRetry.IsSuccessStatusCode)
+                            {
+                                var errRetry = await resRetry.Content.ReadAsStringAsync();
+                                throw new Exception($"Auth user creation (retry) failed: {errRetry}");
+                            }
+                            var retryJson = await resRetry.Content.ReadAsStringAsync();
+                            newId = System.Text.Json.JsonDocument.Parse(retryJson).RootElement.GetProperty("id").GetString()!;
+                        }
+                        else
+                        {
+                            throw new Exception($"Auth user creation failed: {errAuth}");
+                        }
+                    }
+                    else
+                    {
+                        var authJson = await resAuth.Content.ReadAsStringAsync();
+                        newId = System.Text.Json.JsonDocument.Parse(authJson).RootElement.GetProperty("id").GetString()!;
+                    }
                 }
 
                 // 2. Delay briefly to ensure the committed auth.users row is visible 
                 // to PostgREST's connection pool across potential read replica/schema cache bounds.
                 await Task.Delay(500);
 
-                // 3. Bypass ORM — Profile model has columns (oral_health_score etc.) that may not
-                // be in Supabase schema cache yet, causing PGRST204 on Insert.
-                // Only send the columns we know exist in the live schema.
+                // 3. Bypass ORM — Use UPSERT to avoid conflicts with triggers
                 var payload = new
                 {
                     id = newId,
@@ -199,15 +209,15 @@ namespace SamsonDentalCenterManagementSystem.Services
                     sex,
                     date_of_birth = dob.HasValue ? dob.Value.ToString("yyyy-MM-dd") : null,
                     role = "patient",
-                    is_active = true,
+                    is_active = false, // Guest/Shadow profiles start inactive until claimed
                     requires_merge_review = requiresReview,
                     created_at = DateTime.UtcNow
                 };
 
-                var req = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/rest/v1/profiles");
+                var req = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/rest/v1/profiles?on_conflict=id");
                 req.Headers.Add("apikey", _serviceRoleKey);
                 req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
-                req.Headers.Add("Prefer", "return=minimal");
+                req.Headers.Add("Prefer", "resolution=merge-duplicates");
                 req.Content = new System.Net.Http.StringContent(
                     System.Text.Json.JsonSerializer.Serialize(payload),
                     System.Text.Encoding.UTF8,
@@ -454,9 +464,12 @@ namespace SamsonDentalCenterManagementSystem.Services
                 Address = p.Address,
                 Role = p.Role,
                 AvatarUrl = p.AvatarUrl,
+                IsActive = false, // Start inactive until invitation is accepted
                 CreatedAt = DateTime.UtcNow
             };
-            await _supabase.From<Profile>().Insert(profile);
+            
+            // Use Upsert to handle potential trigger conflicts
+            await _supabase.From<Profile>().Upsert(profile);
         }
 
         // UPDATE profile fields
@@ -704,6 +717,67 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
+        }
+        public async Task<string?> GetUserIdByEmail(string email)
+        {
+            try
+            {
+                int page = 1;
+                while (page <= 5) // Limit to 5 pages (250 users) for performance
+                {
+                    var req = new HttpRequestMessage(HttpMethod.Get, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users?page={page}&per_page=50");
+                    req.Headers.Add("apikey", _serviceRoleKey);
+                    req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                    
+                    var res = await _http.SendAsync(req);
+                    if (!res.IsSuccessStatusCode) break;
+
+                    var json = await res.Content.ReadAsStringAsync();
+                    using var doc = System.Text.Json.JsonDocument.Parse(json);
+                    
+                    var users = doc.RootElement.EnumerateArray();
+                    bool foundAny = false;
+                    foreach (var user in users)
+                    {
+                        foundAny = true;
+                        if (user.GetProperty("email").GetString()?.Equals(email, StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            return user.GetProperty("id").GetString();
+                        }
+                    }
+                    
+                    if (!foundAny) break;
+                    page++;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetUserIdByEmail] Error: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<string?> GetAuthUserEmail(string userId)
+        {
+            try
+            {
+                var req = new HttpRequestMessage(HttpMethod.Get, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users/{userId}");
+                req.Headers.Add("apikey", _serviceRoleKey);
+                req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                
+                var res = await _http.SendAsync(req);
+                if (!res.IsSuccessStatusCode) return null;
+
+                var json = await res.Content.ReadAsStringAsync();
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                
+                return doc.RootElement.GetProperty("email").GetString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetAuthUserEmail] Error: {ex.Message}");
+                return null;
+            }
         }
     }
 }

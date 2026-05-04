@@ -8,7 +8,7 @@
 <div class="page p-6">
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h2 class="text-2xl font-extrabold text-brand tracking-tight">Arrived Patients</h2>
+      <h2 class="text-2xl font-bold text-brand tracking-tight">Arrived Patients</h2>
       <p class="text-[13px] text-brand-400 mt-1">Patients waiting for treatment and billing generation</p>
     </div>
     <div class="flex items-center gap-3">
@@ -18,8 +18,8 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8" id="arrived-patients-container">
-    <div class="col-span-full py-20 text-center" id="arrived-loading">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 mb-8" id="arrived-patients-container">
+    <div class="col-span-full py-8 text-center" id="arrived-loading">
       <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary">
         <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
       </div>
@@ -29,7 +29,7 @@
 
   <div class="flex flex-wrap items-center justify-between gap-4 mb-5 mt-10">
       <div>
-          <h3 class="text-xl font-extrabold text-brand tracking-tight">Recent Treatments</h3>
+          <h3 class="text-xl font-bold text-brand tracking-tight">Recent Treatments</h3>
           <p class="text-[12px] text-brand-400">Track and manage treatment records</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
@@ -86,7 +86,7 @@
           <div class="absolute inset-0 opacity-10"
             style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
           <div class="relative z-10">
-            <h3 class="font-display font-extrabold text-white text-xl tracking-tight">Record Treatment</h3>
+            <h3 class="font-display font-bold text-white text-xl tracking-tight">Record Treatment</h3>
             <p class="text-white/50 text-[11px] font-bold uppercase tracking-[0.2em] mt-1">Generate a Treatment Record & Billing
             </p>
           </div>
@@ -213,7 +213,7 @@
               <div class="h-px bg-slate-200"></div>
               <div class="flex justify-between text-[15px]">
                 <span class="font-bold text-brand">Total Due</span>
-                <span id="inv-final" class="font-extrabold text-primary">₱0.00</span>
+                <span id="inv-final" class="font-bold text-primary">₱0.00</span>
               </div>
             </div>
             <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-3">
@@ -244,6 +244,43 @@
             <button id="inv-submit-btn" onclick="submitInvoice()"
               class="hidden px-6 py-2.5 text-[12px] font-bold rounded-xl bg-primary text-white">Save Treatment</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-treatment-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeViewTreatmentModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+      <div id="view-treatment-box" class="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[85vh] pointer-events-auto
+             transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
+        
+        <div class="p-8 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 id="view-treat-patient" class="text-xl font-bold text-brand tracking-tight">Patient Name</h3>
+                <p id="view-treat-date" class="text-[12px] text-brand-400">Date of Treatment</p>
+            </div>
+            <div class="text-right">
+                <span id="view-treat-id" class="text-[10px] font-bold text-slate-300 uppercase tracking-widest block mb-1">#ID</span>
+                <button onclick="closeViewTreatmentModal()" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-brand-400 hover:bg-brand-50 hover:text-brand transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-6">
+            <div>
+                <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Procedures Recorded</h4>
+                <div id="view-treat-body" class="space-y-4">
+                    <!-- Dynamic Content -->
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <button onclick="closeViewTreatmentModal()" class="px-6 py-2.5 bg-brand text-white text-[12px] font-bold rounded-xl shadow-lg shadow-brand/10 hover:scale-[1.02] active:scale-95 transition-all">
+                Close View
+            </button>
         </div>
       </div>
     </div>

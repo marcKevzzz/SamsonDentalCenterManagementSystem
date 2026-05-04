@@ -59,7 +59,7 @@ public class AppointmentsModel : AdminPageModel
 
         if (token == null || (CurrentUserRole != "doctor" && CurrentUserRole != "admin"))
         {
-            return RedirectToPage("/Authentication/Authentication/Signin");
+            return RedirectToPage("/Authentication/Signin");
         }
 
         try

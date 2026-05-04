@@ -15,13 +15,13 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
             </a>
             <div>
-                <h2 class="text-xl font-extrabold text-brand-900 font-display">Patient Profile</h2>
+                <h2 class="text-xl font-bold text-brand-900 font-display">Patient Profile</h2>
                 <div class="flex items-center gap-2 text-[11px] text-brand-400">
                     <span>Receptionist</span>
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
                     <span>Patients</span>
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-                    <span class="text-brand-600 font-semibold">@p?.FirstName @p?.LastName</span>
+                    <span class="text-brand-600 font-medium">@p?.FirstName @p?.LastName</span>
                 </div>
             </div>
         </div>
@@ -103,7 +103,7 @@
                         </div>
                         <div>
                             <div class="text-[11px] text-brand-400 font-bold uppercase tracking-wider">Outstanding</div>
-                            <div class="text-2xl font-black text-brand-900 font-display">₱@Model.OutstandingBalance.ToString("N0")</div>
+                            <div class="text-2xl font-bold text-brand-900 font-display">₱@Model.OutstandingBalance.ToString("N0")</div>
                         </div>
                     </div>
                 }
@@ -246,7 +246,7 @@
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <td class="px-6 py-4 text-[13px] font-bold text-brand-900 font-display">#INV-@i.Id.Substring(0, 8).ToUpper()</td>
                                     <td class="px-6 py-4 text-[13px] text-brand-600">@i.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    <td class="px-6 py-4 text-[13.5px] font-black text-brand-900">₱@i.FinalAmount.ToString("N0")</td>
+                                    <td class="px-6 py-4 text-[13.5px] font-bold text-brand-900">₱@i.FinalAmount.ToString("N0")</td>
                                     <td class="px-6 py-4">
                                         @if (i.Status.ToLower() == "paid") {
                                             <span class="px-3 py-1 bg-emerald-50 text-emerald-600 border-emerald-100 text-[10px] font-bold rounded-full border uppercase tracking-wider">Paid</span>

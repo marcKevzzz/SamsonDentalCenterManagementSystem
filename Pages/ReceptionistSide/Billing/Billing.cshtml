@@ -10,11 +10,11 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h2 class="font-display text-xl font-extrabold text-brand">Billing</h2>
+            <h2 class="font-display text-xl font-bold text-brand">Billing</h2>
             <p class="text-[12px] text-muted mt-0.5">Payment records encoded by receptionist</p>
         </div>
         <button id="addTxnBtn"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -27,19 +27,19 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
             <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Total Revenue</p>
-            <p class="text-[22px] font-extrabold text-brand font-display" id="summaryRevenue">₱0.00</p>
+            <p class="text-[22px] font-bold text-brand font-display" id="summaryRevenue">₱0.00</p>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
             <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Billing Records</p>
-            <p class="text-[22px] font-extrabold text-brand font-display" id="summaryCount">0</p>
+            <p class="text-[22px] font-bold text-brand font-display" id="summaryCount">0</p>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
             <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Paid</p>
-            <p class="text-[22px] font-extrabold text-emerald-600 font-display" id="summaryPaid">0</p>
+            <p class="text-[22px] font-bold text-emerald-600 font-display" id="summaryPaid">0</p>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
             <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Pending</p>
-            <p class="text-[22px] font-extrabold text-amber-500 font-display" id="summaryPending">0</p>
+            <p class="text-[22px] font-bold text-amber-500 font-display" id="summaryPending">0</p>
         </div>
     </div>
 
@@ -161,7 +161,7 @@
             <input type="hidden" id="modalTxnId" />
 
             <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Patient <span
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Patient <span
                         class="text-red-400">*</span></label>
                 <select id="mPatient"
                     class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
@@ -171,13 +171,13 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Service Name <span
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Service Name <span
                             class="text-red-400">*</span></label>
                     <input id="mServiceName" type="text" placeholder="e.g. Teeth Cleaning"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Category</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Category</label>
                     <select id="mCategory"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
                         <option value="General Dentistry">General Dentistry</option>
@@ -188,38 +188,38 @@
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Doctor / Dentist</label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Doctor / Dentist</label>
                 <input id="mDoctorName" type="text" placeholder="e.g. Dr. Santos"
                     class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
             </div>
 
             <div class="grid grid-cols-3 gap-3">
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Service Fee (₱) <span
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Service Fee (₱) <span
                             class="text-red-400">*</span></label>
                     <input id="mFee" type="number" min="0" step="0.01" placeholder="0.00"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Discount (₱)</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Discount (₱)</label>
                     <input id="mDiscount" type="number" min="0" step="0.01" placeholder="0.00"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Amount Paid (₱)</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Amount Paid (₱)</label>
                     <input id="mAmountPaid" type="number" min="0" step="0.01" placeholder="0.00"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
             </div>
 
             <div class="bg-slate-50 rounded-xl px-4 py-3 flex items-center justify-between">
-                <span class="text-[12px] text-muted font-semibold">Balance Due</span>
-                <span id="balancePreview" class="text-[14px] font-extrabold text-brand font-display">₱0.00</span>
+                <span class="text-[12px] text-muted font-medium">Balance Due</span>
+                <span id="balancePreview" class="text-[14px] font-bold text-brand font-display">₱0.00</span>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Payment Method</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Payment Method</label>
                     <select id="mPaymentMethod"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
                         <option value="Cash">Cash</option>
@@ -230,7 +230,7 @@
                     </select>
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Status</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Status</label>
                     <select id="mStatus"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
                         <option value="Paid">Paid</option>
@@ -242,7 +242,7 @@
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Notes</label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Notes</label>
                 <textarea id="mNotes" rows="2" placeholder="Additional notes from doctor or receptionist…"
                     style="resize:none"
                     class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"></textarea>
@@ -253,11 +253,11 @@
 
         <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
             <button id="cancelModalBtn"
-                class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                class="px-4 py-2 text-[12.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
                 Cancel
             </button>
             <button id="modalSaveBtn"
-                class="px-5 py-2 text-[12.5px] font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors">
+                class="px-5 py-2 text-[12.5px] font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors">
                 Save Billing Record
             </button>
         </div>
@@ -280,11 +280,11 @@
         </p>
         <div class="flex gap-2 justify-end">
             <button id="cancelDeleteBtn"
-                class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                class="px-4 py-2 text-[12.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
                 Cancel
             </button>
             <button id="confirmDeleteBtn"
-                class="px-5 py-2 text-[12.5px] font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">
+                class="px-5 py-2 text-[12.5px] font-medium text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">
                 Delete
             </button>
         </div>

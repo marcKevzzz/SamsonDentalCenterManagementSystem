@@ -9,10 +9,10 @@ ViewData["Title"] = "My Appointments page";
   <!-- Header Section -->
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 fade-up">
     <div>
-      <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+      <div class="flex items-center gap-2 font-body text-[0.67rem] font-medium tracking-[0.15em] uppercase text-muted mb-2">
         <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Appointments
       </div>
-      <h1 class="brand-font font-extrabold text-brand text-[1.5rem] leading-tight">My Appointments</h1>
+      <h1 class="brand-font font-bold text-brand text-[1.5rem] leading-tight">My Appointments</h1>
     </div>
     
     <div class="flex flex-col sm:flex-row gap-3">
@@ -34,7 +34,7 @@ ViewData["Title"] = "My Appointments page";
           <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-brand group-hover:bg-primary group-hover:text-white transition-all">
               <i class="fa-solid fa-calendar-check"></i>
           </div>
-          <div class="brand-font font-extrabold text-brand text-[1.5rem]">@Model.TotalCount</div>
+          <div class="brand-font font-bold text-brand text-[1.5rem]">@Model.TotalCount</div>
       </div>
       <div class="font-body text-[0.7rem] font-bold uppercase tracking-wider text-muted">Total</div>
     </div>
@@ -44,7 +44,7 @@ ViewData["Title"] = "My Appointments page";
           <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
               <i class="fa-solid fa-clock-rotate-left"></i>
           </div>
-          <div class="brand-font font-extrabold text-brand text-[1.5rem]">@Model.UpcomingCount</div>
+          <div class="brand-font font-bold text-brand text-[1.5rem]">@Model.UpcomingCount</div>
       </div>
       <div class="font-body text-[0.7rem] font-bold uppercase tracking-wider text-muted">Upcoming</div>
     </div>
@@ -54,7 +54,7 @@ ViewData["Title"] = "My Appointments page";
           <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
               <i class="fa-solid fa-check"></i>
           </div>
-          <div class="brand-font font-extrabold text-brand text-[1.5rem]">@Model.CompletedCount</div>
+          <div class="brand-font font-bold text-brand text-[1.5rem]">@Model.CompletedCount</div>
       </div>
       <div class="font-body text-[0.7rem] font-bold uppercase tracking-wider text-muted">Completed</div>
     </div>
@@ -64,7 +64,7 @@ ViewData["Title"] = "My Appointments page";
           <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600">
               <i class="fa-solid fa-star"></i>
           </div>
-          <div class="brand-font font-extrabold text-brand text-[1.5rem]">4.8</div>
+          <div class="brand-font font-bold text-brand text-[1.5rem]">4.8</div>
       </div>
       <div class="font-body text-[0.7rem] font-bold uppercase tracking-wider text-muted">Rating</div>
     </div>
@@ -121,8 +121,8 @@ ViewData["Title"] = "My Appointments page";
                         <div class="flex items-center gap-5">
                             <!-- Date Pill -->
                             <div class="w-14 h-14 shrink-0 rounded-2xl bg-slate-50 flex flex-col items-center justify-center border border-slate-100 group-hover:bg-white transition-colors">
-                                <span class="text-[0.65rem] font-black uppercase text-muted tracking-widest leading-none">@appt.AppointmentDate.ToString("MMM")</span>
-                                <span class="text-[1.2rem] font-black text-brand leading-none mt-1">@appt.AppointmentDate.ToString("dd")</span>
+                                <span class="text-[0.65rem] font-bold uppercase text-muted tracking-widest leading-none">@appt.AppointmentDate.ToString("MMM")</span>
+                                <span class="text-[1.2rem] font-bold text-brand leading-none mt-1">@appt.AppointmentDate.ToString("dd")</span>
                             </div>
 
                             <div class="flex-1 min-w-0">
@@ -168,7 +168,7 @@ ViewData["Title"] = "My Appointments page";
                       <span id="det-status-badge" class="status-pill">STATUS</span>
                       <span id="det-id" class="text-[0.65rem] font-bold text-slate-300 uppercase tracking-widest">#ID</span>
                   </div>
-                  <h2 id="det-service" class="brand-font font-extrabold text-brand text-[1.4rem] leading-tight mb-6">Service Name</h2>
+                  <h2 id="det-service" class="brand-font font-bold text-brand text-[1.4rem] leading-tight mb-6">Service Name</h2>
                   
                   <div class="space-y-6">
                       <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -177,7 +177,7 @@ ViewData["Title"] = "My Appointments page";
                           </div>
                           <div>
                               <p id="det-date" class="brand-font font-bold text-brand text-[0.95rem]">Date</p>
-                              <p id="det-time" class="font-body text-muted text-xs font-semibold">Time</p>
+                              <p id="det-time" class="font-body text-muted text-xs font-medium">Time</p>
                           </div>
                       </div>
 

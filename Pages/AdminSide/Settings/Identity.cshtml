@@ -9,7 +9,7 @@
 <div class="h-full flex flex-col p-6 overflow-hidden">
     <div class="flex items-center justify-between mb-8">
         <div>
-            <h1 class="text-3xl font-extrabold text-brand tracking-tight font-display">Clinic Identity</h1>
+            <h1 class="text-3xl font-bold text-brand tracking-tight font-display">Clinic Identity</h1>
             <p class="text-slate-500 text-[13px] mt-1 font-medium">Control brand, public information, and contact details.</p>
         </div>
     </div>
@@ -52,23 +52,23 @@
                     </div>
                     <div class="space-y-4">
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Official Clinic Name</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Official Clinic Name</label>
                             <input asp-for="Settings.ClinicName" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all font-bold text-slate-700" />
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">About the Clinic</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">About the Clinic</label>
                             <textarea asp-for="Settings.AboutText" rows="4" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all resize-none font-medium text-slate-600 leading-relaxed"></textarea>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Facebook URL</label>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Facebook URL</label>
                                 <div class="relative">
                                     <i class="fa-brands fa-facebook absolute left-4 top-1/2 -translate-y-1/2 text-blue-600 text-sm"></i>
                                     <input asp-for="Settings.FacebookUrl" class="w-full pl-10 pr-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" placeholder="facebook.com/..." />
                                 </div>
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Instagram URL</label>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Instagram URL</label>
                                 <div class="relative">
                                     <i class="fa-brands fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-pink-600 text-sm"></i>
                                     <input asp-for="Settings.InstagramUrl" class="w-full pl-10 pr-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" placeholder="instagram.com/..." />
@@ -88,25 +88,25 @@
                     </div>
                     <div class="space-y-4">
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Physical Address</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Physical Address</label>
                             <input asp-for="Settings.LocationAddress" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Google Maps Embed URL</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Google Maps Embed URL</label>
                             <input asp-for="Settings.MapsUrl" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" placeholder="Paste map iframe src here" />
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Email</label>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Email</label>
                                 <input asp-for="Settings.ContactEmail" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Mobile</label>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Mobile</label>
                                 <input asp-for="Settings.ContactPhone" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
                             </div>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Landline (Optional)</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">Landline (Optional)</label>
                             <input asp-for="Settings.Landline" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:bg-white focus:border-brand outline-none transition-all font-medium text-slate-700" />
                         </div>
                     </div>
@@ -116,7 +116,7 @@
 
         <!-- FAB -->
         <div class="fixed bottom-8 right-8 flex items-center gap-4">
-            <button type="submit" class="group bg-brand text-white pl-8 pr-10 py-5 rounded-[28px] font-black text-sm shadow-2xl shadow-brand/30 hover:shadow-brand/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
+            <button type="submit" class="group bg-brand text-white pl-8 pr-10 py-5 rounded-[28px] font-bold text-sm shadow-2xl shadow-brand/30 hover:shadow-brand/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
                 <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-12 transition-transform">
                     <i class="fa-solid fa-check text-xs"></i>
                 </div>

@@ -1,9 +1,20 @@
 import { toggleFaq } from "../site.js";
 
+// 1. Force manual scroll restoration to prevent browser from "jumping" mid-page on reload
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+// 2. Early scroll to top
+window.scrollTo(0, 0);
+
 // We use window 'load' instead of DOMContentLoaded to ensure:
 // 1. All images (like the hero portrait) are loaded (setting correct heights).
 // 2. Tailwind CDN has finished parsing and applying classes (setting correct widths/margins).
 window.addEventListener("load", () => {
+  // Extra safety scroll
+  window.scrollTo(0, 0);
+  
   // Lock scroll immediately
   document.body.classList.add("overflow-hidden");
 
@@ -42,8 +53,8 @@ function renderDynamicContent() {
       .map(
         (h, i) => `
             <div class="hours-row flex justify-between items-center px-7 py-4 border-b border-[#e5e7eb] last:border-0 ${h.closed ? "bg-slate-50 opacity-60" : ""}">
-                <span class="font-body text-[0.75rem] font-semibold text-brand/60 uppercase tracking-tighter">${h.day}</span>
-                <span class="brand-font font-bold text-[0.85rem] ${h.closed ? "text-red-700 italic" : "text-brand/80"}">
+                <span class="font-body text-[0.85rem] font-medium text-brand/60 uppercase ">${h.day}</span>
+                <span class="brand-font font-semibold text-[0.85rem] ${h.closed ? "text-red-700 italic" : "text-brand/80"}">
                     ${h.closed ? "Closed" : `${formatTime(h.open)} - ${formatTime(h.close)}`}
                 </span>
             </div>
@@ -93,15 +104,15 @@ function initScrollAnimations() {
     {
       scrollTrigger: {
         trigger: "#features",
-        start: "top 85%", // Lower threshold ensures it triggers even on short desktops
+        start: "top 80%", // Lower threshold ensures it triggers even on short desktops
         once: true,
       },
       autoAlpha: 1,
       y: 0,
       rotateY: 0,
-      duration: 1,
+      duration: 0.5,
       ease: "expo.out",
-      stagger: 0.2,
+      stagger: 0.15,
     },
   );
 
@@ -207,15 +218,17 @@ function initGalleryPin() {
   const items = gsap.utils.toArray(".gallery-item");
   if (!section || items.length === 0) return;
 
+  const isMobile = window.innerWidth < 1024;
+  
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      // We increase this significantly so 1 "unit" of duration
-      // feels much longer and slower to the user.
-      end: "+=800%",
-      pin: true,
-      scrub: 2, // Added a slight smoothing to prevent "popping" on fast scrolls
+      // On mobile, we reduce the scroll distance or disable pinning if preferred
+      // but let's just make it shorter for now.
+      end: isMobile ? "+=300%" : "+=800%",
+      pin: true, // Only pin on desktop to avoid weird mobile scroll behavior
+      scrub: 1.5,
       anticipatePin: 1,
     },
   });
@@ -223,39 +236,43 @@ function initGalleryPin() {
   tl.fromTo(
     "#galleryText",
     { scale: 0.8, opacity: 0.1 },
-    { scale: 1.1, opacity: 0.3, duration: 2 },
+    { scale: 1.1, opacity: 0.3, duration: 1 },
   );
 
   items.forEach((item, i) => {
-    // 1. Entrance: Fast and snappy
+    // 1. Entrance: Fast and snappy, heavily overlapping with the previous item
     tl.fromTo(
       item,
-      { scale: 0.3, opacity: 0, rotate: i % 2 === 0 ? -15 : 15, y: 30 },
+      { 
+        scale: 0.3, 
+        opacity: 0, 
+        rotate: i % 2 === 0 ? -15 : 15, 
+        y: 60 
+      },
       {
-        scale: 1.3,
+        scale: 1.2,
         opacity: 1,
         rotate: 0,
         y: 0,
-        duration: 5,
+        duration: 4,
         ease: "expo.out",
       },
-      i === 0 ? ">" : "-=1.5", // Start showing next item while previous is still solid
+      i === 0 ? ">" : "-=5.2" // Overlap so next one starts while current is mid-reveal
     );
 
-    // 2. The "Linger" Phase: A movement-free gap
-    // This empty tween acts as a "wait" period where the image stays at scale 1
-    tl.to(item, { scale: 1.2, duration: 5 });
+    // 2. Linger phase where it slowly grows/moves
+    tl.to(item, { scale: 1.3, duration: 2 });
 
-    // 3. Exit: Slowly fade away
+    // 3. Exit: Fades out as the next-next one is arriving
     tl.to(
       item,
       {
-        scale: 1.1,
+        scale: 1.4,
         opacity: 0,
-        duration: 3,
+        duration: 2,
         ease: "power2.in",
       },
-      ">", // Starts immediately after the 6-unit linger phase
+      "-=3.5" // Start exit while another is already overlapping
     );
   });
 
@@ -268,18 +285,20 @@ function initReviewsPin() {
   const track2 = document.getElementById("track-2");
   if (!section || !track1 || !track2) return;
 
+  const isMobile = window.innerWidth < 1024;
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      end: "+=1000%",
+      end: isMobile ? "+=150%" : "+=500%",
       pin: true,
       scrub: 1,
     },
   });
 
-  tl.to(track1, { x: "-150%", duration: 6, ease: "none" }, 0);
-  tl.to(track2, { x: "0", duration: 6, ease: "none" }, 0);
+  tl.to(track1, { x: "-50%", duration: 3, ease: "none" }, 0);
+  tl.to(track2, { x: "50%", duration: 3, ease: "none" }, 0);
 
   // Scale cards on active
   gsap.utils.toArray(".review-card").forEach((card) => {
@@ -289,9 +308,9 @@ function initReviewsPin() {
       backgroundColor: "rgba(255, 255, 255, 0.12)",
       scrollTrigger: {
         trigger: card,
-        containerAnimation: tl,
-        start: "left center",
-        end: "right center",
+        containerAnimation: isMobile ? null : tl,
+        start: isMobile ? "top 85%" : "left center",
+        end: isMobile ? "top 50%" : "right center",
         scrub: true,
       },
     });

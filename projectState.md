@@ -1,3 +1,36 @@
+- **Date**: 2026-05-04
+- **Patient Management Expansion**:
+  - **Add Patient for Doctors**: Implemented a functional "Add Patient" workflow in the Doctor Portal, mirroring the Admin UI.
+    - Added `POST /api/admin/data/patients` to `AdminDataController`.
+    - Integrated `UserModal` and patient creation logic in `DoctorSide/Patients/Index.cshtml`.
+    - Automatically pre-selects the "Patient" role and hides the role selector for a streamlined staff experience.
+- **Stability & Parity Fixes**:
+  - Resolved build errors in `AdminReceptionistsController.cs` and standardized `SetAvailabilityAsync` calls across staff services.
+- **Date**: 2026-05-04
+- **Portal Stability & Availability Refactor**:
+  - **Restored Doctor Availability Editor**: Re-enabled functional schedule management for doctors in `DoctorSide/Availability/Availability.cshtml`. It now mirrors the Admin-side UX (adding/deleting slots) but is securely scoped to the logged-in doctor.
+  - **New Endpoint**: Added `POST api/admin/data/my-availability` to `AdminDataController` to allow staff to update their own working hours without requiring Admin-level permissions.
+  - **Service-Level Null Safety**: Robustified `DoctorDto` and `ReceptionistDto` by adding deep null checks to the `Initials` calculation, preventing potential `NullReferenceException` crashes.
+  - **Build Fix**: Aligned `ReceptionistService` with `DoctorService` by implementing `SetAvailabilityAsync`, resolving a compiler error in `AdminDataController`.
+  - **JS Resiliency**: Ensured all dashboard and availability components handle role-specific data correctly, resolving `TypeError` and `403 Forbidden` errors.
+- **Date**: 2026-05-04 (Optimizing Administrative Billing & Portal)
+* **Patient Data Hydration (Avatars & Names)**:
+  - **Fixed Mapping**: Resolved a critical data gap where patient names were missing in billing and treatment views. Root cause: `Profile` properties were using camelCase `[JsonPropertyName]`, mismatching Supabase's snake_case output. Fixed in `Profile.cs`.
+  - **Avatar Injection**: Updated `AdminDataController.cs` and `AppointmentService.cs` to explicitly project and join `patientAvatarUrl` in all relevant DTOs and PostgREST queries.
+  - **Fallback Logic**: Standardized frontend rendering in `doctorInvoice.js` and `Billing.cshtml` to correctly display avatars or initials fallback.
+* **Automated Billing Reference Numbers**:
+  - Implemented 8-character alphanumeric auto-generation for billing reference numbers in `Billing.cshtml`.
+  - Removed manual input fields in favor of a read-only "Generated Reference" display to ensure consistency and professional record-keeping.
+* **Medical Portal: Treatment Granularity**:
+  - **Recent Treatments Refactor**: Overhauled the 'Recent Treatments' table to display individual treatment records instead of invoices. Each row now corresponds to a single procedure (e.g., "Teeth Cleaning") with its own clinical status (Completed, Planned, etc.).
+  - **Nested Data Joins**: Updated `Treatment` model and `RecordService` to support deep joins (`treatments -> invoices -> profiles`), ensuring patient and doctor info is available per treatment row.
+  - **Dedicated API Endpoint**: Added `/api/admin/data/treatments` to handle the new granular data requirements.
+  - **Enhanced View Modal**: Updated the treatment detail modal to focus on specific procedure details, diagnoses, and statuses.
+* **Shadow Profile & Clinical Initialization**:
+  - **Conflict Resolution**: Robustified `CreateShadowProfile` in `ProfileService.cs` by adding a pre-check for existing `auth.users` records. This resolves `email_exists` (422) errors and correctly links guests with existing accounts to their patient profiles.
+  - **Automated Medical Records**: Implemented `InitializePatientRecords` in `RecordService.cs`, which is now called by `AppointmentService.cs` whenever a guest/shadow profile is promoted (marked as 'Arrived'). This ensures every patient has a base `PatientMedicalInfo` record for clinical documentation.
+  - **Diagnostic Logging**: Added detailed response body logging to `InvoiceService.cs` and `AppointmentService.cs` to identify the root cause of 400 Bad Request errors from Supabase during billing and status updates.
+  - **DI Synchronization**: Updated `Program.cs` to correctly wire up `RecordService` as a dependency for `AppointmentService`.
 - **Date**: 2026-05-03
 
 * **Schema Cache PGRST204 Fixes**:

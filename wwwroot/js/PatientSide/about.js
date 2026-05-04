@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initEntranceAnimations();
   initTimelineAnimations();
   initDoctorCarousel();
+  initDoctorAnimations();
+initFacilityAnimations();
 });
 
 function initEntranceAnimations() {
@@ -16,7 +18,7 @@ function initEntranceAnimations() {
         autoAlpha: 1,
         y: 0,
         duration: 1.5,
-        delay: 1,
+        delay: 0.3,
         stagger: 0.2,
         ease: "expo.out",
       },
@@ -31,16 +33,52 @@ function initEntranceAnimations() {
         autoAlpha: 1,
         y: 0,
         duration: 1.5,
-        delay: 1,
+        delay: 0.5,
         ease: "power2.out",
-        scrollTrigger: { trigger: el, start: "top 80%", once: true },
+        scrollTrigger: { trigger: el, start: "top 70%", once: true },
       },
     );
   });
 
-  const storyTrigger = document.querySelector(".reveal-up.relative.group");
-  if (storyTrigger) {
-    gsap.fromTo(
+  const storyTrigger = document.querySelector(".story");
+
+if (storyTrigger) {
+  // 1. Fade in .story1 when .story reaches the bottom of the viewport
+  gsap.fromTo(".story1", 
+    { autoAlpha: 0, y: 40 },
+    {
+      autoAlpha: 1,
+      y: 0,
+      duration: 1.5,
+      delay:0.5,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: storyTrigger,
+        start: "top bottom",
+        once: true,
+      }
+    }
+  );
+
+  // 2. Stagger .stats-item when they enter the view
+ gsap.fromTo(".stats-item", 
+  { autoAlpha: 0, y: 40 },
+  {
+    autoAlpha: 1,
+    y: 0,
+    delay:1,
+    duration: 1.5,
+    stagger: 0.25, // This needs a single trigger point to work
+    ease: "power2.out",
+    scrollTrigger: {
+      trigger: ".story1", // Trigger the parent wrapper
+      start: "top 80%",            // Start when the container is near bottom
+      once: true,
+    }
+  }
+);
+
+   gsap.fromTo(
       "#aboutimg1",
       { scale: 1.1, yPercent: 0 },
       {
@@ -54,7 +92,7 @@ function initEntranceAnimations() {
         },
       },
     );
-  }
+}
 
   gsap.fromTo(
     ".amission-card",
@@ -64,7 +102,7 @@ function initEntranceAnimations() {
       opacity: 1,
       y: 0,
       scale: 1,
-      delay: 1,
+      delay: 0.5,
       duration: 1,
       stagger: 0.25,
       ease: "power2.out",
@@ -75,6 +113,89 @@ function initEntranceAnimations() {
       },
     },
   );
+  
+}
+
+function initDoctorAnimations() {
+    const section = document.querySelector("#doctor-section");
+    if (!section) return;
+
+    // Header reveal (Title and description)
+    gsap.fromTo(".doctors", 
+        { autoAlpha: 0, y: 30 },
+        {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: ".doctors",
+                start: "top 85%",
+                once: true
+            }
+        }
+    );
+
+    // Staggered reveal for the doctor carousel cards
+    gsap.fromTo(".doctor-card", 
+        { autoAlpha: 0, y: 60 },
+        {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1.2,
+            stagger: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: "#doctor-carousel",
+                start: "top 80%",
+                once: true
+            }
+        }
+    );
+}
+
+/**
+ * Animation: Facilities Section
+ * Handles the "State of the Art" header and the staggered grid of services.
+ */
+function initFacilityAnimations() {
+    const section = document.querySelector(".facilities-section"); // The Facilities section
+    if (!section) return;
+
+    // Slide-in effect for the facility section header
+    gsap.fromTo(".facility, .facility-p", 
+        { autoAlpha: 0, x: -40 },
+        {
+            autoAlpha: 1,
+            x: 0,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: section,
+                start: "top 75%",
+                once: true
+            }
+        }
+    );
+
+    // Staggered reveal for the 4 facility feature blocks
+    gsap.fromTo(".facility-card", 
+        { autoAlpha: 0, y: 40 },
+        {
+            autoAlpha: 1,
+            y: 0,
+            delay: 1,
+            duration: 1,
+            stagger: 0.25,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: ".grid-cols-1",
+                start: "top 95%",
+                once: true
+            }
+        }
+    );
 }
 
 function initTimelineAnimations() {
@@ -193,14 +314,20 @@ function initDoctorCarousel() {
     });
   }
 
-  prevBtn.addEventListener("click", () => goTo(current - 1));
-  nextBtn.addEventListener("click", () => goTo(current + 1));
+  if (prevBtn) prevBtn.addEventListener("click", () => goTo(current - 1));
+  if (nextBtn) nextBtn.addEventListener("click", () => goTo(current + 1));
 
   track.addEventListener("mousedown", (e) => {
     startX = e.clientX;
     dragging = true;
     track.style.transitionDuration = "0ms";
   });
+
+  track.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+    dragging = true;
+    track.style.transitionDuration = "0ms";
+  }, { passive: true });
 
   window.addEventListener("mousemove", (e) => {
     if (!dragging) return;
@@ -209,46 +336,28 @@ function initDoctorCarousel() {
     track.style.transform = `translateX(${move}px)`;
   });
 
-  window.addEventListener("mouseup", (e) => {
+  window.addEventListener("touchmove", (e) => {
+    if (!dragging) return;
+    const dx = e.touches[0].clientX - startX;
+    const move = -current * CARD_W + dx;
+    track.style.transform = `translateX(${move}px)`;
+  }, { passive: true });
+
+  const endDrag = (e) => {
     if (!dragging) return;
     dragging = false;
     track.style.transitionDuration = "450ms";
-    const dx = e.clientX - startX;
-    if (Math.abs(dx) > 100) {
-      goTo(dx < 0 ? current + 1 : current - 1);
-    } else {
-      goTo(current);
-    }
-  });
-
-  track.addEventListener(
-    "touchstart",
-    (e) => {
-      startX = e.touches[0].clientX;
-      track.style.transitionDuration = "0ms";
-    },
-    { passive: true },
-  );
-
-  track.addEventListener(
-    "touchmove",
-    (e) => {
-      const dx = e.touches[0].clientX - startX;
-      const move = -current * CARD_W + dx;
-      track.style.transform = `translateX(${move}px)`;
-    },
-    { passive: true },
-  );
-
-  track.addEventListener("touchend", (e) => {
-    track.style.transitionDuration = "450ms";
-    const dx = e.changedTouches[0].clientX - startX;
+    const x = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
+    const dx = x - startX;
     if (Math.abs(dx) > 50) {
       goTo(dx < 0 ? current + 1 : current - 1);
     } else {
       goTo(current);
     }
-  });
+  };
+
+  window.addEventListener("mouseup", endDrag);
+  window.addEventListener("touchend", endDrag);
 
   buildDots();
   window.addEventListener("resize", () => {

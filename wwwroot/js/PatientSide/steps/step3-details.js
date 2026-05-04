@@ -52,7 +52,7 @@ function renderMiniBar() {
         </div>`
       : ""
     }
-        ${STATE.isWaitlist ? `<span class="font-body text-[.68rem] font-semibold uppercase tracking-wider text-[#f59e0b] bg-[#f59e0b]/20 px-2.5 py-1 rounded-full">Waitlist</span>` : ""}
+        ${STATE.isWaitlist ? `<span class="font-body text-[.68rem] font-medium uppercase tracking-wider text-[#f59e0b] bg-[#f59e0b]/20 px-2.5 py-1 rounded-full">Waitlist</span>` : ""}
     </div>`;
 }
 
@@ -86,7 +86,7 @@ function renderDetailsForm() {
                 ${p.initials ?? "??"}
             </div>
             <div class="min-w-0">
-                <div class="font-body font-semibold text-brand text-[.85rem] truncate">${p.firstName} ${p.lastName}</div>
+                <div class="font-body font-medium text-brand text-[.85rem] truncate">${p.firstName} ${p.lastName}</div>
                 <div class="font-body text-[.73rem] text-muted truncate">${p.email}</div>
             </div>
             <span class="ml-auto text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full shrink-0">
@@ -112,7 +112,7 @@ function renderDetailsForm() {
             <p class="font-body text-[.78rem] text-blue-800">
                 <i class="fa-solid fa-circle-info text-blue-500 mr-1.5"></i>
                 You'll receive an email confirmation link to secure your slot.
-                <a href="/sign-in?returnUrl=/Appointments" class="text-primary font-semibold hover:underline ml-1">
+                <a href="/sign-in?returnUrl=/Appointments" class="text-primary font-medium hover:underline ml-1">
                     Sign in
                 </a> for faster booking.
             </p>
@@ -123,7 +123,7 @@ function renderDetailsForm() {
         <div id="selfFields" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         First Name <span class="text-primary">*</span>
                     </label>
                     <input id="f_firstName" type="text" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
@@ -132,7 +132,7 @@ function renderDetailsForm() {
                     <div id="err_firstName" class="field-error">First name is required.</div>
                 </div>
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Last Name <span class="text-primary">*</span>
                     </label>
                     <input id="f_lastName" type="text" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
@@ -143,7 +143,7 @@ function renderDetailsForm() {
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Email <span class="text-primary">*</span>
                     </label>
                     <input id="f_email" type="email" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
@@ -152,7 +152,7 @@ function renderDetailsForm() {
                     <div id="err_email" class="field-error">Valid email is required.</div>
                 </div>
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Phone <span class="text-primary">*</span>
                     </label>
                     <input id="f_phone" type="tel" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
@@ -163,7 +163,7 @@ function renderDetailsForm() {
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Sex</label>
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Sex</label>
                     <select id="f_sex" class="form-input ${loggedIn ? "bg-slate-50" : ""}" ${loggedIn ? "disabled" : ""}>
                         <option value="">Select</option>
                         <option value="Male"       ${sex === "Male" ? "selected" : ""}>Male</option>
@@ -172,7 +172,7 @@ function renderDetailsForm() {
                     </select>
                 </div>
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Birthday</label>
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Birthday</label>
                     <input id="f_dob" type="date" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
                         value="${dob}" ${loggedIn ? "readonly" : ""} />
                 </div>
@@ -182,7 +182,7 @@ function renderDetailsForm() {
                 <i class="fa-solid fa-lock text-[10px] text-muted"></i>
                 <p class="font-body text-[.72rem] text-muted">
                     Details locked to account. 
-                    <a href="/Profile/Settings" target="_blank" class="text-primary font-semibold hover:underline">Edit Settings</a>
+                    <a href="/Profile/Settings" target="_blank" class="text-primary font-medium hover:underline">Edit Settings</a>
                 </p>
             </div>` : ""}
         </div>
@@ -195,7 +195,7 @@ function renderDetailsForm() {
             </p>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         First Name <span class="text-primary">*</span>
                     </label>
                     <input id="f_otherFirstName" type="text" class="form-input" placeholder="Patient's first name"
@@ -203,7 +203,7 @@ function renderDetailsForm() {
                     <div id="err_otherFirstName" class="field-error">First name is required.</div>
                 </div>
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Last Name <span class="text-primary">*</span>
                     </label>
                     <input id="f_otherLastName" type="text" class="form-input" placeholder="Patient's last name"
@@ -213,7 +213,7 @@ function renderDetailsForm() {
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Email <span class="text-primary">*</span>
                     </label>
                     <input id="f_otherEmail" type="email" class="form-input" placeholder="patient@email.com"
@@ -221,7 +221,7 @@ function renderDetailsForm() {
                     <div id="err_otherEmail" class="field-error">Valid email is required.</div>
                 </div>
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Phone <span class="text-primary">*</span>
                     </label>
                     <input id="f_otherPhone" type="tel" class="form-input" placeholder="+63 9XX XXX XXXX"
@@ -231,7 +231,7 @@ function renderDetailsForm() {
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Sex</label>
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Sex</label>
                     <select id="f_otherSex" class="form-input">
                         <option value="">Select</option>
                         <option value="Male">Male</option>
@@ -240,7 +240,7 @@ function renderDetailsForm() {
                     </select>
                 </div>
                 <div>
-                    <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">Birthday</label>
+                    <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Birthday</label>
                     <input id="f_otherDob" type="date" class="form-input" />
                 </div>
             </div>
@@ -251,7 +251,7 @@ function renderDetailsForm() {
 
         <!-- Notes (everyone) -->
         <div class="mt-6">
-            <label class="block font-body text-[.7rem] font-semibold tracking-[.08em] uppercase text-muted mb-2">
+            <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                 Additional Notes <span class="font-normal normal-case text-muted">(optional)</span>
             </label>
             <textarea id="f_notes" class="form-input" rows="3"

@@ -45,7 +45,7 @@ function renderCatTabs() {
     const isRestricted = RESTRICTED_CATEGORIES.includes(cat) && !isLoggedIn();
     return `
         <button onclick="filterCat('${cat}')"
-            class="cat-tab font-body text-[.75rem] font-semibold px-4 py-2 rounded-full border transition-all cursor-pointer
+            class="cat-tab font-body text-[.75rem] font-medium px-4 py-2 rounded-full border transition-all cursor-pointer
                 ${
                   cat === _activeCat
                     ? "bg-brand text-white border-brand"
@@ -133,7 +133,7 @@ function renderServiceList() {
                             <h3 class="brand-font font-bold text-[1rem] text-brand">${s.name}</h3>
                             <p class="font-body text-[.8rem] text-muted mt-0.5">${s.tagline}</p>
                         </div>
-                        <span class="font-body text-[.78rem] font-semibold text-primary whitespace-nowrap">${s.price}</span>
+                        <span class="font-body text-[.78rem] font-medium text-primary whitespace-nowrap">${s.price}</span>
                     </div>
                     <div class="flex items-center gap-4 mt-3">
                         ${
@@ -169,12 +169,12 @@ function renderServiceList() {
         <div class="bg-brand rounded-2xl p-6 text-white">
             <div class="flex items-start justify-between gap-4 mb-4">
                 <div>
-                    <div class="font-body text-[.62rem] font-semibold tracking-[.13em] uppercase text-white/40 mb-1">
+                    <div class="font-body text-[.62rem] font-medium tracking-[.13em] uppercase text-white/40 mb-1">
                         ${STATE.service.category}
                     </div>
                     <h3 class="brand-font font-bold text-[1.1rem]">${STATE.service.name}</h3>
                 </div>
-                <span class="font-body text-[.78rem] font-semibold text-primary bg-white/10 px-3 py-1 rounded-full whitespace-nowrap">
+                <span class="font-body text-[.78rem] font-medium text-primary bg-white/10 px-3 py-1 rounded-full whitespace-nowrap">
                     ${STATE.service.price}
                 </span>
             </div>

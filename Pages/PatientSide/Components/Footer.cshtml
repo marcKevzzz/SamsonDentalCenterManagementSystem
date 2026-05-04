@@ -11,7 +11,7 @@
       <div>
         <div class="brand-logo flex items-center mb-6">
           <img src="@(string.IsNullOrEmpty(settings?.LogoUrl) ? "/images/logo.svg" : settings.LogoUrl)" alt="logo" class="w-14 h-14 object-cover mt-1 brightness-150" />
-            <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2">
+            <span id="logo" class="logo-font font-medium text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2">
           @(settings?.ClinicName?.Replace(" Dental Center", "") ?? "Samson")  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/10 rounded-full text-center">Dental Center</span>
             </span>
         </div>

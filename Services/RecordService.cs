@@ -53,6 +53,31 @@ namespace SamsonDentalCenterManagementSystem.Services
             await _logs.LogActionAsync(actorId, "updated tooth status", $"Patient: {status.PatientId}, Tooth: {status.ToothNumber}, Status: {status.Status}", "Clinical", "/Admin/Patients/Profile?id=" + status.PatientId);
         }
 
+        public async Task UpdateMultipleToothStatusAsync(List<PatientToothStatus> updates, string actorId)
+        {
+            if (updates == null || !updates.Any()) return;
+
+            foreach (var status in updates)
+            {
+                await _supabase.From<PatientToothStatus>().Upsert(status);
+            }
+
+            var patientId = updates.First().PatientId;
+            await _logs.LogActionAsync(actorId, "updated tooth chart", $"Patient: {patientId}, {updates.Count} teeth updated", "Clinical", "/Admin/Patients/Profile?id=" + patientId);
+        }
+
+        public async Task<List<Treatment>> GetAllTreatmentsWithDetailsAsync()
+        {
+            // We join invoice and patient via PostgREST selection
+            // select=*,invoice:invoices(*,patient:profiles(*))
+            var res = await _supabase.From<Treatment>()
+                .Select("*,invoice:invoices(*,patient:profiles(*))")
+                .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
+                .Get();
+
+            return res.Models;
+        }
+
         public async Task<List<Treatment>> GetTreatmentsByPatientAsync(string patientId)
         {
             // First get all invoices for this patient
@@ -68,6 +93,20 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             return treatmentRes.Models.OrderByDescending(t => t.CreatedAt).ToList();
         }
-
+        public async Task InitializePatientRecords(string patientId, string actorId)
+        {
+            var existing = await GetMedicalInfoAsync(patientId);
+            if (existing == null)
+            {
+                var defaultInfo = new PatientMedicalInfo
+                {
+                    PatientId = patientId,
+                    AllergiesJson = "[]",
+                    HistoryJson = "[\"New Patient — Initializing records.\"]",
+                    MedicationsJson = "[]",
+                };
+                await UpsertMedicalInfoAsync(defaultInfo, actorId);
+            }
         }
     }
+}

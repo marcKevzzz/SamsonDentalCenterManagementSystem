@@ -30,14 +30,14 @@ export function renderStep4() {
     <div class="bg-brand p-6 rounded-t-2xl">
         <div class="flex items-start justify-between gap-3 flex-wrap">
             <div>
-                <div class="font-body text-[.65rem] font-semibold tracking-[.12em] uppercase text-white/40 mb-1">
+                <div class="font-body text-[.65rem] font-medium tracking-[.12em] uppercase text-white/40 mb-1">
                     ${s?.category}
                 </div>
-                <h2 class="brand-font font-extrabold text-white text-[1.3rem]">${s?.name}</h2>
+                <h2 class="brand-font font-bold text-white text-[1.3rem]">${s?.name}</h2>
                 <p class="font-body text-[.8rem] text-white/55 mt-1">${s?.tagline}</p>
             </div>
             <div class="text-right shrink-0">
-                <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/40 mb-1">
+                <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-white/40 mb-1">
                     Starting at
                 </div>
                 <div class="brand-font font-bold text-primary text-[1.05rem]">${s?.price}</div>
@@ -69,17 +69,17 @@ export function renderStep4() {
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div class="bg-offwhite rounded-xl p-4">
-                <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-1">Date</div>
+                <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-muted mb-1">Date</div>
                 <div class="brand-font font-bold text-brand text-[.88rem] leading-snug">${dateLabel}</div>
             </div>
             <div class="bg-offwhite rounded-xl p-4">
-                <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-1">Time</div>
+                <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-muted mb-1">Time</div>
                 <div class="brand-font font-bold text-[.88rem] ${isWL ? "text-amber-600" : "text-brand"}">
                     ${isWL ? "TBD — Waitlist" : (STATE.time ?? "—")}
                 </div>
             </div>
             <div class="bg-offwhite rounded-xl p-4">
-                <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-1">Status</div>
+                <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-muted mb-1">Status</div>
                 <div class="brand-font font-bold text-[.88rem] ${isWL ? "text-amber-600" : "text-green-600"}">
                     ${isWL ? "Waitlist" : "Available"}
                 </div>
@@ -103,13 +103,13 @@ export function renderStep4() {
                 ["Birthday",     d.isForOther ? d.otherDob : d.dob]
             ].map(([l, v]) => `
             <div>
-                <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-0.5">${l}</div>
+                <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-muted mb-0.5">${l}</div>
                 <div class="font-body text-[.88rem] text-brand font-medium">${v || "—"}</div>
             </div>`).join("")}
         </div>
         ${d.notes ? `
         <div class="mt-4 pt-4 border-t border-[#e5e7eb]">
-            <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-1">Notes</div>
+            <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-muted mb-1">Notes</div>
             <div class="font-body text-[.85rem] text-muted leading-relaxed">${d.notes}</div>
         </div>` : ""}
         ${guest ? `

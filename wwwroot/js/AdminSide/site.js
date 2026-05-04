@@ -58,17 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function closeAllDropdowns() {
-    staffDropdown?.classList.add("hidden");
-    staffArrow?.classList.remove("rotate-180");
-    settingsDropdown?.classList.add("hidden");
-    settingsArrow?.classList.remove("rotate-180");
-    userPopup?.classList.add("hidden");
-    staffPopup?.classList.add("hidden");
-    settingsPopup?.classList.add("hidden");
-  }
-
   document.addEventListener("click", (e) => {
+    const userPopup = document.getElementById("user-popup");
+    const settingsPopup = document.getElementById("settings-popup");
+    const staffPopup = document.getElementById("staff-popup");
+    const settingsBtn = document.getElementById("settings-dropdown-btn");
+    const staffBtn = document.getElementById("staff-dropdown-btn");
+
     if (userPopup && !userPopup.contains(e.target)) {
       userPopup.classList.add("hidden");
     }
@@ -101,7 +97,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const openSidebarBtn = document.getElementById("openSidebarBtn");
   if (openSidebarBtn) openSidebarBtn.addEventListener("click", openSidebar);
+
+  // Sidebar Scroll Persistence
+  const sidebarNav = document.getElementById("sidebar-nav");
+  if (sidebarNav) {
+    // 1. Restore scroll position with a slight delay to allow layout
+    const savedScroll = localStorage.getItem("sidebarScrollTop");
+    if (savedScroll) {
+      requestAnimationFrame(() => {
+        sidebarNav.scrollTop = parseInt(savedScroll, 10);
+        // Double check after another frame for dynamic content
+        requestAnimationFrame(() => {
+            sidebarNav.scrollTop = parseInt(savedScroll, 10);
+        });
+      });
+    }
+
+    // 2. Save scroll position on scroll
+    sidebarNav.addEventListener("scroll", () => {
+      localStorage.setItem("sidebarScrollTop", sidebarNav.scrollTop);
+    }, { passive: true });
+
+    // 3. Save on click to ensure it's captured before navigation
+    sidebarNav.addEventListener("click", () => {
+      localStorage.setItem("sidebarScrollTop", sidebarNav.scrollTop);
+    });
+  }
 });
+
+function closeAllDropdowns() {
+  const staffDropdown = document.getElementById("staff-dropdown");
+  const staffArrow = document.getElementById("staff-arrow");
+  const settingsDropdown = document.getElementById("settings-dropdown");
+  const settingsArrow = document.getElementById("settings-arrow");
+  const userPopup = document.getElementById("user-popup");
+  const staffPopup = document.getElementById("staff-popup");
+  const settingsPopup = document.getElementById("settings-popup");
+
+  staffDropdown?.classList.add("hidden");
+  staffArrow?.classList.remove("rotate-180");
+  settingsDropdown?.classList.add("hidden");
+  settingsArrow?.classList.remove("rotate-180");
+  userPopup?.classList.add("hidden");
+  staffPopup?.classList.add("hidden");
+  settingsPopup?.classList.add("hidden");
+}
 
 document.getElementById("cur-date").textContent = new Date().toLocaleDateString(
   "en-PH",
@@ -143,27 +183,27 @@ function UpdateSidebar() {
 
   if (currentPath === "/admin" || currentPath === "/admin/dashboard" || currentPath === "/doctor/dashboard" || currentPath === "/receptionist/dashboard") {
     setActive("admin-dashboard");
-  } else if (currentPath.startsWith("/admin/patients" || currentPath === "/doctor/patients" || currentPath === "/receptionist/patients")) {
+  } else if (currentPath.startsWith("/admin/patients") || currentPath.startsWith("/doctor/patients") || currentPath.startsWith("/receptionist/patients")) {
     setActive("admin-patients");
   } else if (currentPath.startsWith("/admin/doctors")) {
     setActive("admin-doctors");
   } else if (currentPath.startsWith("/admin/users")) {
     setActive("admin-users");
-  } else if (currentPath.startsWith("/admin/appointments")  || currentPath === "/doctor/appointments" || currentPath === "/receptionist/appointments") {
+  } else if (currentPath.startsWith("/admin/appointments") || currentPath.startsWith("/doctor/appointments") || currentPath.startsWith("/receptionist/appointments")) {
     setActive("admin-appointments");
-  } else if (currentPath.startsWith("/admin/blockeddates") ) {
+  } else if (currentPath.startsWith("/admin/blockeddates")) {
     setActive("admin-blocked-dates");
-  } else if (currentPath.startsWith("/admin/treatments") || currentPath === "/doctor/treatments" || currentPath === "/receptionist/treatments") {
+  } else if (currentPath.startsWith("/admin/treatments") || currentPath.startsWith("/doctor/treatments") || currentPath.startsWith("/receptionist/treatments")) {
     setActive("admin-invoices");
   } else if (currentPath.startsWith("/admin/services")) {
     setActive("admin-services-link");
-  } else if (currentPath.startsWith("/admin/availability") || currentPath === "/doctor/availability" || currentPath === "/receptionist/availability") {
+  } else if (currentPath.startsWith("/admin/availability") || currentPath.startsWith("/doctor/availability") || currentPath.startsWith("/receptionist/availability")) {
     setActive("staff-availability");
-  } else if (currentPath.startsWith("/admin/billing") || currentPath === "/receptionist/billing") {
+  } else if (currentPath.startsWith("/admin/billing") || currentPath.startsWith("/receptionist/billing")) {
     setActive("admin-transactions");
-    } else if (currentPath.startsWith("/admin/reviews")) {
+  } else if (currentPath.startsWith("/admin/reviews")) {
     setActive("admin-reviews");
-  } else if (currentPath.startsWith("/admin/reports")  || currentPath === "/doctor/reports" || currentPath === "/receptionist/reports") {
+  } else if (currentPath.startsWith("/admin/reports") || currentPath.startsWith("/doctor/reports") || currentPath.startsWith("/receptionist/reports")) {
     setActive("admin-reports");
   } else if (currentPath.startsWith("/admin/inquiries") || currentPath === "/receptionist/inquiries") {
     setActive("admin-inquiries");
@@ -293,27 +333,14 @@ function closeSidebar() {
   document.body.style.overflow = "";
 
   // Close any open dropdowns when sidebar is hidden
-  const staffDropdown = document.getElementById("staff-dropdown");
-  const staffArrow = document.getElementById("staff-arrow");
-  const settingsDropdown = document.getElementById("settings-dropdown");
-  const settingsArrow = document.getElementById("settings-arrow");
-  const userPopup = document.getElementById("user-popup");
-  const staffPopup = document.getElementById("staff-popup");
-  const settingsPopup = document.getElementById("settings-popup");
-
-  staffDropdown?.classList.add("hidden");
-  staffArrow?.classList.remove("rotate-180");
-  settingsDropdown?.classList.add("hidden");
-  settingsArrow?.classList.remove("rotate-180");
-  userPopup?.classList.add("hidden");
-  staffPopup?.classList.add("hidden");
-  settingsPopup?.classList.add("hidden");
+  closeAllDropdowns();
 }
 
 // 🔥 FIX: Consistent resize handling
 window.addEventListener("resize", () => {
   const sb = document.getElementById("sidebar");
   const main = document.getElementById("main");
+  const header = document.querySelector("header");
 
   if (window.innerWidth >= 1024) {
     // Desktop mode
@@ -325,6 +352,13 @@ window.addEventListener("resize", () => {
 
     document.getElementById("overlay")?.classList.add("hidden");
     document.body.style.overflow = "";
+    
+    // Clear any manual mobile styles
+    if (main) main.style.marginLeft = "";
+    if (header) {
+        header.style.left = "";
+        header.style.width = "";
+    }
   } else {
     // Mobile mode
     // Always remove sb-collapsed on mobile to prevent width issues
@@ -336,6 +370,10 @@ window.addEventListener("resize", () => {
     }
 
     if (main) main.style.marginLeft = "0";
+    if (header) {
+        header.style.left = "0";
+        header.style.width = "100%";
+    }
 
     closeSidebar();
   }

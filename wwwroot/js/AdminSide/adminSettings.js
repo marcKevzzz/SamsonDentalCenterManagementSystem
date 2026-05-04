@@ -129,7 +129,7 @@ export class ClinicSettings {
         container.innerHTML = hours.map((h, i) => `
             <div class="p-4 rounded-3xl border border-slate-100 transition-all ${h.closed ? 'bg-slate-50 opacity-40 grayscale pointer-events-none' : 'bg-white shadow-sm'}">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-[11px] font-black text-brand uppercase tracking-widest">${h.day}</span>
+                    <span class="text-[11px] font-bold text-brand uppercase tracking-widest">${h.day}</span>
                     <div class="flex items-center gap-2 pointer-events-auto">
                         <span class="text-[9px] font-bold ${h.closed ? 'text-red-500' : 'text-slate-400'} uppercase">${h.closed ? 'Closed' : 'Open'}</span>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -143,14 +143,14 @@ export class ClinicSettings {
                     <div class="space-y-1">
                         <div class="flex items-center gap-1.5 mb-1">
                             <i class="fa-solid fa-sun text-[9px] text-orange-400"></i>
-                            <label class="text-[8px] font-black text-slate-400 uppercase">Morning</label>
+                            <label class="text-[8px] font-bold text-slate-400 uppercase">Morning</label>
                         </div>
                         <input type="time" value="${h.open || '08:00'}" onchange="updateHour(${i}, 'open', this.value)" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-2 py-1.5 text-[11px] font-bold text-slate-700 outline-none focus:border-brand">
                     </div>
                     <div class="space-y-1">
                         <div class="flex items-center gap-1.5 mb-1">
                             <i class="fa-solid fa-mug-hot text-[9px] text-slate-400"></i>
-                            <label class="text-[8px] font-black text-slate-400 uppercase">Noon Break</label>
+                            <label class="text-[8px] font-bold text-slate-400 uppercase">Noon Break</label>
                         </div>
                         <div class="flex items-center gap-1">
                             <input type="time" value="${h.noonStart || '12:00'}" onchange="updateHour(${i}, 'noonStart', this.value)" class="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-2 py-1.5 text-[11px] font-bold text-slate-700 outline-none focus:border-brand">
@@ -158,7 +158,7 @@ export class ClinicSettings {
                     </div>
                     <div class="space-y-1">
                         <div class="flex items-center gap-1.5 mb-1 invisible">
-                            <label class="text-[8px] font-black text-slate-400 uppercase">To</label>
+                            <label class="text-[8px] font-bold text-slate-400 uppercase">To</label>
                         </div>
                         <div class="flex items-center gap-1">
                             <input type="time" value="${h.noonEnd || '13:00'}" onchange="updateHour(${i}, 'noonEnd', this.value)" class="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-2 py-1.5 text-[11px] font-bold text-slate-700 outline-none focus:border-brand">
@@ -167,7 +167,7 @@ export class ClinicSettings {
                     <div class="space-y-1">
                         <div class="flex items-center gap-1.5 mb-1">
                             <i class="fa-solid fa-moon text-[9px] text-blue-400"></i>
-                            <label class="text-[8px] font-black text-slate-400 uppercase">Evening</label>
+                            <label class="text-[8px] font-bold text-slate-400 uppercase">Evening</label>
                         </div>
                         <input type="time" value="${h.close || '17:00'}" onchange="updateHour(${i}, 'close', this.value)" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-2 py-1.5 text-[11px] font-bold text-slate-700 outline-none focus:border-brand">
                     </div>
@@ -205,7 +205,7 @@ export class ClinicSettings {
             container.innerHTML = `<div class="col-span-full py-12 text-center bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
                 <i class="fa-solid fa-circle-question text-slate-200 text-4xl mb-3"></i>
                 <p class="text-slate-400 text-[13px] font-bold">No FAQs added yet.</p>
-                <button type="button" onclick="addFaq()" class="mt-4 text-brand text-xs font-black uppercase tracking-widest hover:underline">Start adding</button>
+                <button type="button" onclick="addFaq()" class="mt-4 text-brand text-xs font-bold uppercase tracking-widest hover:underline">Start adding</button>
             </div>`;
         } else {
             container.innerHTML = faqs.map((f, i) => `

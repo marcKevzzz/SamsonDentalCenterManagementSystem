@@ -10,17 +10,17 @@ Layout = "AdminSide/_StaffLayout";
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <div>
-      <h2 class="font-display text-xl font-extrabold text-brand-900">Appointments</h2>
+      <h2 class="font-display text-xl font-bold text-brand-900">Appointments</h2>
       <p class="text-[12px] text-brand-500 mt-0.5">Schedule and manage appointments</p>
     </div>
     <div class="flex items-center gap-2">
       <button onclick="openBlockDateModal()"
-        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors">
+        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors">
         <i class="fa-solid fa-ban text-red-400 text-[11px]"></i>
         Block Date
       </button>
       <button onclick="openBookModal()"
-        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-semibold text-white bg-primary shadow-md shadow-primary/25">
+        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" />
@@ -38,7 +38,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
            <i class="fa-solid fa-calendar-check text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountConfirmed</div>
+        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountConfirmed</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Confirmed</div>
     </div>
@@ -48,7 +48,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
            <i class="fa-solid fa-clock text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountPending</div>
+        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountPending</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Pending</div>
     </div>
@@ -58,7 +58,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
            <i class="fa-solid fa-list-ul text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountWaitlist</div>
+        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountWaitlist</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Waitlist</div>
     </div>
@@ -68,7 +68,7 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-accent">
            <i class="fa-solid fa-calendar-xmark text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-extrabold text-brand-900">@Model.CountCancelled</div>
+        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountCancelled</div>
       </div>
       <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Cancelled</div>
     </div>
@@ -164,19 +164,22 @@ Layout = "AdminSide/_StaffLayout";
 
             // Serialize appointment to JSON for JS
             var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
-              id              = appt.Id,
-              source          = appt.Source,
-              patientName     = appt.PatientName,
-              patientEmail    = appt.PatientEmail,
-              patientPhone    = appt.PatientPhone,
-              doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
-              serviceName     = appt.ServiceName,
-              serviceId       = appt.ServiceId,
-              serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
-              appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd"),
-              appointmentTime = appt.AppointmentTime,
-              status          = appt.Status,
-              notes           = appt.Notes
+              id                  = appt.Id,
+              source              = appt.Source,
+              patientName         = appt.PatientName,
+              patientEmail        = appt.PatientEmail,
+              patientPhone        = appt.PatientPhone,
+              patientAvatarUrl    = appt.PatientProfile?.AvatarUrl,
+              doctorId            = appt.DoctorId,
+              doctorName          = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
+              serviceName         = appt.ServiceName,
+              serviceId           = appt.ServiceId,
+              serviceCategory     = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
+              appointmentDate     = appt.AppointmentDate.ToString("yyyy-MM-dd"),
+              appointmentDateFormatted = appt.AppointmentDate.ToString("MMM dd"),
+              appointmentTime     = appt.AppointmentTime,
+              status              = appt.Status,
+              notes               = appt.Notes
             });
 
             <tr class="group hover:bg-slate-50/80 transition-colors" 
@@ -368,7 +371,7 @@ Layout = "AdminSide/_StaffLayout";
       <div class="relative h-32 bg-brand-900 flex items-center px-8 shrink-0 overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
         <div class="relative z-10">
-          <h3 class="font-display font-extrabold text-white text-2xl tracking-tight">Book Appointment</h3>
+          <h3 class="font-display font-bold text-white text-2xl tracking-tight">Book Appointment</h3>
           <p class="text-white/50 text-[11px] font-bold uppercase tracking-[0.2em] mt-1">Manual Schedule Entry</p>
         </div>
         <button onclick="closeBookModal()" class="absolute top-6 right-6 text-white/30 hover:text-white transition-colors">
@@ -513,7 +516,7 @@ Layout = "AdminSide/_StaffLayout";
              transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
 
       <div class="p-6 border-b border-slate-100">
-        <h3 id="edit-modal-title" class="font-display font-extrabold text-xl text-brand-900">Reschedule Appointment</h3>
+        <h3 id="edit-modal-title" class="font-display font-bold text-xl text-brand-900">Reschedule Appointment</h3>
         <p class="text-brand-400 text-[11px] font-bold uppercase tracking-wider mt-1">Adjust Date or Provider</p>
       </div>
 
@@ -580,7 +583,7 @@ Layout = "AdminSide/_StaffLayout";
              transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
 
       <div class="p-6 border-b border-slate-100 bg-emerald-50/50">
-        <h3 class="font-display font-extrabold text-xl text-emerald-700">Confirm Booking</h3>
+        <h3 class="font-display font-bold text-xl text-emerald-700">Confirm Booking</h3>
         <p class="text-emerald-600/60 text-[11px] font-bold uppercase tracking-wider mt-1">Finalize Appointment Slot</p>
       </div>
 
@@ -639,7 +642,7 @@ Layout = "AdminSide/_StaffLayout";
             <i class="fa-solid fa-ban text-red-500"></i>
           </div>
           <div>
-            <h3 class="font-display font-extrabold text-[17px] text-brand">Block a Date</h3>
+            <h3 class="font-display font-bold text-[17px] text-brand">Block a Date</h3>
             <p class="text-[11px] text-brand-400 font-bold uppercase tracking-wider mt-0.5">Prevent new bookings</p>
           </div>
         </div>
@@ -679,7 +682,7 @@ Layout = "AdminSide/_StaffLayout";
 </div>
 
 <!-- ── CONFLICT MODAL (shown after blocking a date with existing appts) ──── -->
-<div id="conflict-modal" class="fixed inset-0 z-[60] hidden">
+<div id="conflict-modal" class="fixed inset-0 z-[40] hidden">
   <div class="absolute inset-0 bg-brand/50 backdrop-blur-md"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="conflict-modal-box"
@@ -691,7 +694,7 @@ Layout = "AdminSide/_StaffLayout";
             <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
           </div>
           <div>
-            <h3 class="font-display font-extrabold text-[17px] text-brand">Date Blocked — Action Required</h3>
+            <h3 class="font-display font-bold text-[17px] text-brand">Date Blocked — Action Required</h3>
             <p id="conflict-summary" class="text-[12px] text-amber-700 mt-0.5"></p>
           </div>
         </div>

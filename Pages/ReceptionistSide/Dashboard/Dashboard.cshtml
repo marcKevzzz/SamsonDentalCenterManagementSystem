@@ -1,233 +1,205 @@
 @page "/Receptionist/Dashboard"
 @model SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.Dashboard.DashboardModel
 @{
-Layout = "AdminSide/_StaffLayout";
+    Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "Receptionist Dashboard";
 }
 
-<div id="page-dashboard" class="page active p-4 md:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+<div class="page p-4 md:p-6 space-y-6">
+    <!-- Welcome Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h2 class="font-display text-[clamp(17px,3vw,22px)] font-extrabold text-brand">Good morning, @ViewData["UserName"] 👋
-            </h2>
-            <p class="text-[12px] text-brand-500 mt-0.5">Here's what's happening at your clinic today.</p>
+            <h2 class="font-display text-2xl font-bold text-brand-900 tracking-tight">Welcome back, @ViewData["UserName"]</h2>
+            <p class="text-[13px] text-brand-500 mt-1">Manage clinic flow and patient appointments with ease.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/Receptionist/Appointments" class="bg-white border border-slate-200 text-brand-900 text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">View Calendar</a>
+            <a href="/Receptionist/Patients" class="bg-primary text-white text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-sm">Patient Directory</a>
         </div>
     </div>
 
     <!-- Stat cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div class="stat-card stat-blue relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
-                    <i class="fa-solid fa-clock text-xl"></i>
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+        <div class="stat-card stat-blue relative bg-white rounded-[32px] p-6 border border-slate-200 transition-all duration-300 group">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-user-group text-primary text-lg"></i>
                 </div>
-                <div>
-                    <div class="text-2xl font-extrabold text-brand">@Model.PendingAppointmentsCount</div>
-                    <div class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Pending Approval</div>
-                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-primary uppercase tracking-wider">Patients</span>
             </div>
+            <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-total-patients">@Model.TotalPatients</div>
+            <div class="text-[13px] font-medium text-brand-500 mt-1">Total Patients</div>
+            <div class="text-[11px] text-emerald-600 mt-2 font-bold" id="stat-patients-trend">Registered in system</div>
         </div>
-        <div class="stat-card stat-teal relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <i class="fa-solid fa-calendar-check text-xl"></i>
+        
+        <div class="stat-card stat-teal relative bg-white rounded-[32px] p-6 border border-slate-200 transition-all duration-300 group">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-user-nurse text-emerald-600 text-lg"></i>
                 </div>
-                <div>
-                    <div class="text-2xl font-extrabold text-brand">@Model.ConfirmedTodayCount</div>
-                    <div class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Confirmed Today</div>
-                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 uppercase tracking-wider">Active</span>
             </div>
+            <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-active-doctors">@Model.ActiveDoctorsCount</div>
+            <div class="text-[13px] font-medium text-brand-500 mt-1">Doctors Available</div>
+            <div class="text-[11px] text-emerald-600 mt-2 font-bold" id="stat-doctors-trend">On duty today</div>
         </div>
-        <div class="stat-card stat-amber relative bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-lg transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                    <i class="fa-solid fa-person-walking text-xl"></i>
+
+        <div class="stat-card stat-red relative bg-white rounded-[32px] p-6 border border-slate-200 transition-all duration-300 group">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-calendar-day text-red-600 text-lg"></i>
                 </div>
-                <div>
-                    <div class="text-2xl font-extrabold text-brand">@Model.ArrivedTodayCount</div>
-                    <div class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Arrived / In-Queue</div>
-                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-600 uppercase tracking-wider">Arrived</span>
             </div>
+            <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-today-appts">@Model.ArrivedTodayCount</div>
+            <div class="text-[13px] font-medium text-brand-500 mt-1">Patients Arrived</div>
+            <div class="text-[11px] text-red-500 mt-2 font-bold" id="stat-appts-trend">Today's visits</div>
+        </div>
+
+        <div class="stat-card stat-purple relative bg-white rounded-[32px] p-6 border border-slate-200 transition-all duration-300 group">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-money-bill-trend-up text-violet-600 text-lg"></i>
+                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 uppercase tracking-wider">Month</span>
+            </div>
+            <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-monthly-revenue">₱@Model.MonthlyRevenue.ToString("N0")</div>
+            <div class="text-[13px] font-medium text-brand-500 mt-1">Monthly Billing</div>
+            <div class="text-[11px] text-emerald-600 mt-2 font-bold" id="stat-revenue-trend">Real-time stats</div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <!-- Main Appointments (2/3) -->
         <div class="xl:col-span-2 space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/30">
-                    <h3 class="font-display font-bold text-brand text-[15px]">Today's Appointments</h3>
-                    <a href="/Receptionist/Appointments" class="text-[11px] font-bold text-primary hover:underline uppercase tracking-wider">View Full Table</a>
+            <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden shadow-sm flex flex-col">
+                <div class="px-6 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                    <div>
+                        <h3 class="font-display font-bold text-brand-900 text-lg tracking-tight">Incoming Schedule</h3>
+                        <p class="text-[12px] text-brand-400 mt-0.5">Today's confirmed appointments at a glance.</p>
+                    </div>
+                    <a href="/Receptionist/Appointments" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-brand-600 hover:bg-slate-50 transition-all uppercase tracking-wider">View Calendar</a>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full text-left">
                         <thead class="bg-slate-50/50">
                             <tr>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Patient</th>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Time</th>
-                                <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Status</th>
-                                <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-6 py-3">Action</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Patient</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @if (!Model.TodayAppointments.Any())
-                            {
-                                <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-slate-400 text-[13px]">
-                                        No appointments for today.
-                                    </td>
-                                </tr>
-                            }
-                            @foreach (var appt in Model.TodayAppointments)
-                            {
-                                <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
-                                                @(appt.PatientName?[0].ToString() ?? "P")
-                                            </div>
-                                            <div>
-                                                <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
-                                                <div class="text-[10px] text-brand-400">@appt.ServiceName</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-[12.5px] font-bold text-brand-900">@appt.AppointmentTime</td>
-                                    <td class="px-6 py-4">
-                                        @{
-                                            var badge = appt.Status.ToLower() switch {
-                                                "confirmed" => "bg-emerald-50 text-emerald-600 border-emerald-100",
-                                                "arrived" => "bg-amber-50 text-amber-600 border-amber-100",
-                                                "pending" => "bg-blue-50 text-blue-600 border-blue-100",
-                                                _ => "bg-slate-50 text-slate-500 border-slate-100"
-                                            };
-                                        }
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border @badge uppercase tracking-wider">@appt.Status</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        @if(appt.Status == "confirmed") {
-                                            <button onclick="updateStatus('@appt.Id', 'arrived')" class="text-[11px] font-bold text-primary hover:underline">Check-in</button>
-                                        }
-                                    </td>
-                                </tr>
-                            }
+                        <tbody id="upcoming-appts-body" class="divide-y divide-slate-100">
+                             <!-- Hydrated by adminDashboard.js -->
+                             <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 text-[13px] italic"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading appointments...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Staff Leaves & Availability -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-display font-bold text-brand text-[15px]">My Leave Requests</h3>
-                    <button onclick="openLeaveModal()" class="px-3 py-1.5 bg-brand text-white text-[11px] font-bold rounded-lg shadow-sm">Apply for Leave</button>
-                </div>
-                <div class="space-y-3">
-                    @if (!Model.MyLeaves.Any())
-                    {
-                        <p class="text-[12px] text-slate-400 py-2 italic text-center">No leave requests found.</p>
-                    }
-                    @foreach (var leave in Model.MyLeaves)
-                    {
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <div>
-                                <div class="text-[12.5px] font-bold text-brand-900">@leave.LeaveType</div>
-                                <div class="text-[10px] text-brand-400">@leave.StartDate.ToString("MMM dd") - @leave.EndDate.ToString("MMM dd")</div>
-                            </div>
-                            <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border @(leave.Status == "approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : leave.Status == "rejected" ? "bg-red-50 text-red-600 border-red-100" : "bg-blue-50 text-blue-600 border-blue-100")">
-                                @leave.Status
-                            </span>
+            <!-- Charts row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="font-display font-bold text-brand-900 text-lg tracking-tight">Weekly Visits</h3>
+                            <p class="text-[12px] text-brand-400">Patient traffic trend analysis</p>
                         </div>
-                    }
+                    </div>
+                    <div class="h-64">
+                        <canvas id="visitsChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm">
+                    <h3 class="font-display font-bold text-brand-900 text-lg tracking-tight mb-1">Department Load</h3>
+                    <p class="text-[12px] text-brand-400 mb-8">Service distribution across specialties</p>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar (1/3) -->
         <div class="space-y-6">
+            <!-- Inquiry Widget -->
+            <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-brand/5">
+                    <div>
+                        <h3 class="font-display font-bold text-brand-900">Unread Inquiries</h3>
+                        <p class="text-[10px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Latest Messages</p>
+                    </div>
+                    <a href="/Receptionist/Inquiries" class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-400 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+                <div id="dashboard-inquiries-body" class="p-2 divide-y divide-slate-50 overflow-y-auto max-h-[350px]">
+                    <!-- Hydrated by JS -->
+                    <div class="py-12 text-center text-slate-400 text-[12px] italic">Loading messages...</div>
+                </div>
+            </div>
+
             <!-- Activity Logs -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                <h3 class="font-display font-bold text-brand text-[14px] mb-4">Clinic Pulse (Activity)</h3>
-                <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    @foreach (var log in Model.RecentLogs)
-                    {
-                        <div class="flex gap-3 relative">
-                            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0"></div>
-                            <div class="min-w-0">
-                                <p class="text-[12px] font-bold text-brand-900 truncate">@log.Action</p>
-                                <p class="text-[11px] text-brand-500 leading-tight">@(log.Profile != null ? $"{log.Profile.FirstName} {log.Profile.LastName}" : "Unknown") · @log.Details</p>
-                                <p class="text-[9px] text-brand-400 mt-1 uppercase tracking-tighter">@log.CreatedAt.ToString("HH:mm")</p>
-                            </div>
-                        </div>
-                    }
+            <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-display font-bold text-brand-900">Clinic Pulse</h3>
+                        <p class="text-[10px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Recent Updates</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Recent Invoices -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                <h3 class="font-display font-bold text-brand text-[14px] mb-4">Recent Transactions</h3>
-                <div class="space-y-3">
-                    @foreach (var inv in Model.RecentInvoices)
-                    {
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50">
-                            <div>
-                                <div class="text-[12px] font-bold text-brand-900">@(inv.Patient?.FullName ?? "Patient")</div>
-                                <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd, HH:mm")</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-[12px] font-extrabold text-brand-900">₱@inv.FinalAmount.ToString("N0")</div>
-                                <span class="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")">@inv.Status</span>
-                            </div>
-                        </div>
-                    }
+                <div id="dashboard-activity-body" class="p-2 space-y-2 overflow-y-auto max-h-[400px]">
+                    <!-- Hydrated by adminDashboard.js -->
+                    <div class="py-12 text-center text-slate-400 text-[12px] italic">Loading activity...</div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts row -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4 mt-8">
-        <!-- Bar chart (2/3) -->
-        <div class="xl:col-span-2 bg-white rounded-2xl p-5 border border-slate-200">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="font-display font-bold text-brand text-[15px]">Weekly Visits</h3>
-                    <p class="text-[11px] text-brand-500">Patient traffic for the current week</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-primary/80"></span>
-                    <span class="text-[11px] font-bold text-brand-400">Total: <span id="chart-visits-total" class="text-brand">...</span></span>
-                </div>
-            </div>
-            <div class="h-64 w-full">
-                <canvas id="weeklyVisitsChart"></canvas>
-            </div>
-        </div>
-        <!-- Pie chart (1/3) -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200">
-            <h3 class="font-display font-bold text-brand text-[15px] mb-1">Department Load</h3>
-            <p class="text-[11px] text-brand-500 mb-6">Active cases by category</p>
-            <div class="h-64 w-full flex justify-center">
-                <canvas id="deptLoadChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<script type="module" src="~/js/AdminSide/adminDashboard.js" asp-append-version="true"></script>
+            <!-- Leave Quick Links -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display font-bold text-brand text-[14px]">Quick Actions</h3>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                    <button onclick="openLeaveModal()" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-all group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+                                <i class="fa-solid fa-plane-departure text-[12px]"></i>
+                            </div>
+                            <span class="text-[12.5px] font-bold text-brand group-hover:text-primary transition-colors">Apply for Leave</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    <a href="/Receptionist/Inquiries" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-all group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <i class="fa-solid fa-message text-[12px]"></i>
+                            </div>
+                            <span class="text-[12.5px] font-bold text-brand group-hover:text-primary transition-colors">Manage Inquiries</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Leave Modal -->
-<div id="leave-modal" class="fixed inset-0 z-50 hidden">
+<!-- Leave Modal (Reuse existing logic) -->
+<div id="leave-modal" class="fixed inset-0 z-[1000] hidden">
     <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeLeaveModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto flex flex-col overflow-hidden">
             <div class="p-6 bg-brand-900 text-white">
-                <h3 class="font-display font-extrabold text-xl">Apply for Leave</h3>
-                <p class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Staff Availability Request</p>
+                <h3 class="font-display font-bold text-xl">Apply for Leave</h3>
+                <p class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Submit request for approval</p>
             </div>
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Leave Type</label>
-                    <select id="leave-type" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none">
+                    <select id="leave-type" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-primary/20">
                         <option value="Sick Leave">Sick Leave</option>
                         <option value="Vacation">Vacation</option>
                         <option value="Emergency">Emergency</option>
@@ -246,16 +218,18 @@ Layout = "AdminSide/_StaffLayout";
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Reason</label>
-                    <textarea id="leave-reason" rows="3" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none resize-none"></textarea>
+                    <textarea id="leave-reason" rows="3" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none resize-none" placeholder="Provide a brief reason..."></textarea>
                 </div>
             </div>
             <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t">
-                <button onclick="closeLeaveModal()" class="text-[12px] font-bold text-brand-500">Cancel</button>
-                <button onclick="submitLeave()" class="px-6 py-2.5 bg-brand-900 text-white text-[12px] font-bold rounded-xl shadow-lg">Submit Request</button>
+                <button onclick="closeLeaveModal()" class="text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">Cancel</button>
+                <button onclick="submitLeave()" class="px-6 py-2.5 bg-primary text-white text-[12px] font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all">Submit Request</button>
             </div>
         </div>
     </div>
 </div>
+
+<script type="module" src="~/js/AdminSide/adminDashboard.js" asp-append-version="true"></script>
 
 <script>
     function openLeaveModal() { document.getElementById('leave-modal').classList.remove('hidden'); }
@@ -283,14 +257,5 @@ Layout = "AdminSide/_StaffLayout";
         } else {
             alert('Failed to submit');
         }
-    }
-
-    async function updateStatus(id, status) {
-        const res = await fetch('/api/admin/appointments/status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, status })
-        });
-        if(res.ok) location.reload();
     }
 </script>

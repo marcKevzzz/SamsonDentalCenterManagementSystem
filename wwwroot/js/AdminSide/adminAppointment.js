@@ -258,6 +258,15 @@ function rowHTML(appt) {
     workflowBtn = `<button onclick='updateStatus(${idStr}, "completed")' class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">Checkout</button>`;
   }
 
+  const avatarHtml = (() => {
+    if (appt.patientAvatarUrl) {
+      return `<img src="${appt.patientAvatarUrl}" alt="${appt.patientName}" class="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-200" />`;
+    }
+    const parts = (appt.patientName || 'G').split(' ').filter(p => p);
+    const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : (parts[0]?.[0] || 'G').toUpperCase();
+    return `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">${initials}</div>`;
+  })();
+
   return `
     <tr class="group hover:bg-slate-50/80 transition-colors">
       <td class="px-4 py-4">
@@ -265,9 +274,7 @@ function rowHTML(appt) {
       </td>
       <td class="px-4 py-4">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-            ${(appt.patientName || "G")[0]}
-          </div>
+          ${avatarHtml}
           <div>
             <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">${appt.patientName}</div>
             <div class="text-[10.5px] text-brand-400">${appt.patientEmail}</div>
@@ -352,11 +359,11 @@ function renderSourceBadge(source) {
 
 function renderPaginationBtns(totalPages) {
   const container = document.getElementById("paginationBtns");
-  let html = `<button data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">← Prev</button>`;
+  let html = `<button data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">← Prev</button>`;
   for (let i = 1; i <= totalPages; i++) {
-    html += `<button data-page="${i}" class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg ${i === currentPage ? "bg-primary text-white" : "border border-slate-200 text-brand-500 hover:bg-slate-50"}">${i}</button>`;
+    html += `<button data-page="${i}" class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg ${i === currentPage ? "bg-primary text-white" : "border border-slate-200 text-brand-500 hover:bg-slate-50"}">${i}</button>`;
   }
-  html += `<button data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-semibold rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>`;
+  html += `<button data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>`;
   container.innerHTML = html;
 }
 
@@ -687,14 +694,15 @@ window.deleteAppt = (apptInput) => {
 // ── EDIT / RESCHEDULE MODAL ───────────────────────────────────────────────────
 window.openEditModal = (apptInput) => {
   const appt = getAppt(apptInput);
-  document.getElementById("edit-modal-title").textContent = "Edit Appointment";
+  const titleEl = document.getElementById("edit-modal-title");
+  if (titleEl) titleEl.textContent = "Edit Appointment";
   _setupEditModal(appt);
 };
 
 window.openRescheduleModal = (apptInput) => {
   const appt = getAppt(apptInput);
-  document.getElementById("edit-modal-title").textContent =
-    "Reschedule Appointment";
+  const titleEl = document.getElementById("edit-modal-title");
+  if (titleEl) titleEl.textContent = "Reschedule Appointment";
   _setupEditModal(appt);
 };
 

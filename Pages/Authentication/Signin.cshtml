@@ -14,40 +14,40 @@ Layout = "_AuthLayout";
     <!-- Center -->
     <div class="relative z-10 my-auto">
       <div
-        class="flex items-center gap-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/35 mb-5">
+        class="flex items-center gap-2 font-body text-[0.8rem] font-medium tracking-[0.15em] uppercase text-white/35 mb-5">
         <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Patient
         Portal
       </div>
-      <h2 class="brand-font font-extrabold text-white leading-[1.08] mb-5" style="font-size: clamp(2rem, 3.2vw, 2.8rem)">
-        Your smile,<br />your account.
+      <h2 class="brand-font font-medium text-white leading-[1.08] mb-5" style="font-size: clamp(3rem, 4.2vw, 3.8rem)">
+        Your smile, our account.
       </h2>
-      <p class="font-body text-[0.9rem] text-white/50 leading-relaxed max-w-xs mb-10">
+      <p class="font-body text-[0.95rem] text-white/50 leading-relaxed max-w-lg mb-10">
         Access appointments, treatment history, and exclusive member offers — all
         in one place.
       </p>
       <div class="space-y-3.5">
-        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+        <div class="flex items-center gap-3 font-body text-[0.9rem] text-white/65">
           <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
               height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
               <polyline points="20 6 9 17 4 12" />
             </svg></span>
           View & manage upcoming appointments
         </div>
-        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+        <div class="flex items-center gap-3 font-body text-[0.9rem] text-white/65">
           <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
               height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
               <polyline points="20 6 9 17 4 12" />
             </svg></span>
           Access treatment history & records
         </div>
-        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+        <div class="flex items-center gap-3 font-body text-[0.9rem] text-white/65">
           <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
               height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
               <polyline points="20 6 9 17 4 12" />
             </svg></span>
           Exclusive promos & member discounts
         </div>
-        <div class="flex items-center gap-3 font-body text-[0.84rem] text-white/65">
+        <div class="flex items-center gap-3 font-body text-[0.9rem] text-white/65">
           <span class="w-7 h-7 rounded-full bg-primary/20  text-primary flex items-center justify-center shrink-0"><svg width="11"
               height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
               <polyline points="20 6 9 17 4 12" />
@@ -68,7 +68,7 @@ Layout = "_AuthLayout";
           class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
       </div>
       <div>
-        <div class="text-[#f59e0b] text-sm font-bold flex items-center gap-1">
+        <div class="text-[#f59e0b] text-sm font-medium flex items-center gap-1">
           <i class="fa-solid fa-star"></i>
           <span>@ViewData["ReviewAvg"] / 5.0</span>
         </div>
@@ -80,18 +80,19 @@ Layout = "_AuthLayout";
   </div>
 
   <!-- ── Right panel (form) ── -->
-  <div class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto ">
-    <div class="w-full max-w-[420px] fade-up animate">
+  <div class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto relative">
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #1e40af 1px, transparent 0); background-size: 40px 40px;"></div>
+    <div class="w-full max-w-[420px] fade-up animate relative z-10">
       <!-- Mobile logo -->
       <div  class="brand-logo flex items-center mb-2 -ml-4">
              <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 " />
-              <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex">
+              <span id="logo" class="logo-font font-bold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 md:hidden lg:flex">
                   Samson  <span id="logo-last" class="text-gray-600 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/20 rounded-full">Dental  Center</span>
               </span>
           </div>
 
       <div class="mb-8">
-        <h2 class="brand-font font-extrabold text-brand text-[1.9rem] leading-tight mb-1.5">
+        <h2 class="brand-font font-bold text-brand text-[2.2rem] leading-tight mb-1.5">
           Welcome back
         </h2>
         <p class="font-body text-[0.9rem] text-muted">
@@ -103,7 +104,7 @@ Layout = "_AuthLayout";
         @Html.AntiForgeryToken()
         <!-- Email -->
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Email
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Email
             Address</label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -124,7 +125,7 @@ Layout = "_AuthLayout";
         <div>
 
           <label for="si_pw"
-            class="font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Password</label>
+            class="font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Password</label>
           <div class="relative" name="pass">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -168,7 +169,7 @@ Layout = "_AuthLayout";
 
         <!-- Sign in btn -->
         <button type="button" id="signin-btn"
-          class="brand-font font-bold text-[0.85rem] tracking-wider uppercase w-full bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
+          class="brand-font font-medium text-[0.85rem] tracking-wider uppercase w-full bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
           Sign In →
         </button>
 
@@ -176,7 +177,7 @@ Layout = "_AuthLayout";
 
         <!-- Guest -->
         <a href="../"
-          class="brand-font font-bold text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline">
+          class="brand-font font-medium text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

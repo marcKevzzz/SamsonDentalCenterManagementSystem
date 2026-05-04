@@ -297,7 +297,7 @@ async function loadDynamicServices() {
         const desktopLink = document.createElement("a");
         desktopLink.href = `/Services/${service.slug}`;
         desktopLink.className =
-          "block py-1.5 text-[0.85rem] hover:text-primary";
+          "block py-1.5 text-[0.9rem] font-[400] hover:text-primary";
         desktopLink.textContent = service.name;
         containers[cat].appendChild(desktopLink);
       }

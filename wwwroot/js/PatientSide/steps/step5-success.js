@@ -101,7 +101,7 @@ export function renderStep5(apiResult = {}) {
             <div class="flex justify-between items-start gap-4
                 ${i === rows.length - 1 ? "pt-3 border-t border-[#e5e7eb]" : ""}">
                 <span class="font-body text-[.8rem] text-muted shrink-0">${l}</span>
-                <span class="font-body text-[.85rem] font-semibold text-brand text-right">${v}</span>
+                <span class="font-body text-[.85rem] font-medium text-brand text-right">${v}</span>
             </div>`).join("")}
             <div class="flex justify-between items-center pt-3 border-t border-[#e5e7eb] gap-4">
                 <span class="font-body text-[.8rem] text-muted">Contact</span>

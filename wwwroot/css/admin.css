@@ -13,7 +13,10 @@
 }
 
 body {
-  font-family: "Syne", sans-serif;
+  font-family: sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.025em;
   color: var(--text-main);
 }
 
@@ -22,7 +25,8 @@ h2,
 h3,
 h4,
 .brand-font {
-  font-family: "Syne", sans-serif;
+  font-family: sans-serif;
+  font-weight: 500;
 }
 
 .logo-font {
@@ -35,17 +39,19 @@ h4,
   pointer-events: none !important;
 }
 
-.sb-collapsed #sidebar {
-  width: 68px !important;
-}
-
-.sb-collapsed #main {
-  margin-left: 68px !important;
-}
-
-.sb-collapsed header {
-  left: 68px !important;
-  width: calc(100% - 68px) !important;
+@media (min-width: 1024px) {
+  .sb-collapsed #sidebar {
+    width: 68px !important;
+  }
+  
+  .sb-collapsed #main {
+    margin-left: 68px !important;
+  }
+  
+  .sb-collapsed header {
+    left: 68px !important;
+    width: calc(100% - 68px) !important;
+  }
 }
 
 .sb-collapsed #toggle-icon {
@@ -67,6 +73,11 @@ h4,
 
 .page {
   animation: fadeIn 0.3s ease-out;
+}
+
+.sidebar-text.nav-links{
+  font-family: sans-serif !important;
+  font-size: 12px !important;
 }
 
 @keyframes fadeIn {

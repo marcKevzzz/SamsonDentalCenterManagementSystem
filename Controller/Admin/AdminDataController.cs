@@ -87,6 +87,7 @@ public class AdminDataController : ControllerBase
                     patientName = a.PatientName,
                     patientEmail = a.PatientEmail,
                     patientPhone = a.PatientPhone,
+                    patientAvatarUrl = a.PatientProfile?.AvatarUrl,
                     serviceId = a.ServiceId,
                     serviceName = a.Service?.Name,
                     doctorId = a.DoctorId,
@@ -188,6 +189,7 @@ public class AdminDataController : ControllerBase
                     patientName = i.Patient != null
                         ? $"{i.Patient.FirstName} {i.Patient.LastName}"
                         : "Unknown",
+                    patientAvatarUrl = i.Patient?.AvatarUrl,
                     doctorId = i.DoctorId,
                     doctorName = i.Doctor != null
                         ? $"{i.Doctor.Title} {i.Doctor.Profile?.FirstName} {i.Doctor.Profile?.LastName}".Trim()
@@ -207,6 +209,37 @@ public class AdminDataController : ControllerBase
                             totalPrice = item.TotalPrice,
                         })
                         .ToList(),
+                })
+                .ToList();
+            return Ok(new { ok = true, data = dtos });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpGet("treatments")]
+    public async Task<IActionResult> GetTreatments()
+    {
+        try
+        {
+            var data = await _recordService.GetAllTreatmentsWithDetailsAsync();
+            var dtos = data.Select(t => new
+                {
+                    id = t.Id,
+                    invoiceId = t.InvoiceId,
+                    createdAt = t.CreatedAt,
+                    serviceName = t.ServiceName,
+                    status = t.Status,
+                    procedureDetails = t.ProcedureDetails,
+                    diagnosis = t.Diagnosis,
+                    patientName = t.Invoice?.Patient != null
+                        ? $"{t.Invoice.Patient.FirstName} {t.Invoice.Patient.LastName}"
+                        : "Unknown",
+                    patientAvatarUrl = t.Invoice?.Patient?.AvatarUrl,
+                    doctorId = t.Invoice?.DoctorId,
+                    amount = t.Invoice?.FinalAmount ?? 0,
                 })
                 .ToList();
             return Ok(new { ok = true, data = dtos });
@@ -958,7 +991,70 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value;
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst("role")?.Value?.ToLower();
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Fallback role lookup
+            if (string.IsNullOrEmpty(role))
+            {
+                var profile = await _profileService.GetProfileById(userId);
+                role = profile?.Role?.ToLower() ?? "admin";
+            }
+
+            if (role == "doctor")
+            {
+                var doc = await _doctorService.GetDoctorByProfileIdAsync(userId);
+                if (doc?.Availability == null || doc.Availability.Count == 0)
+                    return Ok(new { ok = true, data = new List<object>() });
+
+                var slots = doc.Availability
+                    .Where(a => a.IsActive)
+                    .OrderBy(a => a.DayOfWeek)
+                    .Select(a => new
+                    {
+                        dayOfWeek = a.DayOfWeek,
+                        startTime = a.StartTime,
+                        endTime = a.EndTime,
+                        isActive = a.IsActive
+                    }).ToList();
+                return Ok(new { ok = true, data = slots });
+            }
+            else if (role == "receptionist")
+            {
+                var rec = await _receptionistService.GetReceptionistByProfileIdAsync(userId);
+                if (rec?.Availability == null || rec.Availability.Count == 0)
+                    return Ok(new { ok = true, data = new List<object>() });
+
+                var slots = rec.Availability
+                    .Where(a => a.IsActive)
+                    .OrderBy(a => a.DayOfWeek)
+                    .Select(a => new
+                    {
+                        dayOfWeek = a.DayOfWeek,
+                        startTime = a.StartTime,
+                        endTime = a.EndTime,
+                        isActive = a.IsActive
+                    }).ToList();
+                return Ok(new { ok = true, data = slots });
+            }
+
+            // Admin — no personal availability schedule
+            return Ok(new { ok = true, data = new List<object>(), message = "admin" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost("my-availability")]
+    public async Task<IActionResult> UpdateMyAvailability([FromBody] List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto> slots)
+    {
+        try
+        {
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst("role")?.Value?.ToLower();
 
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
@@ -966,20 +1062,55 @@ public class AdminDataController : ControllerBase
             if (role == "doctor")
             {
                 var doc = await _doctorService.GetDoctorByProfileIdAsync(userId);
-                if (doc == null) return Ok(new { ok = true, data = new List<object>() });
-                return Ok(new { ok = true, data = doc.Availability });
+                if (doc == null) return NotFound(new { ok = false, error = "Doctor record not found" });
+                await _doctorService.SetAvailabilityAsync(doc.Id, slots);
+                return Ok(new { ok = true });
             }
             else if (role == "receptionist")
             {
                 var rec = await _receptionistService.GetReceptionistByProfileIdAsync(userId);
-                if (rec == null) return Ok(new { ok = true, data = new List<object>() });
-                return Ok(new { ok = true, data = rec.Availability });
+                if (rec == null) return NotFound(new { ok = false, error = "Receptionist record not found" });
+                await _receptionistService.SetAvailabilityAsync(rec.Id, slots);
+                return Ok(new { ok = true });
             }
 
-            return Ok(new { ok = true, data = new List<object>() });
+            return BadRequest(new { ok = false, error = "Availability update not supported for this role" });
         }
         catch (Exception ex)
         {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost("patients")]
+    public async Task<IActionResult> CreatePatient([FromBody] UserPayload p)
+    {
+        try
+        {
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst("role")?.Value?.ToLower();
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // 1. Create Shadow Profile (creates Auth user and Profile record)
+            var id = await _profileService.CreateShadowProfile(
+                p.FirstName,
+                p.LastName,
+                p.Email,
+                p.PhoneNumber,
+                p.Sex,
+                p.DateOfBirth,
+                false // requiresReview
+            );
+
+            // 2. Log action
+            await _activityLogService.LogActionAsync(userId, "created patient", $"{p.FirstName} {p.LastName}", id, "Staff", $"/Admin/Patients/Details?id={id}");
+
+            return Ok(new { ok = true, id });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create patient");
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }

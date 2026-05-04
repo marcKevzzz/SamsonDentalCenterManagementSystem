@@ -13,15 +13,15 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string Id { get; set; } = string.Empty;
 
         [Column("first_name")]
-        [JsonPropertyName("firstName")]
+        [JsonPropertyName("first_name")]
         public string FirstName { get; set; } = string.Empty;
 
         [Column("last_name")]
-        [JsonPropertyName("lastName")]
+        [JsonPropertyName("last_name")]
         public string LastName { get; set; } = string.Empty;
 
         [Column("date_of_birth")]
-        [JsonPropertyName("dateOfBirth")]
+        [JsonPropertyName("date_of_birth")]
         public DateTime? DateOfBirth { get; set; }
 
         [Column("sex")]
@@ -29,7 +29,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? Sex { get; set; }
 
         [Column("phone_number")]
-        [JsonPropertyName("phoneNumber")]
+        [JsonPropertyName("phone_number")]
         public string? PhoneNumber { get; set; }
 
         [Column("email")]
@@ -42,7 +42,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? Role { get; set; }
 
         [Column("avatar_url")]
-        [JsonPropertyName("avatarUrl")]
+        [JsonPropertyName("avatar_url")]
         public string? AvatarUrl { get; set; }
 
         [Column("created_at")]

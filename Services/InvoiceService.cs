@@ -75,7 +75,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             );
 
             var res = await _http.SendAsync(req);
-            res.EnsureSuccessStatusCode();
+            if (!res.IsSuccessStatusCode)
+            {
+                var errBody = await res.Content.ReadAsStringAsync();
+                throw new Exception($"Invoice creation failed: {res.StatusCode} - {errBody}");
+            }
 
             var json = await res.Content.ReadAsStringAsync();
             var created =
@@ -146,6 +150,12 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var err = await res.Content.ReadAsStringAsync();
                 throw new Exception($"[CreateTreatments] Supabase error: {err}");
             }
+        }
+
+        public async Task<Invoice?> GetInvoiceByIdAsync(string id)
+        {
+            var res = await _supabase.From<Invoice>().Where(i => i.Id == id).Get();
+            return res.Models.FirstOrDefault();
         }
 
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)
@@ -237,9 +247,10 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task RecordPaymentAsync(Payment payment)
         {
+            // Insert payment record (once only)
             await _supabase.From<Payment>().Insert(payment);
 
-            // Calculate total paid
+            // Calculate total paid so far for this invoice
             var res = await _supabase
                 .From<Payment>()
                 .Where(x => x.InvoiceId == payment.InvoiceId)
@@ -247,18 +258,15 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var totalPaid = res.Models.Sum(p => p.Amount);
 
-            // Get invoice to check amount
-            var payRes = await _supabase.From<Payment>().Insert(payment);
-
             // Log payment
             await _logs.LogActionAsync(payment.InvoiceId, "payment recorded", $"Amount: {payment.Amount}", null, "Invoice", $"/Admin/Invoices?id={payment.InvoiceId}");
             
-            // Re-calc status logic...
+            // Update invoice status based on total paid
             var invRes = await _supabase.From<Invoice>().Where(i => i.Id == payment.InvoiceId).Get();
             var invoice = invRes.Models.FirstOrDefault();
             if (invoice != null)
             {
-                // Send notification to patient
+                // Notify patient
                 await _notifs.CreateNotificationAsync(invoice.PatientId, "Payment Received", $"A payment of {payment.Amount:C} has been recorded for your invoice.");
 
                 string newStatus =

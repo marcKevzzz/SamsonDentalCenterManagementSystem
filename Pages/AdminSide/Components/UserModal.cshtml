@@ -14,30 +14,30 @@
             <input type="hidden" id="modalUserId" />
             <div class="grid grid-cols-2 gap-4 !-my-2">
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">First Name</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">First Name</label>
                     <input id="mFirstName" type="text" placeholder="Juan"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Last Name</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Last Name</label>
                     <input id="mLastName" type="text" placeholder="Dela Cruz"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Email</label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Email</label>
                 <input id="mEmail" type="email" placeholder="user@email.com"
                     class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Date of Birth</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Date of Birth</label>
                     <input id="mDob" type="date"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Sex</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Sex</label>
                     <select id="mSex"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
                         <option value="">Select</option>
@@ -49,12 +49,12 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Phone Number</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Phone Number</label>
                     <input id="mPhone" type="tel" placeholder="09XX XXX XXXX"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Role</label>
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Role</label>
                     <select id="mRole"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
                         <option value="patient">Patient</option>
@@ -63,27 +63,27 @@
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Address</label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Address</label>
                 <input id="mAddress" type="text" placeholder="Complete address"
                     class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
             </div>
 
             <!-- Avatar -->
             <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] font-semibold text-slate-600 tracking-wide">Avatar (Optional)</label>
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Avatar (Optional)</label>
                 <input id="mAvatar" type="file" accept="image/*"
-                    class="px-3 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all" />
+                    class="px-3 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all" />
             </div>
 
             <p id="modalError" class="hidden text-[12px] text-red-500 font-medium"></p>
         </div>
         <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
             <button onclick="closeModal()"
-                class="px-4 py-2 text-[12.5px] font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                class="px-4 py-2 text-[12.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
                 Cancel
             </button>
             <button id="modalSaveBtn" onclick="saveUser()"
-                class="px-5 py-2 text-[12.5px] font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors">
+                class="px-5 py-2 text-[12.5px] font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors">
                 Save
             </button>
         </div>

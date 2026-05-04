@@ -8,113 +8,201 @@
 <div id="page-patients" class="page p-4 md:p-6">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h2 class="font-display text-xl font-extrabold text-brand-900">
-                My Patients
-            </h2>
-            <p class="text-[12px] text-brand-500 mt-0.5">
-                Patients assigned to you for treatment
-            </p>
+            <h2 class="font-display text-xl font-bold text-brand-900">My Patients</h2>
+            <p class="text-[12px] text-brand-500 mt-0.5">Patients you have treated or have upcoming appointments with.</p>
         </div>
+        <button onclick="openAddPatientModal()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+            <i class="fa-solid fa-plus text-[11px]"></i>
+            Add Patient
+        </button>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <div class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100">
-            <div class="relative flex-1 min-w-[140px] max-w-[260px]">
-                <svg class="absolute left-2.5 top-1/2 translate-half text-slate-400" width="12" height="12" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input id="patient-search" placeholder="Search patients" oninput="filterPatientsLocal()"
-                    class="w-full pl-7 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary/40" />
+    <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden shadow-sm">
+        <div class="flex flex-wrap items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+            <div class="relative flex-1 min-w-[200px] max-w-[320px]">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[12px]"></i>
+                <input id="patient-search" placeholder="Search by name or email..." oninput="filterPatientsLocal()"
+                    class="w-full pl-10 pr-4 py-2.5 text-[13px] bg-white border border-slate-200 rounded-2xl outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all" />
+            </div>
+            <div class="flex items-center gap-2 text-[11px] font-bold text-brand-400 uppercase tracking-widest ml-auto">
+                <i class="fa-solid fa-circle text-[6px] text-emerald-500"></i>
+                <span id="patient-count">@Model.Patients.Count Patients</span>
             </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="dtable w-full min-w-[500px]">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
-                            Patient
-                        </th>
-                        <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
-                            Age / Gender
-                        </th>
-                        <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
-                            Contact
-                        </th>
-                        <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
-                            Status
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50" id="patients-body">
-                    @if (!Model.Patients.Any())
-                    {
-                        <tr id="no-patients-row">
-                            <td colspan="4" class="px-4 py-10 text-center text-[12px] text-brand-400">
-                                No patients assigned to you yet.
-                            </td>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[700px]">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Patient</th>
+                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Age / Gender</th>
+                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Contact</th>
+                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Status</th>
+                            <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Action</th>
                         </tr>
-                    }
-                    else
-                    {
-                        foreach (var patient in Model.Patients)
+                    </thead>
+                    <tbody class="divide-y divide-slate-50" id="patients-body">
+                        @if (!Model.Patients.Any())
                         {
-                            var isGuest = patient.Id.StartsWith("guest_");
-                            <tr onclick="window.location.href='/Doctor/Patients/Details?id=@patient.Id'" 
-                                class="patient-row group hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-50 last:border-0"
-                                data-search="@patient.FirstName.ToLower() @patient.LastName.ToLower()">
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-3">
-                                        @if (!string.IsNullOrEmpty(patient.AvatarUrl))
-                                        {
-                                            <img src="@patient.AvatarUrl" class="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200" />
-                                        }
-                                        else
-                                        {
-                                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase ring-1 ring-primary/20">
-                                                @(patient.FirstName.Length > 0 ? patient.FirstName[..1] : "P")@(patient.LastName.Length > 0 ? patient.LastName[..1] : "")
-                                            </div>
-                                        }
-                                        <div>
-                                            <div class="text-[13px] font-bold text-brand-900 leading-none mb-1 group-hover:text-primary transition-colors">
-                                                @patient.FirstName @patient.LastName
-                                                @if (isGuest)
-                                                {
-                                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-slate-100 text-slate-500">Guest</span>
-                                                }
-                                            </div>
-                                            <div class="text-[10.5px] text-brand-400">@patient.Email</div>
-                                        </div>
+                            <tr>
+                                <td colspan="5" class="px-4 py-16 text-center">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <span class="text-[13px] font-medium text-brand-600">No patients found assigned to you.</span>
+                                        <span class="text-[11px] text-brand-400">Try adjusting your search or filters.</span>
                                     </div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="text-[12px] text-brand-800">
-                                        @(patient.DateOfBirth.HasValue ? (DateTime.Today.Year - patient.DateOfBirth.Value.Year).ToString() + " yrs" : "N/A")
-                                    </div>
-                                    <div class="text-[10.5px] text-brand-400 capitalize">@(patient.Sex ?? "Unspecified")</div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="text-[12px] text-brand-800">@(string.IsNullOrEmpty(patient.PhoneNumber) ? "N/A" : patient.PhoneNumber)</div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20">
-                                        Active
-                                    </span>
                                 </td>
                             </tr>
                         }
-                    }
-                </tbody>
-            </table>
+                        else
+                        {
+                            foreach (var patient in Model.Patients)
+                            {
+                                var isGuest = patient.Id.StartsWith("guest_");
+                                var initials = $"{( (patient.FirstName ?? "").Length > 0 ? patient.FirstName[0] : 'P')}{( (patient.LastName ?? "").Length > 0 ? patient.LastName[0] : ' ')}".Trim();
+                                var ageStr = patient.DateOfBirth.HasValue ? (DateTime.Today.Year - patient.DateOfBirth.Value.Year).ToString() : "N/A";
+                                var statusText = isGuest ? "Guest" : "Registered";
+                                
+                                <tr class="patient-row group hover:bg-slate-50/80 border-b border-slate-100 transition-colors last:border-0 cursor-pointer" onclick="window.location.href='/Doctor/Patients/Details?id=@patient.Id'" data-search="@((patient.FirstName ?? "").ToLower()) @((patient.LastName ?? "").ToLower()) @((patient.Email ?? "").ToLower())">
+                                    <td class="px-4 py-3.5">
+                                        <div class="flex items-center gap-3">
+                                            @if (!string.IsNullOrEmpty(patient.AvatarUrl))
+                                            {
+                                                <img src="@patient.AvatarUrl" class="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-slate-200" />
+                                            }
+                                            else
+                                            {
+                                                <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-bold font-display shadow-sm uppercase">
+                                                    @initials
+                                                </div>
+                                            }
+                                            <div>
+                                                <a href="/Doctor/Patients/Details?id=@patient.Id" class="text-[13.5px] font-medium text-brand-900 hover:text-primary transition-colors block leading-tight">
+                                                    @patient.FirstName @patient.LastName
+                                                </a>
+                                                <span class="text-[10px] font-mono text-brand-400 uppercase tracking-tight">#P-@((patient.Id ?? "00000").Substring(0, Math.Min(5, patient.Id?.Length ?? 0)))</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3.5">
+                                        <div class="flex flex-col">
+                                            <span class="text-[12.5px] text-brand-600 font-medium">@ageStr yrs</span>
+                                            <span class="text-[10.5px] text-brand-400 capitalize">@(patient.Sex ?? "Not Set")</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-[12.5px] text-brand-500 font-medium">
+                                        @(string.IsNullOrEmpty(patient.PhoneNumber) ? "No Phone" : patient.PhoneNumber)
+                                    </td>
+                                    <td class="px-4 py-3.5">
+                                        <span class="inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20 uppercase tracking-wide">
+                                            @statusText
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right">
+                                        <a href="/Doctor/Patients/Details?id=@patient.Id" class="inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-bold text-primary hover:bg-primary/5 rounded-md transition-all">
+                                            View Profile
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
+<partial name="~/Pages/AdminSide/Components/UserModal.cshtml" />
+
 @section Scripts {
-<script>
-    function filterPatientsLocal() {
+<script src="~/js/ui.js" type="module"></script>
+<script type="module">
+    import { Toast } from "/js/ui.js";
+
+    window.openAddPatientModal = () => {
+        const modal = document.getElementById('userModal');
+        const roleSel = document.getElementById('mRole');
+        if (roleSel) {
+            roleSel.value = 'patient';
+            roleSel.parentElement.classList.add('hidden'); // Hide role selection for doctors
+        }
+        
+        document.getElementById('modalTitle').textContent = 'Add New Patient';
+        document.getElementById('modalUserId').value = '';
+        
+        // Clear inputs
+        document.querySelectorAll('.modal-input').forEach(i => i.value = '');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        gsap.fromTo(modal.querySelector('.bg-white'), 
+            { scale: 0.9, opacity: 0, y: 20 },
+            { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+        );
+    };
+
+    window.closeModal = () => {
+        const modal = document.getElementById('userModal');
+        gsap.to(modal.querySelector('.bg-white'), {
+            scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
+            onComplete: () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        });
+    };
+
+    window.saveUser = async () => {
+        const btn = document.getElementById('modalSaveBtn');
+        const err = document.getElementById('modalError');
+        
+        const payload = {
+            firstName: document.getElementById('mFirstName').value.trim(),
+            lastName: document.getElementById('mLastName').value.trim(),
+            email: document.getElementById('mEmail').value.trim(),
+            phoneNumber: document.getElementById('mPhone').value.trim(),
+            dateOfBirth: document.getElementById('mDob').value,
+            sex: document.getElementById('mSex').value,
+            role: 'patient'
+        };
+
+        if (!payload.firstName || !payload.lastName || !payload.email) {
+            err.textContent = "Please fill in all required fields.";
+            err.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...';
+
+        try {
+            const res = await fetch('/api/admin/data/patients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (data.ok) {
+                Toast.show("Patient created successfully!", "success");
+                closeModal();
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                throw new Error(data.error || "Failed to save patient.");
+            }
+        } catch (e) {
+            err.textContent = e.message;
+            err.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save';
+        }
+    };
+
+    window.filterPatientsLocal = () => {
         const q = document.getElementById('patient-search').value.toLowerCase().trim();
         const rows = document.querySelectorAll('.patient-row');
         let found = 0;
@@ -129,19 +217,26 @@
             }
         });
 
-        // Show/hide no results row if needed
+        document.getElementById('patient-count').textContent = `${found} Patients`;
+
         let noResults = document.getElementById('no-results-row');
         if (found === 0 && q) {
             if (!noResults) {
                 const tbody = document.getElementById('patients-body');
                 noResults = document.createElement('tr');
                 noResults.id = 'no-results-row';
-                noResults.innerHTML = `<td colspan="4" class="px-4 py-10 text-center text-[12px] text-brand-400">No patients matching "${q}"</td>`;
+                noResults.innerHTML = `<td colspan="5" class="px-6 py-20 text-center">
+                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-300">
+                        <i class="fa-solid fa-magnifying-glass text-2xl"></i>
+                    </div>
+                    <p class="text-[13px] text-brand-400 font-medium">No results matching "${q}"</p>
+                </td>`;
                 tbody.appendChild(noResults);
             }
         } else if (noResults) {
             noResults.remove();
         }
-    }
+    };
 </script>
 }
+

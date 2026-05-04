@@ -8,7 +8,7 @@
 <div class="page p-6">
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h2 class="text-2xl font-extrabold text-brand tracking-tight">Arrived Patients</h2>
+      <h2 class="text-2xl font-bold text-brand tracking-tight">Arrived Patients</h2>
       <p class="text-[13px] text-brand-400 mt-1">Patients waiting for treatment and billing generation</p>
     </div>
     <div class="flex items-center gap-3">
@@ -18,8 +18,8 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8" id="arrived-patients-container">
-    <div class="col-span-full py-20 text-center" id="arrived-loading">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 mb-8" id="arrived-patients-container">
+    <div class="col-span-full py-8 text-center" id="arrived-loading">
       <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary">
         <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
       </div>
@@ -29,7 +29,7 @@
 
   <div class="flex flex-wrap items-center justify-between gap-4 mb-5 mt-10">
       <div>
-          <h3 class="text-xl font-extrabold text-brand tracking-tight">Recent Treatments</h3>
+          <h3 class="text-xl font-bold text-brand tracking-tight">Recent Treatments</h3>
           <p class="text-[12px] text-brand-400">Track and manage treatment records</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
@@ -86,7 +86,7 @@
           <div class="absolute inset-0 opacity-10"
             style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
           <div class="relative z-10">
-            <h3 class="font-display font-extrabold text-white text-xl tracking-tight">Record Treatment</h3>
+            <h3 class="font-display font-bold text-white text-xl tracking-tight">Record Treatment</h3>
             <p class="text-white/50 text-[11px] font-bold uppercase tracking-[0.2em] mt-1">Generate a Treatment Record & Billing
             </p>
           </div>
@@ -211,7 +211,7 @@
               <div class="h-px bg-slate-200"></div>
               <div class="flex justify-between text-[15px]">
                 <span class="font-bold text-brand">Total Due</span>
-                <span id="inv-final" class="font-extrabold text-primary">₱0.00</span>
+                <span id="inv-final" class="font-bold text-primary">₱0.00</span>
               </div>
             </div>
             <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-3">

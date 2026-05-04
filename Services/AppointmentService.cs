@@ -23,6 +23,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly BlockedDateService _blockedDates;
         private readonly IHubContext<AdminHub> _hubContext;
         private readonly ProfileService _profiles;
+        private readonly RecordService _recordService;
         private readonly IDistributedCache _cache;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
@@ -57,6 +58,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             ClinicService clinic,
             BlockedDateService blockedDates,
             ProfileService profiles,
+            RecordService recordService,
             IDistributedCache cache
         )
         {
@@ -72,6 +74,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _clinic = clinic;
             _blockedDates = blockedDates;
             _profiles = profiles;
+            _recordService = recordService;
             _cache = cache;
         }
 
@@ -766,7 +769,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             );
 
             var patchRes = await _http.SendAsync(patchReq);
-            patchRes.EnsureSuccessStatusCode();
+            if (!patchRes.IsSuccessStatusCode)
+            {
+                var err = await patchRes.Content.ReadAsStringAsync();
+                throw new Exception($"Appointment status update failed: {patchRes.StatusCode} - {err}");
+            }
 
             // Broadcast real-time update
             await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "status_update", id = id, status = newStatus });
@@ -913,7 +920,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&patient_id=eq.{patientId}&order=appointment_date.desc";
+                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*)),patient_profile:profiles!patient_id(*)&patient_id=eq.{patientId}&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -935,7 +942,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var path = $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&doctor_id=eq.{doctorId}&order=appointment_date.desc";
+                var path = $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*)),patient_profile:profiles!patient_id(*)&doctor_id=eq.{doctorId}&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -1097,6 +1104,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                     
                     Console.WriteLine($"[Promotion] Linked appointment {appt.Id} to profile {newPatientId}");
                 }
+
+                // 4. Initialize Clinical Records (Medical Info etc.)
+                await _recordService.InitializePatientRecords(newPatientId, "system");
             }
             catch (Exception ex)
             {

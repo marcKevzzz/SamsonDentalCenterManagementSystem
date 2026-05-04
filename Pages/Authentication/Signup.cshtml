@@ -15,21 +15,21 @@ Layout = "_AuthLayout";
           class="flex items-center gap-0.5 -ml-8 text-white "
         >
           <img src="~/images/logo.svg" alt="logo" class="w-20 h-20 object-cover mt-1 brightness-150" />
-            <span id="logo" class="logo-font font-semibold text-[2.25rem] tracking-[0.12em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-4">
+            <span id="logo" class="logo-font font-medium text-[2.25rem] tracking-[0.12em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-4">
                 Samson  <span id="logo-last" class="text-gray-400 brightness-125 tracking-[0.22em] text-[0.95rem] p-0.5 pl-1 bg-gray-400/10 rounded-full">Dental  Center</span>
             </span>
         </div> -->
 
   <div class="relative z-10 my-auto">
     <div
-      class="flex items-center gap-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/35 mb-5">
+      class="flex items-center gap-2 font-body text-[0.8rem] font-medium tracking-[0.15em] uppercase text-white/35 mb-5">
       <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>New
       Patient Registration
     </div>
-    <h2 class="brand-font font-extrabold text-white leading-[1.08] mb-5" style="font-size: clamp(2rem, 3.2vw, 2.8rem)">
-      Join 2,000+<br />happy patients.
+    <h2 class="brand-font font-medium text-white leading-[1.08] mb-5" style="font-size: clamp(3rem, 4.2vw, 3.8rem)">
+      Join 2,000+ happy patients.
     </h2>
-    <p class="font-body text-[0.9rem] text-white/50 leading-relaxed max-w-xs mb-10">
+    <p class="font-body text-[0.9rem] text-white/50 leading-relaxed max-w-lg mb-10">
       Create your free patient account and enjoy a smoother, more personalised
       dental experience at SDC.
     </p>
@@ -38,14 +38,14 @@ Layout = "_AuthLayout";
     <div class="space-y-1">
       <div class="flex items-center gap-3">
         <div id="lp_step1"
-          class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 font-body text-[0.75rem] font-bold text-white step-indicator">
+          class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 font-body text-[0.8rem] font-medium text-white step-indicator">
           1
         </div>
         <div>
-          <div class="brand-font font-semibold text-white text-[0.85rem]">
+          <div class="brand-font font-medium text-white text-[1rem]">
             Personal Details
           </div>
-          <div class="font-body text-[0.72rem] text-white/40">
+          <div class="font-body text-[0.85rem] text-white/40">
             Your name and birthday
           </div>
         </div>
@@ -53,14 +53,14 @@ Layout = "_AuthLayout";
       <div class="w-px h-4 bg-white/15 ml-4"></div>
       <div class="flex items-center gap-3">
         <div id="lp_step2"
-          class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 font-body text-[0.75rem] font-bold text-white/40 step-indicator">
+          class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 font-body text-[0.8rem] font-medium text-white/40 step-indicator">
           2
         </div>
         <div>
-          <div class="brand-font font-semibold text-white/50 text-[0.85rem]">
+          <div class="brand-font font-medium text-white/50 text-[1rem]">
             Contact Info
           </div>
-          <div class="font-body text-[0.72rem] text-white/30">
+          <div class="font-body text-[0.85rem] text-white/30">
             Email and phone number
           </div>
         </div>
@@ -68,14 +68,14 @@ Layout = "_AuthLayout";
       <div class="w-px h-4 bg-white/15 ml-4"></div>
       <div class="flex items-center gap-3">
         <div id="lp_step3"
-          class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 font-body text-[0.75rem] font-bold text-white/40 step-indicator">
+          class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 font-body text-[0.8rem] font-medium text-white/40 step-indicator">
           3
         </div>
         <div>
-          <div class="brand-font font-semibold text-white/50 text-[0.85rem]">
+          <div class="brand-font font-medium text-white/50 text-[1rem]">
             Security
           </div>
-          <div class="font-body text-[0.72rem] text-white/30">
+          <div class="font-body text-[0.85rem] text-white/30">
             Create your password
           </div>
         </div>
@@ -93,7 +93,7 @@ Layout = "_AuthLayout";
           class="w-10 h-10 rounded-full border-2 border-brand object-cover" alt="" />
       </div>
       <div>
-        <div class="text-[#f59e0b] text-sm font-bold flex items-center gap-1">
+        <div class="text-[#f59e0b] text-sm font-medium flex items-center gap-1">
           <i class="fa-solid fa-star"></i>
           <span>@ViewData["ReviewAvg"] / 5.0</span>
         </div>
@@ -105,19 +105,20 @@ Layout = "_AuthLayout";
 </div>
 
 <!-- ── Right panel ── -->
-<div class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto ">
-  <form id="signup-form" method="post" class="w-full max-w-[460px] fade-up animate">
+<div class="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 overflow-y-auto relative">
+  <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #1e40af 1px, transparent 0); background-size: 40px 40px;"></div>
+  <form id="signup-form" method="post" class="w-full max-w-[460px] fade-up animate relative z-10">
     <!-- Mobile logo -->
     <div  class="brand-logo flex items-center mb-2 -ml-4">
            <img src="~/images/logo.svg" alt="logo" class="w-12 h-12 object-cover mt-1 " />
-            <span id="logo" class="logo-font font-semibold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 ">
+            <span id="logo" class="logo-font font-bold text-[1.25rem] tracking-[0.035em] uppercase flex flex-col leading-[0.85] transition-colors gap-0.5 -ml-2 ">
                 Samson  <span id="logo-last" class="text-gray-600 brightness-125 tracking-[0.20em] text-[0.5rem] p-0.5 bg-gray-400/20 rounded-full">Dental  Center</span>
             </span>
         </div>
 
     <!-- Header -->
     <div class="mb-7">
-      <h2 class="brand-font font-extrabold text-brand text-[1.7rem] lg:text-nowrap leading-tight mb-1.5">
+      <h2 class="brand-font font-semibold text-brand text-[2.2rem] lg:text-nowrap leading-tight mb-1.5">
         Create your account
       </h2>
       <p class="font-body text-[0.9rem] text-muted">
@@ -142,7 +143,7 @@ Layout = "_AuthLayout";
     <div id="step1" class="space-y-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">First
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">First
             Name <span class="text-primary">*</span></label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -157,7 +158,7 @@ Layout = "_AuthLayout";
           <div id="err_su_fn" class="field-error">First name is required.</div>
         </div>
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Last
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Last
             Name <span class="text-primary">*</span></label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -175,7 +176,7 @@ Layout = "_AuthLayout";
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Date
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Date
             of Birth <span class="text-primary">*</span></label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -194,7 +195,7 @@ Layout = "_AuthLayout";
           </div>
         </div>
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Sex
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Sex
             <span class="text-primary">*</span></label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -220,14 +221,14 @@ Layout = "_AuthLayout";
       </div>
 
       <button type="button" id="gostep-2" data-next-step="2"
-        class="brand-font font-bold text-[0.85rem] tracking-wider uppercase w-full bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer mt-2">
+        class="brand-font font-medium text-[0.85rem] tracking-wider uppercase w-full bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer mt-2">
         Continue →
       </button>
 
       <div class="or-line font-body">or</div>
 
       <a href="../"
-        class="brand-font font-bold text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline">
+        class="brand-font font-medium text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -241,7 +242,7 @@ Layout = "_AuthLayout";
     <div id="step2" class="space-y-4 hidden">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Email
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Email
             Address <span class="text-primary">*</span></label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -259,7 +260,7 @@ Layout = "_AuthLayout";
         </div>
 
         <div>
-          <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Phone
+          <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Phone
             Number <span class="text-primary">*</span></label>
           <div class="relative">
             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -278,7 +279,7 @@ Layout = "_AuthLayout";
         </div>
       </div>
       <div>
-        <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Address
+        <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Address
           <span class="text-muted font-normal normal-case">(optional)</span></label>
         <div class="relative">
           <span class="absolute left-3.5 top-3.5 text-muted pointer-events-none">
@@ -295,11 +296,11 @@ Layout = "_AuthLayout";
 
       <div class="flex gap-3">
         <button type="button" id="goback-1" type="button" data-prev-step="1"
-          class="brand-font font-bold text-[0.82rem] tracking-wider uppercase flex-1 border-2 border-[#e5e7eb] text-muted py-3.5 rounded-xl hover:border-brand hover:text-brand transition-all cursor-pointer">
+          class="brand-font font-medium text-[0.82rem] tracking-wider uppercase flex-1 border-2 border-[#e5e7eb] text-muted py-3.5 rounded-xl hover:border-brand hover:text-brand transition-all cursor-pointer">
           ← Back
         </button>
         <button type="button" id="gostep-3" type="button" data-next-step="3"
-          class="brand-font font-bold text-[0.85rem] tracking-wider uppercase flex-[2] bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
+          class="brand-font font-medium text-[0.85rem] tracking-wider uppercase flex-[2] bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
           Continue →
         </button>
       </div>
@@ -309,7 +310,7 @@ Layout = "_AuthLayout";
     <!-- ══ STEP 3: Security ══ -->
     <div id="step3" class="space-y-4 hidden">
       <div>
-        <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Password
+        <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Password
           <span class="text-primary">*</span></label>
         <div class="relative">
           <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -351,7 +352,7 @@ Layout = "_AuthLayout";
       </div>
 
       <div>
-        <label class="block font-body text-[0.71rem] font-semibold tracking-[0.08em] uppercase text-muted mb-2">Confirm
+        <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Confirm
           Password <span class="text-primary">*</span></label>
         <div class="relative">
           <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -404,11 +405,11 @@ Layout = "_AuthLayout";
 
       <div class="flex gap-3 pt-1">
         <button type="button" id="goback-2" data-prev-step="2"
-          class="brand-font font-bold text-[0.82rem] tracking-wider uppercase flex-1 border-2 border-[#e5e7eb] text-muted py-3.5 rounded-xl hover:border-brand hover:text-brand transition-all cursor-pointer">
+          class="brand-font font-medium text-[0.82rem] tracking-wider uppercase flex-1 border-2 border-[#e5e7eb] text-muted py-3.5 rounded-xl hover:border-brand hover:text-brand transition-all cursor-pointer">
           ← Back
         </button>
         <button type="button" id="create-acc-btn"
-          class="brand-font font-bold text-[0.85rem] tracking-wider uppercase flex-[2] bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
+          class="brand-font font-medium text-[0.85rem] tracking-wider uppercase flex-[2] bg-brand text-white py-3.5 rounded-xl hover:bg-primary transition-colors duration-200 cursor-pointer">
           Create Account →
         </button>
       </div>

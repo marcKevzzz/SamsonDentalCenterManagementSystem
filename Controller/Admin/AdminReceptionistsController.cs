@@ -108,12 +108,12 @@ public class AdminReceptionistsController : ControllerBase
     // ── PUT /api/admin/receptionists/{id}/availability ───────────────────────
     [HttpPut("{id}/availability")]
     [Authorize(Roles = "admin,receptionist")]
-    public async Task<IActionResult> UpdateAvailability(string id, [FromBody] List<ReceptionistAvailabilityDto> slots)
+    public async Task<IActionResult> UpdateAvailability(string id, [FromBody] List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto> slots)
     {
         try
         {
-            var result = await _svc.UpdateAvailabilityAsync(id, slots);
-            return Ok(new { ok = true, data = result });
+            await _svc.SetAvailabilityAsync(id, slots);
+            return Ok(new { ok = true });
         }
         catch (Exception ex)
         {

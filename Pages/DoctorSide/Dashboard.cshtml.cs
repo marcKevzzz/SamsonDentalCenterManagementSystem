@@ -27,13 +27,16 @@ public class DashboardModel : AdminPageModel
         _leaveService = leaveService;
     }
 
-    public List<Appointment> MyAppointments { get; set; } = new();
+    public string DoctorName { get; set; } = string.Empty;
+    public List<Appointment> UpcomingAppointments { get; set; } = new();
     public List<Appointment> ArrivedPatients { get; set; } = new();
     public List<DentalService> AllServices { get; set; } = new();
     public List<Invoice> RecentInvoices { get; set; } = new();
     public List<StaffLeave> MyLeaves { get; set; } = new();
     
-    public int TodayAppointmentsCount { get; set; }
+    public int TodayAppointments { get; set; }
+    public int TotalPatients { get; set; }
+    public int MonthlyTreatments { get; set; }
     public int PendingReviewsCount { get; set; }
     public int TotalInvoicesCount { get; set; }
 
@@ -65,6 +68,7 @@ public class DashboardModel : AdminPageModel
         
         // 3. Filter by this doctor's ID
         var doctorId = doctorRecord?.Id;
+        DoctorName = doctorRecord?.Profile?.LastName ?? "Staff";
 
         if (doctorId != null)
         {
@@ -75,13 +79,15 @@ public class DashboardModel : AdminPageModel
             ArrivedPatients = myToday.Where(a => a.Status == "arrived").ToList();
             
             // Upcoming: confirmed and within 24 hours (Today and Tomorrow)
-            MyAppointments = allAppointments
+            UpcomingAppointments = allAppointments
                 .Where(a => a.DoctorId == doctorId && a.Status == "confirmed" && a.AppointmentDate.Date >= DateTime.Today && a.AppointmentDate.Date <= DateTime.Today.AddDays(1))
                 .OrderBy(a => a.AppointmentDate)
                 .ThenBy(a => a.AppointmentTime)
                 .Take(10).ToList();
 
-            TodayAppointmentsCount = myToday.Count;
+            TodayAppointments = myToday.Count;
+            TotalPatients = allAppointments.Where(a => a.DoctorId == doctorId).Select(a => a.PatientId).Distinct().Count();
+            MonthlyTreatments = allAppointments.Count(a => a.DoctorId == doctorId && a.AppointmentDate.Month == DateTime.Today.Month && a.AppointmentDate.Year == DateTime.Today.Year);
             PendingReviewsCount = allAppointments.Count(a => a.DoctorId == doctorId && a.Status == "pending");
 
             var myInvoices = await invoiceService.GetInvoicesByDoctorIdAsync(doctorId);
@@ -93,14 +99,16 @@ public class DashboardModel : AdminPageModel
         else if (CurrentUserRole == "admin")
         {
             ArrivedPatients = allAppointments.Where(a => a.Status == "arrived").ToList();
-            MyAppointments = allAppointments
+            UpcomingAppointments = allAppointments
                 .Where(a => a.Status == "confirmed" && a.AppointmentDate.Date >= DateTime.Today && a.AppointmentDate.Date <= DateTime.Today.AddDays(1))
                 .OrderBy(a => a.AppointmentDate)
                 .ThenBy(a => a.AppointmentTime)
                 .Take(10)
                 .ToList();
             
-            TodayAppointmentsCount = MyAppointments.Count;
+            TodayAppointments = UpcomingAppointments.Count;
+            TotalPatients = allAppointments.Select(a => a.PatientId).Distinct().Count();
+            MonthlyTreatments = allAppointments.Count(a => a.AppointmentDate.Month == DateTime.Today.Month && a.AppointmentDate.Year == DateTime.Today.Year);
             PendingReviewsCount = allAppointments.Count(a => a.Status == "pending");
 
             var allInvoices = await invoiceService.GetAllInvoicesAsync();

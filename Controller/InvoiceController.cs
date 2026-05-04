@@ -190,25 +190,31 @@ public class InvoiceController : ControllerBase
                         var adminId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value ?? "system";
                         foreach (var t in req.Treatments)
                         {
-                            if (!string.IsNullOrEmpty(t.ToothData))
+                            if (!string.IsNullOrEmpty(t.ToothNumbers) && !string.IsNullOrEmpty(req.PatientId))
                             {
                                 try
                                 {
-                                    var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(t.ToothData);
+                                    var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(t.ToothNumbers);
                                     if (dict != null)
                                     {
+                                        var toothUpdates = new List<PatientToothStatus>();
                                         foreach (var kvp in dict)
                                         {
                                             if (int.TryParse(kvp.Key, out int toothNum))
                                             {
-                                                await _recordService.UpdateToothStatusAsync(new PatientToothStatus
+                                                toothUpdates.Add(new PatientToothStatus
                                                 {
                                                     PatientId = req.PatientId,
                                                     ToothNumber = toothNum,
                                                     Status = kvp.Value,
                                                     Notes = t.Procedure ?? "Updated from treatment",
-                                                }, adminId);
+                                                });
                                             }
+                                        }
+
+                                        if (toothUpdates.Any())
+                                        {
+                                            await _recordService.UpdateMultipleToothStatusAsync(toothUpdates, adminId);
                                         }
                                     }
                                 }
@@ -272,6 +278,22 @@ public class InvoiceController : ControllerBase
 
         try
         {
+            // 1. Fetch Invoice to check balance and total
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(req.InvoiceId);
+            if (invoice == null) return NotFound(new { ok = false, error = "Invoice not found." });
+
+            // 2. Enforce Full Payment for specific methods
+            var fullPaymentMethods = new[] { "Cash", "GCash", "Maya", "Bank Transfer" };
+            if (fullPaymentMethods.Contains(req.PaymentMethod, StringComparer.OrdinalIgnoreCase) && req.Amount < invoice.FinalAmount)
+            {
+                return BadRequest(new { ok = false, error = $"{req.PaymentMethod} does not allow partial payments. Please pay the full amount of {invoice.FinalAmount:C}." });
+            }
+
+            if (req.Amount > invoice.FinalAmount)
+            {
+                return BadRequest(new { ok = false, error = $"Payment amount {req.Amount:C} exceeds the final amount {invoice.FinalAmount:C}." });
+            }
+
             var payment = new Payment
             {
                 Id = Guid.NewGuid().ToString(),

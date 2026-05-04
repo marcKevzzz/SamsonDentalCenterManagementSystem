@@ -43,7 +43,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         // ── staff_availability rows (array from the join) ──────────────────
         [JsonPropertyName("staff_availability")]
-        public List<AvailabilityDto>? Availability { get; set; }
+        public List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>? Availability { get; set; }
 
         // ── Computed helpers for the view ─────────────────────────────────────
         public string FullName =>
@@ -52,10 +52,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                 : "Unknown Profile";
 
         public string Initials =>
-            $"{Profile?.FirstName?.FirstOrDefault().ToString().ToUpper() ?? ""}"
-            + $"{Profile?.LastName?.FirstOrDefault().ToString().ToUpper() ?? "?"}";
+            $"{( (Profile?.FirstName?.Length ?? 0) > 0 ? Profile.FirstName[0] : ' ')}{( (Profile?.LastName?.Length ?? 0) > 0 ? Profile.LastName[0] : ' ')}".Trim();
     }
 
+    // ── ProfileDto (used for projections) ─────────────────────
     public class ProfileDto
     {
         [JsonPropertyName("id")]
@@ -78,41 +78,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         [JsonPropertyName("role")]
         public string? Role { get; set; }
-    }
-
-    // ── AvailabilityDto (used for read-side projections) ─────────────────────
-    public class AvailabilityDto
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = string.Empty;
-
-        [JsonPropertyName("staff_id")]
-        public string DoctorId { get; set; } = string.Empty;
-
-        [JsonPropertyName("day_of_week")]
-        public int DayOfWeek { get; set; }
-
-        [JsonPropertyName("start_time")]
-        public string StartTime { get; set; } = string.Empty;
-
-        [JsonPropertyName("end_time")]
-        public string EndTime { get; set; } = string.Empty;
-
-        [JsonPropertyName("is_active")]
-        public bool IsActive { get; set; } = true;
-
-        public string DayAbbr =>
-            DayOfWeek switch
-            {
-                0 => "Sun",
-                1 => "Mon",
-                2 => "Tue",
-                3 => "Wed",
-                4 => "Thu",
-                5 => "Fri",
-                6 => "Sat",
-                _ => "?",
-            };
     }
 
     // ── Service ───────────────────────────────────────────────────────────────
@@ -145,7 +110,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Fetch availability from staff_availability (no FK embed needed) ─────
-        private async Task<Dictionary<string, List<AvailabilityDto>>> FetchDoctorAvailabilityAsync()
+        private async Task<Dictionary<string, List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>> FetchDoctorAvailabilityAsync()
         {
             try
             {
@@ -153,8 +118,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var res = await _http.SendAsync(req);
                 if (!res.IsSuccessStatusCode) return new();
                 var json  = await res.Content.ReadAsStringAsync();
-                var slots = JsonSerializer.Deserialize<List<AvailabilityDto>>(json, _json) ?? new();
-                return slots.GroupBy(s => s.DoctorId)
+                var slots = JsonSerializer.Deserialize<List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>(json, _json) ?? new();
+                return slots.GroupBy(s => s.StaffId)
                             .ToDictionary(g => g.Key, g => g.ToList());
             }
             catch { return new(); }
@@ -323,7 +288,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Set availability — bypasses RLS ──────────────────────────────────
-        public async Task SetAvailabilityAsync(string doctorId, List<StaffAvailability> slots)
+        public async Task SetAvailabilityAsync(string doctorId, List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto> slots)
         {
             // 1. Delete old slots for this doctor
             var delReq = BuildRequest(

@@ -28,7 +28,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public ProfileDto? Profile { get; set; }
 
         [JsonPropertyName("staff_availability")]
-        public List<ReceptionistAvailabilityDto>? Availability { get; set; }
+        public List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>? Availability { get; set; }
 
         public string FullName =>
             Profile != null
@@ -36,30 +36,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                 : "Unknown Profile";
 
         public string Initials =>
-            $"{Profile?.FirstName?.FirstOrDefault().ToString().ToUpper() ?? ""}" +
-            $"{Profile?.LastName?.FirstOrDefault().ToString().ToUpper()  ?? "?"}";
+            $"{( (Profile?.FirstName?.Length ?? 0) > 0 ? Profile.FirstName[0] : ' ')}{( (Profile?.LastName?.Length ?? 0) > 0 ? Profile.LastName[0] : ' ')}".Trim();
     }
 
-    public class ReceptionistAvailabilityDto
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = string.Empty;
 
-        [JsonPropertyName("staff_id")]
-        public string ReceptionistId { get; set; } = string.Empty;
-
-        [JsonPropertyName("day_of_week")]
-        public int DayOfWeek { get; set; }
-
-        [JsonPropertyName("start_time")]
-        public string StartTime { get; set; } = string.Empty;
-
-        [JsonPropertyName("end_time")]
-        public string EndTime { get; set; } = string.Empty;
-
-        [JsonPropertyName("is_active")]
-        public bool IsActive { get; set; } = true;
-    }
 
     public class ReceptionistService
     {
@@ -91,7 +71,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Fetch availability from staff_availability (no FK embed needed) ──
-        private async Task<Dictionary<string, List<ReceptionistAvailabilityDto>>> FetchReceptionistAvailabilityAsync()
+        private async Task<Dictionary<string, List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>> FetchReceptionistAvailabilityAsync()
         {
             try
             {
@@ -99,8 +79,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var res = await _http.SendAsync(req);
                 if (!res.IsSuccessStatusCode) return new();
                 var json  = await res.Content.ReadAsStringAsync();
-                var slots = JsonSerializer.Deserialize<List<ReceptionistAvailabilityDto>>(json, _json) ?? new();
-                return slots.GroupBy(s => s.ReceptionistId)
+                var slots = JsonSerializer.Deserialize<List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>(json, _json) ?? new();
+                return slots.GroupBy(s => s.StaffId)
                             .ToDictionary(g => g.Key, g => g.ToList());
             }
             catch { return new(); }
@@ -134,8 +114,15 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var json    = await res.Content.ReadAsStringAsync();
             var receptionists = JsonSerializer.Deserialize<List<ReceptionistDto>>(json, _json) ?? new();
-            
-            return receptionists.FirstOrDefault();
+            var rec = receptionists.FirstOrDefault();
+
+            if (rec != null)
+            {
+                var avail = await FetchReceptionistAvailabilityAsync();
+                rec.Availability = avail.TryGetValue(rec.Id, out var s) ? s : new();
+            }
+
+            return rec;
         }
 
         // ── Fetch receptionist-role profiles not yet linked ───────────────────
@@ -217,18 +204,17 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Availability ─────────────────────────────────────────────────────
-        public async Task<List<ReceptionistAvailabilityDto>> UpdateAvailabilityAsync(string receptionistId, List<ReceptionistAvailabilityDto> slots)
+        public async Task SetAvailabilityAsync(string receptionistId, List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto> slots)
         {
             // 1. Delete existing for receptionist
             var delReq = BuildRequest(HttpMethod.Delete, $"/staff_availability?staff_id=eq.{receptionistId}&staff_type=eq.receptionist");
             await _http.SendAsync(delReq);
 
-            if (!slots.Any()) return new List<ReceptionistAvailabilityDto>();
+            if (slots == null || !slots.Any()) return;
 
             // 2. Insert new slots
             var insReq = BuildRequest(HttpMethod.Post, "/staff_availability");
-            insReq.Headers.Add("Prefer", "return=representation");
-
+            
             var payload = slots.Select(s => new
             {
                 staff_id    = receptionistId,
@@ -236,16 +222,13 @@ namespace SamsonDentalCenterManagementSystem.Services
                 day_of_week = s.DayOfWeek,
                 start_time  = s.StartTime,
                 end_time    = s.EndTime,
-                is_active   = s.IsActive
+                is_active   = true
             }).ToList();
 
             insReq.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
 
             var res = await _http.SendAsync(insReq);
             res.EnsureSuccessStatusCode();
-
-            var json = await res.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<ReceptionistAvailabilityDto>>(json, _json) ?? new();
         }
     }
 }
