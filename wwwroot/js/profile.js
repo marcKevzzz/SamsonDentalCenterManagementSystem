@@ -81,7 +81,11 @@ async function updatePatientCounts() {
     }
 
     if (elements.general) {
-      elements.general.classList.toggle("hidden", data.unreadNotifications === 0);
+      const count = data.unreadNotifications;
+      elements.general.classList.toggle("hidden", count === 0);
+      if (count > 0) {
+        elements.general.innerText = count > 99 ? "99+" : count;
+      }
     }
 
     // Dental Records currently don't have an 'unread' state in the DB.
@@ -195,8 +199,8 @@ export function signOut(e) {
     confirmText: "Sign Out",
     cancelText: "Cancel",
     onConfirm: () => {
-      localStorage.removeItem("sb_user");
-      window.location.href = "/signout"; // Use an absolute path for reliability
+      localStorage.clear();
+      window.location.href = "/signout";
     },
   });
 }

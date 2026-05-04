@@ -8,18 +8,23 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide.Patients;
 
 public class PatientDetailsModel : AdminPageModel
 {
+    private readonly RecordService _recordService;
+    private readonly ProfileService _profileService;
     private readonly AppointmentService _appointmentService;
     private readonly InvoiceService _invoiceService;
-    private readonly ProfileService _profileService;
 
     public PatientDetailsModel(
         ProfileService profileService,
         AppointmentService appointmentService,
-        InvoiceService invoiceService) : base(profileService)
+        InvoiceService invoiceService,
+        RecordService recordService
+    )
+        : base(profileService)
     {
         _profileService = profileService;
         _appointmentService = appointmentService;
         _invoiceService = invoiceService;
+        _recordService = recordService;
     }
 
     public Profile? Patient { get; set; }
@@ -30,42 +35,42 @@ public class PatientDetailsModel : AdminPageModel
     public Appointment? NextAppointment { get; set; }
     public decimal OutstandingBalance { get; set; }
     public DateTime? LastTreatmentDate { get; set; }
+    public PatientMedicalInfo? MedicalInfo { get; set; }
+    public Dictionary<int, string> ToothStatusMap { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync(string id)
     {
-        if (string.IsNullOrEmpty(id)) return RedirectToPage("./Patients");
+        if (string.IsNullOrEmpty(id))
+            return RedirectToPage("./Patients");
 
         Patient = await _profileService.GetProfileById(id);
-        if (Patient == null) return NotFound();
+        if (Patient == null)
+            return NotFound();
 
         // 1. Appointments
         Appointments = await _appointmentService.GetByPatient(id);
         NextAppointment = Appointments
-            .Where(a => a.AppointmentDate >= DateTime.Today && (a.Status == "confirmed" || a.Status == "pending"))
+            .Where(a =>
+                a.AppointmentDate >= DateTime.Today
+                && (a.Status == "confirmed" || a.Status == "pending")
+            )
             .OrderBy(a => a.AppointmentDate)
             .FirstOrDefault();
 
         // 2. Invoices & Balance
-        // We use GetAllInvoicesAsync and filter for now as InvoiceService doesn't have GetByPatient
-        // Actually, let's assume we can fetch them or add a method.
-        // For now, let's fetch all and filter to be safe, or check if we can optimize.
-        var allInvoices = await _invoiceService.GetAllInvoicesAsync();
-        Invoices = allInvoices.Where(i => i.PatientId == id).ToList();
-        OutstandingBalance = Invoices.Where(i => i.Status != "paid" && i.Status != "cancelled").Sum(i => i.FinalAmount);
+        Invoices = await _invoiceService.GetInvoicesByPatientIdAsync(id);
+        OutstandingBalance = Invoices
+            .Where(i => i.Status != "paid" && i.Status != "cancelled")
+            .Sum(i => i.FinalAmount);
 
         // 3. Clinical Timeline (Treatments)
-        // Treatments are linked to invoices. 
-        if (Invoices.Any())
-        {
-            var invoiceIds = Invoices.Select(i => i.Id).ToList();
-            var treatmentsRes = await _invoiceService._supabase.From<Treatment>()
-                .Where(t => invoiceIds.Contains(t.InvoiceId))
-                .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
-                .Get();
-            
-            ClinicalTimeline = treatmentsRes.Models;
-            LastTreatmentDate = ClinicalTimeline.FirstOrDefault()?.CreatedAt;
-        }
+        ClinicalTimeline = await _recordService.GetTreatmentsByPatientAsync(id);
+        LastTreatmentDate = ClinicalTimeline.FirstOrDefault()?.CreatedAt;
+
+        // 4. Medical Info & Tooth Chart
+        MedicalInfo = await _recordService.GetMedicalInfoAsync(id);
+        var toothStatuses = await _recordService.GetToothChartAsync(id);
+        ToothStatusMap = toothStatuses.ToDictionary(ts => ts.ToothNumber, ts => ts.Status);
 
         return Page();
     }

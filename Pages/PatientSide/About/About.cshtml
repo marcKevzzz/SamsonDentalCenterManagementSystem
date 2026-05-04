@@ -252,7 +252,7 @@ ViewData["Title"] = "About page";
                                      alt="@doc.FullName"
                                      class="w-full h-full object-cover grayscale-[60%] group-hover:grayscale-0 transition-all duration-500" />
                                 <div class="absolute bottom-3.5 left-3.5">
-                                    <span class="bg-primary text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full">@doc.Title</span>
+                                    <span class="bg-primary text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full">@(doc.Title == "Admin" ? "Staff" : doc.Title)</span>
                                 </div>
                             </div>
                             <div class="p-5">

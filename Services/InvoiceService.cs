@@ -118,7 +118,34 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             if (treatments.Count == 0)
                 return;
-            await _supabase.From<Treatment>().Insert(treatments);
+
+            // Bypass ORM — schema cache may not include newly-added columns (tooth_data, xray_data).
+            // Explicit raw HTTP POST with snake_case payload avoids PGRST204 entirely.
+            var req = BuildRequest(HttpMethod.Post, "/treatments");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(
+                    treatments.Select(t => new
+                    {
+                        invoice_id = t.InvoiceId,
+                        service_id = string.IsNullOrEmpty(t.ServiceId) ? (object?)null : t.ServiceId,
+                        service_name = t.ServiceName,
+                        tooth_numbers = t.ToothNumbers,
+                        procedure_details = t.ProcedureDetails,
+                        diagnosis = t.Diagnosis,
+                        status = t.Status,
+                        notes = t.Notes
+                    })
+                ),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var res = await _http.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
+            {
+                var err = await res.Content.ReadAsStringAsync();
+                throw new Exception($"[CreateTreatments] Supabase error: {err}");
+            }
         }
 
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)

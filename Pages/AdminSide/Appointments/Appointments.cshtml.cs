@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
-using SamsonDentalCenterManagementSystem.Helpers;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SamsonDentalCenterManagementSystem.Pages.Admin;
 
@@ -20,31 +20,44 @@ public class AdminAppointmentsModel : AdminPageModel
         DentalServiceService services,
         ILogger<AdminAppointmentsModel> logger,
         SessionHelper sessionHelper,
-        ProfileService profileService)
+        ProfileService profileService
+    )
         : base(profileService)
     {
         _appointments = appointments;
-        _services     = services;
-        _logger       = logger;
+        _services = services;
+        _logger = logger;
         _sessionHelper = sessionHelper;
     }
 
-    public List<Appointment>    Appointments { get; set; } = new();
-    public List<Doctor>         Doctors      { get; set; } = new();
-    public List<DentalService>  Services     { get; set; } = new();
+    public List<Appointment> Appointments { get; set; } = new();
+    public List<Doctor> Doctors { get; set; } = new();
+    public List<DentalService> Services { get; set; } = new();
 
-    public int CountConfirmed => Appointments.Count(a => string.Equals(a.Status, "confirmed", StringComparison.OrdinalIgnoreCase));
-    public int CountPending   => Appointments.Count(a => string.Equals(a.Status, "pending", StringComparison.OrdinalIgnoreCase));
-    public int CountCancelled => Appointments.Count(a => string.Equals(a.Status, "cancelled", StringComparison.OrdinalIgnoreCase));
-    public int CountWaitlist  => Appointments.Count(a => string.Equals(a.Status, "waitlist", StringComparison.OrdinalIgnoreCase));
+    public int CountConfirmed =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "confirmed", StringComparison.OrdinalIgnoreCase)
+        );
+    public int CountPending =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "pending", StringComparison.OrdinalIgnoreCase)
+        );
+    public int CountCancelled =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "cancelled", StringComparison.OrdinalIgnoreCase)
+        );
+    public int CountWaitlist =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "waitlist", StringComparison.OrdinalIgnoreCase)
+        );
 
     public async Task<IActionResult> OnGetAsync()
     {
         var token = await _sessionHelper.GetValidTokenAsync();
-        
+
         if (token == null)
         {
-            return RedirectToPage("/Sign-in");
+            return RedirectToPage("/Authentication/Signin");
         }
 
         try
@@ -57,11 +70,23 @@ public class AdminAppointmentsModel : AdminPageModel
             _logger.LogError(ex, "Failed to load appointments");
         }
 
-        try { Doctors = await _appointments.GetDoctors(); }
-        catch (Exception ex) { _logger.LogError(ex, "Failed to load doctors"); }
+        try
+        {
+            Doctors = await _appointments.GetDoctors();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load doctors");
+        }
 
-        try { Services = await _services.GetAll(); }
-        catch (Exception ex) { _logger.LogError(ex, "Failed to load services"); }
+        try
+        {
+            Services = await _services.GetAll();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load services");
+        }
         return Page();
     }
 
@@ -69,7 +94,8 @@ public class AdminAppointmentsModel : AdminPageModel
     {
         try
         {
-            if (payload == null) return new JsonResult(new { ok = false, error = "Invalid data" });
+            if (payload == null)
+                return new JsonResult(new { ok = false, error = "Invalid data" });
             var appt = await _appointments.Create(payload);
             return new JsonResult(new { ok = true, id = appt.Id });
         }
@@ -140,7 +166,10 @@ public class AdminAppointmentsModel : AdminPageModel
     }
 
     public record UpdateStatusRequest(string Id, string Status, string? DoctorId = null);
+
     public record RescheduleRequest(string Id, DateTime NewDate, string NewTime, string? DoctorId);
+
     public record SlotRequest(string ServiceId, string Category, string Date);
+
     public record DeleteRequest(string Id);
 }

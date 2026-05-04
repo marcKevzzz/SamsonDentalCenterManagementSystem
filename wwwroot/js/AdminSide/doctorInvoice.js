@@ -46,11 +46,19 @@ function initializeWithData(data) {
     RECENT_TREATMENTS = data.treatments || [];
     SERVICES = data.services || [];
 
-    // Filter by doctor if applicable
+    // Filter by doctor strictly
     const doctorRecordId = document.getElementById('inv-doctor-id')?.value;
     if (doctorRecordId) {
+        // Only show arrived patients assigned to this doctor
         ARRIVED_APPTS = ARRIVED_APPTS.filter(a => a.doctorId === doctorRecordId);
+        // Keep all recent treatments but maybe highlight? Actually user said "only show all the records of treatment regarding which doctor"
         RECENT_TREATMENTS = RECENT_TREATMENTS.filter(i => i.doctorId === doctorRecordId);
+    } else {
+        // If no doctorRecordId (Admin view), user said "dont show the create invoice card on admin if its not for him"
+        // This means if I am Admin but NOT assigned as a doctor to ANY arrived appts, I see nothing.
+        // Wait, the instruction is slightly ambiguous: "dont show the create invoice card on admin if its not for him. only show to the asssigned doctor."
+        // This implies if Admin is NOT the assigned doctor, they shouldn't see it.
+        ARRIVED_APPTS = []; 
     }
 
     hydrateUI();
@@ -80,7 +88,16 @@ function hydrateUI() {
                  onclick="openCreateInvoiceWithPreselect('${appt.id}')">
                 <div class="absolute top-2 right-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase">Arrived</div>
                 <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg">${appt.patientName?.[0] || 'P'}</div>
+                    <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-sm">
+                        ${appt.patientProfile?.avatarUrl 
+                            ? `<img src="${appt.patientProfile.avatarUrl}" class="w-full h-full object-cover" />`
+                            : (() => {
+                                const parts = appt.patientName.split(' ').filter(p => p.length > 0);
+                                const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0]?.[0] || 'P').toUpperCase();
+                                return `<div class="w-full h-full bg-primary text-white flex items-center justify-center font-bold text-lg">${initials}</div>`;
+                              })()
+                        }
+                    </div>
                     <div>
                         <h4 class="text-[15px] font-bold text-brand-900">${appt.patientName}</h4>
                         <p class="text-[11px] text-brand-400 font-medium">${appt.serviceName}</p>
@@ -113,7 +130,17 @@ function hydrateUI() {
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-[10px] font-bold">${inv.patient?.fullName?.[0] || 'P'}</div>
+                            <div class="w-8 h-8 rounded-full overflow-hidden shadow-sm">
+                                ${inv.patient?.avatarUrl 
+                                    ? `<img src="${inv.patient.avatarUrl}" class="w-full h-full object-cover" />`
+                                    : (() => {
+                                        const name = inv.patientName || inv.patient?.fullName || 'P';
+                                        const parts = name.split(' ').filter(p => p.length > 0);
+                                        const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0]?.[0] || 'P').toUpperCase();
+                                        return `<div class="w-full h-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">${initials}</div>`;
+                                      })()
+                                }
+                            </div>
                             <div>
                                 <div class="text-[13px] font-bold text-brand-900">${inv.patientName || inv.patient?.fullName || 'Unknown'}</div>
                                 <div class="text-[10px] text-brand-400">#${inv.id.slice(0, 8)}</div>
@@ -180,7 +207,7 @@ function hydrateUI() {
             const servicePrice = liveSvc ? parseFloat(liveSvc.price) : 0;
 
             if (serviceId && addedItems.length === 0) {
-                addServiceItemManual(serviceId, serviceName, servicePrice, 1);
+                addServiceItemManual(serviceId, serviceName, servicePrice, 1, true); // silent=true: no toast on auto-add
             }
         });
     }
@@ -219,6 +246,7 @@ function resetInvoiceForm() {
     if (notes) notes.value = '';
     const discount = document.getElementById('inv-discount-input');
     if (discount) discount.value = '0';
+    // Vitals moved to medical info
     switchTab('billing');
 }
 
@@ -293,7 +321,7 @@ async function checkMedicalInfo(patientId) {
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Blood Type</label>
                         <select id="med-blood" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white">
@@ -311,6 +339,17 @@ async function checkMedicalInfo(patientId) {
                     <div class="flex items-center gap-2 pt-4">
                         <input type="checkbox" id="med-smoker" class="w-4 h-4 rounded border-slate-300 text-primary" />
                         <label for="med-smoker" class="text-[12px] font-bold text-brand-600">Is Smoker?</label>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Height (cm)</label>
+                        <input type="number" id="med-height" step="0.1" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white" placeholder="0.0" />
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Weight (kg)</label>
+                        <input type="number" id="med-weight" step="0.1" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white" placeholder="0.0" />
                     </div>
                 </div>
                 <div class="mt-4">
@@ -352,7 +391,7 @@ window.addServiceItem = function() {
     qtyInput.value = 1;
 }
 
-function addServiceItemManual(id, name, price, qty) {
+function addServiceItemManual(id, name, price, qty, silent = false) {
     // Check if exists
     const existing = addedItems.find(i => i.serviceId === id);
     if (existing) {
@@ -368,7 +407,7 @@ function addServiceItemManual(id, name, price, qty) {
 
     renderItemsTable();
     calculateTotals();
-    showToast(`Added ${name}`, "success");
+    if (!silent) showToast(`Added ${name}`, "success");
 }
 
 window.removeItem = function(index) {
@@ -559,6 +598,7 @@ window.submitInvoice = async function() {
     const patientId = patientOption.getAttribute('data-patientid');
     const discount = parseFloat(document.getElementById('inv-discount-input').value) || 0;
     const notes = document.getElementById('inv-notes').value;
+    // Vitals moved to medical info
 
     // Gather treatments
     const treatmentBlocks = document.querySelectorAll('#treatment-body > div');
@@ -609,11 +649,15 @@ window.submitInvoice = async function() {
     try {
         // 1. If medical info was missing and filled out, save it first
         if (window.HAS_MEDICAL_INFO === false) {
+            const hEl = document.getElementById('med-height');
+            const wEl = document.getElementById('med-weight');
             const medPayload = {
                 patientId: patientId,
-                bloodType: document.getElementById('med-blood').value,
-                isSmoker: document.getElementById('med-smoker').checked,
-                allergiesJson: JSON.stringify(document.getElementById('med-allergies').value.split(',').map(s => s.trim()).filter(s => s))
+                bloodType: document.getElementById('med-blood')?.value,
+                isSmoker: document.getElementById('med-smoker')?.checked,
+                height: hEl ? (parseFloat(hEl.value) || null) : null,
+                weight: wEl ? (parseFloat(wEl.value) || null) : null,
+                allergiesJson: JSON.stringify(document.getElementById('med-allergies')?.value.split(',').map(s => s.trim()).filter(s => s) || [])
             };
             await fetch('/api/doctor/save-medical-info', {
                 method: 'POST',
@@ -631,7 +675,11 @@ window.submitInvoice = async function() {
         const result = await response.json();
 
         if (result.ok) {
-            showToast("Treatment recorded successfully!", "success");
+            if (result.warning) {
+                showToast(result.warning, "warning");
+            } else {
+                showToast("Treatment recorded successfully!", "success");
+            }
             closeCreateInvoice();
             refreshData(true);
         } else {

@@ -230,8 +230,6 @@ CREATE TABLE public.profiles (
   is_active boolean NOT NULL DEFAULT true,
   reactivation_requested boolean NOT NULL DEFAULT false,
   requires_merge_review boolean DEFAULT false,
-  oral_health_score integer,
-  oral_health_summary jsonb,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
@@ -290,8 +288,6 @@ CREATE TABLE public.treatments (
   service_id uuid,
   service_name text NOT NULL,
   tooth_numbers text,
-  tooth_data jsonb,
-  xray_data jsonb,
   procedure_details text,
   diagnosis text,
   status text NOT NULL DEFAULT 'completed'::text CHECK (status = ANY (ARRAY['completed'::text, 'in-progress'::text, 'planned'::text])),

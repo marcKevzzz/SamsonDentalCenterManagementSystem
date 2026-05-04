@@ -42,6 +42,7 @@ namespace SamsonDentalCenterManagementSystem.Controller.Staff
             }
         }
 
+        /*
         [HttpPost("evaluate-oral-health")]
         public async Task<IActionResult> EvaluateOralHealth([FromBody] OralHealthEvaluationRequest req)
         {
@@ -72,6 +73,7 @@ namespace SamsonDentalCenterManagementSystem.Controller.Staff
                 return BadRequest(new { ok = false, error = ex.Message });
             }
         }
+        */
     }
 
     public class OralHealthEvaluationRequest

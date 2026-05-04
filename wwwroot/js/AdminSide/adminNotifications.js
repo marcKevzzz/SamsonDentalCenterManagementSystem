@@ -80,6 +80,13 @@
       updateBadge('notif-inquiries-count', data.unreadInquiries);
       updateBadge('notif-leaves-count', data.pendingLeaves);
       updateBadge('notif-reviews-count', data.pendingReviews);
+      
+      updateBadge('notif-doctor-count', data.totalDoctors);
+      updateBadge('notif-receptionist-count', data.totalReceptionists);
+      updateBadge('notif-users-count', data.totalUsers);
+      updateBadge('popup-notif-doctor-count', data.totalDoctors);
+      updateBadge('popup-notif-receptionist-count', data.totalReceptionists);
+      updateBadge('notif-activitylogs-count', data.totalActivityLogs);
   }
 
 

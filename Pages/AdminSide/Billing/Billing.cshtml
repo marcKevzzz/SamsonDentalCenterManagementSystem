@@ -63,8 +63,20 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-[10px] font-bold">
-                                    @(invoice.Patient?.FullName?.Substring(0, 1) ?? "P")
+                                <div class="w-8 h-8 rounded-full overflow-hidden shadow-sm flex-shrink-0">
+                                    @if (!string.IsNullOrEmpty(invoice.Patient?.AvatarUrl))
+                                    {
+                                        <img src="@invoice.Patient.AvatarUrl" class="w-full h-full object-cover" />
+                                    }
+                                    else
+                                    {
+                                        var name = invoice.Patient?.FullName ?? "P";
+                                        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                        var initials = parts.Length > 1 
+                                            ? $"{parts[0][0]}{parts[^1][0]}".ToUpper() 
+                                            : (parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "P");
+                                        <div class="w-full h-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">@initials</div>
+                                    }
                                 </div>
                                 <div>
                                     <div class="text-[13px] font-bold text-brand">@(invoice.Patient?.FullName ?? "Unknown Patient")</div>

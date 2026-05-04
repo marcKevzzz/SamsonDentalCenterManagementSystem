@@ -110,5 +110,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         // can deserialize them from the HTTP response.
         [Reference(typeof(Doctor))]
         public Doctor? Doctor { get; set; }
+
+        [Reference(typeof(Profile))]
+        public Profile? PatientProfile { get; set; }
     }
 }

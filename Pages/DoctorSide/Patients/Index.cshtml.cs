@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
-using SamsonDentalCenterManagementSystem.Helpers;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Patients;
 
@@ -16,7 +16,8 @@ public class IndexModel : AdminPageModel
     public IndexModel(
         ProfileService profiles,
         DoctorService doctorService,
-        ILogger<IndexModel> logger)
+        ILogger<IndexModel> logger
+    )
         : base(profiles)
     {
         _profiles = profiles;
@@ -30,7 +31,7 @@ public class IndexModel : AdminPageModel
     {
         if (CurrentUserRole != "doctor" && CurrentUserRole != "admin")
         {
-            return RedirectToPage("/Sign-in");
+            return RedirectToPage("/Authentication/Signin");
         }
 
         try

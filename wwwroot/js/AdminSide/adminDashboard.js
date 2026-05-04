@@ -77,8 +77,15 @@ function hydrateDashboard(data) {
                     <tr>
                         <td class="px-4 py-3 text-[13px]">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-primary text-[9.5px] font-bold flex-shrink-0">
-                                    ${appt.patientName?.[0] || 'P'}
+                                <div class="w-7 h-7 rounded-full overflow-hidden shadow-sm flex-shrink-0">
+                                    ${appt.patientProfile?.avatarUrl 
+                                        ? `<img src="${appt.patientProfile.avatarUrl}" class="w-full h-full object-cover" />`
+                                        : (() => {
+                                            const parts = appt.patientName.split(' ').filter(p => p.length > 0);
+                                            const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0]?.[0] || 'P').toUpperCase();
+                                            return `<div class="w-full h-full bg-primary text-white flex items-center justify-center text-[9px] font-bold">${initials}</div>`;
+                                          })()
+                                    }
                                 </div>
                                 ${appt.patientId ? `<a href="/Admin/Patients/Details?id=${appt.patientId}" class="hover:text-primary transition-colors font-medium">${appt.patientName}</a>` : `<span>${appt.patientName}</span>`}
                             </div>

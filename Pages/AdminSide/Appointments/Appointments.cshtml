@@ -188,9 +188,21 @@ Layout = "AdminSide/_StaffLayout";
               </td>
               <td class="px-4 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-                    @(appt.PatientName[..1])
-                  </div>
+                  @if (appt.PatientProfile != null && !string.IsNullOrEmpty(appt.PatientProfile.AvatarUrl))
+                  {
+                      <img src="@appt.PatientProfile.AvatarUrl" alt="@appt.PatientName" class="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-200" />
+                  }
+                  else
+                  {
+                      var parts = appt.PatientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                      var initials = parts.Length > 1 
+                          ? $"{parts[0][0]}{parts[^1][0]}".ToUpper() 
+                          : (parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "?");
+                      
+                      <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">
+                        @initials
+                      </div>
+                  }
                   <div>
                     <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
                     <div class="text-[10.5px] text-brand-400">@appt.PatientEmail</div>

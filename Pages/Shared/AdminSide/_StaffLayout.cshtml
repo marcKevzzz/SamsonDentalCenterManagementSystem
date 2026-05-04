@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@ViewData["Title"] - SamsonDentalCenterManagementSystem</title>
+  <title>@ViewData["Title"] - Samson Dental Center Staff Portal</title>
   <script type="importmap"></script>
 
   <script>
@@ -30,6 +30,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="~/js/config.js" asp-append-version="true"></script>
+  <!-- Auth guard: intercepts 401 expired responses across all fetch() calls -->
+  <script src="~/js/auth-guard.js" asp-append-version="true"></script>
   <script type="module" src="~/js/AdminSide/AdminStore.js" asp-append-version="true"></script>
   <script type="module" src="~/js/AdminSide/site.js" asp-append-version="true" defer></script>
   <script src="~/js/AdminSide/adminNotifications.js" asp-append-version="true" defer></script>
@@ -37,7 +39,7 @@
 
 <body data-role="@(ViewData["UserRole"]?.ToString()?.ToLower() ?? "admin")">
   <!-- Overlay for mobile sidebar -->
-  <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[49] hidden"></div>
+  <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[49] hidden lg:!hidden"></div>
 
   <div class="flex min-h-screen">
     <!-- ══════════════════════════════════════ -->
@@ -100,7 +102,7 @@
               <circle cx="9" cy="7" r="4" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Patients</span>
-            <span id="notif-patients-count" class="sidebar-text ml-auto  hidden unread-dot"></span>
+            <span id="notif-patients-count" class="sidebar-text ml-auto px-2 py-0.5 bg-brand-400/20 text-white text-[11px] font-bold rounded-full hidden"></span>
           </a>
           }
 
@@ -124,11 +126,11 @@
             <div id="staff-dropdown" class="hidden pl-10 pr-2 py-1 space-y-1 overflow-hidden transition-all duration-300">
               <a href="/Admin/Staff/Doctors" class="flex items-center justify-between px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">
                 <span>Doctors</span>
-                <span id="notif-doctor-count" class="w-1.5 h-1.5 bg-red-500 rounded-full hidden unread-dot"></span>
+                <span id="notif-doctor-count" class=" text-white text-[11px] font-bold hidden"></span>
               </a>
               <a href="/Admin/Staff/Receptionists" class="flex items-center justify-between px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">
                 <span>Receptionists</span>
-                <span id="notif-receptionist-count" class="w-1.5 h-1.5 bg-red-500 rounded-full hidden unread-dot"></span>
+                <span id="notif-receptionist-count" class=" text-white text-[11px] font-bold hidden"></span>
               </a>
             </div>
 
@@ -157,8 +159,7 @@
 </svg>
 
             <span class="sidebar-text transition-opacity duration-300">Users</span>
-            <span
-              id="notif-users-count" class="nav-badge sidebar-text ml-auto w-2 h-2  rounded-full hidden unread-dot"></span>
+            <span id="notif-users-count" class="ml-auto px-2 py-0.5 bg-brand-400/20 text-white text-[11px] font-bold rounded-full hidden"></span>
           </a>
           }
 
@@ -177,7 +178,7 @@
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Appointments</span>
-            <span id="notif-appointments-count" class="sidebar-text ml-auto   hidden unread-dot"></span>
+            <span id="notif-appointments-count" class="sidebar-text ml-auto px-2 py-0.5 bg-brand-400/20 text-white text-[10px] font-bold rounded-full hidden"></span>
           </a>
 
           @if(r == "admin") {
@@ -221,7 +222,7 @@
               <path d="M10 16h4" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Services</span>
-            <span id="notif-services-count" class="sidebar-text ml-auto   hidden unread-dot"></span>
+            <span id="notif-services-count" class="sidebar-text ml-auto text-[11px] hidden unread-dot"></span>
           </a>
           }
 
@@ -251,7 +252,7 @@
               <line x1="8" y1="14" x2="16" y2="14" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">@(r == "admin" ? "Leaves" : "My Schedule")</span>
-            <span id="notif-leaves-count" class="sidebar-text ml-auto   hidden unread-dot"></span>
+            <span id="notif-leaves-count" class="sidebar-text ml-auto px-2 py-0.5 bg-brand-400/20 text-white text-[10px] font-bold rounded-full hidden"></span>
           </a>
           }
 
@@ -278,7 +279,7 @@
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Inquiries</span>
-            <span id="notif-inquiries-count" class="sidebar-text ml-auto   hidden unread-dot"></span>
+            <span id="notif-inquiries-count" class="sidebar-text ml-auto px-2 py-0.5 bg-brand-400/20 text-white text-[10px] font-bold rounded-full hidden"></span>
           </a>
 
           <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
@@ -288,6 +289,7 @@
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
             <span class="sidebar-text transition-opacity duration-300">Activity Logs</span>
+            <span id="notif-activitylogs-count" class="sidebar-text ml-auto  px-2 py-0.5 bg-brand-400/20 text-white text-[11px] font-bold rounded-full hidden"></span>
           </a>
           }
           
@@ -304,15 +306,15 @@
             </svg>
 
             <span class="sidebar-text transition-opacity duration-300">Reviews</span>
-            <span id="notif-reviews-count" class="sidebar-text ml-auto   hidden unread-dot"></span>
+            <span id="notif-reviews-count" class="sidebar-text ml-auto text-[11px] hidden unread-dot"></span>
           </a>
 
           <!-- Settings Dropdown -->
           <div class="relative px-2">
-            <button class="nav-item group w-full flex items-center gap-4 px-4 py-2.5 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all hover:bg-white/[0.05]"
+            <button class="nav-item group w-full flex items-center gap-4 px-4 py-2.5 rounded-xl cursor-pointer text-white text-[13px] font-medium "
               id="settings-dropdown-btn">
               <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15-.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
               <span class="sidebar-text transition-opacity duration-300">Settings</span>
@@ -382,7 +384,7 @@
       class="flex-1 flex flex-col min-h-screen transition-all duration-[250ms] lg:ml-[256px] overflow-hidden relative">
       <!-- TOPBAR -->
       <header
-        class="bg-white border-b border-slate-200  z-[50] flex items-center justify-between px-4 lg:px-6 h-[60px] flex-shrink-0 fixed left-[72px] top-0 w-[calc(100%-72px)]">
+        class="bg-white border-b border-slate-200 z-[50] flex items-center justify-between px-4 lg:px-6 h-[60px] flex-shrink-0 fixed left-0 lg:left-[256px] top-0 w-full lg:w-[calc(100%-256px)] transition-all duration-[250ms]">
         <div class="flex items-center gap-3">
           <!-- Hamburger (mobile only) -->
           <button class="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"

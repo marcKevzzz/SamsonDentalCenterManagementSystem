@@ -24,6 +24,7 @@ public class AdminDataController : ControllerBase
     private readonly NotificationService _notificationService;
     private readonly StaffLeaveService _leaveService;
     private readonly ReviewService _reviewService;
+    private readonly RecordService _recordService;
     private readonly ILogger<AdminDataController> _logger;
 
     public AdminDataController(
@@ -39,6 +40,7 @@ public class AdminDataController : ControllerBase
         NotificationService notificationService,
         StaffLeaveService leaveService,
         ReviewService reviewService,
+        RecordService recordService,
         ILogger<AdminDataController> logger
     )
     {
@@ -54,6 +56,7 @@ public class AdminDataController : ControllerBase
         _notificationService = notificationService;
         _leaveService = leaveService;
         _reviewService = reviewService;
+        _recordService = recordService;
         _logger = logger;
     }
 
@@ -319,6 +322,7 @@ public class AdminDataController : ControllerBase
             
             var allProfiles = await _profileService.GetAllProfiles();
             var services = await _dentalService.GetAll();
+            var logsCount = (await _activityLogService.GetAllLogsAsync()).Count;
 
             return Ok(new {
                 ok = true,
@@ -328,10 +332,28 @@ public class AdminDataController : ControllerBase
                     pendingLeaves = leaves.Count(l => l.Status.ToLower() == "pending"),
                     pendingReviews = reviews.Count(r => !r.IsVisible),
                     totalPatients = allProfiles.Count(p => p.Role.ToLower() == "patient"),
-                    totalStaff = allProfiles.Count(p => p.Role.ToLower() == "doctor" || p.Role.ToLower() == "receptionist"),
-                    totalServices = services.Count
+                    totalDoctors = allProfiles.Count(p => p.Role.ToLower() == "doctor"),
+                    totalReceptionists = allProfiles.Count(p => p.Role.ToLower() == "receptionist"),
+                    totalUsers = allProfiles.Count(p => p.Role.ToLower() == "patient"), // or all roles? User probably wants non-staff users? Actually Samson system uses Profiles for everyone.
+                    totalServices = services.Count,
+                    totalActivityLogs = logsCount
                 }
             });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost("update-medical")]
+    public async Task<IActionResult> UpdateMedical([FromBody] PatientMedicalInfo payload)
+    {
+        try
+        {
+            var adminId = User.FindFirst("sub")?.Value;
+            await _recordService.UpsertMedicalInfoAsync(payload, adminId);
+            return Ok(new { ok = true });
         }
         catch (Exception ex)
         {
@@ -924,6 +946,37 @@ public class AdminDataController : ControllerBase
                 })
                 .ToList();
             return Ok(new { ok = true, data = dtos });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpGet("my-availability")]
+    public async Task<IActionResult> GetMyAvailability()
+    {
+        try
+        {
+            var userId = User.FindFirst("sub")?.Value;
+            var role = User.FindFirst("role")?.Value?.ToLower();
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            if (role == "doctor")
+            {
+                var doc = await _doctorService.GetDoctorByProfileIdAsync(userId);
+                if (doc == null) return Ok(new { ok = true, data = new List<object>() });
+                return Ok(new { ok = true, data = doc.Availability });
+            }
+            else if (role == "receptionist")
+            {
+                var rec = await _receptionistService.GetReceptionistByProfileIdAsync(userId);
+                if (rec == null) return Ok(new { ok = true, data = new List<object>() });
+                return Ok(new { ok = true, data = rec.Availability });
+            }
+
+            return Ok(new { ok = true, data = new List<object>() });
         }
         catch (Exception ex)
         {

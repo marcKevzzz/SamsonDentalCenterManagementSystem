@@ -1,60 +1,45 @@
 // wwwroot/js/AdminSide/staffAvailability.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadMySchedule();
+    loadMyAvailability();
     loadMyLeaves();
 });
 
-async function loadMySchedule() {
-    const container = document.getElementById('schedule-container');
+async function loadMyAvailability() {
+    const container = document.getElementById('availability-container');
     if (!container) return;
 
     try {
-        // We reuse the standard appointments endpoint but filtered for the current user
-        // Note: For Doctor, they only see their own. For Receptionist, they see all? 
-        // User instruction said: "Availability page where you can see the user schedule"
-        // Let's assume it fetches from a staff-specific schedule endpoint or we use the general one.
-        const res = await fetch('/api/admin/data/my-schedule');
+        const res = await fetch('/api/admin/data/my-availability');
         const json = await res.json();
         const data = json.data || [];
         
         if (data.length === 0) {
-            container.innerHTML = '<div class="py-8 text-center text-brand-400 text-[12px]">No upcoming appointments scheduled.</div>';
+            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand-400 text-[12px]">No availability schedule set.</div>';
             return;
         }
 
-        // Group by date
-        const groups = {};
-        data.slice(0, 10).forEach(appt => {
-            const d = appt.appointment_date || appt.appointmentDate;
-            if (!groups[d]) groups[d] = [];
-            groups[d].push(appt);
-        });
-
-        container.innerHTML = Object.keys(groups).sort().map(date => `
-            <div class="mb-4">
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                <div class="space-y-2">
-                    ${groups[date].map(appt => `
-                        <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-brand font-bold text-[10px]">
-                                    ${appt.appointment_time || appt.appointmentTime}
-                                </div>
-                                <div>
-                                    <div class="text-[13px] font-bold text-brand">${appt.patient_name || (appt.patient ? appt.patient.first_name + ' ' + appt.patient.last_name : 'Patient')}</div>
-                                    <div class="text-[10px] text-brand-400">${appt.service_name || 'General Checkup'}</div>
-                                </div>
-                            </div>
-                            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase tracking-wider">Confirmed</span>
-                        </div>
-                    `).join('')}
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        
+        container.innerHTML = data.map(slot => `
+            <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-primary shadow-sm">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <div class="text-[14px] font-bold text-brand">${days[slot.dayOfWeek]}</div>
+                        <div class="text-[11px] font-bold text-brand-400 uppercase tracking-widest">${slot.startTime} - ${slot.endTime}</div>
+                    </div>
+                </div>
+                <div class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
+                    Active
                 </div>
             </div>
         `).join('');
     } catch (e) {
         console.error(e);
-        container.innerHTML = '<div class="py-8 text-center text-red-500 text-[12px]">Failed to load schedule.</div>';
+        container.innerHTML = '<div class="col-span-full py-8 text-center text-red-500 text-[12px]">Failed to load availability.</div>';
     }
 }
 

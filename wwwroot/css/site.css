@@ -88,9 +88,9 @@ html {
 
 .nav-island {
   pointer-events: auto;
-  background: rgba(15, 23, 42, 0.4); /* Glassy dark on top */
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(15, 23, 42, 0.3); /* Glassy dark on top */
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 100px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -108,9 +108,9 @@ html {
 
 /* Scrolled State */
 .nav-scrolled .nav-island {
-  background: rgba(255, 255, 255, 0.65); /* Glassy white on scroll */
-  backdrop-filter: blur(25px) saturate(200%);
-  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  background: rgba(255, 255, 255, 0.4); /* Glassy white on scroll */
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
   border-color: rgba(255, 255, 255, 0.5);
   color: var(--brand-dark);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
@@ -1508,16 +1508,55 @@ textarea.form-input {
   transform: rotate(180deg);
 }
 
-/* Section card hover */
-.rec-card {
-  transition:
-    box-shadow 0.2s,
-    transform 0.2s;
+.appt-master-container {
+    display: flex;
+    gap: 1.5rem;
+    height: calc(100vh - 380px);
+    min-height: 500px;
 }
 
-.rec-card:hover {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
-  transform: translateY(-2px);
+.appt-list-pane {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.appt-detail-pane {
+    flex: 1.2;
+    background: white;
+    border-radius: 2rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    overflow: hidden;
+}
+
+.appt-item-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 1.25rem;
+    padding: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.appt-item-card:hover {
+    border-color: var(--primary);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.05);
+}
+
+.appt-item-card.active {
+    border-color: var(--primary);
+    background: #f8faff;
+}
+
+.status-pill {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
 }
 
 /* Tooth chart v2 - Digital Odontogram */
@@ -1986,6 +2025,7 @@ textarea.form-input {
     border-radius: 12px;
     color: var(--text-muted);
     font-size: 0.82rem;
+    font-weight: 500;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     text-decoration: none !important;
 }

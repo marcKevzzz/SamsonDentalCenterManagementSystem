@@ -144,7 +144,7 @@
                                     <circle cx="56" cy="56" r="50" fill="none" stroke="#e2e8f0" stroke-width="8"></circle>
                                     <circle cx="56" cy="56" r="50" fill="none" stroke="currentColor" stroke-width="8" stroke-dasharray="314" :stroke-dashoffset="314 - (314 * (parseInt(document.getElementById('health-score-input')?.value || 0) / 100))" class="text-primary transition-all duration-1000"></circle>
                                 </svg>
-                                <input type="number" id="health-score-input" value="@(p?.OralHealthScore ?? 85)" min="0" max="100" class="absolute text-2xl font-bold text-brand-900 bg-transparent text-center w-16 outline-none" />
+                                <input type="number" id="health-score-input" value="0" min="0" max="100" class="absolute text-2xl font-bold text-brand-900 bg-transparent text-center w-16 outline-none" />
                                 <span class="absolute bottom-6 text-[10px] font-bold text-brand-400">/ 100</span>
                             </div>
                         </div>
@@ -369,17 +369,7 @@
     }
 
     // Pre-fill evaluation if exists
-    document.addEventListener('DOMContentLoaded', () => {
-        const summaryJson = `@Html.Raw(p?.OralHealthSummary ?? "{}")`;
-        try {
-            const summary = JSON.parse(summaryJson);
-            if (summary.gumHealth) document.getElementById('eval-gum').value = summary.gumHealth;
-            if (summary.cavityRisk) document.getElementById('eval-cavity').value = summary.cavityRisk;
-            if (summary.enamelStatus) document.getElementById('eval-enamel').value = summary.enamelStatus;
-            if (summary.plaqueLevel) document.getElementById('eval-plaque').value = summary.plaqueLevel;
-            if (summary.notes) document.getElementById('eval-notes').value = summary.notes;
-        } catch(e) {}
-    });
+
 </script>
 
 <style>

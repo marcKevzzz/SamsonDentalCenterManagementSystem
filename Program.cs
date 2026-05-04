@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.SignalR;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -15,6 +15,7 @@ using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Services;
 using Supabase;
+using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +48,7 @@ ecKey.ImportParameters(
 
 var signingKey = new ECDsaSecurityKey(ecKey) { KeyId = jwtKid };
 
-// ── Anon client — for auth/signin pages ──────────────────────────────────────
+// ── Anon client — for auth/Authentication/Signin pages ──────────────────────────────────────
 var anonClient = new Supabase.Client(
     supabaseUrl,
     supabaseKey,
@@ -118,7 +119,8 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         provider.GetRequiredService<IHubContext<AdminHub>>(),
         provider.GetRequiredService<ClinicService>(),
         provider.GetRequiredService<BlockedDateService>(),
-        provider.GetRequiredService<ProfileService>()
+        provider.GetRequiredService<ProfileService>(),
+        provider.GetRequiredService<IDistributedCache>()
     );
 });
 
@@ -209,7 +211,6 @@ builder.Services.AddScoped<RecordService>(provider => new RecordService(
     provider.GetRequiredService<IHubContext<AdminHub>>()
 ));
 
-
 builder.Services.AddSingleton<ActivityLogService>(provider =>
 {
     var httpFactory = provider.GetRequiredService<IHttpClientFactory>();
@@ -269,6 +270,49 @@ builder
                 context.Token = context.Request.Cookies["sb-access-token"];
                 return Task.CompletedTask;
             },
+            OnChallenge = async context =>
+            {
+                // Suppress default 401 behavior — we handle it ourselves
+                context.HandleResponse();
+
+                var req = context.Request;
+                var res = context.Response;
+
+                bool isExpired = context.AuthenticateFailure is SecurityTokenExpiredException;
+                bool isXhr =
+                    req.Headers["X-Requested-With"] == "XMLHttpRequest"
+                    || (
+                        req.Headers["Accept"].ToString().Contains("application/json")
+                        && !req.Headers["Accept"].ToString().Contains("text/html")
+                    );
+
+                if (isXhr)
+                {
+                    // API call: return JSON so JS can intercept and redirect
+                    res.StatusCode = 401;
+                    res.ContentType = "application/json";
+                    await res.WriteAsync(
+                        System.Text.Json.JsonSerializer.Serialize(
+                            new
+                            {
+                                ok = false,
+                                expired = true,
+                                error = isExpired
+                                    ? "Session expired. Please sign in again."
+                                    : "Unauthorized.",
+                            }
+                        )
+                    );
+                }
+                else
+                {
+                    // Page navigation: expire auth cookie and redirect
+                    res.Cookies.Delete("sb-access-token");
+                    res.Cookies.Delete("sb-refresh-token");
+                    var returnUrl = Uri.EscapeDataString(req.Path + req.QueryString);
+                    res.Redirect($"/Authentication/Signin?expired=1&returnUrl={returnUrl}");
+                }
+            },
         };
     });
 
@@ -303,13 +347,19 @@ builder
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
-    builder.Services.AddCors(options => {
-    options.AddPolicy("AllowVanilla", policy => {
-        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500") 
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // SignalR MUST have this
-    });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowVanilla",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // SignalR MUST have this
+        }
+    );
 });
 
 var app = builder.Build();

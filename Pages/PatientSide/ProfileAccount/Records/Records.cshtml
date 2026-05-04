@@ -4,20 +4,16 @@
 ViewData["Title"] = "Dental Records";
 }
 
-<section class="flex-1 min-w-0 space-y-2 sm:space-y-5">
+<section class="flex-1 min-w-0 space-y-5">
   <div class="fade-up">
-
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <div
-          class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
+        <div class="flex items-center gap-2 font-body text-[0.67rem] font-semibold tracking-[0.15em] uppercase text-muted mb-2">
           <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Patient Records
         </div>
         <h1 class="brand-font font-extrabold text-brand text-[1.75rem] leading-tight">Dental Records</h1>
-        <p class="font-body text-[.87rem] text-muted mt-1">Your complete oral health history at Samson Dental Center.
-        </p>
+        <p class="font-body text-[.87rem] text-muted mt-1">Your complete oral health history at Samson Dental Center.</p>
       </div>
-
     </div>
   </div>
 
@@ -29,8 +25,7 @@ ViewData["Title"] = "Dental Records";
       </div>
       <div class="relative z-10 flex flex-col sm:flex-row sm:items-start gap-4 mb-5">
         <!-- Avatar -->
-        <div
-          class="w-14 h-14 rounded-full bg-primary flex items-center justify-center shrink-0 border-2 border-primary/30 overflow-hidden">
+        <div class="w-14 h-14 rounded-full bg-primary flex items-center justify-center shrink-0 border-2 border-primary/30 overflow-hidden">
           @if (!string.IsNullOrEmpty(Model.Patient?.AvatarUrl))
           {
             <img src="@Model.Patient.AvatarUrl" class="w-full h-full object-cover" alt="avatar" />
@@ -67,8 +62,7 @@ ViewData["Title"] = "Dental Records";
                 <span class="font-body text-[.75rem] text-white/55">Patient ID: @Model.Patient?.Id.Substring(0, 8).ToUpper()</span>
               </div>
             </div>
-            <span
-              class="font-body text-[.65rem] font-semibold uppercase tracking-wider bg-green-500/20 text-green-300 px-2.5 py-1 rounded-full">
+            <span class="font-body text-[.65rem] font-semibold uppercase tracking-wider bg-green-500/20 text-green-300 px-2.5 py-1 rounded-full">
               @(Model.Patient?.IsActive == true ? "Active Patient" : "Inactive")
             </span>
           </div>
@@ -77,18 +71,15 @@ ViewData["Title"] = "Dental Records";
       <!-- Info grid -->
       <div class="relative z-10 grid grid-cols-2 sm:grid-cols-4 border-t border-white/10">
         <div class="px-4 py-3 border-r border-white/10">
-          <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/35 mb-1">Patient Since
-          </div>
+          <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/35 mb-1">Patient Since</div>
           <div class="brand-font font-bold text-white text-[.9rem]">@Model.Patient?.CreatedAt.ToString("MMMM yyyy")</div>
         </div>
         <div class="px-4 py-3 sm:border-r border-white/10">
-          <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/35 mb-1">Blood Type
-          </div>
+          <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/35 mb-1">Blood Type</div>
           <div class="brand-font font-bold text-white text-[.9rem]">@(Model.MedicalInfo?.BloodType ?? "N/A")</div>
         </div>
         <div class="px-4 py-3 border-t sm:border-t-0 border-r border-white/10">
-          <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/35 mb-1">Last Visit
-          </div>
+          <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-white/35 mb-1">Last Visit</div>
           <div class="brand-font font-bold text-white text-[.9rem]">
             @(Model.Treatments.FirstOrDefault()?.CreatedAt.ToString("MMM dd, yyyy") ?? "No visits yet")
           </div>
@@ -101,525 +92,290 @@ ViewData["Title"] = "Dental Records";
     </div>
   </div>
 
-  <!-- ═══ TAB FILTER ═══ -->
-  <div class="fade-up flex gap-2 flex-wrap">
-    <button class="rec-tab active" data-tab="all" onclick="switchTab('all')">All Records</button>
-    <button class="rec-tab" data-tab="medical" onclick="switchTab('medical')">Medical Info</button>
-    <button class="rec-tab" data-tab="treatments" onclick="switchTab('treatments')">Treatments</button>
-    <button class="rec-tab" data-tab="xrays" onclick="switchTab('xrays')">X-Rays &amp; Scans</button>
-    <button class="rec-tab" data-tab="chart" onclick="switchTab('chart')">Tooth Chart</button>
+  <!-- ═══ RECORDS NAVIGATION ═══ -->
+  <div class="flex items-center gap-6 border-b border-slate-100 mb-8 overflow-x-auto no-scrollbar">
+    <button onclick="showTab('treatment')" id="tab-treatment" 
+      class="rec-tab-btn active px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 transition-all whitespace-nowrap">
+      Treatment History
+    </button>
+    <button onclick="showTab('chart')" id="tab-chart" 
+      class="rec-tab-btn px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 transition-all text-muted border-transparent hover:text-brand whitespace-nowrap">
+      Interactive Tooth Chart
+    </button>
+    <button onclick="showTab('xray')" id="tab-xray" 
+      class="rec-tab-btn px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 transition-all text-muted border-transparent hover:text-brand whitespace-nowrap">
+      Diagnostic Imaging
+    </button>
+    <button onclick="showTab('medical')" id="tab-medical" 
+      class="rec-tab-btn px-6 py-3 font-bold text-[0.7rem] tracking-widest uppercase border-b-2 transition-all text-muted border-transparent hover:text-brand whitespace-nowrap">
+      Medical History
+    </button>
   </div>
 
-  <!-- ═══ MEDICAL INFORMATION ═══ -->
-  <div class="rec-section fade-up" data-section="medical">
-    <div class="bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden rec-card">
-      <button onclick="toggleSection(this)"
-        class="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-transparent border-none text-left">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </div>
-          <span class="brand-font font-bold text-brand text-[.95rem]">Medical Information</span>
-        </div>
-        <svg class="rec-chevron open w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div class="rec-body open">
-        <div class="px-5 pb-5 border-t border-[#f0f0f0]">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-
-            <div class="bg-offwhite rounded-xl p-4">
-              <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-3">General
-                Health</div>
-              <div class="space-y-2.5">
-                <div class="flex justify-between"><span class="font-body text-[.8rem] text-muted">Blood Type</span><span
-                    class="font-body text-[.82rem] font-medium text-brand">@(Model.MedicalInfo?.BloodType ?? "N/A")</span></div>
-                <div class="flex justify-between"><span class="font-body text-[.8rem] text-muted">Height</span><span
-                    class="font-body text-[.82rem] font-medium text-brand">@(Model.MedicalInfo?.Height?.ToString("0") ?? "---") cm</span></div>
-                <div class="flex justify-between"><span class="font-body text-[.8rem] text-muted">Weight</span><span
-                    class="font-body text-[.82rem] font-medium text-brand">@(Model.MedicalInfo?.Weight?.ToString("0") ?? "---") kg</span></div>
-                <div class="flex justify-between"><span class="font-body text-[.8rem] text-muted">Smoker</span><span
-                    class="font-body text-[.82rem] font-medium @(Model.MedicalInfo?.IsSmoker == true ? "text-red-600" : "text-green-600")">@(Model.MedicalInfo?.IsSmoker == true ? "Yes" : "No")</span></div>
-              </div>
-            </div>
-
-            <div class="bg-offwhite rounded-xl p-4">
-              <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-3">Allergies
-              </div>
-              <div class="space-y-2">
-                @if (Model.Allergies.Count == 0)
-                {
-                   <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </span>
-                    <span class="font-body text-[.82rem] text-muted">No known allergies</span>
-                  </div>
-                }
-                @foreach(var allergy in Model.Allergies)
-                {
-                  <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </span>
-                    <span class="font-body text-[.82rem] text-muted">@allergy</span>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="bg-offwhite rounded-xl p-4">
-              <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-3">Current
-                Medications</div>
-              <div class="space-y-2">
-                @if (Model.Medications.Count == 0)
-                {
-                  <div class="font-body text-[.8rem] text-brand font-medium">None on file</div>
-                }
-                @foreach(var med in Model.Medications)
-                {
-                   <div class="font-body text-[.8rem] text-brand font-medium">• @med</div>
-                }
-                <div class="font-body text-[.75rem] text-muted leading-relaxed">Last updated: @(Model.MedicalInfo?.UpdatedAt.ToString("MMM dd, yyyy") ?? "N/A")</div>
-              </div>
-            </div>
-
-            <div class="bg-offwhite rounded-xl p-4 sm:col-span-2 lg:col-span-3">
-              <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-3">Medical
-                History</div>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                @foreach(var h in Model.History)
-                {
-                   <div class="flex items-center gap-2">
-                     <span class="w-3 h-3 rounded-full @(h.Value.ToLower() == "none" ? "bg-green-400" : "bg-red-400") shrink-0"></span>
-                     <span class="font-body text-[.8rem] text-muted">@h.Key: @h.Value</span>
-                   </div>
-                }
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ TREATMENT HISTORY ═══ -->
-  <div class="rec-section fade-up" data-section="treatments">
-    <div class="bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden rec-card">
-      <button onclick="toggleSection(this)"
-        class="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-transparent border-none text-left">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-          </div>
-          <span class="brand-font font-bold text-brand text-[.95rem]">Treatment History</span>
-          <span class="font-body text-[.7rem] font-semibold text-muted bg-offwhite px-2 py-0.5 rounded-full">@Model.Treatments.Count
-            records</span>
-        </div>
-        <svg class="rec-chevron open w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div class="rec-body open">
-        <div class="border-t border-[#f0f0f0]">
-
-          @if (Model.Treatments.Count == 0)
+  <!-- ═══ TREATMENT HISTORY TAB ═══ -->
+  <div id="tabContent-treatment" class="tab-pane-rec space-y-6">
+      <div class="grid grid-cols-1 gap-4">
+          @if (!Model.Treatments.Any())
           {
-            <div class="px-5 py-10 text-center">
-              <p class="font-body text-[.85rem] text-muted">No treatment records found.</p>
-            </div>
+              <div class="py-20 text-center bg-white rounded-3xl border border-dashed border-[#e5e7eb]">
+                  <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i class="fa-solid fa-notes-medical text-muted text-xl"></i>
+                  </div>
+                  <h3 class="brand-font font-bold text-brand text-[1.1rem] mb-2">No Treatment Records</h3>
+                  <p class="font-body text-[0.85rem] text-muted max-w-xs mx-auto">Your treatment history will be displayed here after your first clinical visit.</p>
+              </div>
+          }
+          @foreach (var t in Model.Treatments)
+          {
+              <div class="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-all group">
+                  <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div class="flex gap-4">
+                          <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                              <i class="fa-solid fa-tooth"></i>
+                          </div>
+                          <div>
+                              <div class="flex items-center gap-3 mb-1">
+                                  <h3 class="brand-font font-bold text-brand text-lg">@t.ServiceName</h3>
+                                  <span class="text-[0.65rem] font-black uppercase tracking-widest px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg">@t.Status</span>
+                              </div>
+                              <p class="text-sm text-muted mb-4">@t.Diagnosis</p>
+                              
+                              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium">
+                                  <div class="flex items-center gap-2 text-brand/70">
+                                      <i class="fa-regular fa-calendar opacity-50"></i>
+                                      <span>@t.CreatedAt.ToString("MMMM dd, yyyy")</span>
+                                  </div>
+                                  @if (!string.IsNullOrEmpty(t.ToothNumbers))
+                                  {
+                                      <div class="flex items-center gap-2 text-brand/70">
+                                          <i class="fa-solid fa-hashtag opacity-50"></i>
+                                          <span>Teeth: @t.ToothNumbers</span>
+                                      </div>
+                                  }
+                              </div>
+                          </div>
+                      </div>
+                      <div class="md:text-right">
+                          <p class="text-[0.65rem] font-bold text-slate-300 uppercase tracking-widest mb-2">Procedure Details</p>
+                          <p class="text-[0.8rem] text-muted leading-relaxed max-w-sm ml-auto">@t.ProcedureDetails</p>
+                      </div>
+                  </div>
+              </div>
+          }
+      </div>
+  </div>
+
+  <!-- ═══ TOOTH CHART TAB ═══ -->
+  <div id="tabContent-chart" class="tab-pane-rec hidden">
+      <div class="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm">
+          <div class="flex items-center justify-between mb-10">
+              <div>
+                  <h2 class="brand-font font-extrabold text-brand text-2xl">Digital Odontogram</h2>
+                  <p class="text-muted text-sm mt-1">Interactive visualization of your dental status.</p>
+              </div>
+              <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded bg-emerald-500"></div>
+                      <span class="text-[0.6rem] font-bold text-muted uppercase tracking-widest">Healthy</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded bg-amber-500"></div>
+                      <span class="text-[0.6rem] font-bold text-muted uppercase tracking-widest">Plan</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded bg-blue-500"></div>
+                      <span class="text-[0.6rem] font-bold text-muted uppercase tracking-widest">Filled</span>
+                  </div>
+              </div>
+          </div>
+
+          <div class="bg-slate-50/50 rounded-[2.5rem] p-12 border border-slate-100/50">
+              <!-- Upper Teeth -->
+              <div class="flex flex-wrap justify-center gap-3 mb-16">
+                  @for (int i = 1; i <= 16; i++)
+                  {
+                      var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i].ToLower() : "healthy";
+                      <div class="flex flex-col items-center gap-2 group">
+                          <span class="text-[0.6rem] font-bold text-slate-300 group-hover:text-primary transition-colors">#@i</span>
+                          <div class="tooth-v2 tooth-@status" title="Tooth #@i: @status">@i</div>
+                      </div>
+                  }
+              </div>
+
+              <!-- Arch Divider -->
+              <div class="h-px bg-slate-200 w-2/3 mx-auto mb-16 relative">
+                  <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 bg-slate-50 px-6 -top-2 text-[0.6rem] font-black text-slate-300 uppercase tracking-[0.4em]">Lower Mandibular Arch</div>
+              </div>
+
+              <!-- Lower Teeth -->
+              <div class="flex flex-wrap justify-center gap-3">
+                  @for (int i = 32; i >= 17; i--)
+                  {
+                      var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i].ToLower() : "healthy";
+                      <div class="flex flex-col items-center gap-2 group">
+                          <div class="tooth-v2 tooth-@status rotate-180" title="Tooth #@i: @status">
+                              <span class="rotate-180 inline-block">@i</span>
+                          </div>
+                          <span class="text-[0.6rem] font-bold text-slate-300 group-hover:text-primary transition-colors">#@i</span>
+                      </div>
+                  }
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- ═══ X-RAY TAB ═══ -->
+  <div id="tabContent-xray" class="tab-pane-rec hidden">
+      <div class="flex flex-col gap-8">
+          @if (false)
+          {
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  @foreach (var treatment in Model.Treatments)
+                  {
+                      <div class="group relative bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all">
+                          <div class="aspect-square bg-slate-900 flex items-center justify-center overflow-hidden">
+                              <i class="fa-solid fa-file-medical text-slate-700 text-5xl group-hover:scale-110 transition-transform"></i>
+                          </div>
+                          <div class="p-8">
+                              <div class="flex items-center justify-between mb-2">
+                                  <h3 class="font-bold text-brand text-base">@treatment.ServiceName</h3>
+                                  <i class="fa-solid fa-expand text-slate-200 text-xs group-hover:text-primary transition-colors"></i>
+                              </div>
+                              <p class="text-muted text-[0.65rem] uppercase tracking-[0.15em] font-bold">Captured: @treatment.CreatedAt.ToString("MMM dd, yyyy")</p>
+                          </div>
+                      </div>
+                  }
+              </div>
           }
           else
           {
-            @foreach (var t in Model.Treatments)
-            {
-              <!-- Treatment row -->
-              <div
-                class="px-5 py-4 flex flex-col sm:flex-row sm:items-start gap-4 border-b border-[#f5f5f7] hover:bg-offwhite/60 transition-colors">
-                <div class="flex items-start gap-3 flex-1 min-w-0">
-                  <div class="w-2 h-2 rounded-full @(t.Status == "completed" ? "bg-green-500" : "bg-amber-500") mt-2 shrink-0"></div>
-                  <div class="min-w-0">
-                    <div class="brand-font font-semibold text-brand text-[.9rem]">@t.ServiceName</div>
-                    <div class="font-body text-[.78rem] text-muted mt-0.5">
-                      @t.Diagnosis
-                      @if (!string.IsNullOrEmpty(t.ToothNumbers))
-                      {
-                        <span> · Tooth: @t.ToothNumbers</span>
-                      }
-                    </div>
-                    <div class="font-body text-[.77rem] text-brand/80 mt-1.5 leading-relaxed">
-                      @t.ProcedureDetails
-                      @if (!string.IsNullOrEmpty(t.Notes))
-                      {
-                        <div class="mt-1 text-muted italic">Note: @t.Notes</div>
-                      }
-                    </div>
+              <div class="py-32 flex flex-col items-center justify-center text-center bg-white rounded-[3rem] border border-slate-100 shadow-sm">
+                  <div class="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-8">
+                      <i class="fa-solid fa-x-ray text-slate-200 text-4xl"></i>
                   </div>
-                </div>
-                <div class="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1.5 shrink-0 ml-5 sm:ml-0">
-                  <span
-                    class="font-body text-[.72rem] font-semibold @(t.Status == "completed" ? "text-green-600 bg-green-50" : "text-amber-600 bg-amber-50") px-2.5 py-1 rounded-full whitespace-nowrap uppercase">
-                    @t.Status
-                  </span>
-                  <span class="font-body text-[.72rem] text-muted whitespace-nowrap">@t.CreatedAt.ToString("MMM dd, yyyy")</span>
-                </div>
+                  <h3 class="font-extrabold text-2xl text-brand mb-3" style="font-family:'Syne',sans-serif">No X-Rays Found</h3>
+                  <p class="text-sm text-muted max-w-xs mx-auto leading-relaxed">Digital diagnostic images associated with your treatments will appear here once uploaded by our clinical team.</p>
               </div>
-            }
           }
-
-        </div>
       </div>
-    </div>
   </div>
 
-  <!-- ═══ X-RAYS & SCANS ═══ -->
-  <div class="rec-section fade-up" data-section="xrays">
-    <div class="bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden rec-card">
-      <button onclick="toggleSection(this)"
-        class="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-transparent border-none text-left">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-brand flex items-center justify-center shrink-0">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
+  <!-- ═══ MEDICAL HISTORY TAB ═══ -->
+  <div id="tabContent-medical" class="tab-pane-rec hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+              <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 mb-6">
+                  <i class="fa-solid fa-droplet text-lg"></i>
+              </div>
+              <h3 class="brand-font font-bold text-brand text-lg mb-4">Core Info</h3>
+              <div class="space-y-4">
+                  <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                      <span class="text-sm text-muted">Blood Type</span>
+                      <span class="text-sm font-bold text-brand">@(Model.MedicalInfo?.BloodType ?? "N/A")</span>
+                  </div>
+                  <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                      <span class="text-sm text-muted">Weight</span>
+                      <span class="text-sm font-bold text-brand">@(Model.MedicalInfo?.Weight?.ToString("0") ?? "---") kg</span>
+                  </div>
+                  <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                      <span class="text-sm text-muted">Smoker</span>
+                      <span class="text-sm font-bold @(Model.MedicalInfo?.IsSmoker == true ? "text-red-600" : "text-green-600")">@(Model.MedicalInfo?.IsSmoker == true ? "Yes" : "No")</span>
+                  </div>
+              </div>
           </div>
-          <span class="brand-font font-bold text-brand text-[.95rem]">X-Rays &amp; Scans</span>
-          <span class="font-body text-[.7rem] font-semibold text-muted bg-offwhite px-2 py-0.5 rounded-full">3
-            files</span>
-        </div>
-        <svg class="rec-chevron open w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div class="rec-body open">
-        <div class="px-5 pb-5 border-t border-[#f0f0f0]">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
 
-            <!-- X-ray card 1 -->
-            <div
-              class="rounded-xl overflow-hidden border border-[#e5e7eb] hover:border-brand transition-colors group cursor-pointer">
-              <div class="xray-shimmer h-36 relative flex items-center justify-center">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                </div>
-                <div
-                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-brand/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
-                </div>
+          <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 mb-6">
+                  <i class="fa-solid fa-shield-virus text-lg"></i>
               </div>
-              <div class="p-3">
-                <div class="brand-font font-semibold text-brand text-[.82rem]">Periapical X-Ray — #46</div>
-                <div class="font-body text-[.72rem] text-muted mt-0.5">Pre-root canal assessment</div>
-                <div class="flex items-center justify-between mt-2">
-                  <span class="font-body text-[.68rem] text-muted">Jul 8, 2025</span>
-                  <span
-                    class="font-body text-[.65rem] font-semibold text-[#7c3aed] bg-purple-50 px-2 py-0.5 rounded-full">Periapical</span>
-                </div>
+              <h3 class="brand-font font-bold text-brand text-lg mb-4">Allergies</h3>
+              <div class="flex flex-wrap gap-2">
+                  @if (!Model.Allergies.Any())
+                  {
+                      <p class="text-sm text-muted">No known allergies on file.</p>
+                  }
+                  @foreach (var allergy in Model.Allergies)
+                  {
+                      <span class="px-3 py-1.5 bg-red-50 text-red-600 text-[0.7rem] font-bold rounded-lg uppercase tracking-wider">@allergy</span>
+                  }
               </div>
-            </div>
-
-            <!-- X-ray card 2 -->
-            <div
-              class="rounded-xl overflow-hidden border border-[#e5e7eb] hover:border-brand transition-colors group cursor-pointer">
-              <div class="xray-shimmer h-36 relative flex items-center justify-center">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                </div>
-                <div
-                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-brand/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
-                </div>
-              </div>
-              <div class="p-3">
-                <div class="brand-font font-semibold text-brand text-[.82rem]">Full Mouth X-Ray Series</div>
-                <div class="font-body text-[.72rem] text-muted mt-0.5">Initial patient intake</div>
-                <div class="flex items-center justify-between mt-2">
-                  <span class="font-body text-[.68rem] text-muted">Jan 15, 2024</span>
-                  <span
-                    class="font-body text-[.65rem] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Full
-                    Mouth</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- X-ray card 3 -->
-            <div
-              class="rounded-xl overflow-hidden border border-[#e5e7eb] hover:border-brand transition-colors group cursor-pointer">
-              <div class="xray-shimmer h-36 relative flex items-center justify-center">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                </div>
-                <div
-                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-brand/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
-                </div>
-              </div>
-              <div class="p-3">
-                <div class="brand-font font-semibold text-brand text-[.82rem]">Bitewing X-Ray — Posterior</div>
-                <div class="font-body text-[.72rem] text-muted mt-0.5">Routine annual check</div>
-                <div class="flex items-center justify-between mt-2">
-                  <span class="font-body text-[.68rem] text-muted">Jan 10, 2026</span>
-                  <span
-                    class="font-body text-[.65rem] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Bitewing</span>
-                </div>
-              </div>
-            </div>
-
           </div>
-          <p class="font-body text-[.73rem] text-muted mt-3 flex items-center gap-1.5">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            X-ray images are for your reference. Full diagnostic quality files are available at the clinic.
-          </p>
-        </div>
+
+          <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+              <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 mb-6">
+                  <i class="fa-solid fa-pills text-lg"></i>
+              </div>
+              <h3 class="brand-font font-bold text-brand text-lg mb-4">Medications</h3>
+              <div class="space-y-3">
+                  @if (!Model.Medications.Any())
+                  {
+                      <p class="text-sm text-muted">No current medications.</p>
+                  }
+                  @foreach (var med in Model.Medications)
+                  {
+                      <div class="flex items-center gap-3">
+                          <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                          <span class="text-sm text-brand font-medium">@med</span>
+                      </div>
+                  }
+              </div>
+          </div>
       </div>
-    </div>
   </div>
 
-  <!-- ═══ TOOTH CHART ═══ -->
-  <div class="rec-section fade-up" data-section="chart">
-    <div class="bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden rec-card">
-      <button onclick="toggleSection(this)"
-        class="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-transparent border-none text-left">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-            </svg>
-          </div>
-          <span class="brand-font font-bold text-brand text-[.95rem]">Tooth Chart</span>
-          <span class="font-body text-[.7rem] font-semibold text-muted bg-offwhite px-2 py-0.5 rounded-full">Last
-            updated Jan 10, 2026</span>
-        </div>
-        <svg class="rec-chevron open w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div class="rec-body open">
-        <div class="px-5 pb-5 border-t border-[#f0f0f0]">
-
-          <!-- Legend -->
-          <div class="flex flex-wrap gap-3 mt-4 mb-5">
-            <div class="flex items-center gap-1.5">
-              <div class="tooth-cell tooth-healthy w-5 h-5 text-[0px]"></div><span
-                class="font-body text-[.72rem] text-muted">Healthy</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div class="tooth-cell tooth-filled w-5 h-5 text-[0px]"></div><span
-                class="font-body text-[.72rem] text-muted">Filled</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div class="tooth-cell tooth-crown w-5 h-5 text-[0px]"></div><span
-                class="font-body text-[.72rem] text-muted">Crown</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div class="tooth-cell tooth-rct w-5 h-5 text-[0px]"></div><span
-                class="font-body text-[.72rem] text-muted">RCT</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div class="tooth-cell tooth-extracted w-5 h-5 text-[0px]"></div><span
-                class="font-body text-[.72rem] text-muted">Extracted</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <div class="tooth-cell tooth-missing w-5 h-5 text-[0px]"></div><span
-                class="font-body text-[.72rem] text-muted">Missing</span>
-            </div>
-          </div>
-
-          <!-- Chart -->
-          <div class="overflow-x-auto">
-            <div class="min-w-[360px]">
-
-              <!-- Upper jaw label -->
-              <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-2 text-center">
-                Upper Jaw (Maxillary)</div>
-
-              <!-- Upper right (18–11) → upper left (21–28) -->
-              <div class="flex justify-center gap-1 mb-1" id="upper-row">
-                @for (int i = 18; i >= 11; i--)
-                {
-                  var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i] : "healthy";
-                  <div class="tooth-cell tooth-@status" title="@i — @status.ToUpper()">@i</div>
-                }
-                <div class="w-3"></div>
-                @for (int i = 21; i <= 28; i++)
-                {
-                  var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i] : "healthy";
-                  <div class="tooth-cell tooth-@status" title="@i — @status.ToUpper()">@i</div>
-                }
-              </div>
-
-              <!-- Gum divider -->
-              <div class="flex justify-center my-2">
-                <div class="w-[480px] max-w-full h-px bg-[#e5e7eb] relative">
-                  <span
-                    class="absolute left-1/2 -translate-x-1/2 -top-2.5 font-body text-[.6rem] text-muted bg-white px-2">←
-                    Right &nbsp;|&nbsp; Left →</span>
-                </div>
-              </div>
-
-              <!-- Lower Right: 48–41 → lower left 31–38 -->
-              <div class="flex justify-center gap-1 mt-1">
-                @for (int i = 48; i >= 41; i--)
-                {
-                  var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i] : "healthy";
-                  <div class="tooth-cell tooth-@status" title="@i — @status.ToUpper()">@i</div>
-                }
-                <div class="w-3"></div>
-                @for (int i = 31; i <= 38; i++)
-                {
-                  var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i] : "healthy";
-                  <div class="tooth-cell tooth-@status" title="@i — @status.ToUpper()">@i</div>
-                }
-              </div>
-              <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mt-2 text-center">
-                Lower Jaw (Mandibular)</div>
-
-            </div>
-          </div>
-
-          <!-- Notes -->
-          <div class="mt-5 bg-offwhite rounded-xl p-4">
-            <div class="font-body text-[.65rem] font-semibold tracking-[.1em] uppercase text-muted mb-2.5">Clinical
-              Notes</div>
-            <div class="space-y-2">
-              <div class="flex items-start gap-2.5 font-body text-[.8rem] text-muted">
-                <span
-                  class="w-4 h-4 rounded-full bg-[#fef9c3] border border-[#fde68a] flex items-center justify-center shrink-0 mt-0.5 text-[.5rem] font-bold text-[#a16207]">▲</span>
-                Tooth #46 — Crown placed August 2025 following root canal treatment (July 2025). Monitor at each visit.
-              </div>
-              <div class="flex items-start gap-2.5 font-body text-[.8rem] text-muted">
-                <span
-                  class="w-4 h-4 rounded-full bg-offwhite border border-[#e5e7eb] flex items-center justify-center shrink-0 mt-0.5 text-[.5rem] font-bold text-muted">○</span>
-                Teeth #28 and #38 — Wisdom teeth absent (never erupted / congenitally missing).
-              </div>
-              <div class="flex items-start gap-2.5 font-body text-[.8rem] text-muted">
-                <span class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </span>
-                All remaining teeth appear healthy as of January 10, 2026. No active caries detected.
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ NOTES & DOCTOR REMARKS ═══ -->
-  <div class="rec-section fade-up" data-section="medical">
-    <div class="bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden rec-card">
-      <button onclick="toggleSection(this)"
-        class="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-transparent border-none text-left">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-[#fef3c7] flex items-center justify-center shrink-0">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
-            </svg>
-          </div>
-          <span class="brand-font font-bold text-brand text-[.95rem]">Doctor's Notes &amp; Remarks</span>
-        </div>
-        <svg class="rec-chevron w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div class="rec-body">
-        <div class="px-5 pb-5 border-t border-[#f0f0f0] space-y-4 pt-4">
-
-          <div class="bg-offwhite rounded-xl p-4 border-l-4 border-primary">
-            <div class="flex items-center gap-3 mb-2">
-              <img src="https://randomuser.me/api/portraits/men/46.jpg"
-                class="w-7 h-7 rounded-full object-cover border border-[#e5e7eb]" alt="" />
-              <div>
-                <div class="brand-font font-semibold text-brand text-[.83rem]">Dr. Marcus Rivera</div>
-                <div class="font-body text-[.68rem] text-muted">January 10, 2026</div>
-              </div>
-            </div>
-            <p class="font-body text-[.83rem] text-brand/80 leading-relaxed">Patient is maintaining excellent oral
-              hygiene habits. Gum tissue shows no signs of gingivitis. Crown on #46 is intact and functional.
-              Recommended fluoride treatment at next 6-month visit to address mild enamel sensitivity. Continue current
-              brushing and flossing routine.</p>
-          </div>
-
-          <div class="bg-offwhite rounded-xl p-4 border-l-4 border-[#7c3aed]">
-            <div class="flex items-center gap-3 mb-2">
-              <img src="https://randomuser.me/api/portraits/women/44.jpg"
-                class="w-7 h-7 rounded-full object-cover border border-[#e5e7eb]" alt="" />
-              <div>
-                <div class="brand-font font-semibold text-brand text-[.83rem]">Dr. Leila Santos</div>
-                <div class="font-body text-[.68rem] text-muted">October 22, 2025</div>
-              </div>
-            </div>
-            <p class="font-body text-[.83rem] text-brand/80 leading-relaxed">Post-whitening results are excellent —
-              patient very satisfied. Mild transient sensitivity resolved within 24 hours per patient's follow-up
-              message. Advised to continue maintenance kit twice weekly and avoid highly chromogenic foods. Touch-up
-              recommended in 12 months.</p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
 </section>
+
+<script>
+function showTab(tabId) {
+    // Buttons
+    document.querySelectorAll('.rec-tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'text-primary', 'border-primary');
+        btn.classList.add('text-muted', 'border-transparent');
+    });
+    const activeBtn = document.getElementById('tab-' + tabId);
+    activeBtn.classList.add('active', 'text-primary', 'border-primary');
+    activeBtn.classList.remove('text-muted', 'border-transparent');
+
+    // Panes
+    document.querySelectorAll('.tab-pane-rec').forEach(pane => {
+        pane.classList.add('hidden');
+    });
+    document.getElementById('tabContent-' + tabId).classList.remove('hidden');
+}
+</script>
+
+<style>
+.rec-tab-btn.active {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+.tooth-v2 {
+    width: 32px;
+    height: 42px;
+    border-radius: 8px 8px 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1);
+}
+.tooth-v2:hover {
+    transform: translateY(-4px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1), inset 0 -4px 0 rgba(0,0,0,0.1);
+    z-index: 10;
+}
+.tooth-healthy { background: #10b981; }
+.tooth-filled { background: #3b82f6; }
+.tooth-plan { background: #f59e0b; }
+.tooth-crown { background: #f59e0b; }
+.tooth-rct { background: #ef4444; }
+.tooth-extracted { background: #94a3b8; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

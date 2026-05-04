@@ -119,23 +119,108 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var newId = Guid.NewGuid().ToString();
-                var p = new Profile
+                // 1. Create the shadow user in auth.users via GoTrue Admin API
+                // This satisfies the profiles_id_fkey constraint.
+                var authPayload = new
                 {
-                    Id = newId,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    Email = email,
-                    PhoneNumber = phone,
-                    Sex = sex,
-                    DateOfBirth = dob,
-                    Role = "patient",
-                    IsActive = true,
-                    RequiresMergeReview = requiresReview,
-                    CreatedAt = DateTime.UtcNow
+                    email = email,
+                    password = Guid.NewGuid().ToString() + "A1!",
+                    email_confirm = true,
+                    user_metadata = new { first_name = firstName, last_name = lastName }
                 };
 
-                await _supabase.From<Profile>().Insert(p);
+                var reqAuth = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users");
+                reqAuth.Headers.Add("apikey", _serviceRoleKey);
+                reqAuth.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                reqAuth.Content = new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(authPayload),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+
+                var resAuth = await _http.SendAsync(reqAuth);
+                string newId;
+
+                if (!resAuth.IsSuccessStatusCode)
+                {
+                    var errAuth = await resAuth.Content.ReadAsStringAsync();
+                    
+                    // If email already exists in auth.users (but somehow wasn't in profiles to be matched),
+                    // we create a purely synthetic shadow email so the FK constraint is satisfied without crashing.
+                    if (errAuth.Contains("already registered", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var shadowEmail = $"shadow_{Guid.NewGuid().ToString().Substring(0, 8)}@shadow.local";
+                        var retryPayload = new
+                        {
+                            email = shadowEmail,
+                            password = Guid.NewGuid().ToString() + "A1!",
+                            email_confirm = true,
+                            user_metadata = new { first_name = firstName, last_name = lastName }
+                        };
+                        var reqRetry = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users");
+                        reqRetry.Headers.Add("apikey", _serviceRoleKey);
+                        reqRetry.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                        reqRetry.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(retryPayload), System.Text.Encoding.UTF8, "application/json");
+                        
+                        var resRetry = await _http.SendAsync(reqRetry);
+                        if (!resRetry.IsSuccessStatusCode)
+                        {
+                            var errRetry = await resRetry.Content.ReadAsStringAsync();
+                            throw new Exception($"Auth user creation (retry) failed: {errRetry}");
+                        }
+                        var retryJson = await resRetry.Content.ReadAsStringAsync();
+                        newId = System.Text.Json.JsonDocument.Parse(retryJson).RootElement.GetProperty("id").GetString()!;
+                    }
+                    else
+                    {
+                        throw new Exception($"Auth user creation failed: {errAuth}");
+                    }
+                }
+                else
+                {
+                    var authJson = await resAuth.Content.ReadAsStringAsync();
+                    newId = System.Text.Json.JsonDocument.Parse(authJson).RootElement.GetProperty("id").GetString()!;
+                }
+
+                // 2. Delay briefly to ensure the committed auth.users row is visible 
+                // to PostgREST's connection pool across potential read replica/schema cache bounds.
+                await Task.Delay(500);
+
+                // 3. Bypass ORM — Profile model has columns (oral_health_score etc.) that may not
+                // be in Supabase schema cache yet, causing PGRST204 on Insert.
+                // Only send the columns we know exist in the live schema.
+                var payload = new
+                {
+                    id = newId,
+                    first_name = firstName,
+                    last_name = lastName,
+                    email,
+                    phone_number = phone,
+                    sex,
+                    date_of_birth = dob.HasValue ? dob.Value.ToString("yyyy-MM-dd") : null,
+                    role = "patient",
+                    is_active = true,
+                    requires_merge_review = requiresReview,
+                    created_at = DateTime.UtcNow
+                };
+
+                var req = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl.TrimEnd('/')}/rest/v1/profiles");
+                req.Headers.Add("apikey", _serviceRoleKey);
+                req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                req.Headers.Add("Prefer", "return=minimal");
+                req.Content = new System.Net.Http.StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(payload),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+
+                var res = await _http.SendAsync(req);
+                if (!res.IsSuccessStatusCode)
+                {
+                    var err = await res.Content.ReadAsStringAsync();
+                    throw new Exception($"Profile insert failed: {err}");
+                }
+
                 return newId;
             }
             catch (Exception ex)

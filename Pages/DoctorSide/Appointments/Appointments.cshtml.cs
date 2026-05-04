@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
-using SamsonDentalCenterManagementSystem.Helpers;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Appointments;
 
@@ -22,31 +22,44 @@ public class AppointmentsModel : AdminPageModel
         DentalServiceService services,
         ILogger<AppointmentsModel> logger,
         SessionHelper sessionHelper,
-        ProfileService profileService)
+        ProfileService profileService
+    )
         : base(profileService)
     {
         _appointments = appointments;
         _doctorService = doctorService;
-        _services     = services;
-        _logger       = logger;
+        _services = services;
+        _logger = logger;
         _sessionHelper = sessionHelper;
     }
 
-    public List<Appointment>    Appointments { get; set; } = new();
-    public List<DentalService>  Services     { get; set; } = new();
+    public List<Appointment> Appointments { get; set; } = new();
+    public List<DentalService> Services { get; set; } = new();
 
-    public int CountConfirmed => Appointments.Count(a => string.Equals(a.Status, "confirmed", StringComparison.OrdinalIgnoreCase));
-    public int CountPending   => Appointments.Count(a => string.Equals(a.Status, "pending", StringComparison.OrdinalIgnoreCase));
-    public int CountCancelled => Appointments.Count(a => string.Equals(a.Status, "cancelled", StringComparison.OrdinalIgnoreCase));
-    public int CountWaitlist  => Appointments.Count(a => string.Equals(a.Status, "waitlist", StringComparison.OrdinalIgnoreCase));
+    public int CountConfirmed =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "confirmed", StringComparison.OrdinalIgnoreCase)
+        );
+    public int CountPending =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "pending", StringComparison.OrdinalIgnoreCase)
+        );
+    public int CountCancelled =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "cancelled", StringComparison.OrdinalIgnoreCase)
+        );
+    public int CountWaitlist =>
+        Appointments.Count(a =>
+            string.Equals(a.Status, "waitlist", StringComparison.OrdinalIgnoreCase)
+        );
 
     public async Task<IActionResult> OnGetAsync()
     {
         var token = await _sessionHelper.GetValidTokenAsync();
-        
+
         if (token == null || (CurrentUserRole != "doctor" && CurrentUserRole != "admin"))
         {
-            return RedirectToPage("/Sign-in");
+            return RedirectToPage("/Authentication/Authentication/Signin");
         }
 
         try
@@ -63,8 +76,14 @@ public class AppointmentsModel : AdminPageModel
             _logger.LogError(ex, "Failed to load doctor appointments");
         }
 
-        try { Services = await _services.GetAll(); }
-        catch (Exception ex) { _logger.LogError(ex, "Failed to load services"); }
+        try
+        {
+            Services = await _services.GetAll();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load services");
+        }
         return Page();
     }
 
@@ -72,7 +91,8 @@ public class AppointmentsModel : AdminPageModel
     {
         try
         {
-            if (payload == null) return new JsonResult(new { ok = false, error = "Invalid data" });
+            if (payload == null)
+                return new JsonResult(new { ok = false, error = "Invalid data" });
             var appt = await _appointments.Create(payload);
             return new JsonResult(new { ok = true, id = appt.Id });
         }
@@ -143,7 +163,10 @@ public class AppointmentsModel : AdminPageModel
     }
 
     public record UpdateStatusRequest(string Id, string Status, string? DoctorId = null);
+
     public record RescheduleRequest(string Id, DateTime NewDate, string NewTime, string? DoctorId);
+
     public record SlotRequest(string ServiceId, string Category, string Date);
+
     public record DeleteRequest(string Id);
 }

@@ -1,5 +1,3 @@
-
-
 import { initProfile } from "./profile.js";
 
 let isNavScrollDisabled = false;
@@ -12,9 +10,9 @@ let isNavHidden = false;
 export function toggleNavbar() {
   const navbar = document.getElementById("navbar-wrapper");
   if (!navbar) return;
-  
+
   const isScrolled = window.scrollY > 50 || isNavScrollDisabled;
-  
+
   if (isScrolled) {
     navbar.classList.add("nav-scrolled");
   } else {
@@ -23,20 +21,20 @@ export function toggleNavbar() {
 
   // Hide/Show logic
   if (window.scrollY > 400) {
-      if (window.scrollY > lastScrollY && !isNavHidden) {
-          navbar.classList.add("nav-hidden");
-          isNavHidden = true;
-      } else if (window.scrollY < lastScrollY && isNavHidden) {
-          navbar.classList.remove("nav-hidden");
-          isNavHidden = false;
-      }
-  } else {
+    if (window.scrollY > lastScrollY && !isNavHidden) {
+      navbar.classList.add("nav-hidden");
+      isNavHidden = true;
+    } else if (window.scrollY < lastScrollY && isNavHidden) {
       navbar.classList.remove("nav-hidden");
       isNavHidden = false;
+    }
+  } else {
+    navbar.classList.remove("nav-hidden");
+    isNavHidden = false;
   }
-  
+
   lastScrollY = window.scrollY;
-  
+
   // Theme logic removed since we now use CSS for dark/light islands
 }
 
@@ -46,38 +44,45 @@ function setActive(id) {
   const el = document.getElementById(id);
   const mel = document.getElementById(`m-${id}`);
   if (el) {
-      el.classList.add("active", "text-primary");
+    el.classList.add("active", "text-primary");
   }
   if (mel) {
-      mel.classList.add("active", "text-primary");
+    mel.classList.add("active", "text-primary");
   }
   if (id === "servicesBtn") {
-      el.classList.add("service");
+    el.classList.add("service");
   }
 }
 
 function syncProfileLinks() {
   const path = window.location.pathname.toLowerCase();
   const allProfileLinks = document.querySelectorAll(".side-link, .menu-link");
-  
-  allProfileLinks.forEach(link => {
+
+  allProfileLinks.forEach((link) => {
     link.classList.remove("active");
     const href = link.getAttribute("href")?.toLowerCase();
     if (!href) return;
 
-    if (path.includes("dashboard") && href.includes("dashboard")) link.classList.add("active");
-    if (path.includes("myappointments") && href.includes("myappointments")) link.classList.add("active");
-    if (path.includes("records") && href.includes("records")) link.classList.add("active");
-    if (path.includes("notifications") && href.includes("notifications")) link.classList.add("active");
-    if (path.includes("settings") && href.includes("settings")) link.classList.add("active");
+    if (path.includes("dashboard") && href.includes("dashboard"))
+      link.classList.add("active");
+    if (path.includes("myappointments") && href.includes("myappointments"))
+      link.classList.add("active");
+    if (path.includes("records") && href.includes("records"))
+      link.classList.add("active");
+    if (path.includes("notifications") && href.includes("notifications"))
+      link.classList.add("active");
+    if (path.includes("settings") && href.includes("settings"))
+      link.classList.add("active");
   });
 }
 
 export function syncActiveLink() {
   const path = window.location.pathname.toLowerCase();
-  
+
   // Clear previous actives
-  document.querySelectorAll(".nav-link, .mobile-nav-link").forEach(l => l.classList.remove("active", "text-primary"));
+  document
+    .querySelectorAll(".nav-link, .mobile-nav-link")
+    .forEach((l) => l.classList.remove("active", "text-primary"));
 
   if (path === "/" || path === "") {
     setActive("nav-home");
@@ -85,7 +90,6 @@ export function syncActiveLink() {
     setActive("nav-about");
   } else if (path.startsWith("/services")) {
     setActive("servicesBtn");
-  
   } else if (path.startsWith("/contacts")) {
     setActive("nav-contacts");
   } else if (path.startsWith("/profile")) {
@@ -106,27 +110,31 @@ export function initServicesMenu() {
   servicesBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     const isHidden = servicesMega.classList.contains("servicesMega-hidden");
-    
+
     if (isHidden) {
-        servicesMega.classList.remove("servicesMega-hidden");
-        chevronIcon.classList.add("rotate-180");
-        gsap.fromTo(panel, 
-            { opacity: 0, y: -20, scale: 0.95 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.2)" }
-        );
+      servicesMega.classList.remove("servicesMega-hidden");
+      chevronIcon.classList.add("rotate-180");
+      gsap.fromTo(
+        panel,
+        { opacity: 0, y: -20, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.2)" },
+      );
     } else {
-        closeMega();
+      closeMega();
     }
   });
 
   function closeMega() {
-      gsap.to(panel, {
-          opacity: 0, y: -10, scale: 0.98, duration: 0.2, 
-          onComplete: () => {
-              servicesMega.classList.add("servicesMega-hidden");
-              chevronIcon.classList.remove("rotate-180");
-          }
-      });
+    gsap.to(panel, {
+      opacity: 0,
+      y: -10,
+      scale: 0.98,
+      duration: 0.2,
+      onComplete: () => {
+        servicesMega.classList.add("servicesMega-hidden");
+        chevronIcon.classList.remove("rotate-180");
+      },
+    });
   }
 
   document.addEventListener("click", (e) => {
@@ -149,46 +157,54 @@ export function initMobileMenu() {
     const isOpening = mobileMenu.classList.contains("invisible");
 
     if (isOpening) {
-        // Open
-        mobileMenu.classList.remove("invisible");
-        document.body.style.overflow = "hidden";
-        
-        // Force navbar to "active" style so burger is visible against white bg
-        toggleNavbar();
-        
-        gsap.to(mobileMenu, { opacity: 1, duration: 0.5, ease: "power2.out" });
+      // Open
+      mobileMenu.classList.remove("invisible");
+      document.body.style.overflow = "hidden";
 
-        // Burger Transform
-        gsap.to(burgerTop, { y: 8, rotation: 45, duration: 0.3 });
-        gsap.to(burgerMid, { opacity: 0, x: -10, duration: 0.3 });
-        gsap.to(burgerBot, { y: -8, rotation: -45, duration: 0.3 });
-        
-        // Links Entrance
-        gsap.fromTo(".mobile-nav-link", 
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out", delay: 0.2 }
-        );
+      // Force navbar to "active" style so burger is visible against white bg
+      toggleNavbar();
+
+      gsap.to(mobileMenu, { opacity: 1, duration: 0.5, ease: "power2.out" });
+
+      // Burger Transform
+      gsap.to(burgerTop, { y: 6, rotation: 45, duration: 0.3 });
+      gsap.to(burgerMid, { opacity: 0, x: -10, duration: 0.3 });
+      gsap.to(burgerBot, { y: -6, rotation: -45, duration: 0.3 });
+
+      // Links Entrance
+      gsap.fromTo(
+        ".mobile-nav-link",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power3.out",
+          delay: 0.2,
+        },
+      );
     } else {
-        // Close
-        gsap.to(mobileMenu, { 
-            opacity: 0, 
-            duration: 0.4, 
-            onComplete: () => {
-                mobileMenu.classList.add("invisible");
-                document.body.style.overflow = "";
-                
-                // Revert navbar style based on scroll
-                if (!isNavScrollDisabled) {
-                    const isScrolled = window.scrollY > 60;
-                    toggleNavbar(isScrolled);
-                }
-            }
-        });
-        
-        // Burger Reset
-        gsap.to(burgerTop, { y: 0, rotation: 0, duration: 0.3 });
-        gsap.to(burgerMid, { opacity: 1, x: 0, duration: 0.3 });
-        gsap.to(burgerBot, { y: 0, rotation: 0, duration: 0.3 });
+      // Close
+      gsap.to(mobileMenu, {
+        opacity: 0,
+        duration: 0.4,
+        onComplete: () => {
+          mobileMenu.classList.add("invisible");
+          document.body.style.overflow = "";
+
+          // Revert navbar style based on scroll
+          if (!isNavScrollDisabled) {
+            const isScrolled = window.scrollY > 60;
+            toggleNavbar(isScrolled);
+          }
+        },
+      });
+
+      // Burger Reset
+      gsap.to(burgerTop, { y: 0, rotation: 0, duration: 0.3 });
+      gsap.to(burgerMid, { opacity: 1, x: 0, duration: 0.3 });
+      gsap.to(burgerBot, { y: 0, rotation: 0, duration: 0.3 });
     }
   });
 
@@ -201,7 +217,8 @@ export function initMobileMenu() {
       mobileServicesMenu.style.maxHeight = null;
       mobileChevron?.classList.remove("rotate-180");
     } else {
-      mobileServicesMenu.style.maxHeight = mobileServicesMenu.scrollHeight + "px";
+      mobileServicesMenu.style.maxHeight =
+        mobileServicesMenu.scrollHeight + "px";
       mobileChevron?.classList.add("rotate-180");
     }
   });

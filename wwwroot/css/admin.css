@@ -8,7 +8,7 @@
   --bg-card: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(255, 255, 255, 0.3);
 }
 
@@ -43,12 +43,17 @@ h4,
   margin-left: 68px !important;
 }
 
+.sb-collapsed header {
+  left: 68px !important;
+  width: calc(100% - 68px) !important;
+}
+
 .sb-collapsed #toggle-icon {
   transform: rotate(180deg);
 }
 
 .nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.10);
 }
 
 .nav-item.active {

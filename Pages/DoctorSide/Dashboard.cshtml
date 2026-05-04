@@ -60,7 +60,7 @@ ViewData["Title"] = "Doctor Dashboard";
                         Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span>
                     </div>
                 </div>
-                <a href="/Doctor/Invoices?appt=@appt.Id"
+                    <a href="/Doctor/Treatments?appt=@appt.Id"
                     class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">
                     Start Treatment & Invoice
                 </a>
@@ -115,7 +115,7 @@ ViewData["Title"] = "Doctor Dashboard";
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/30">
                     <h3 class="font-display font-bold text-brand text-[15px]">Your Upcoming Appointments</h3>
-                    <a href="/Admin/Appointments"
+                    <a href="/Doctor/Appointments"
                         class="text-[11px] font-bold text-primary hover:underline uppercase tracking-wider">View Full
                         Schedule</a>
                 </div>
@@ -224,7 +224,7 @@ ViewData["Title"] = "Doctor Dashboard";
             <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-400">Recent Invoices</h4>
-                    <a href="/Admin/Invoices" class="text-[10px] font-bold text-primary hover:underline uppercase">View
+                    <a href="/Doctor/Treatments" class="text-[10px] font-bold text-primary hover:underline uppercase">View
                         All</a>
                 </div>
                 <div class="space-y-3">
@@ -234,7 +234,7 @@ ViewData["Title"] = "Doctor Dashboard";
                     }
                     @foreach (var inv in Model.RecentInvoices)
                     {
-                    <a href='/Doctor/Invoices?invId=@inv.Id' class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
+                    <a href='/Doctor/Treatments?invId=@inv.Id' class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-all group">
                         <div class="min-w-0">
                             <div class="text-[12px] font-bold text-brand-900 truncate">@(inv.Patient?.FullName ?? "Unknown")</div>
                             <div class="text-[10px] text-brand-400">@inv.CreatedAt.ToString("MMM dd")</div>

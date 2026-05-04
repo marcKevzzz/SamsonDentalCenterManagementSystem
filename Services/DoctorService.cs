@@ -220,10 +220,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Fetch profiles not yet linked to a doctor (for the Add modal) ─────
         public async Task<List<ProfileDto>> GetAvailableProfilesAsync()
         {
-            // All doctor-role OR admin-role profiles
+            // Only doctor-role profiles (admins no longer double as doctors)
             var profileReq = BuildRequest(
                 HttpMethod.Get,
-                "/profiles?select=*&role=in.(doctor,admin)&order=first_name.asc"
+                "/profiles?select=*&role=eq.doctor&order=first_name.asc"
             );
             var profileRes = await _http.SendAsync(profileReq);
             profileRes.EnsureSuccessStatusCode();

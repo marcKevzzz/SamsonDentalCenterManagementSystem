@@ -58,6 +58,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function closeAllDropdowns() {
+    staffDropdown?.classList.add("hidden");
+    staffArrow?.classList.remove("rotate-180");
+    settingsDropdown?.classList.add("hidden");
+    settingsArrow?.classList.remove("rotate-180");
+    userPopup?.classList.add("hidden");
+    staffPopup?.classList.add("hidden");
+    settingsPopup?.classList.add("hidden");
+  }
+
   document.addEventListener("click", (e) => {
     if (userPopup && !userPopup.contains(e.target)) {
       userPopup.classList.add("hidden");
@@ -106,7 +116,7 @@ const SIDEBAR_COLLAPSED = "w-[68px]";
 const pageTitles = {
   dashboard: ["Dashboard", "Overview · Today"],
   patients: ["Patients", "People · Registry"],
-  doctors: ["Doctors", "People · Doctors Directory"],
+  doctors: ["Doctors", "People · Staff Directory"],
   receptionists: ["Receptionists", "People · Receptionists Directory"],
   users: ["Users", "People · User Management"],
   appointments: ["Appointments", "Operations · Schedule"],
@@ -260,6 +270,7 @@ function toggleSidebar() {
   localStorage.setItem("sidebarCollapsed", sidebarCollapsed);
 
   document.documentElement.classList.toggle("sb-collapsed", sidebarCollapsed);
+  closeAllDropdowns();
 }
 
 function openSidebar() {
@@ -275,11 +286,28 @@ function openSidebar() {
 function closeSidebar() {
   const sb = document.getElementById("sidebar");
 
-  sb.classList.add("-translate-x-full");
-  sb.classList.remove("translate-x-0");
+  sb?.classList.add("-translate-x-full");
+  sb?.classList.remove("translate-x-0");
 
   document.getElementById("overlay")?.classList.add("hidden");
   document.body.style.overflow = "";
+
+  // Close any open dropdowns when sidebar is hidden
+  const staffDropdown = document.getElementById("staff-dropdown");
+  const staffArrow = document.getElementById("staff-arrow");
+  const settingsDropdown = document.getElementById("settings-dropdown");
+  const settingsArrow = document.getElementById("settings-arrow");
+  const userPopup = document.getElementById("user-popup");
+  const staffPopup = document.getElementById("staff-popup");
+  const settingsPopup = document.getElementById("settings-popup");
+
+  staffDropdown?.classList.add("hidden");
+  staffArrow?.classList.remove("rotate-180");
+  settingsDropdown?.classList.add("hidden");
+  settingsArrow?.classList.remove("rotate-180");
+  userPopup?.classList.add("hidden");
+  staffPopup?.classList.add("hidden");
+  settingsPopup?.classList.add("hidden");
 }
 
 // 🔥 FIX: Consistent resize handling
@@ -289,17 +317,23 @@ window.addEventListener("resize", () => {
 
   if (window.innerWidth >= 1024) {
     // Desktop mode
-    sb.classList.remove("-translate-x-full");
-    sb.classList.add("translate-x-0");
+    sb?.classList.remove("-translate-x-full");
+    sb?.classList.add("translate-x-0");
 
+    // Restore sidebar state (collapsed/expanded)
     applySidebarState();
 
     document.getElementById("overlay")?.classList.add("hidden");
     document.body.style.overflow = "";
   } else {
     // Mobile mode
-    sb.classList.remove(SIDEBAR_COLLAPSED);
-    sb.classList.add(SIDEBAR_EXPANDED);
+    // Always remove sb-collapsed on mobile to prevent width issues
+    document.documentElement.classList.remove("sb-collapsed");
+    
+    if (sb) {
+        sb.classList.remove(SIDEBAR_COLLAPSED);
+        sb.classList.add(SIDEBAR_EXPANDED);
+    }
 
     if (main) main.style.marginLeft = "0";
 
@@ -308,6 +342,6 @@ window.addEventListener("resize", () => {
 });
 
 function signout() {
-  localStorage.removeItem("sb_user");
-  window.location.href = "/signout"; // Use an absolute path for reliability
+  localStorage.clear(); // wipe sb_user + all admin_v2_* cache
+  window.location.href = "/signout";
 }

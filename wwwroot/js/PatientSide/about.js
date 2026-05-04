@@ -46,7 +46,6 @@ function initEntranceAnimations() {
       {
         yPercent: 15,
         scale: 1.2,
-        delay: 1,
         scrollTrigger: {
           trigger: storyTrigger,
           start: "top bottom",
@@ -71,7 +70,7 @@ function initEntranceAnimations() {
       ease: "power2.out",
       scrollTrigger: {
         trigger: ".amission-card",
-        start: "top 60%",
+        start: "top 80%",
         once: true,
       },
     },

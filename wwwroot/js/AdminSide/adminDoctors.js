@@ -324,7 +324,7 @@ window.switchStaffRole = function (role) {
         recBtn.className    = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all border-slate-200 bg-white text-slate-500 hover:border-slate-300";
         docFields.classList.remove("hidden");
         recFields.classList.add("hidden");
-        hintLabel.textContent = "(Doctor / Admin role)";
+        hintLabel.textContent = "(Doctor / Staff role)";
         saveBtn.textContent   = "Save Doctor";
     } else {
         recBtn.className    = "flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold border-2 transition-all border-primary bg-primary/5 text-primary";
@@ -473,8 +473,9 @@ async function loadAvailableUsers(role) {
                     opt.value = u.id;
                     const fn = u.firstName ?? u.first_name ?? "";
                     const ln = u.lastName ?? u.last_name ?? "";
-                    const role = u.role ? ` [${u.role}]` : "";
-                    opt.text = `${fn} ${ln} (${u.email ?? ""})${role}`.trim();
+                    const displayRole = u.role === "admin" ? "Staff" : (u.role || "");
+                    const roleLabel = displayRole ? ` [${displayRole}]` : "";
+                    opt.text = `${fn} ${ln} (${u.email ?? ""})${roleLabel}`.trim();
                     select.appendChild(opt);
                 });
             }

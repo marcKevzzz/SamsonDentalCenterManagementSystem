@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Resend;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Distributed;
 using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Models;
 
@@ -22,6 +23,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly BlockedDateService _blockedDates;
         private readonly IHubContext<AdminHub> _hubContext;
         private readonly ProfileService _profiles;
+        private readonly IDistributedCache _cache;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -54,7 +56,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             IHubContext<AdminHub> hubContext,
             ClinicService clinic,
             BlockedDateService blockedDates,
-            ProfileService profiles
+            ProfileService profiles,
+            IDistributedCache cache
         )
         {
             _supabase = supabase;
@@ -69,6 +72,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _clinic = clinic;
             _blockedDates = blockedDates;
             _profiles = profiles;
+            _cache = cache;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -408,11 +412,52 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var status = DetermineStatus(p);
             var emailStatus = (status == "confirmed" || status == "waitlist") ? status : "pending";
+            if (p.IsGuestConfirmed) emailStatus = "confirmed";
 
             // FIX THE DATE BUG: Strip time and offset to keep it on the selected day
             var fixedDate = DateTime.SpecifyKind(p.AppointmentDate.Date, DateTimeKind.Unspecified);
 
             var token = (p.IsGuest && !p.IsWaitlist) ? Guid.NewGuid().ToString("N") : null;
+
+            // ── DECOUPLE DATABASE FOR UNCONFIRMED GUESTS ──────────────────────
+            if (p.IsGuest && !p.IsWaitlist && !p.IsGuestConfirmed)
+            {
+                var cacheToken = Guid.NewGuid().ToString("N");
+                var cacheJson = JsonSerializer.Serialize(p);
+                await _cache.SetStringAsync(cacheToken, cacheJson, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24) });
+
+                var mockAppt = new Appointment
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PatientName = p.PatientName,
+                    PatientEmail = p.PatientEmail,
+                    Service = new DentalService { Name = p.ServiceName },
+                    AppointmentDate = fixedDate,
+                    AppointmentTime = p.AppointmentTime,
+                    ConfirmationToken = cacheToken,
+                    EmailStatus = "pending",
+                    Status = "pending",
+                    IsGuest = true,
+                    IsWaitlist = false
+                };
+
+                if (!string.IsNullOrEmpty(p.DoctorId))
+                {
+                    try {
+                        var docRes = await _supabase.From<Doctor>().Where(d => d.Id == p.DoctorId).Get();
+                        var doc = docRes.Models.FirstOrDefault();
+                        if (doc != null) {
+                            var profRes = await _supabase.From<Profile>().Where(pr => pr.Id == doc.ProfileId).Get();
+                            doc.Profile = profRes.Models.FirstOrDefault();
+                            mockAppt.Doctor = doc;
+                        }
+                    } catch {}
+                }
+
+                await SendGuestConfirmationEmail(mockAppt);
+                Console.WriteLine($"[Appointment] Cached mock waiting for email confirmation. Token: {cacheToken}");
+                return mockAppt;
+            }
 
             // --- Smart Matching & Shadow Profiles ---
             if (p.IsGuest && string.IsNullOrEmpty(p.PatientId))
@@ -429,19 +474,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                     // Strong Match found -> Auto link
                     p.PatientId = matchResult.Profile.Id;
                 }
-                else
-                {
-                    // Create Shadow Profile
-                    p.PatientId = await _profiles.CreateShadowProfile(
-                        firstName,
-                        lastName,
-                        p.PatientEmail,
-                        p.PatientPhone,
-                        p.PatientSex,
-                        p.PatientDob,
-                        matchResult.RequiresReview
-                    );
-                }
+                // If no match is found, we leave PatientId as null.
+                // Identity Bridge: The profile is only created when marked 'Arrived'.
             }
 
             // --- Auto Assign Previous Doctor ---
@@ -549,6 +583,32 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
+                // First check if it's a cached payload waiting to be saved
+                var cachedJson = await _cache.GetStringAsync(token);
+                if (!string.IsNullOrEmpty(cachedJson))
+                {
+                    var p = JsonSerializer.Deserialize<AppointmentPayload>(cachedJson);
+                    if (p != null)
+                    {
+                        p.IsGuestConfirmed = true;
+                        // Re-run the Create logic to actually insert
+                        var createdAppt = await Create(p);
+                        await _cache.RemoveAsync(token);
+                        
+                        // Force email status to confirmed in the DB just in case DetermineStatus logic is weird
+                        createdAppt.EmailStatus = "confirmed";
+                        createdAppt.ConfirmedAt = DateTime.UtcNow;
+                        await _supabase.From<Appointment>()
+                            .Where(x => x.Id == createdAppt.Id)
+                            .Set(x => x.EmailStatus, "confirmed")
+                            .Set(x => x.ConfirmedAt, DateTime.UtcNow)
+                            .Update();
+
+                        return createdAppt;
+                    }
+                }
+
+                // Fallback for older appointments already in the DB with token
                 var res = await _supabase
                     .From<Appointment>()
                     .Where(a => a.ConfirmationToken == token)
@@ -830,7 +890,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    "/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&order=appointment_date.desc";
+                    "/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*)),patient_profile:profiles!patient_id(*)&order=appointment_date.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -962,6 +1022,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                                     : null,
                         }
                         : null,
+                PatientProfile = dto.PatientProfile
             };
         }
 
@@ -1021,14 +1082,20 @@ namespace SamsonDentalCenterManagementSystem.Services
                     Console.WriteLine($"[Promotion] Created new Shadow Profile {newPatientId}");
                 }
 
-                // 3. Link appointment to this profile
+                // 3. Link appointment to this profile using raw HTTP to bypass ORM cache issues
                 if (appt.PatientId != newPatientId)
                 {
-                    await _supabase
-                        .From<Appointment>()
-                        .Where(a => a.Id == appt.Id)
-                        .Set(a => a.PatientId!, newPatientId)
-                        .Update();
+                    var linkPath = $"/appointments?id=eq.{appt.Id}";
+                    var linkReq = BuildRequest(new HttpMethod("PATCH"), linkPath);
+                    linkReq.Content = new StringContent(
+                        JsonSerializer.Serialize(new { patient_id = newPatientId }),
+                        System.Text.Encoding.UTF8,
+                        "application/json"
+                    );
+                    var linkRes = await _http.SendAsync(linkReq);
+                    linkRes.EnsureSuccessStatusCode();
+                    
+                    Console.WriteLine($"[Promotion] Linked appointment {appt.Id} to profile {newPatientId}");
                 }
             }
             catch (Exception ex)
@@ -1136,6 +1203,12 @@ namespace SamsonDentalCenterManagementSystem.Services
                     </body>
                     </html>
                     """;
+
+                // Temporary log for manual confirmation without Resend subdomain
+                Console.WriteLine("\n=======================================================");
+                Console.WriteLine($"[MANUAL CONFIRMATION LINK] FOR {appt.PatientEmail}:");
+                Console.WriteLine(confirmUrl);
+                Console.WriteLine("=======================================================\n");
 
                 await _resend.EmailSendAsync(msg);
                 Console.WriteLine($"[Email] Guest confirmation sent → {appt.PatientEmail}");
@@ -1631,6 +1704,9 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         [JsonPropertyName("doctor")]
         public DoctorDto? Doctor { get; set; }
+
+        [JsonPropertyName("patient_profile")]
+        public Profile? PatientProfile { get; set; }
     }
 
     public class AppointmentPayload
@@ -1642,6 +1718,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public string? PatientSex { get; set; }
         public DateTime? PatientDob { get; set; }
         public bool IsGuest { get; set; }
+        public bool IsGuestConfirmed { get; set; }
         public bool IsForOther { get; set; }
         public string? OtherFirstName { get; set; }
         public string? OtherLastName { get; set; }

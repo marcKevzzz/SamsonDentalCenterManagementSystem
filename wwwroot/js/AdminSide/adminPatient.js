@@ -36,6 +36,11 @@ function initializeWithData(data) {
         const dob = p.dob ? new Date(p.dob) : null;
         const age = dob ? (new Date().getFullYear() - dob.getFullYear()) : 0;
 
+        const parts = [p.firstName, p.lastName].filter(Boolean);
+        const initials = parts.length > 1 
+            ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase() 
+            : (parts[0]?.[0] || "P").toUpperCase();
+
         return {
             id: p.id,
             firstName: p.firstName,
@@ -44,7 +49,7 @@ function initializeWithData(data) {
             sex: p.sex,
             dob: p.dob,
             age: age,
-            initials: `${(p.firstName || p.firstName || "")[0] || ""}${(p.lastName || p.lastName || "")[0] || ""}`.toUpperCase(),
+            initials: initials,
             lastVisit: lastAppt ? new Date(lastAppt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "--",
             assignedDoctor: docName,
             status: "Active"
@@ -93,8 +98,8 @@ function renderTable() {
                     <div class="flex items-center gap-3">
                         ${
                           p.avatarUrl
-                            ? `<img src="${p.avatarUrl}" class="w-9 h-9 rounded-full object-cover ring-1 ring-slate-200" />`
-                            : `<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold font-display ring-1 ring-primary/20">${p.initials}</div>`
+                            ? `<img src="${p.avatarUrl}" class="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-slate-200" />`
+                            : `<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-bold font-display shadow-sm">${p.initials}</div>`
                         }
                         <div>
                             <a href="${basePath}/Patients/Details?id=${p.id || ''}" class="text-[13.5px] font-semibold text-brand-900 hover:text-primary transition-colors block leading-tight">

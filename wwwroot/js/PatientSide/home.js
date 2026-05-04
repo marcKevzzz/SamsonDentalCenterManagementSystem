@@ -4,6 +4,9 @@ import { toggleFaq } from "../site.js";
 // 1. All images (like the hero portrait) are loaded (setting correct heights).
 // 2. Tailwind CDN has finished parsing and applying classes (setting correct widths/margins).
 window.addEventListener("load", () => {
+  // Lock scroll immediately
+  document.body.classList.add("overflow-hidden");
+
   // Background reveal logic
   const bg = document.getElementById("heroBg");
   if (bg) {
@@ -22,7 +25,7 @@ window.addEventListener("load", () => {
   initGalleryPin();
   initReviewsPin();
   renderDynamicContent();
-  
+
   // Final refresh to lock in positions
   ScrollTrigger.refresh();
 });
@@ -90,7 +93,7 @@ function initScrollAnimations() {
     {
       scrollTrigger: {
         trigger: "#features",
-        start: "top 55%", // Lower threshold ensures it triggers even on short desktops
+        start: "top 85%", // Lower threshold ensures it triggers even on short desktops
         once: true,
       },
       autoAlpha: 1,
@@ -118,7 +121,14 @@ function initScrollAnimations() {
 }
 
 function initHeroAnimations() {
-  const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+  const tl = gsap.timeline({
+    defaults: { ease: "expo.out" },
+    onComplete: () => {
+      document.body.classList.remove("overflow-hidden");
+      // Refresh ScrollTrigger to ensure positions are correct now that overflow is back
+      ScrollTrigger.refresh();
+    },
+  });
   gsap.set(
     ".hp-reveal, .hp-reveal-late, .hp-word, .hp-doctor-img, .hp-glass-badge",
     { autoAlpha: 0 },
@@ -126,7 +136,7 @@ function initHeroAnimations() {
   tl.fromTo(
     ".hp-reveal",
     { autoAlpha: 0, y: 40, skewY: 5 },
-    { autoAlpha: 1, y: 0, skewY: 0, duration: 1, delay: 1, stagger: 0.2 },
+    { autoAlpha: 1, y: 0, skewY: 0, duration: 1, delay: 0.8, stagger: 0.2 },
   )
     .fromTo(
       ".hp-word",
@@ -135,7 +145,7 @@ function initHeroAnimations() {
         autoAlpha: 1,
         y: 0,
         rotateX: 0,
-        duration: 2.5,
+        duration: 2,
         stagger: 0.18,
         ease: "expo.out",
       },
@@ -144,7 +154,7 @@ function initHeroAnimations() {
     .fromTo(
       ".hp-reveal-late",
       { autoAlpha: 0, y: 30 },
-      { autoAlpha: 1, y: 0, duration: 1, stagger: 0.2 },
+      { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.2 },
       "-=1",
     )
     .fromTo(
@@ -155,7 +165,7 @@ function initHeroAnimations() {
         scale: 1,
         x: 0,
         filter: "brightness(1.05) blur(0px)",
-        duration: 2,
+        duration: 1,
         ease: "expo.out",
       },
       "-=1.2",
@@ -163,7 +173,7 @@ function initHeroAnimations() {
     .fromTo(
       ".hp-glass-badge",
       { autoAlpha: 0, x: -30, scale: 0.8 },
-      { autoAlpha: 1, x: 0, scale: 1, duration: 1.2, ease: "back.out(1.7)" },
+      { autoAlpha: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" },
       "-=1",
     );
 }

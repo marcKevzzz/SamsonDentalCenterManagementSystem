@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
-using SamsonDentalCenterManagementSystem.Helpers;
 
 namespace SamsonDentalCenterManagementSystem.Pages;
 
@@ -30,7 +30,8 @@ public class RecordsModel : PageModel
         RecordService recordService,
         ProfileService profileService,
         SessionHelper session,
-        ILogger<RecordsModel> logger)
+        ILogger<RecordsModel> logger
+    )
     {
         _recordService = recordService;
         _profileService = profileService;
@@ -40,9 +41,11 @@ public class RecordsModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+        var userId =
+            User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
-            return RedirectToPage("/Sign-in");
+            return RedirectToPage("/Authentication/Signin");
 
         Patient = await _profileService.GetProfileById(userId);
         if (Patient == null || Patient.Role?.ToLower() != "patient")
@@ -51,11 +54,20 @@ public class RecordsModel : PageModel
         MedicalInfo = await _recordService.GetMedicalInfoAsync(userId);
         if (MedicalInfo != null)
         {
-            try {
-                Allergies = JsonSerializer.Deserialize<List<string>>(MedicalInfo.AllergiesJson ?? "[]") ?? new();
-                Medications = JsonSerializer.Deserialize<List<string>>(MedicalInfo.MedicationsJson ?? "[]") ?? new();
-                History = JsonSerializer.Deserialize<Dictionary<string, string>>(MedicalInfo.HistoryJson ?? "{}") ?? new();
-            } catch { }
+            try
+            {
+                Allergies =
+                    JsonSerializer.Deserialize<List<string>>(MedicalInfo.AllergiesJson ?? "[]")
+                    ?? new();
+                Medications =
+                    JsonSerializer.Deserialize<List<string>>(MedicalInfo.MedicationsJson ?? "[]")
+                    ?? new();
+                History =
+                    JsonSerializer.Deserialize<Dictionary<string, string>>(
+                        MedicalInfo.HistoryJson ?? "{}"
+                    ) ?? new();
+            }
+            catch { }
         }
 
         Treatments = await _recordService.GetTreatmentsByPatientAsync(userId);

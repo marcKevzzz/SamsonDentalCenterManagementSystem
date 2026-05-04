@@ -69,10 +69,15 @@ async function checkUrlParams() {
     if (patientsData) {
       const patient = patientsData.find(p => p.id === patientId);
       if (patient) {
-        document.getElementById('book-patient-id').value = patient.id;
-        document.getElementById('book-patient-name').value = `${patient.firstName} ${patient.lastName}`;
-        document.getElementById('book-patient-email').value = patient.email;
-        document.getElementById('book-patient-phone').value = patient.phone || '';
+        const elId = document.getElementById('book-patient-id');
+        const elName = document.getElementById('book-patient-name');
+        const elEmail = document.getElementById('book-patient-email');
+        const elPhone = document.getElementById('book-patient-phone');
+
+        if (elId) elId.value = patient.id;
+        if (elName) elName.value = `${patient.firstName} ${patient.lastName}`;
+        if (elEmail) elEmail.value = patient.email;
+        if (elPhone) elPhone.value = patient.phone || '';
         
         // Auto-assign doctor from past appointments
         if (ALL_APPT && ALL_APPT.length > 0) {
@@ -160,8 +165,9 @@ function hydrateDropdowns() {
       '<option value="">Any available specialist</option>' +
       ALL_DOCS.map((d) => {
         const profile = d.profile || d.Profile;
+        const displayTitle = (d.title === "Admin") ? "Staff" : d.title;
         const name = profile
-          ? `${d.title} ${profile.first_name || profile.firstName} ${profile.last_name || profile.lastName}`
+          ? `${displayTitle} ${profile.first_name || profile.firstName} ${profile.last_name || profile.lastName}`
           : "Unknown";
         const specs = d.specialties ? d.specialties.join(",") : "";
         return `<option value="${d.id}" data-name="${name}" data-specialties="${specs}">${name}</option>`;
@@ -327,18 +333,21 @@ function rowHTML(appt) {
 
 function renderSourceBadge(source) {
   const s = (source || "online").toLowerCase();
-  if (s === "guest") {
-    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-user-secret text-[9px]"></i> Guest</span>`;
-  } else if (s === "admin") {
-    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-[9px]"></i> Admin</span>`;
-  } else if (s === "walk_in") {
-    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-person-walking text-[9px]"></i> Walk-in</span>`;
-  } else if (s === "phone") {
-    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-phone text-[9px]"></i> Phone</span>`;
-  } else {
-    // default to online
-    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-globe text-[9px]"></i> Online</span>`;
-  }
+  const role = document.body.dataset.role || "admin";
+  const label = s === "admin" ? (role === "admin" ? "Admin" : "Office") : (s === "guest" ? "Guest" : (s === "walk_in" ? "Walk-in" : (s === "phone" ? "Phone" : "Online")));
+  
+  const configs = {
+    guest:   { classes: "bg-slate-100 border-slate-200 text-slate-600", icon: "fa-user-secret" },
+    admin:   { classes: "bg-blue-50 border-blue-100 text-blue-600",   icon: "fa-shield-halved" },
+    walk_in: { classes: "bg-amber-50 border-amber-100 text-amber-600", icon: "fa-person-walking" },
+    phone:   { classes: "bg-purple-50 border-purple-100 text-purple-600", icon: "fa-phone" },
+    online:  { classes: "bg-emerald-50 border-emerald-100 text-emerald-600", icon: "fa-globe" }
+  };
+
+  const c = configs[s] || configs.online;
+  const displayLabel = s === "admin" ? (role === "admin" ? "Admin" : "Office") : label;
+
+  return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full ${c.classes} text-[10px] font-bold uppercase tracking-wider border"><i class="fa-solid ${c.icon} text-[9px]"></i> ${displayLabel}</span>`;
 }
 
 function renderPaginationBtns(totalPages) {

@@ -18,7 +18,8 @@ public class BlockedDatesModel : AdminPageModel
     public async Task<IActionResult> OnGetAsync()
     {
         var token = await _sessionHelper.GetValidTokenAsync();
-        if (token == null) return RedirectToPage("/Sign-in");
+        if (token == null)
+            return RedirectToPage("/Authentication/Signin");
         return Page();
     }
 }

@@ -60,12 +60,6 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("requires_merge_review")]
         public bool RequiresMergeReview { get; set; } = false;
 
-        [Column("oral_health_score")]
-        public int? OralHealthScore { get; set; }
-
-        [Column("oral_health_summary")]
-        public string? OralHealthSummary { get; set; } // JSON: { gumHealth, cavityRisk, plaqueLevel, enamelStatus }
-
         [JsonIgnore]
         [Newtonsoft.Json.JsonIgnore]
         public string FullName => $"{FirstName} {LastName}";
