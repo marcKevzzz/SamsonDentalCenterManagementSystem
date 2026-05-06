@@ -1,3 +1,17 @@
+- **Date**: 2026-05-04 (Appointment Refactor: Split Patient Names)
+- **Database & Model Refactoring**:
+  - **Split Patient Name**: Successfully refactored the monolithic `patient_name` field into `patient_first_name` and `patient_last_name` across the entire stack.
+  - **Migration**: Created `20260504_SplitAppointmentPatientName.sql` to safely migrate data and update the `appointments` table schema.
+  - **Computed Property**: Added a `PatientName` computed property to the `Appointment.cs` model to maintain backward compatibility with existing server-side logic and JSON serialization.
+- **API & Controller Updates**:
+  - Updated `AppointmentService.cs` and `AppointmentPayload` to handle split name inputs during creation and matching.
+  - Refactored `AppointmentsController`, `AdminDataController`, and `AdminBlockedDatesController` to project separate name fields in API responses.
+- **Frontend & UI Standardization**:
+  - **Admin/Staff Portals**: Updated `adminAppointment.js`, `Appointments.cshtml` (Admin, Doctor, Receptionist), and `doctorInvoice.js` to handle split names in search, modals, and tables.
+  - **Patient Portal**: Refactored the multi-step booking process (`step4-review.js`, `step5-success.js`) to collect and display first/last names separately.
+  - **Dashboard & Profile**: Updated `MyAppointments.cshtml`, `Confirmed.cshtml`, and `Dashboard.cshtml.cs` to ensure consistent name rendering across the patient portal.
+- **Source of Truth**: Updated `Blueprint/schema.sql` to reflect the new table structure.
+
 - **Date**: 2026-05-04
 - **Patient Management Expansion**:
   - **Add Patient for Doctors**: Implemented a functional "Add Patient" workflow in the Doctor Portal, mirroring the Admin UI.
@@ -409,3 +423,17 @@
   - Implemented a new `my-availability` API in `AdminDataController.cs` for role-based schedule retrieval.
   - Replaced the "Upcoming Schedule" view on the `Availability` page with a read-only **Weekly Availability** grid for Doctors and Receptionists.
   - Updated `staffAvailability.js` to dynamically render availability slots based on the logged-in user's role.
+- **Date**: 2026-05-05 (User Management Unification)
+- **Unified User Management**:
+  - **Decommissioned Users Page**: Removed the standalone `/Admin/Users` module and its associated files (`Users.cshtml`, `adminUsers.js`).
+  - **Role-Specific Integration**: Migrated account management actions (Resend Invite, Deactivate/Activate) directly into the **Patients**, **Doctors**, and **Receptionists** dashboards.
+  - **Patient Management**: Added an action dropdown to the patient table in `Patients.cshtml` for quick access to account invitations and status toggles.
+  - **Staff Management**: Integrated account action dropdowns into doctor and receptionist cards in `adminDoctors.js` and `adminReceptionists.js`.
+  - **Creation Workflow**: Added "Create User" buttons to staff pages that allow creating a new auth user profile with the correct role (Doctor/Receptionist) before linking it as a staff record.
+- **UI/UX Cleanup**:
+  - Removed the "Users" link from the admin sidebar navigation in `_StaffLayout.cshtml`.
+  - Added `UserModal` partial to all management pages to support the unified account creation/status logic.
+  - Updated activity log links in `AdminUsersController.cs` to dynamically point to role-specific pages instead of the deleted Users page.
+- **Safety**:
+  - Strictly omitted "Delete Account" functionality per user requirements; only "Deactivate/Activate" is permitted.
+  - Omitted "Edit Profile" from the account actions to focus on status and invitation management.

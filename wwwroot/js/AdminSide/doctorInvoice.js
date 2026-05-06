@@ -92,8 +92,11 @@ function hydrateUI() {
                         ${appt.patientProfile?.avatarUrl 
                             ? `<img src="${appt.patientProfile.avatarUrl}" class="w-full h-full object-cover" />`
                             : (() => {
-                                const parts = appt.patientName.split(' ').filter(p => p.length > 0);
-                                const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0]?.[0] || 'P').toUpperCase();
+                                const fn = appt.patientFirstName || '';
+                                const ln = appt.patientLastName || '';
+                                const initials = (fn && ln) 
+                                    ? (fn[0] + ln[0]).toUpperCase() 
+                                    : (fn?.[0] || ln?.[0] || appt.patientName?.[0] || 'P').toUpperCase();
                                 return `<div class="w-full h-full bg-primary text-white flex items-center justify-center font-bold text-lg">${initials}</div>`;
                               })()
                         }
@@ -134,9 +137,11 @@ function hydrateUI() {
                                 ${treat.patientAvatarUrl 
                                     ? `<img src="${treat.patientAvatarUrl}" class="w-full h-full object-cover" />`
                                     : (() => {
-                                        const name = treat.patientName || 'P';
-                                        const parts = name.split(' ').filter(p => p.length > 0);
-                                        const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0]?.[0] || 'P').toUpperCase();
+                                        const fn = treat.patientFirstName || '';
+                                        const ln = treat.patientLastName || '';
+                                        const initials = (fn && ln) 
+                                            ? (fn[0] + ln[0]).toUpperCase() 
+                                            : (fn?.[0] || ln?.[0] || treat.patientName?.[0] || 'P').toUpperCase();
                                         return `<div class="w-full h-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">${initials}</div>`;
                                       })()
                                 }

@@ -15,7 +15,7 @@ Layout = "AdminSide/_StaffLayout";
         Manage all registered patients
       </p>
     </div>
-    <button
+    <button id="addPatientBtn"
       class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
         stroke-linecap="round" stroke-linejoin="round">
@@ -87,5 +87,6 @@ Layout = "AdminSide/_StaffLayout";
     </div>
   </div>
 </div>
+<partial name="Components/UserModal" />
 <!-- Data injected via AdminStore -->
 <script type="module" src="~/js/AdminSide/adminPatient.js"></script>

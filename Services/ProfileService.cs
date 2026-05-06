@@ -398,7 +398,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // To find my patients, we need to find all patients who have an appointment with this doctor
                 var apptResponse = await _supabase
                     .From<Appointment>()
-                    .Select("patient_id, is_guest, patient_name")
+                    .Select("patient_id, is_guest, patient_first_name, patient_last_name")
                     .Where(a => a.DoctorId == doctorId)
                     .Get();
 
@@ -429,12 +429,12 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // Add guests as dummy profiles
                 var guests = apptResponse.Models
                     .Where(a => a.IsGuest || string.IsNullOrEmpty(a.PatientId))
-                    .GroupBy(a => a.PatientName)
+                    .GroupBy(a => new { a.PatientFirstName, a.PatientLastName })
                     .Select(g => new Profile
                     {
                         Id = "guest_" + Guid.NewGuid().ToString().Substring(0, 8),
-                        FirstName = g.Key ?? "Guest",
-                        LastName = "",
+                        FirstName = g.Key.PatientFirstName ?? "Guest",
+                        LastName = g.Key.PatientLastName ?? "",
                         Role = "patient",
                         IsActive = true
                     });
@@ -504,20 +504,81 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             await _supabase.From<Profile>().Upsert(profile);
             
-            // Sync Bio if staff
+            // Sync Additional Doctor Fields
             if (profile.Role == "doctor")
             {
-                await _supabase.From<Doctor>()
-                    .Where(x => x.ProfileId == userId)
-                    .Set(x => x.Bio!, p.Bio)
-                    .Update();
+                var docResponse = await _supabase.From<Doctor>().Where(x => x.ProfileId == userId).Get();
+                var doc = docResponse.Models.FirstOrDefault();
+                if (doc != null)
+                {
+                    var update = _supabase.From<Doctor>()
+                        .Where(x => x.ProfileId == userId)
+                        .Set(x => x.Bio!, p.Bio)
+                        .Set(x => x.IsActive, p.IsActive ?? true);
+                    
+                    if (!string.IsNullOrEmpty(p.Title)) update = update.Set(x => x.Title, p.Title);
+                    if (p.Specialties != null) update = update.Set(x => x.Specialties, p.Specialties);
+                    
+                    await update.Update();
+
+                    // Sync Availability
+                    if (p.Availability != null)
+                    {
+                        // 1. Delete old
+                        await _supabase.From<StaffAvailability>()
+                            .Where(x => x.StaffId == doc.Id && x.StaffType == "doctor")
+                            .Delete();
+
+                        // 2. Insert new
+                        if (p.Availability.Any())
+                        {
+                            foreach (var av in p.Availability)
+                            {
+                                av.Id = Guid.NewGuid().ToString();
+                                av.StaffId = doc.Id;
+                                av.StaffType = "doctor";
+                                av.IsActive = true;
+                            }
+                            await _supabase.From<StaffAvailability>().Insert(p.Availability);
+                        }
+                    }
+                }
             }
             else if (profile.Role == "receptionist")
             {
-                await _supabase.From<Receptionist>()
-                    .Where(x => x.ProfileId == userId)
-                    .Set(x => x.Bio!, p.Bio)
-                    .Update();
+                var recResponse = await _supabase.From<Receptionist>().Where(x => x.ProfileId == userId).Get();
+                var rec = recResponse.Models.FirstOrDefault();
+                if (rec != null)
+                {
+                    await _supabase.From<Receptionist>()
+                        .Where(x => x.ProfileId == userId)
+                        .Set(x => x.Bio!, p.Bio)
+                        .Set(x => x.DeskLocation!, p.DeskLocation)
+                        .Set(x => x.IsActive, p.IsActive ?? true)
+                        .Update();
+
+                    // Sync Availability
+                    if (p.Availability != null)
+                    {
+                        // 1. Delete old
+                        await _supabase.From<StaffAvailability>()
+                            .Where(x => x.StaffId == rec.Id && x.StaffType == "receptionist")
+                            .Delete();
+
+                        // 2. Insert new
+                        if (p.Availability.Any())
+                        {
+                            foreach (var av in p.Availability)
+                            {
+                                av.Id = Guid.NewGuid().ToString();
+                                av.StaffId = rec.Id;
+                                av.StaffType = "receptionist";
+                                av.IsActive = true;
+                            }
+                            await _supabase.From<StaffAvailability>().Insert(p.Availability);
+                        }
+                    }
+                }
             }
 
             // Sync to auth.users metadata

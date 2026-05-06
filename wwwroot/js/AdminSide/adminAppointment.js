@@ -70,12 +70,14 @@ async function checkUrlParams() {
       const patient = patientsData.find(p => p.id === patientId);
       if (patient) {
         const elId = document.getElementById('book-patient-id');
-        const elName = document.getElementById('book-patient-name');
+        const elFirstName = document.getElementById('book-patient-first-name');
+        const elLastName = document.getElementById('book-patient-last-name');
         const elEmail = document.getElementById('book-patient-email');
         const elPhone = document.getElementById('book-patient-phone');
 
         if (elId) elId.value = patient.id;
-        if (elName) elName.value = `${patient.firstName} ${patient.lastName}`;
+        if (elFirstName) elFirstName.value = patient.firstName || '';
+        if (elLastName) elLastName.value = patient.lastName || '';
         if (elEmail) elEmail.value = patient.email;
         if (elPhone) elPhone.value = patient.phone || '';
         
@@ -262,8 +264,11 @@ function rowHTML(appt) {
     if (appt.patientAvatarUrl) {
       return `<img src="${appt.patientAvatarUrl}" alt="${appt.patientName}" class="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-200" />`;
     }
-    const parts = (appt.patientName || 'G').split(' ').filter(p => p);
-    const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : (parts[0]?.[0] || 'G').toUpperCase();
+    const firstName = appt.patientFirstName || '';
+    const lastName = appt.patientLastName || '';
+    const initials = (firstName && lastName) 
+      ? (firstName[0] + lastName[0]).toUpperCase() 
+      : (firstName?.[0] || lastName?.[0] || appt.patientName?.[0] || 'G').toUpperCase();
     return `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">${initials}</div>`;
   })();
 
@@ -384,6 +389,8 @@ window.filterTable = () => {
     const matchSearch =
       !q ||
       appt.patientName.toLowerCase().includes(q) ||
+      (appt.patientFirstName && appt.patientFirstName.toLowerCase().includes(q)) ||
+      (appt.patientLastName && appt.patientLastName.toLowerCase().includes(q)) ||
       (appt.doctorName && appt.doctorName.toLowerCase().includes(q)) ||
       appt.serviceName.toLowerCase().includes(q);
       
@@ -430,7 +437,8 @@ let initialBookFormState = "";
 function getBookFormState() {
   return JSON.stringify({
     id: document.getElementById("book-patient-id")?.value || "",
-    n: document.getElementById("book-patient-name")?.value || "",
+    fn: document.getElementById("book-patient-first-name")?.value || "",
+    ln: document.getElementById("book-patient-last-name")?.value || "",
     e: document.getElementById("book-patient-email")?.value || "",
     p: document.getElementById("book-patient-phone")?.value || "",
     s: document.getElementById("book-service")?.value || "",
@@ -444,7 +452,7 @@ function getBookFormState() {
 window.openBookModal = (skipReset = false) => {
   if (!skipReset) {
     // Reset fields to ensure clean state on open
-    const fields = ["book-patient-id", "book-patient-name", "book-patient-email", "book-patient-phone", "book-service", "book-doctor", "book-date", "book-time", "book-notes"];
+    const fields = ["book-patient-id", "book-patient-first-name", "book-patient-last-name", "book-patient-email", "book-patient-phone", "book-service", "book-doctor", "book-date", "book-time", "book-notes"];
     fields.forEach(f => {
       const el = document.getElementById(f);
       if(el) el.value = "";
@@ -493,7 +501,8 @@ window.closeBookModal = () => {
 };
 
 window.submitBook = async () => {
-  const name = document.getElementById("book-patient-name").value.trim();
+  const firstName = document.getElementById("book-patient-first-name").value.trim();
+  const lastName = document.getElementById("book-patient-last-name").value.trim();
   const email = document.getElementById("book-patient-email").value.trim();
   const phone = document.getElementById("book-patient-phone").value.trim();
   const svcEl = document.getElementById("book-service");
@@ -507,14 +516,15 @@ window.submitBook = async () => {
   const docId = docEl.value || null;
   const docName = docEl.value ? docEl.selectedOptions[0]?.dataset.name : null;
 
-  if (!name || !email || !svcId || !date || !time) {
+  if (!firstName || !lastName || !email || !svcId || !date || !time) {
     Toast.show("Please fill in all required fields.", "warning");
     return;
   }
 
   const res = await post("/api/admin/appointments/book", {
     patientId: document.getElementById("book-patient-id").value || null,
-    patientName: name,
+    patientFirstName: firstName,
+    patientLastName: lastName,
     patientEmail: email,
     patientPhone: phone,
     serviceId: svcId,
@@ -914,7 +924,7 @@ function showConflictModal(data) {
   list.innerHTML = data.conflicts.map(c => `
     <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
       <div>
-        <div class="text-[12.5px] font-bold text-brand-900">${c.patientName}</div>
+        <div class="text-[12.5px] font-bold text-brand-900">${c.patientFirstName} ${c.patientLastName}</div>
         <div class="text-[11px] text-brand-400">${c.serviceName || ""} · ${c.appointmentTime} · <span class="capitalize">${c.status}</span></div>
         <div class="text-[10px] text-brand-400">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
       </div>

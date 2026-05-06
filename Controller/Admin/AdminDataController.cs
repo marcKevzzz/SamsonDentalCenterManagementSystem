@@ -84,6 +84,8 @@ public class AdminDataController : ControllerBase
                 {
                     id = a.Id,
                     patientId = a.PatientId,
+                    patientFirstName = a.PatientFirstName,
+                    patientLastName = a.PatientLastName,
                     patientName = a.PatientName,
                     patientEmail = a.PatientEmail,
                     patientPhone = a.PatientPhone,

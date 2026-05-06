@@ -149,18 +149,6 @@
               </a>
             </div>
           </div>
-          <a class="nav-item flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer text-white text-[13px] font-medium transition-all"
-            href="/Admin/Users" id="admin-users">
-          <svg class="flex-shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-  <circle cx="9" cy="7" r="4" />
-  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-</svg>
-
-            <span class="sidebar-text nav-links transition-opacity duration-300">Users</span>
-            <span id="notif-users-count" class="sidebar-text ml-auto px-2 py-0.5 bg-brand-400/20 text-white text-[11px] font-bold rounded-full hidden"></span>
-          </a>
           }
 
           <div class="px-7 py-2.5 mt-1">
@@ -291,7 +279,6 @@
             <span class="sidebar-text nav-links transition-opacity duration-300">Activity Logs</span>
             <span id="notif-activitylogs-count" class="sidebar-text ml-auto  px-2 py-0.5 bg-brand-400/20 text-white text-[10px] font-bold rounded-full hidden"></span>
           </a>
-          }
           
           
           @if(r == "admin" ){
@@ -344,6 +331,7 @@
           </div>
           }
         </nav>
+
 
         <div class="p-2 border-t border-white/[0.07] flex-shrink-0 overflow-visible relative">
           
@@ -465,13 +453,17 @@
   <!-- Modal Root -->
   <div id="modal-root" ></div>
 
+
+
   <!-- Hidden role data for JS -->
   <input type="hidden" id="currentUserRole" value="@(ViewData["UserRole"] ?? "")" />
+  <input type="hidden" id="admin-id" value="@(ViewData["UserId"] ?? "")" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
   <script type="module" src="~/js/AdminSide/adminNotifications.js" asp-append-version="true"></script>
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
   <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+
 
   @await RenderSectionAsync("Scripts", required: false)
 </body>

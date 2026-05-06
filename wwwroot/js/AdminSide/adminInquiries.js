@@ -42,7 +42,98 @@ async function refreshInquiries(force = false) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  refreshInquiries();
+  window.openNewInquiryModal = openNewInquiryModal;
+  window.closeNewInquiryModal = closeNewInquiryModal;
+
+  await refreshInquiries();
+
+  // Check for patientId in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientId = urlParams.get('patientId');
+  if (patientId) {
+    await openNewInquiryModal();
+    const select = document.getElementById("new-inquiry-patient");
+    if (select) {
+      select.value = patientId;
+      // Also clear URL param to prevent re-opening on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+});
+
+async function openNewInquiryModal() {
+  const modal = document.getElementById("new-inquiry-modal");
+  const select = document.getElementById("new-inquiry-patient");
+  if (!modal || !select) return;
+
+  modal.classList.remove("hidden");
+
+  // Fetch staff
+  try {
+    const res = await fetch("/api/admin/data/users");
+    const data = await res.json();
+    if (data.ok) {
+      const staffRoles = ["admin", "doctor", "receptionist"];
+      const staff = data.data.filter(u => staffRoles.includes(u.role?.toLowerCase()));
+      
+      select.innerHTML = '<option value="">Select a colleague...</option>' + 
+        staff.map(p => `<option value="${p.id}">${p.firstName} ${p.lastName} (${p.role})</option>`).join("");
+    }
+  } catch (err) {
+    select.innerHTML = '<option value="">Failed to load staff</option>';
+  }
+}
+
+function closeNewInquiryModal() {
+  const modal = document.getElementById("new-inquiry-modal");
+  if (modal) modal.classList.add("hidden");
+  document.getElementById("new-inquiry-form")?.reset();
+}
+
+document.getElementById("new-inquiry-form")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type="submit"]');
+  const patientId = document.getElementById("new-inquiry-patient").value;
+  const subject = document.getElementById("new-inquiry-subject").value;
+  const message = document.getElementById("new-inquiry-message").value;
+
+  if (!patientId || !subject || !message) return;
+
+  btn.disabled = true;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...';
+
+  try {
+    const res = await fetch("/api/inquiry/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patientId,
+        subject,
+        message,
+        senderId: document.getElementById("admin-id")?.value,
+        isFromStaff: true
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeNewInquiryModal();
+      await refreshInquiries(true); // Refresh sidebar
+      
+      // Auto-select the new inquiry
+      setTimeout(() => {
+        const item = document.querySelector(`[data-id="${data.inquiryId}"]`);
+        if (item) item.click();
+      }, 500);
+    } else {
+      alert(data.error || "Failed to create inquiry");
+    }
+  } catch (err) {
+    alert("An error occurred");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
 });
 
 // Listen for SignalR updates from AdminStore
@@ -264,14 +355,24 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
     renderInquiryList();
   }
 
-  // Show/Hide resolve button
+  // Show/Hide patient-specific features if it's a staff-to-staff thread
+  const isStaffThread = inq.isFromStaff === true;
   const resolveBtn = document.getElementById('resolve-btn');
-  if (resolveBtn) {
-    if (inq.status === 'resolved') {
-      resolveBtn.classList.add('hidden');
-    } else {
-      resolveBtn.classList.remove('hidden');
+  const predefinedReplies = document.getElementById('predefined-replies');
+  const internalNoteContainer = document.getElementById('internal-note-container');
+
+  if (isStaffThread) {
+    if (resolveBtn) resolveBtn.classList.add('hidden');
+    if (predefinedReplies) predefinedReplies.classList.add('hidden');
+    if (internalNoteContainer) internalNoteContainer.classList.add('hidden');
+  } else {
+    // Show them for patient threads
+    if (resolveBtn) {
+        if (inq.status === 'resolved') resolveBtn.classList.add('hidden');
+        else resolveBtn.classList.remove('hidden');
     }
+    if (predefinedReplies) predefinedReplies.classList.remove('hidden');
+    if (internalNoteContainer) internalNoteContainer.classList.remove('hidden');
   }
 
   await fetchMessages();
@@ -429,13 +530,31 @@ async function fetchMessages() {
         lastDate = msgDate;
       }
 
-      html += `
-                <div class="flex ${msg.is_from_staff ? "justify-end" : "justify-start"}">
-                    <div class="max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-[12.5px] ${msg.is_from_staff ? "bg-primary text-white rounded-tr-none shadow-md shadow-primary/20" : "bg-slate-100 border border-slate-200 text-brand rounded-tl-none shadow-sm shadow-slate-900/15"}">
-                        <p class="leading-relaxed font-medium whitespace-pre-wrap">${msg.message}</p>
-                        <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(dStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+      if (msg.is_internal) {
+          html += `
+                <div class="flex justify-center my-2">
+                    <div class="max-w-[90%] bg-amber-50 border border-amber-100 rounded-2xl p-3 shadow-sm">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[9px] font-bold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded uppercase">Internal Note</span>
+                            <span class="text-[10px] font-bold text-brand">${msg.sender_name} (${msg.sender_role})</span>
+                        </div>
+                        <p class="text-[12px] text-brand-700 leading-relaxed italic">${msg.message}</p>
+                        <div class="text-[9px] mt-1 text-amber-500/70 font-bold">${new Date(dStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
                 </div>`;
+      } else {
+          const isStaff = msg.is_from_staff;
+          html += `
+                <div class="flex ${isStaff ? "justify-end" : "justify-start"}">
+                    <div class="max-w-[85%] md:max-w-[70%]">
+                        ${isStaff ? `<div class="text-right text-[9px] font-bold text-slate-400 mb-1 px-1">${msg.sender_name} (${msg.sender_role})</div>` : ''}
+                        <div class="px-4 py-3 rounded-2xl text-[12.5px] ${isStaff ? "bg-primary text-white rounded-tr-none shadow-md shadow-primary/20" : "bg-slate-100 border border-slate-200 text-brand rounded-tl-none shadow-sm shadow-slate-900/15"}">
+                            <p class="leading-relaxed font-medium whitespace-pre-wrap">${msg.message}</p>
+                            <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(dStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                        </div>
+                    </div>
+                </div>`;
+      }
     });
 
     container.innerHTML = html;
@@ -456,6 +575,8 @@ async function sendMessage() {
 
   input.disabled = true;
 
+  const isInternal = document.getElementById("internal-note-toggle")?.checked || false;
+
   try {
     const res = await fetch("/api/inquiry/message", {
       method: "POST",
@@ -465,12 +586,16 @@ async function sendMessage() {
         senderId: adminId,
         message: msg,
         isFromStaff: true,
+        isInternal: isInternal
       }),
     });
 
     if (res.ok) {
       input.value = "";
       input.style.height = "auto";
+      const toggle = document.getElementById("internal-note-toggle");
+      if (toggle) toggle.checked = false;
+      
       await fetchMessages();
       const container = document.querySelector(selectors.chatMessages);
       container.scrollTop = container.scrollHeight;
@@ -519,4 +644,10 @@ document.addEventListener("keypress", (e) => {
   }
 });
 
-// Removed 10s polling - now uses SignalR via AdminStore events
+document.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search);
+  const openNew = params.get('openNew');
+  if (openNew === 'true') {
+    openNewInquiryModal();
+  }
+});

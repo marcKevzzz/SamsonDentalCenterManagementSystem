@@ -313,6 +313,7 @@ window.fetchChatMessages = async function () {
         container.scrollHeight - container.clientHeight <=
         container.scrollTop + 100;
       container.innerHTML = data.messages
+        .filter(msg => !msg.is_internal)
         .map((msg) => {
           const isMe = !msg.is_from_staff;
           return `

@@ -76,10 +76,11 @@ public class AppointmentsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] AppointmentPayload p)
     {
         // Basic validation
-        if (string.IsNullOrWhiteSpace(p.PatientName) ||
+        if (string.IsNullOrWhiteSpace(p.PatientFirstName) ||
+            string.IsNullOrWhiteSpace(p.PatientLastName) ||
             string.IsNullOrWhiteSpace(p.PatientEmail) ||
             string.IsNullOrWhiteSpace(p.PatientPhone))
-            return BadRequest(new { ok = false, error = "Patient name, email, and phone are required." });
+            return BadRequest(new { ok = false, error = "Patient first name, last name, email, and phone are required." });
 
         if (!p.IsWaitlist && string.IsNullOrWhiteSpace(p.AppointmentTime))
             return BadRequest(new { ok = false, error = "Appointment time is required." });
@@ -182,6 +183,8 @@ public class AppointmentsController : ControllerBase
             otherLastName   = a.OtherLastName,
             otherPhone   = a.OtherPhone,
             otherEmail   = a.OtherEmail,
+            patientFirstName = a.PatientFirstName,
+            patientLastName = a.PatientLastName,
             patientName = a.PatientName
         }));
     }
@@ -210,6 +213,8 @@ public class AppointmentsController : ControllerBase
                 otherLastName   = appt.OtherLastName,
                 otherPhone   = appt.OtherPhone,
                 otherEmail   = appt.OtherEmail,
+                patientFirstName = appt.PatientFirstName,
+                patientLastName = appt.PatientLastName,
                 patientName = appt.PatientName,
                 patientEmail = appt.PatientEmail,
                 refNumber   = $"SDC-{appt.Id[..8].ToUpper()}"

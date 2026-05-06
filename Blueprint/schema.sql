@@ -16,7 +16,8 @@ CREATE TABLE public.activity_logs (
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   patient_id uuid,
-  patient_name text NOT NULL,
+  patient_first_name text NOT NULL,
+  patient_last_name text NOT NULL,
   patient_email text NOT NULL,
   patient_phone text NOT NULL,
   patient_sex text,
@@ -132,6 +133,7 @@ CREATE TABLE public.inquiry_messages (
   sender_id uuid,
   message text NOT NULL,
   is_from_staff boolean NOT NULL DEFAULT false,
+  is_internal boolean NOT NULL DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT inquiry_messages_pkey PRIMARY KEY (id),
   CONSTRAINT inquiry_messages_inquiry_id_fkey FOREIGN KEY (inquiry_id) REFERENCES public.inquiries(id),

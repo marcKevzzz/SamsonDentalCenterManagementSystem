@@ -75,7 +75,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             return JsonSerializer.Deserialize<List<InquiryMessage>>(json, _json) ?? new();
         }
 
-        public async Task<Inquiry> CreateInquiryAsync(Inquiry inquiry, string initialMessage)
+        public async Task<Inquiry> CreateInquiryAsync(Inquiry inquiry, string initialMessage, string? senderId = null, bool isFromStaff = false)
         {
             // 1. Create Inquiry
             var req = BuildRequest(HttpMethod.Post, "/inquiries");
@@ -84,11 +84,12 @@ namespace SamsonDentalCenterManagementSystem.Services
                 JsonSerializer.Serialize(new {
                     patient_id = inquiry.PatientId,
                     subject = inquiry.Subject,
-                    status = "pending",
+                    status = isFromStaff ? "replied" : "pending", // If staff starts it, status is 'replied'
                     guest_email = inquiry.GuestEmail,
                     guest_first_name = inquiry.GuestFirstName,
                     guest_last_name = inquiry.GuestLastName,
-                    guest_phone = inquiry.GuestPhone
+                    guest_phone = inquiry.GuestPhone,
+                    is_from_staff = isFromStaff
                 }),
                 Encoding.UTF8, "application/json");
 
@@ -100,18 +101,18 @@ namespace SamsonDentalCenterManagementSystem.Services
                         ?? throw new Exception("Inquiry creation failed.");
 
             // 2. Create Initial Message
-            await AddMessageAsync(created.Id, inquiry.PatientId, initialMessage, false);
+            await AddMessageAsync(created.Id, senderId ?? inquiry.PatientId, initialMessage, isFromStaff);
 
             // Broadcast real-time update
             await _hubContext.Clients.All.SendAsync("ReceiveInquiryUpdate", new { action = "create", id = created.Id });
 
             // Log action
-            await _logs.LogActionAsync(inquiry.PatientId, "sent inquiry", $"Subject: {inquiry.Subject}", null, "Inquiry", $"/Admin/Inquiries?id={created.Id}");
+            await _logs.LogActionAsync(senderId ?? inquiry.PatientId, "sent inquiry", $"Subject: {inquiry.Subject}", null, "Inquiry", $"/Admin/Inquiries?id={created.Id}");
 
             return created;
         }
 
-        public async Task AddMessageAsync(string inquiryId, string? senderId, string message, bool isFromStaff)
+        public async Task AddMessageAsync(string inquiryId, string? senderId, string message, bool isFromStaff, bool isInternal = false)
         {
             var req = BuildRequest(HttpMethod.Post, "/inquiry_messages");
             req.Content = new StringContent(
@@ -119,21 +120,28 @@ namespace SamsonDentalCenterManagementSystem.Services
                     inquiry_id = inquiryId,
                     sender_id = senderId,
                     message = message,
-                    is_from_staff = isFromStaff
+                    is_from_staff = isFromStaff,
+                    is_internal = isInternal
                 }),
                 Encoding.UTF8, "application/json");
 
             var res = await _http.SendAsync(req);
-            res.EnsureSuccessStatusCode();
+            if (!res.IsSuccessStatusCode) {
+                var errBody = await res.Content.ReadAsStringAsync();
+                throw new Exception($"Supabase error: {res.StatusCode} - {errBody}");
+            }
 
-            // Update inquiry status/updated_at
+            // Update inquiry status/updated_at (only if not an internal note)
             var updateReq = BuildRequest(HttpMethod.Patch, $"/inquiries?id=eq.{inquiryId}");
-            var status = isFromStaff ? "replied" : "pending";
+            var status = isFromStaff ? (isInternal ? null : "replied") : "pending";
+            
+            var updateBody = new Dictionary<string, object> {
+                { "updated_at", DateTime.UtcNow.ToString("o") }
+            };
+            if (status != null) updateBody.Add("status", status);
+
             updateReq.Content = new StringContent(
-                JsonSerializer.Serialize(new {
-                    status = status,
-                    updated_at = DateTime.UtcNow.ToString("o")
-                }),
+                JsonSerializer.Serialize(updateBody),
                 Encoding.UTF8, "application/json");
             
             await _http.SendAsync(updateReq);

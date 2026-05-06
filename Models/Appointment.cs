@@ -15,8 +15,15 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("patient_id")]
         public string? PatientId { get; set; }
 
-        [Column("patient_name")]
-        public string PatientName { get; set; } = string.Empty;
+        [Column("patient_first_name")]
+        public string PatientFirstName { get; set; } = string.Empty;
+
+        [Column("patient_last_name")]
+        public string PatientLastName { get; set; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string PatientName => $"{PatientFirstName} {PatientLastName}".Trim();
 
         [Column("patient_email")]
         public string PatientEmail { get; set; } = string.Empty;

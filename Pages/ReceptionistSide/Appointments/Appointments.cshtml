@@ -159,7 +159,9 @@ Layout = "AdminSide/_StaffLayout";
             var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
               id              = appt.Id,
               source          = appt.Source,
-              patientName     = appt.PatientName,
+              patientFirstName = appt.PatientFirstName,
+              patientLastName  = appt.PatientLastName,
+              patientName      = appt.PatientName,
               patientEmail    = appt.PatientEmail,
               patientPhone    = appt.PatientPhone,
               doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
@@ -175,7 +177,7 @@ Layout = "AdminSide/_StaffLayout";
             <tr class="group hover:bg-slate-50/80 transition-colors" 
             data-status="@appt.Status" 
             data-date="@appt.AppointmentDate.ToString("yyyy-MM-dd")"
-            data-search="@(appt.PatientName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
+            data-search="@(appt.PatientFirstName + " " + appt.PatientLastName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
               <td class="px-4 py-4">
                 <span class="text-[10px] font-bold text-brand-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">@shortId</span>
               </td>
@@ -187,10 +189,7 @@ Layout = "AdminSide/_StaffLayout";
                   }
                   else
                   {
-                      var parts = appt.PatientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                      var initials = parts.Length > 1 
-                          ? $"{parts[0][0]}{parts[^1][0]}".ToUpper() 
-                          : (parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "P");
+                      var initials = $"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}".ToUpper();
                       
                       <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">
                         @initials
@@ -380,11 +379,19 @@ Layout = "AdminSide/_StaffLayout";
           </div>
           
           <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Full Name *</label>
+            <div>
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">First Name *</label>
               <div class="relative">
                 <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
-                <input id="book-patient-name" type="text" placeholder="e.g. Juan Dela Cruz"
+                <input id="book-patient-first-name" type="text" placeholder="e.g. Juan"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Last Name *</label>
+              <div class="relative">
+                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <input id="book-patient-last-name" type="text" placeholder="e.g. Dela Cruz"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>

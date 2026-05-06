@@ -92,7 +92,10 @@ public class AdminUsersController : ControllerBase
                 var doc = new Doctor { 
                     Id = Guid.NewGuid().ToString(),
                     ProfileId = id,
+                    Title = p.Title ?? "Dr.",
+                    Specialties = p.Specialties ?? Array.Empty<string>(),
                     Bio = p.Bio,
+                    IsActive = p.IsActive ?? true,
                     CreatedAt = DateTime.UtcNow
                 };
                 await _supabase.From<Doctor>().Insert(doc);
@@ -112,7 +115,9 @@ public class AdminUsersController : ControllerBase
                 var rec = new Receptionist {
                     Id = Guid.NewGuid().ToString(),
                     ProfileId = id,
+                    DeskLocation = p.DeskLocation,
                     Bio = p.Bio,
+                    IsActive = p.IsActive ?? true,
                     CreatedAt = DateTime.UtcNow
                 };
                 await _supabase.From<Receptionist>().Insert(rec);
@@ -248,7 +253,8 @@ public class AdminUsersController : ControllerBase
                 return BadRequest(new { ok = false, error = $"Failed to send recovery email: {err}" });
             }
 
-            await _logs.LogActionAsync(id, "resent invitation", $"User: {profile.FullName}", null, "Admin", $"/Admin/Users");
+            string rolePath = profile.Role?.ToLower() == "patient" ? "/Admin/Patients" : "/Admin/Staff/Doctors";
+            await _logs.LogActionAsync(id, "resent invitation", $"User: {profile.FullName}", null, "Admin", rolePath);
             return Ok(new { ok = true });
         }
         catch (Exception ex)

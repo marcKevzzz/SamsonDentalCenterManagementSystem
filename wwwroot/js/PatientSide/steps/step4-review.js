@@ -150,7 +150,8 @@ export async function confirmBooking() {
 
         const payload = {
             patientId:       loggedIn ? STATE.patient?.id    : null,
-            patientName:     `${d.firstName} ${d.lastName}`.trim(),
+            patientFirstName: d.firstName,
+            patientLastName:  d.lastName,
             patientEmail:    d.email,
             patientPhone:    d.phone,
             patientSex:      d.sex   || null,

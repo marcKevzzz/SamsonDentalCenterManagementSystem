@@ -87,6 +87,8 @@ public class AdminBlockedDatesController : ControllerBase
                 .Select(a => new
                 {
                     id = a.Id,
+                    patientFirstName = a.PatientFirstName,
+                    patientLastName = a.PatientLastName,
                     patientName = a.PatientName,
                     patientEmail = a.PatientEmail,
                     patientPhone = a.PatientPhone,

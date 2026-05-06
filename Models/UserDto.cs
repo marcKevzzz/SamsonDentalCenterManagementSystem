@@ -40,5 +40,17 @@ namespace SamsonDentalCenterManagementSystem.Models
 
         [JsonPropertyName("avatarUrl")]
         public string? AvatarUrl { get; set; }
+
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+
+        [JsonPropertyName("specialties")]
+        public string[]? Specialties { get; set; }
+
+        [JsonPropertyName("deskLocation")]
+        public string? DeskLocation { get; set; }
+
+        [JsonPropertyName("isActive")]
+        public bool? IsActive { get; set; }
     }
 }

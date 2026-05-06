@@ -47,6 +47,10 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("guest_phone")]
         public string? GuestPhone { get; set; }
 
+        [Column("is_from_staff")]
+        [JsonPropertyName("is_from_staff")]
+        public bool IsFromStaff { get; set; } = false;
+
         [Reference(typeof(Profile))]
         [JsonPropertyName("patient")]
         public Profile? Patient { get; set; }
@@ -72,6 +76,10 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("is_from_staff")]
         [JsonPropertyName("is_from_staff")]
         public bool IsFromStaff { get; set; } = false;
+
+        [Column("is_internal")]
+        [JsonPropertyName("is_internal")]
+        public bool IsInternal { get; set; } = false;
 
         [Column("created_at")]
         [JsonPropertyName("created_at")]

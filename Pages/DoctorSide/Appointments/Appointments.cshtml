@@ -10,8 +10,8 @@ Layout = "AdminSide/_StaffLayout";
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <div>
-      <h2 class="font-display text-xl font-bold text-brand-900">Appointments</h2>
-      <p class="text-[12px] text-brand-500 mt-0.5">Schedule and manage appointments</p>
+      <h2 class="font-display text-xl font-bold text-brand">Appointments</h2>
+      <p class="text-[12px] text-brand/50 mt-0.5">Schedule and manage appointments</p>
     </div>
     <button onclick="openBookModal()"
       class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25">
@@ -31,9 +31,9 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
            <i class="fa-solid fa-calendar-check text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountConfirmed</div>
+        <div class="font-display text-2xl font-bold text-brand">@Model.CountConfirmed</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Confirmed</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Confirmed</div>
     </div>
 
     <div class="stat-card stat-blue relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
@@ -41,9 +41,9 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
            <i class="fa-solid fa-clock text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountPending</div>
+        <div class="font-display text-2xl font-bold text-brand">@Model.CountPending</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Pending</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Pending</div>
     </div>
 
     <div class="stat-card stat-purple relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
@@ -51,9 +51,9 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
            <i class="fa-solid fa-list-ul text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountWaitlist</div>
+        <div class="font-display text-2xl font-bold text-brand">@Model.CountWaitlist</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Waitlist</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Waitlist</div>
     </div>
 
     <div class="stat-card stat-red relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md">
@@ -61,29 +61,29 @@ Layout = "AdminSide/_StaffLayout";
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-accent">
            <i class="fa-solid fa-calendar-xmark text-sm"></i>
         </div>
-        <div class="font-display text-2xl font-bold text-brand-900">@Model.CountCancelled</div>
+        <div class="font-display text-2xl font-bold text-brand">@Model.CountCancelled</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Cancelled</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Cancelled</div>
     </div>
   </div>
 
   <!-- Filter bar -->
   <div class="flex flex-wrap items-center gap-3 mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 ">
     <div class="relative flex-1 min-w-[240px]">
-      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-brand-300 text-[11px]"></i>
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-brand/30 text-[11px]"></i>
       <input id="search-input" type="text" placeholder="Search by patient name, doctor, or service…"
         oninput="filterTable()"
         class="w-full text-[12px] pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white" />
     </div>
     
     <div class="flex items-center gap-2">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Date:</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-brand/40 ml-2">Date:</span>
       <input id="date-filter" type="date" onchange="filterTable()"
         class="text-[12px] px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white" />
     </div>
 
     <div class="flex items-center gap-2">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400 ml-2">Status:</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-brand/40 ml-2">Status:</span>
       <select id="status-filter" onchange="filterTable()"
         class="text-[12px] px-4 md:px-8 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white min-w-[140px]">
         <option value="">All Statuses</option>
@@ -103,19 +103,19 @@ Layout = "AdminSide/_StaffLayout";
       <table class="w-full min-w-[640px]" id="appointments-table">
         <thead class="bg-slate-50/50">
           <tr>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Ref ID</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Patient</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Service</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Source</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Schedule</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-3 font-display">Status</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Ref ID</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Patient</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Service</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Source</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Schedule</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Status</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="appointments-body">
           @if (!Model.Appointments.Any())
           {
             <tr>
-              <td colspan="7" class="px-4 py-10 text-center text-[12px] text-brand-400">
+              <td colspan="7" class="px-4 py-10 text-center text-[12px] text-brand/40">
                 No appointments found.
               </td>
             </tr>
@@ -140,6 +140,8 @@ Layout = "AdminSide/_StaffLayout";
             var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
               id              = appt.Id,
               source          = appt.Source,
+              patientFirstName = appt.PatientFirstName,
+              patientLastName = appt.PatientLastName,
               patientName     = appt.PatientName,
               patientEmail    = appt.PatientEmail,
               patientPhone    = appt.PatientPhone,
@@ -156,23 +158,23 @@ Layout = "AdminSide/_StaffLayout";
             <tr class="group hover:bg-slate-50/80 transition-colors" 
             data-status="@appt.Status" 
             data-date="@appt.AppointmentDate.ToString("yyyy-MM-dd")"
-            data-search="@(appt.PatientName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
+            data-search="@(appt.PatientFirstName + " " + appt.PatientLastName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
               <td class="px-4 py-4">
-                <span class="text-[10px] font-bold text-brand-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">@shortId</span>
+                <span class="text-[10px] font-bold text-brand/40 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">@shortId</span>
               </td>
               <td class="px-4 py-4">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-                    @(appt.PatientName[..1])
+                    @($"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}")
                   </div>
                   <div>
-                    <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">@appt.PatientName</div>
-                    <div class="text-[10.5px] text-brand-400">@appt.PatientEmail</div>
+                    <div class="text-[13px] font-bold text-brand leading-none mb-1">@appt.PatientName</div>
+                    <div class="text-[10.5px] text-brand/40">@appt.PatientEmail</div>
                   </div>
                 </div>
               </td>
               <td class="px-4 py-4">
-                <div class="text-[12.5px] font-medium text-brand-800">@appt.ServiceName</div>
+                <div class="text-[12.5px] font-medium text-brand/80">@appt.ServiceName</div>
               </td>
               <td class="px-4 py-4">
                 @if (string.Equals(appt.Source, "guest", StringComparison.OrdinalIgnoreCase))
@@ -197,8 +199,8 @@ Layout = "AdminSide/_StaffLayout";
                 }
               </td>
               <td class="px-4 py-4">
-                <div class="text-[12.5px] font-bold text-brand-900">@appt.AppointmentDate.ToString("MMM dd")</div>
-                <div class="text-[11px] text-brand-400">@appt.AppointmentTime</div>
+                <div class="text-[12.5px] font-bold text-brand">@appt.AppointmentDate.ToString("MMM dd")</div>
+                <div class="text-[11px] text-brand/40">@appt.AppointmentTime</div>
               </td>
               <td class="px-4 py-4 text-center">
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
@@ -215,14 +217,14 @@ Layout = "AdminSide/_StaffLayout";
 
 
 <div id="book-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeBookModal()"></div>
+  <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeBookModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="book-modal-box"
       class="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden pointer-events-auto
              transform scale-95 opacity-0 transition-all duration-300 flex flex-col">
 
       <!-- Modal Header -->
-      <div class="relative h-32 bg-brand-900 flex items-center px-8 shrink-0 overflow-hidden">
+      <div class="relative h-32 bg-brand flex items-center px-8 shrink-0 overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
         <div class="relative z-10">
           <h3 class="font-display font-bold text-white text-2xl tracking-tight">Book Appointment</h3>
@@ -240,30 +242,38 @@ Layout = "AdminSide/_StaffLayout";
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Patient Information</h4>
+            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand/40">Patient Information</h4>
           </div>
           
           <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Full Name *</label>
+            <div>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">First Name *</label>
               <div class="relative">
-                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
-                <input id="book-patient-name" type="text" placeholder="e.g. Juan Dela Cruz"
+                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
+                <input id="book-patient-first-name" type="text" placeholder="e.g. Juan"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Email Address *</label>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Last Name *</label>
               <div class="relative">
-                <i class="fa-solid fa-envelope absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-user absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
+                <input id="book-patient-last-name" type="text" placeholder="e.g. Dela Cruz"
+                  class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Email Address *</label>
+              <div class="relative">
+                <i class="fa-solid fa-envelope absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <input id="book-patient-email" type="email" placeholder="patient@example.com"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Phone Number</label>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Phone Number</label>
               <div class="relative">
-                <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <input id="book-patient-phone" type="tel" placeholder="+63 9XX XXX XXXX"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
@@ -275,14 +285,14 @@ Layout = "AdminSide/_StaffLayout";
         <div class="space-y-4 pt-2">
           <div class="flex items-center gap-2 mb-2">
             <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Treatment Details</h4>
+            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand/40">Treatment Details</h4>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Select Service *</label>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Select Service *</label>
               <div class="relative">
-                <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-tooth absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <select id="book-service"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Choose a service…</option>
@@ -291,21 +301,21 @@ Layout = "AdminSide/_StaffLayout";
                     <option value="@svc.Id" data-name="@svc.Name" data-category="@svc.Category">@svc.Name</option>
                   }
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand/20 text-[10px] pointer-events-none"></i>
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Appointment Date *</label>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Appointment Date *</label>
               <div class="relative">
-                <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-calendar-day absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <input id="book-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Preferred Time *</label>
+              <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Preferred Time *</label>
               <div class="relative">
-                <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand-200 text-xs"></i>
+                <i class="fa-solid fa-clock absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
                 <select id="book-time"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none">
                   <option value="">Select slot…</option>
@@ -314,7 +324,7 @@ Layout = "AdminSide/_StaffLayout";
                     <option value="@slot">@slot</option>
                   }
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand-200 text-[10px] pointer-events-none"></i>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-brand/20 text-[10px] pointer-events-none"></i>
               </div>
             </div>
           </div>
@@ -322,7 +332,7 @@ Layout = "AdminSide/_StaffLayout";
 
         <!-- Section: Notes -->
         <div class="pt-2">
-          <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Additional Notes</label>
+          <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Additional Notes</label>
           <textarea id="book-notes" rows="3" placeholder="Symptoms, preferences, or medical history notes…"
             class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none"></textarea>
         </div>
@@ -330,14 +340,14 @@ Layout = "AdminSide/_StaffLayout";
 
       <!-- Modal Footer -->
       <div class="flex items-center justify-between p-6 bg-slate-50 border-t border-slate-100 shrink-0">
-        <p class="text-[10px] text-brand-400 italic">* Required fields for booking</p>
+        <p class="text-[10px] text-brand/40 italic">* Required fields for booking</p>
         <div class="flex gap-3">
           <button onclick="closeBookModal()"
-            class="px-6 py-2.5 text-[12px] font-bold rounded-xl text-brand-500 hover:text-brand-900 transition-colors">
+            class="px-6 py-2.5 text-[12px] font-bold rounded-xl text-brand/50 hover:text-brand transition-colors">
             Cancel
           </button>
           <button onclick="submitBook()"
-            class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand-900 text-white shadow-xl shadow-brand-900/20 hover:opacity-90 transition-all active:scale-95">
+            class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/20 hover:opacity-90 transition-all active:scale-95">
             Create Appointment
           </button>
         </div>
@@ -348,15 +358,15 @@ Layout = "AdminSide/_StaffLayout";
 
 
 <div id="edit-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeEditModal()"></div>
+  <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeEditModal()"></div>
   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
     <div id="edit-modal-box"
       class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto
              transform scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden">
 
       <div class="p-6 border-b border-slate-100">
-        <h3 id="edit-modal-title" class="font-display font-bold text-xl text-brand-900">Reschedule Appointment</h3>
-        <p class="text-brand-400 text-[11px] font-bold uppercase tracking-wider mt-1">Adjust Date or Provider</p>
+        <h3 id="edit-modal-title" class="font-display font-bold text-xl text-brand">Reschedule Appointment</h3>
+        <p class="text-brand/40 text-[11px] font-bold uppercase tracking-wider mt-1">Adjust Date or Provider</p>
       </div>
 
       <input type="hidden" id="edit-appt-id" />
@@ -366,12 +376,12 @@ Layout = "AdminSide/_StaffLayout";
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Date *</label>
+            <label class="block text-[11px] font-bold text-brand/50 mb-2 ml-1">New Date *</label>
             <input id="edit-date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
               class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none" />
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-brand-500 mb-2 ml-1">New Time *</label>
+            <label class="block text-[11px] font-bold text-brand/50 mb-2 ml-1">New Time *</label>
             <select id="edit-time"
               class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary transition-all outline-none appearance-none">
               <option value="">Select slot</option>
@@ -386,11 +396,11 @@ Layout = "AdminSide/_StaffLayout";
 
       <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeEditModal()"
-          class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">
+          class="px-6 py-2.5 text-[12px] font-bold text-brand/50 hover:text-brand transition-colors">
           Cancel
         </button>
         <button onclick="submitReschedule()"
-          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand-900/10 hover:opacity-90 transition-all">
+          class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/10 hover:opacity-90 transition-all">
           Update Schedule
         </button>
       </div>
@@ -425,7 +435,7 @@ Layout = "AdminSide/_StaffLayout";
 
       <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeConfirmModal()"
-          class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">
+          class="px-6 py-2.5 text-[12px] font-bold text-brand/50 hover:text-brand transition-colors">
           Dismiss
         </button>
         <button onclick="submitConfirm()"

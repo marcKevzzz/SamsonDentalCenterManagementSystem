@@ -80,8 +80,8 @@ export function renderStep5(apiResult = {}) {
     if (guestAddr) guestAddr.textContent = d.email;
 
     // ── Summary card ──────────────────────────────────────────────────────────
-    const patientDisplay = d.isForOther && d.otherName
-        ? d.otherName
+    const patientDisplay = d.isForOther && d.otherFirstName
+        ? `${d.otherFirstName} ${d.otherLastName}`
         : `${d.firstName} ${d.lastName}`;
 
     const card = document.getElementById("successCard");

@@ -4,46 +4,85 @@
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
             <div>
                 <h3 id="staffModalTitle" class="font-display font-bold text-[15px] text-brand-900">Add Staff</h3>
-                <p id="staffModalSubtitle" class="text-[11px] text-brand-500 mt-0.5">Select a role and user profile.</p>
+                <p id="staffModalSubtitle" class="text-[11px] text-brand-500 mt-0.5">Enter profile and professional details.</p>
             </div>
             <button onclick="closeStaffModal()" class="text-slate-400 hover:text-slate-700 transition-colors">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
 
-        <div class="px-6 py-5 gap-4">
+        <div class="px-6 py-5">
             <input type="hidden" id="staffId" />
-            <input type="hidden" id="staffEditRole" />
+            <input type="hidden" id="staffProfileId" />
 
-            <!-- ── Role Toggle ─────────────────────────────────────────────── -->
-            <div id="roleToggleGroup" class="flex flex-col gap-1.5 mb-4">
-                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Staff Role <span class="text-red-400">*</span></label>
-                <div class="flex gap-2">
-                    <button type="button" id="roleBtnDoctor"
-                        onclick="switchStaffRole('doctor')"
-                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all
-                               border-primary bg-primary/5 text-primary">
-                        <i class="fa-solid fa-user-doctor mr-1.5"></i> Doctor
-                    </button>
-                    <button type="button" id="roleBtnReceptionist"
-                        onclick="switchStaffRole('receptionist')"
-                        class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all
-                               border-slate-200 bg-white text-slate-500 hover:border-slate-300">
-                        <i class="fa-solid fa-headset mr-1.5"></i> Receptionist
-                    </button>
+            <!-- ── Profile Information ────────────────────────────────────────── -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">First Name <span class="text-red-400">*</span></label>
+                    <input id="staffFirstName" type="text" placeholder="Juan"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Last Name <span class="text-red-400">*</span></label>
+                    <input id="staffLastName" type="text" placeholder="Dela Cruz"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
             </div>
 
-            <!-- ── User Select ─────────────────────────────────────────────── -->
-            <div class="flex flex-col gap-1.5 mb-4" id="userSelectGroup">
-                <label class="text-[11px] font-medium text-slate-600 tracking-wide">
-                    Select User <span id="roleHintLabel" class="text-brand-400">(Doctor role)</span>
-                    <span class="text-red-400">*</span>
-                </label>
-                <select id="staffProfileId" class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
-                    <option value="">Select an available user...</option>
-                </select>
-                <p class="text-[10px] text-brand-400 mt-0.5">Once a profile is selected, it cannot be changed.</p>
+            <div class="flex flex-col gap-1.5 mb-4">
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Email <span class="text-red-400">*</span></label>
+                <input id="staffEmail" type="email" placeholder="user@email.com"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Date of Birth</label>
+                    <input id="staffDob" type="date"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Sex</label>
+                    <select id="staffSex"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="prefer_not">Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Phone Number</label>
+                    <input id="staffPhone" type="tel" placeholder="09XX XXX XXXX"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Staff Role <span class="text-red-400">*</span></label>
+                    <div id="roleDisplayLabel" class="px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-[13px] text-slate-600 font-medium">Doctor</div>
+                    <div id="roleToggleGroup" class="flex gap-2">
+                        <button type="button" id="roleBtnDoctor"
+                            onclick="switchStaffRole('doctor')"
+                            class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all
+                                border-primary bg-primary/5 text-primary">
+                            <i class="fa-solid fa-user-doctor mr-1.5"></i> Doctor
+                        </button>
+                        <button type="button" id="roleBtnReceptionist"
+                            onclick="switchStaffRole('receptionist')"
+                            class="flex-1 px-3 py-2 rounded-lg text-[12.5px] font-medium border-2 transition-all
+                                border-slate-200 bg-white text-slate-500 hover:border-slate-300">
+                            <i class="fa-solid fa-headset mr-1.5"></i> Receptionist
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5 mb-4">
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Address</label>
+                <input id="staffAddress" type="text" placeholder="Complete address"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
             </div>
 
             <!-- ── Doctor-only fields ──────────────────────────────────────── -->
@@ -57,9 +96,7 @@
                 <!-- ── Specialties Multi-select ────────────────────────────── -->
                 <div class="flex flex-col gap-1.5 mb-4">
                     <label class="text-[11px] font-medium text-slate-600 tracking-wide">Specialties</label>
-                    <!-- Selected pills -->
-                    <div id="specialtyPills" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
-                    <!-- Dropdown toggle -->
+                    <div id="specialtyPills" class="flex flex-wrap gap-1.5 min-h-[28px] mb-2"></div>
                     <div class="relative">
                         <button type="button" id="specialtyDropdownBtn"
                             onclick="toggleSpecialtyDropdown()"
@@ -71,7 +108,6 @@
                         </button>
                         <div id="specialtyDropdown"
                             class="hidden absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                            <!-- Options populated by JS -->
                         </div>
                     </div>
                 </div>
@@ -102,13 +138,10 @@
                         <i class="fa-solid fa-plus text-[9px]"></i> Add Slot
                     </button>
                 </div>
-                <div id="availabilityRows" class="space-y-2">
-                    <!-- Dynamic rows added by JS -->
-                </div>
+                <div id="availabilityRows" class="space-y-2"></div>
                 <p id="noAvailabilityMsg" class="text-[10px] text-brand-300 italic mt-1">No schedule set. Click "Add Slot" to create one.</p>
             </div>
 
-            <!-- ── Active status ───────────────────────────────────────────── -->
             <div class="flex items-center gap-2 mt-2">
                 <input type="checkbox" id="staffIsActive" class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary" checked />
                 <label for="staffIsActive" class="text-[12px] font-medium text-slate-700">Active Status (Check if available)</label>
@@ -122,7 +155,7 @@
                 Cancel
             </button>
             <button onclick="saveStaff()" id="staffSaveBtn" class="px-5 py-2 text-[12.5px] font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2">
-                Save Doctor
+                Save Staff
             </button>
         </div>
     </div>

@@ -35,7 +35,7 @@ namespace SamsonDentalCenterManagementSystem.Controllers
                     GuestPhone = req.GuestPhone,
                 };
 
-                var created = await _inquiryService.CreateInquiryAsync(inquiry, req.Message);
+                var created = await _inquiryService.CreateInquiryAsync(inquiry, req.Message, req.SenderId, req.IsFromStaff);
                 return Ok(new { ok = true, inquiryId = created.Id });
             }
             catch (Exception ex)
@@ -58,7 +58,8 @@ namespace SamsonDentalCenterManagementSystem.Controllers
                     req.InquiryId,
                     req.SenderId,
                     req.Message,
-                    req.IsFromStaff
+                    req.IsFromStaff,
+                    req.IsInternal
                 );
                 return Ok(new { ok = true });
             }
@@ -82,8 +83,10 @@ namespace SamsonDentalCenterManagementSystem.Controllers
                     sender_id = m.SenderId,
                     message = m.Message,
                     is_from_staff = m.IsFromStaff,
+                    is_internal = m.IsInternal,
                     created_at = m.CreatedAt,
                     sender_name = m.Sender?.FullName ?? (m.IsFromStaff ? "Staff" : "Patient"),
+                    sender_role = m.Sender?.Role ?? (m.IsFromStaff ? "staff" : "patient")
                 });
                 return Ok(new { ok = true, messages = projected });
             }
@@ -108,6 +111,36 @@ namespace SamsonDentalCenterManagementSystem.Controllers
             }
         }
 
+        [HttpGet("patient/{patientId}")]
+        public async Task<IActionResult> GetByPatient(string patientId)
+        {
+            try
+            {
+                var inquiries = await _inquiryService.GetInquiriesByPatientIdAsync(patientId);
+                var latest = inquiries.OrderByDescending(i => i.CreatedAt).FirstOrDefault();
+                
+                if (latest == null) return Ok(new { ok = false });
+
+                var messages = await _inquiryService.GetInquiryMessagesAsync(latest.Id);
+                return Ok(new { 
+                    ok = true, 
+                    inquiry = latest, 
+                    messages = messages.Select(m => new {
+                        id = m.Id,
+                        senderId = m.SenderId,
+                        message = m.Message,
+                        isFromStaff = m.IsFromStaff,
+                        isInternal = m.IsInternal,
+                        createdAt = m.CreatedAt
+                    })
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ok = false, error = ex.Message });
+            }
+        }
+
         public class CreateInquiryRequest
         {
             [JsonPropertyName("patientId")]
@@ -118,6 +151,12 @@ namespace SamsonDentalCenterManagementSystem.Controllers
 
             [JsonPropertyName("message")]
             public string Message { get; set; } = "";
+
+            [JsonPropertyName("senderId")]
+            public string? SenderId { get; set; }
+
+            [JsonPropertyName("isFromStaff")]
+            public bool IsFromStaff { get; set; } = false;
 
             [JsonPropertyName("guestEmail")]
             public string? GuestEmail { get; set; }
@@ -145,6 +184,9 @@ namespace SamsonDentalCenterManagementSystem.Controllers
 
             [JsonPropertyName("isFromStaff")]
             public bool IsFromStaff { get; set; } = false;
+
+            [JsonPropertyName("isInternal")]
+            public bool IsInternal { get; set; } = false;
         }
     }
 }
