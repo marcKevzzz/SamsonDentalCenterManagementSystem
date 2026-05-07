@@ -249,53 +249,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             return response.Models ?? new List<Profile>();
         }
 
-        public async Task MergeProfile(string sourceId, string targetId)
-        {
-            await _supabase.InitializeAsync();
-
-            try
-            {
-                // Bulk update Appointments
-                await _supabase.From<Appointment>()
-                    .Where(a => a.PatientId == sourceId)
-                    .Set(a => a.PatientId, targetId)
-                    .Update();
-
-                // Bulk update Invoices
-                await _supabase.From<Invoice>()
-                    .Where(i => i.PatientId == sourceId)
-                    .Set(i => i.PatientId, targetId)
-                    .Update();
-
-                // Bulk update Inquiries
-                await _supabase.From<Inquiry>()
-                    .Where(i => i.PatientId == sourceId)
-                    .Set(i => i.PatientId, targetId)
-                    .Update();
-
-                // Bulk update Activity Logs
-                await _supabase.From<ActivityLog>()
-                    .Where(a => a.ProfileId == sourceId)
-                    .Set(a => a.ProfileId, targetId)
-                    .Update();
-
-                // Bulk update Notifications
-                await _supabase.From<Notification>()
-                    .Where(n => n.ProfileId == sourceId)
-                    .Set(n => n.ProfileId, targetId)
-                    .Update();
-
-                // Finally, delete the shadow profile
-                await _supabase.From<Profile>()
-                    .Where(p => p.Id == sourceId)
-                    .Delete();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[MergeProfile] Error merging {sourceId} into {targetId}: {ex.Message}");
-                throw;
-            }
-        }
 
         public async Task<string> UploadAvatar(
             string userId,
@@ -796,9 +749,23 @@ namespace SamsonDentalCenterManagementSystem.Services
                     var json = await res.Content.ReadAsStringAsync();
                     using var doc = System.Text.Json.JsonDocument.Parse(json);
                     
-                    var users = doc.RootElement.EnumerateArray();
+                    System.Text.Json.JsonElement users;
+                    if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        users = doc.RootElement;
+                    }
+                    else if (doc.RootElement.TryGetProperty("users", out var usersProp) && usersProp.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        users = usersProp;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[GetUserIdByEmail] Unexpected response format: {json.Substring(0, Math.Min(100, json.Length))}");
+                        break;
+                    }
+                    
                     bool foundAny = false;
-                    foreach (var user in users)
+                    foreach (var user in users.EnumerateArray())
                     {
                         foundAny = true;
                         if (user.GetProperty("email").GetString()?.Equals(email, StringComparison.OrdinalIgnoreCase) == true)
@@ -838,6 +805,161 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 Console.WriteLine($"[GetAuthUserEmail] Error: {ex.Message}");
                 return null;
+            }
+        }
+        public async Task<string?> GenerateLink(string type, string email, string? redirectTo = null)
+        {
+            try
+            {
+                var payload = new
+                {
+                    type = type,
+                    email = email,
+                    options = new { redirectTo = redirectTo }
+                };
+
+                _http.DefaultRequestHeaders.Clear();
+                _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+                _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+
+                var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/generate_link",
+                    new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json"));
+
+                if (!res.IsSuccessStatusCode)
+                {
+                    var err = await res.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[GenerateLink] Failed: {err}");
+                    return null;
+                }
+
+                var json = await res.Content.ReadAsStringAsync();
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                return doc.RootElement.GetProperty("action_link").GetString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GenerateLink] Error: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<string?> CreateUserWithId(string id, string email, string password, object metadata)
+        {
+            try
+            {
+                var authPayload = new
+                {
+                    id = id,
+                    email = email,
+                    password = password,
+                    email_confirm = true,
+                    user_metadata = metadata
+                };
+
+                _http.DefaultRequestHeaders.Clear();
+                _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+                _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+
+                var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users",
+                    new StringContent(System.Text.Json.JsonSerializer.Serialize(authPayload), System.Text.Encoding.UTF8, "application/json"));
+
+                if (!res.IsSuccessStatusCode)
+                {
+                    var err = await res.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[CreateUserWithId] Failed: {err}");
+                    throw new Exception($"Auth creation failed: {err}");
+                }
+
+                var resStr = await res.Content.ReadAsStringAsync();
+                using var doc = System.Text.Json.JsonDocument.Parse(resStr);
+                return doc.RootElement.GetProperty("id").GetString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CreateUserWithId] Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Profile?> FindExistingPatientRecord(string firstName, string lastName, DateTime? dob, string? phone)
+        {
+            await _supabase.InitializeAsync();
+            var response = await _supabase.From<Profile>()
+                .Where(p => p.Role == "patient")
+                .Get();
+
+            var profiles = response.Models;
+
+            // Match by Name + DOB OR Name + Phone
+            return profiles.FirstOrDefault(p => 
+                p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase) && 
+                p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase) && 
+                ((dob.HasValue && p.DateOfBirth == dob.Value) || (!string.IsNullOrEmpty(phone) && p.PhoneNumber == phone))
+            );
+        }
+        public async Task MergeProfile(string sourceId, string targetId)
+        {
+            try
+            {
+                await _supabase.InitializeAsync();
+
+                // 1. Update Appointments
+                await _supabase.From<Appointment>()
+                    .Where(a => a.PatientId == sourceId)
+                    .Set(a => a.PatientId, targetId)
+                    .Set(a => a.IsGuest, false)
+                    .Update();
+
+                // 2. Invoices (Treatments are linked to Invoices, which link to PatientId)
+                await _supabase.From<Invoice>()
+                    .Where(i => i.PatientId == sourceId)
+                    .Set(i => i.PatientId, targetId)
+                    .Update();
+
+                // 3. Update Notifications
+                await _supabase.From<Notification>()
+                    .Where(n => n.ProfileId == sourceId)
+                    .Set(n => n.ProfileId, targetId)
+                    .Update();
+
+                // 4. Transfer Medical Info
+                var sourceInfoRes = await _supabase.From<PatientMedicalInfo>().Where(x => x.PatientId == sourceId).Get();
+                var sourceInfo = sourceInfoRes.Models.FirstOrDefault();
+                if (sourceInfo != null)
+                {
+                    var targetInfoRes = await _supabase.From<PatientMedicalInfo>().Where(x => x.PatientId == targetId).Get();
+                    if (targetInfoRes.Models.Count == 0)
+                    {
+                        sourceInfo.PatientId = targetId;
+                        await _supabase.From<PatientMedicalInfo>().Insert(sourceInfo);
+                    }
+                }
+
+                // 5. Transfer Tooth Status
+                var sourceToothRes = await _supabase.From<PatientToothStatus>().Where(x => x.PatientId == sourceId).Get();
+                if (sourceToothRes.Models.Any())
+                {
+                    var targetToothRes = await _supabase.From<PatientToothStatus>().Where(x => x.PatientId == targetId).Get();
+                    if (!targetToothRes.Models.Any())
+                    {
+                        foreach (var t in sourceToothRes.Models)
+                        {
+                            t.Id = Guid.NewGuid().ToString();
+                            t.PatientId = targetId;
+                        }
+                        await _supabase.From<PatientToothStatus>().Insert(sourceToothRes.Models);
+                    }
+                }
+
+                // 6. Delete old profile
+                await _supabase.From<Profile>().Where(x => x.Id == sourceId).Delete();
+
+                await _logs.LogActionAsync(targetId, "merged profile", $"Merged data from {sourceId} to {targetId}", targetId, "User", "/Admin/Patients");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MergeProfile] Error: {ex.Message}");
+                throw;
             }
         }
     }

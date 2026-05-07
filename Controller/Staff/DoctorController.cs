@@ -42,6 +42,28 @@ namespace SamsonDentalCenterManagementSystem.Controller.Staff
             }
         }
 
+        [HttpGet("tooth-chart/{patientId}")]
+        public async Task<IActionResult> GetToothChart(string patientId)
+        {
+            try
+            {
+                var chart = await _recordService.GetToothChartAsync(patientId);
+                var dtos = chart.Select(ts => new
+                {
+                    toothNumber = ts.ToothNumber,
+                    status = ts.Status,
+                    notes = ts.Notes,
+                    updatedAt = ts.UpdatedAt
+                }).ToList();
+
+                return Ok(new { ok = true, data = dtos });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ok = false, error = ex.Message });
+            }
+        }
+
         /*
         [HttpPost("evaluate-oral-health")]
         public async Task<IActionResult> EvaluateOralHealth([FromBody] OralHealthEvaluationRequest req)

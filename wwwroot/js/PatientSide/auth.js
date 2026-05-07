@@ -198,13 +198,9 @@ function validateStep(step) {
 function handleSignUp() {
   if (!validateStep(3)) return;
 
-  Modal.open({
-    title: "Confirm Registration",
-    message:
-      "By confirming, you agree to create a patient account at Samson Dental Center. Would you like to proceed?",
-    type: "info",
-    confirmText: "Yes, Create Account",
-    onConfirm: async () => {
+  const claimId = document.getElementById("su_claim_id")?.value;
+
+  const performSubmit = async () => {
       try {
         const form = document.getElementById("signup-form");
         const token = document.querySelector(
@@ -220,12 +216,26 @@ function handleSignUp() {
           body: new URLSearchParams(new FormData(form)),
         });
 
-        const formData = new FormData(form);
-        for (let [key, value] of formData.entries()) {
-          console.log(`${key}: ${value}`);
-        }
-
         const json = await res.json();
+        console.log("[Signup] Response:", json);
+
+        if (json.ok && json.recordFound) {
+          Modal.open({
+            title: "Existing Record Found",
+            message: json.message,
+            type: "info",
+            confirmText: "Yes, Use Existing",
+            cancelText: "No, Create New",
+            onConfirm: () => {
+              const claimInp = document.getElementById("su_claim_id");
+              if (claimInp) {
+                claimInp.value = json.patientId;
+                handleSignUp(); 
+              }
+            }
+          });
+          return;
+        }
 
         if (!json.ok) {
           Toast.show(json.errors?.[0] ?? "Registration failed.", "danger");
@@ -233,17 +243,30 @@ function handleSignUp() {
         }
 
         if (json.needsConfirmation) {
-          Toast.show("Check your email to confirm your account!", "success");
+          Toast.show(json.message || "Check your email to confirm your account!", "success");
           return;
         }
         if (json.user) {
-          signIn(json.user); // Run your fancy GSAP/UI update
+          signIn(json.user); 
         }
         setTimeout(() => (window.location.href = "../"), 2000);
       } catch (err) {
         Toast.show("An unexpected error occurred.", "danger");
       }
-    },
+  };
+
+  if (claimId) {
+    performSubmit();
+    return;
+  }
+
+  Modal.open({
+    title: "Confirm Registration",
+    message:
+      "By confirming, you agree to create a patient account at Samson Dental Center. Would you like to proceed?",
+    type: "info",
+    confirmText: "Yes, Create Account",
+    onConfirm: performSubmit
   });
 }
 

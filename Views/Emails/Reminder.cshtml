@@ -1,0 +1,36 @@
+@model dynamic
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .details { background-color: #f8fafc; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .footer { margin-top: 30px; font-size: 12px; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Appointment Reminder</h1>
+        </div>
+        <p>Hello @Model.Name,</p>
+        <p>This is a friendly reminder of your upcoming appointment at Samson Dental Center.</p>
+        <div class="details">
+            <p><strong>Service:</strong> @Model.Service</p>
+            <p><strong>Date:</strong> @Model.Date</p>
+            <p><strong>Time:</strong> @Model.Time</p>
+        </div>
+        <p>Please arrive 10 minutes early. If you need to reschedule, please call us at least 24 hours in advance.</p>
+        <p>We look forward to seeing you!</p>
+        <p>Best regards,<br/>The Samson Dental Team</p>
+        <div class="footer">
+            &copy; @DateTime.Now.Year Samson Dental Center. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

@@ -165,6 +165,8 @@
     - Added robust error handling for expired or invalid confirmation tokens.
     - Fixed authentication redirection by explicitly setting `EmailRedirectTo` in Signup and Forgot Password flows.
     - Improved `EmailConfirmed.cshtml` to detect tokens from both URL hash and query parameters.
+    - [x] Unified Odontogram: Standardized on Universal (1-32) numbering and shared chart in treatment modal.
+    - [x] Clinical Data Sync: Implemented history fetching and global sync for tooth status in invoices.
     - Expanded support for `invite` and `email_change` confirmation types.
   - Profile Settings Refactor (Part 2):
     - Moved Email field back to Contact tab for easier access.

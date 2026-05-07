@@ -108,6 +108,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("source")]
         public string Source { get; set; } = "online";
 
+        [Column("reminder_sent")]
+        public bool ReminderSent { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 

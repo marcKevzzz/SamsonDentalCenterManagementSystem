@@ -51,6 +51,9 @@ public class InvoiceController : ControllerBase
 
         [JsonPropertyName("treatments")]
         public List<TreatmentDto> Treatments { get; set; } = new();
+
+        [JsonPropertyName("toothData")]
+        public string? ToothData { get; set; }
     }
 
     public class InvoiceItemDto
@@ -165,14 +168,16 @@ public class InvoiceController : ControllerBase
             string? treatmentWarning = null;
             if (req.Treatments?.Count > 0)
             {
-                var treatments = req
-                    .Treatments.Select(t => new Treatment
+                var treatments = req.Treatments
+                    .Select(t => new Treatment
                     {
                         Id = Guid.NewGuid().ToString(),
                         InvoiceId = created.Id,
                         ServiceId = t.ServiceId,
                         ServiceName = t.ServiceName,
                         ToothNumbers = t.ToothNumbers,
+                        ToothData = t.ToothData ?? req.ToothData,
+                        XrayData = t.XrayData,
                         ProcedureDetails = t.Procedure,
                         Diagnosis = t.Diagnosis,
                         Status = t.Status,
@@ -185,44 +190,38 @@ public class InvoiceController : ControllerBase
                     await _invoiceService.CreateTreatmentsAsync(treatments);
                     
                     // Also sync tooth data to patient_tooth_status table if provided
-                    if (!string.IsNullOrEmpty(req.PatientId))
+                    if (!string.IsNullOrEmpty(req.PatientId) && !string.IsNullOrEmpty(req.ToothData))
                     {
                         var adminId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value ?? "system";
-                        foreach (var t in req.Treatments)
+                        try
                         {
-                            if (!string.IsNullOrEmpty(t.ToothNumbers) && !string.IsNullOrEmpty(req.PatientId))
+                            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(req.ToothData);
+                            if (dict != null)
                             {
-                                try
+                                var toothUpdates = new List<PatientToothStatus>();
+                                foreach (var kvp in dict)
                                 {
-                                    var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(t.ToothNumbers);
-                                    if (dict != null)
+                                    if (int.TryParse(kvp.Key, out int toothNum))
                                     {
-                                        var toothUpdates = new List<PatientToothStatus>();
-                                        foreach (var kvp in dict)
+                                        toothUpdates.Add(new PatientToothStatus
                                         {
-                                            if (int.TryParse(kvp.Key, out int toothNum))
-                                            {
-                                                toothUpdates.Add(new PatientToothStatus
-                                                {
-                                                    PatientId = req.PatientId,
-                                                    ToothNumber = toothNum,
-                                                    Status = kvp.Value,
-                                                    Notes = t.Procedure ?? "Updated from treatment",
-                                                });
-                                            }
-                                        }
-
-                                        if (toothUpdates.Any())
-                                        {
-                                            await _recordService.UpdateMultipleToothStatusAsync(toothUpdates, adminId);
-                                        }
+                                            PatientId = req.PatientId,
+                                            ToothNumber = toothNum,
+                                            Status = kvp.Value,
+                                            Notes = "Updated during treatment session",
+                                        });
                                     }
                                 }
-                                catch (Exception ex)
+
+                                if (toothUpdates.Any())
                                 {
-                                    Console.WriteLine($"[InvoiceController] Failed to parse/sync tooth data: {ex.Message}");
+                                    await _recordService.UpdateMultipleToothStatusAsync(toothUpdates, adminId);
                                 }
                             }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[InvoiceController] Failed to parse/sync global tooth data: {ex.Message}");
                         }
                     }
                 }

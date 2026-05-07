@@ -17,6 +17,7 @@ public class AdminUsersController : ControllerBase
     private readonly Supabase.Client _supabase;
 
     private readonly ActivityLogService _logs;
+    private readonly IEmailService _emailService;
     private readonly string _serviceRoleKey;
     private readonly string _supabaseUrl;
     private static readonly HttpClient _http = new HttpClient();
@@ -25,12 +26,14 @@ public class AdminUsersController : ControllerBase
         ProfileService profileService,
         Supabase.Client supabase,
         ActivityLogService logs,
+        IEmailService emailService,
         IConfiguration config
     )
     {
         _profileService = profileService;
         _supabase = supabase;
         _logs = logs;
+        _emailService = emailService;
         _serviceRoleKey =
             config["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey is missing");
         _supabaseUrl = config["Supabase:Url"] ?? throw new Exception("Supabase:Url is missing");
@@ -133,10 +136,14 @@ public class AdminUsersController : ControllerBase
                 }
             }
 
-            // 4. Send Welcome Email (Password Reset Flow)
+            // 4. Send Welcome Email (Invitation flow)
             try {
                 var baseUrl = $"{Request.Scheme}://{Request.Host}";
-                await _profileService.ResetPasswordForEmail(p.Email, baseUrl);
+                var link = await _profileService.GenerateLink("recovery", p.Email, $"{baseUrl}/reset-password");
+                if (link != null)
+                {
+                    await _emailService.SendEmailAsync(p.Email, $"{p.FirstName} {p.LastName}", "Welcome to Samson Dental Center", "Invitation", new { Name = p.FirstName, Link = link });
+                }
             } catch (Exception ex) {
                 Console.WriteLine($"[CreateUser] Welcome email failed: {ex.Message}");
             }
@@ -239,19 +246,15 @@ public class AdminUsersController : ControllerBase
             var profile = await _profileService.GetProfileById(id);
             if (profile == null) return NotFound();
 
-            // Trigger Supabase recovery email (Set Password flow)
-            _http.DefaultRequestHeaders.Clear();
-            _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
-            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
-
-            var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/recover",
-                new StringContent(System.Text.Json.JsonSerializer.Serialize(new { email = profile.Email }), System.Text.Encoding.UTF8, "application/json"));
-
-            if (!res.IsSuccessStatusCode) 
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var link = await _profileService.GenerateLink("recovery", profile.Email, $"{baseUrl}/reset-password");
+            
+            if (link == null)
             {
-                var err = await res.Content.ReadAsStringAsync();
-                return BadRequest(new { ok = false, error = $"Failed to send recovery email: {err}" });
+                return BadRequest(new { ok = false, error = "Failed to generate invitation link." });
             }
+
+            await _emailService.SendEmailAsync(profile.Email, profile.FullName, "Invitation to Samson Dental Center Portal", "Invitation", new { Name = profile.FirstName, Link = link });
 
             string rolePath = profile.Role?.ToLower() == "patient" ? "/Admin/Patients" : "/Admin/Staff/Doctors";
             await _logs.LogActionAsync(id, "resent invitation", $"User: {profile.FullName}", null, "Admin", rolePath);

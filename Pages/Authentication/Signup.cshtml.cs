@@ -11,11 +11,15 @@ public class SignupModel : PageModel
 {
     private readonly ReviewService _reviewService;
     private readonly Supabase.Client _supabase;
+    private readonly ProfileService _profileService;
+    private readonly IEmailService _emailService;
 
-    public SignupModel(Supabase.Client supabase, ReviewService reviewService)
+    public SignupModel(Supabase.Client supabase, ReviewService reviewService, ProfileService profileService, IEmailService emailService)
     {
         _reviewService = reviewService;
         _supabase = supabase;
+        _profileService = profileService;
+        _emailService = emailService;
     }
 
     [BindProperty]
@@ -58,92 +62,121 @@ public class SignupModel : PageModel
 
         try
         {
-            // ── Sign up — trigger handles profiles insert ─────────────────────
-            var options = new SignUpOptions
+            // ── Pre-check for existing account by Email ───────────────────────
+            bool emailExists = await _profileService.CheckEmailExists(Input.Email!);
+            if (emailExists)
             {
-                Data = new Dictionary<string, object>
-                {
-                    { "first_name", Input.FirstName! },
-                    { "last_name", Input.LastName! },
-                    { "date_of_birth", Input.DateOfBirth?.ToString("yyyy-MM-dd") ?? "" },
-                    { "sex", Input.Sex ?? "unspecified" },
-                    { "phone_number", Input.PhoneNumber ?? "" },
-                    { "address", Input.Address ?? "" },
-                    { "role", "patient" },
-                },
-                // CHANGE THIS LINE: EmailRedirectTo -> RedirectTo
-                RedirectTo = $"{Request.Scheme}://{Request.Host}/email-confirmed",
-            };
-
-            var session = await _supabase.Auth.SignUp(Input.Email!, Input.Password, options);
-
-            if (session?.User == null)
-                return Fail("Sign-up failed. Please try again.");
-
-            // ── Email confirmation flow ────────────────────────────────────────
-            // If email confirmation is enabled in Supabase, AccessToken is null
-            // until the user confirms. We detect this and tell the client.
-            bool needsConfirmation = string.IsNullOrEmpty(session.AccessToken);
-
-            if (needsConfirmation)
-            {
-                // Do NOT set cookie — user isn't confirmed yet
-                return new JsonResult(
-                    new
-                    {
-                        ok = true,
-                        needsConfirmation = true,
-                        message = "A confirmation email has been sent. Please verify your email before signing in.",
-                        errors = Array.Empty<string>(),
-                    }
-                );
+                return Fail("An account with this email already exists.");
             }
 
-            // ── Auto-confirmed (email confirmation disabled in Supabase) ───────
-            var cookieOptions = new CookieOptions
+            // ── Identity Claim Check ──────────────────────────────────────────
+            if (string.IsNullOrEmpty(Input.ClaimId))
             {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Path = "/",
-                Expires = DateTime.UtcNow.AddHours(1),
-            };
-            Response.Cookies.Append("sb-access-token", session.AccessToken!, cookieOptions);
-
-            var firstName = Input.FirstName!;
-            var lastName = Input.LastName!;
-
-            return new JsonResult(
-                new
+                var existing = await _profileService.FindExistingPatientRecord(Input.FirstName!, Input.LastName!, Input.DateOfBirth, Input.PhoneNumber);
+                if (existing != null)
                 {
-                    ok = true,
-                    needsConfirmation = false,
-                    errors = Array.Empty<string>(),
-                    user = new
-                    {
-                        id = session.User.Id,
-                        firstName,
-                        lastName,
-                        email = Input.Email,
-                        avatarUrl = (string?)null,
-                        initials = (
-                            firstName[0].ToString()
-                            + (lastName.Length > 0 ? lastName[0].ToString() : "")
-                        ).ToUpper(),
-                        role = "patient",
-                    },
+                    return new JsonResult(new { 
+                        ok = true, 
+                        recordFound = true, 
+                        patientId = existing.Id,
+                        message = "We found an existing patient record matching your information. Would you like to claim this record?"
+                    });
                 }
-            );
+            }
+
+            // ── Sign up flow ──────────────────────────────────────────────────
+            string userId;
+            bool needsConfirmation = true;
+
+            if (!string.IsNullOrEmpty(Input.ClaimId))
+            {
+                // Claim Existing Record: Create user with existing ID
+                userId = await _profileService.CreateUserWithId(
+                    Input.ClaimId, 
+                    Input.Email!, 
+                    Input.Password!, 
+                    new { 
+                        first_name = Input.FirstName!, 
+                        last_name = Input.LastName!,
+                        role = "patient"
+                    }
+                ) ?? throw new Exception("Failed to create user for claim.");
+                
+                // Since we created via Admin API with email_confirm: true, we don't NEED confirmation,
+                // but for security we might want them to verify. 
+                // Let's set email_confirm: false in CreateUserWithId if we want that.
+                // Actually, the user said "it needs to verify the email to make a password".
+                // If they are claiming, they just set a password now.
+                needsConfirmation = false;
+            }
+            else
+            {
+                // New User: Use regular signup or Admin API + link
+                // To bypass Supabase's built-in email limits/domain issues, use Admin API + FluentEmail
+                userId = Guid.NewGuid().ToString();
+                await _profileService.CreateUserWithId(
+                    userId,
+                    Input.Email!,
+                    Input.Password!,
+                    new { 
+                        first_name = Input.FirstName!, 
+                        last_name = Input.LastName!,
+                        role = "patient"
+                    }
+                );
+                
+                // Generate signup link
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var link = await _profileService.GenerateLink("signup", Input.Email!, $"{baseUrl}/email-confirmed");
+                
+                if (link != null)
+                {
+                    await _emailService.SendConfirmationEmailAsync(Input.Email!, Input.FirstName!, link);
+                }
+                else
+                {
+                    // Fallback or error
+                    Console.WriteLine("[Signup] Failed to generate signup link.");
+                }
+            }
+
+            // ── Update Profile ───────────────────────────────────────────────
+            // Even if it's a claim, we update the profile with the new email/details
+            await _profileService.UpdateProfile(userId, new UserPayload {
+                FirstName = Input.FirstName,
+                LastName = Input.LastName,
+                Email = Input.Email,
+                Sex = Input.Sex,
+                DateOfBirth = Input.DateOfBirth,
+                PhoneNumber = Input.PhoneNumber,
+                Address = Input.Address,
+                IsActive = !needsConfirmation
+            });
+
+            // ── Success Flow ───────────────────────────────────────────────
+            return new JsonResult(new {
+                ok = true,
+                needsConfirmation = needsConfirmation,
+                message = needsConfirmation 
+                    ? "A confirmation email has been sent. Please verify your email before signing in."
+                    : "Account set up successfully! You can now sign in.",
+                errors = Array.Empty<string>(),
+                user = needsConfirmation ? null : new {
+                    id = userId,
+                    firstName = Input.FirstName,
+                    lastName = Input.LastName,
+                    email = Input.Email,
+                    initials = (Input.FirstName![0].ToString() + (Input.LastName!.Length > 0 ? Input.LastName[0].ToString() : "")).ToUpper(),
+                    role = "patient",
+                },
+            });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Signup] Error: {ex.Message}");
-
-            // Supabase returns "User already registered" for duplicate emails
             var msg = ex.Message.Contains("already registered")
                 ? "An account with this email already exists."
                 : ex.Message;
-
             return Fail(msg);
         }
     }

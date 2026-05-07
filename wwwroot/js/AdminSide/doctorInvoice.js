@@ -5,6 +5,7 @@ let addedItems = [];
 let ARRIVED_APPTS = [];
 let RECENT_TREATMENTS = [];
 let SERVICES = [];
+let TOOTH_DATA = {}; // Global tooth status for current patient
 
 async function refreshData(force = false) {
     const appts    = await AdminStore.loadData('appointments', '/api/admin/data/appointments', { force });
@@ -210,7 +211,33 @@ function hydrateUI() {
             if (serviceId && addedItems.length === 0) {
                 addServiceItemManual(serviceId, serviceName, servicePrice, 1, true); // silent=true: no toast on auto-add
             }
+
+            // Fetch tooth chart when patient changes
+            const patientId = option.getAttribute('data-patientid');
+            if (patientId) {
+                fetchPatientToothChart(patientId);
+            }
         });
+    }
+}
+
+async function fetchPatientToothChart(patientId) {
+    try {
+        const res = await fetch(`/api/doctor/tooth-chart/${patientId}`);
+        const result = await res.json();
+        if (result.ok) {
+            TOOTH_DATA = {};
+            result.data.forEach(ts => {
+                TOOTH_DATA[ts.toothNumber] = ts.status;
+            });
+            // If modal is open and on treatment tab, re-render
+            const panel = document.getElementById('panel-treatment');
+            if (panel && !panel.classList.contains('hidden')) {
+                renderTreatmentForms();
+            }
+        }
+    } catch (err) {
+        console.error("Failed to fetch tooth chart:", err);
     }
 }
 
@@ -457,11 +484,55 @@ function calculateTotals() {
 function renderTreatmentForms() {
     const container = document.getElementById('treatment-body');
     
-    container.innerHTML = addedItems.map((item, idx) => {
+    // Build Global Odontogram Header
+    const renderRow = (start, end, reverse = false) => {
+        const arr = [];
+        if (reverse) {
+            for (let i = start; i >= end; i--) arr.push(i);
+        } else {
+            for (let i = start; i <= end; i++) arr.push(i);
+        }
+        return arr.map(t => {
+            const status = TOOTH_DATA[t] || 'Healthy';
+            return `<button type="button" onclick="toggleToothStatus(this, ${t})" data-tooth="${t}" data-status="${status}" class="tooth-btn w-6 h-8 text-[9px] font-bold rounded border flex items-center justify-center transition-colors ${getToothColorClass(status)}">${t}</button>`;
+        }).join('');
+    };
+
+    const odontogramUI = `
+        <div class="bg-white rounded-2xl p-5 border border-brand-100 shadow-sm mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h6 class="text-[12px] font-bold text-brand uppercase tracking-wider">Patient Odontogram</h6>
+                    <p class="text-[9px] text-brand-400 font-medium">Global tooth status for this session</p>
+                </div>
+                <span class="text-[9px] font-bold text-slate-400">Click tooth to cycle status</span>
+            </div>
+
+            <!-- Color Legend -->
+            <div class="flex flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100">
+                <span class="flex items-center gap-1 text-[9px] font-bold text-slate-500"><span class="w-3 h-3 rounded border border-slate-200 bg-white inline-block"></span>Healthy</span>
+                <span class="flex items-center gap-1 text-[9px] font-bold text-blue-600"><span class="w-3 h-3 rounded border border-blue-300 bg-blue-100 inline-block"></span>Filled</span>
+                <span class="flex items-center gap-1 text-[9px] font-bold text-purple-600"><span class="w-3 h-3 rounded border border-purple-300 bg-purple-100 inline-block"></span>Crown</span>
+                <span class="flex items-center gap-1 text-[9px] font-bold text-emerald-600"><span class="w-3 h-3 rounded border border-emerald-300 bg-emerald-100 inline-block"></span>RCT</span>
+                <span class="flex items-center gap-1 text-[9px] font-bold text-slate-400"><span class="w-3 h-3 rounded border border-slate-300 bg-slate-200 inline-block"></span>Extracted</span>
+                <span class="flex items-center gap-1 text-[9px] font-bold text-red-300"><span class="w-3 h-3 rounded border border-red-200 bg-red-50 inline-block opacity-60"></span>Missing</span>
+                <span class="flex items-center gap-1 text-[9px] font-bold text-red-600"><span class="w-3 h-3 rounded border border-red-300 bg-red-100 inline-block"></span>Decay</span>
+            </div>
+            
+            <div class="flex flex-col gap-2 items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <!-- Upper (1-16) -->
+                <div class="flex gap-1.5 flex-wrap justify-center">${renderRow(1, 16)}</div>
+                <div class="w-full h-px bg-slate-200 my-1"></div>
+                <!-- Lower (32-17) -->
+                <div class="flex gap-1.5 flex-wrap justify-center">${renderRow(32, 17, true)}</div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = odontogramUI + addedItems.map((item, idx) => {
         // Simple logic to detect if x-ray or tooth-related
         const nameLower = item.name.toLowerCase();
         const isXRay = nameLower.includes("x-ray") || nameLower.includes("xray") || nameLower.includes("radiograph");
-        const isTooth = !isXRay; // Default to tooth chart for most services
 
         let extraUI = "";
 
@@ -490,52 +561,7 @@ function renderTreatmentForms() {
                     </div>
                 </div>
             `;
-        } else if (isTooth) {
-            // Build simple FDI Odontogram Grid
-            const upperRight = [18,17,16,15,14,13,12,11];
-            const upperLeft = [21,22,23,24,25,26,27,28];
-            const lowerRight = [48,47,46,45,44,43,42,41];
-            const lowerLeft = [31,32,33,34,35,36,37,38];
-            
-            const renderRow = (arr) => arr.map(t => `<button type="button" onclick="toggleToothStatus(this, ${t})" data-tooth="${t}" data-status="Healthy" class="tooth-btn w-6 h-8 text-[9px] font-bold rounded border border-slate-200 bg-white text-slate-500 hover:border-primary transition-colors flex items-center justify-center">${t}</button>`).join('');
-
-            extraUI = `
-                <div class="mt-4 p-4 border border-brand-100 bg-white rounded-xl">
-                    <div class="flex items-center justify-between mb-2">
-                        <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider">Tooth Chart (Odontogram)</h6>
-                        <span class="text-[9px] font-bold text-slate-400">Click tooth to cycle status</span>
-                    </div>
-
-                    <!-- Color Legend -->
-                    <div class="flex flex-wrap gap-2 mb-3 pb-3 border-b border-slate-100">
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-slate-500"><span class="w-3 h-3 rounded border border-slate-200 bg-white inline-block"></span>Healthy</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-blue-600"><span class="w-3 h-3 rounded border border-blue-300 bg-blue-100 inline-block"></span>Filled</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-purple-600"><span class="w-3 h-3 rounded border border-purple-300 bg-purple-100 inline-block"></span>Crown</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-emerald-600"><span class="w-3 h-3 rounded border border-emerald-300 bg-emerald-100 inline-block"></span>RCT</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-slate-400"><span class="w-3 h-3 rounded border border-slate-300 bg-slate-200 inline-block"></span>Extracted</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-red-300"><span class="w-3 h-3 rounded border border-red-200 bg-red-50 inline-block opacity-60"></span>Missing</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold text-red-600"><span class="w-3 h-3 rounded border border-red-300 bg-red-100 inline-block"></span>Decay</span>
-                    </div>
-                    
-                    <div class="flex flex-col gap-1 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <!-- Upper -->
-                        <div class="flex gap-4">
-                            <div class="flex gap-1">${renderRow(upperRight)}</div>
-                            <div class="flex gap-1">${renderRow(upperLeft)}</div>
-                        </div>
-                        <div class="w-full h-px bg-slate-200 my-1"></div>
-                        <!-- Lower -->
-                        <div class="flex gap-4">
-                            <div class="flex gap-1">${renderRow(lowerRight)}</div>
-                            <div class="flex gap-1">${renderRow(lowerLeft)}</div>
-                        </div>
-                    </div>
-                    
-                    <input type="hidden" class="inv-treat-tooth-data" value="{}" />
-                </div>
-            `;
         }
-
         return `
         <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-4 treatment-block">
             <div class="flex items-center justify-between">
@@ -567,6 +593,23 @@ function renderTreatmentForms() {
 // Global toggle for Odontogram
 window.toggleToothStatus = function(btn, toothNum) {
     const statuses = ['Healthy', 'Filled', 'Crown', 'RCT', 'Extracted', 'Missing', 'Decay'];
+    
+    let current = btn.getAttribute('data-status');
+    let nextIdx = (statuses.indexOf(current) + 1) % statuses.length;
+    let next = statuses[nextIdx];
+    
+    btn.setAttribute('data-status', next);
+    btn.className = `tooth-btn w-6 h-8 text-[9px] font-bold rounded border flex items-center justify-center transition-colors ${getToothColorClass(next)}`;
+    
+    // Update global data
+    if (next === 'Healthy') {
+        delete TOOTH_DATA[toothNum];
+    } else {
+        TOOTH_DATA[toothNum] = next;
+    }
+}
+
+function getToothColorClass(status) {
     const colors = {
         'Healthy': 'bg-white text-slate-500 border-slate-200',
         'Filled': 'bg-blue-100 text-blue-700 border-blue-300',
@@ -576,26 +619,7 @@ window.toggleToothStatus = function(btn, toothNum) {
         'Missing': 'bg-red-50 text-red-300 border-red-200 opacity-50',
         'Decay': 'bg-red-100 text-red-700 border-red-300'
     };
-
-    let current = btn.getAttribute('data-status');
-    let nextIdx = (statuses.indexOf(current) + 1) % statuses.length;
-    let next = statuses[nextIdx];
-    
-    btn.setAttribute('data-status', next);
-    btn.className = `tooth-btn w-6 h-8 text-[9px] font-bold rounded border flex items-center justify-center transition-colors ${colors[next]}`;
-    
-    // Update hidden data
-    const block = btn.closest('.treatment-block');
-    const input = block.querySelector('.inv-treat-tooth-data');
-    let data = {};
-    try { data = JSON.parse(input.value); } catch(e){}
-    
-    if (next === 'Healthy') {
-        delete data[toothNum];
-    } else {
-        data[toothNum] = next;
-    }
-    input.value = JSON.stringify(data);
+    return colors[status] || colors['Healthy'];
 }
 
 /** ── SUBMISSION ──────────────────────────────────────────────────────────── */
@@ -652,7 +676,8 @@ window.submitInvoice = async function() {
             unitPrice: i.price,
             quantity: i.quantity
         })),
-        treatments: treatments
+        treatments: treatments,
+        toothData: JSON.stringify(TOOTH_DATA)
     };
 
     submitBtn.disabled = true;

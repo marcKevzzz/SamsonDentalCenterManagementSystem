@@ -45,6 +45,7 @@ CREATE TABLE public.appointments (
   other_email text,
   other_phone text,
   source text NOT NULL DEFAULT 'online'::text,
+  reminder_sent boolean NOT NULL DEFAULT false,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id),

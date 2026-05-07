@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
-using Resend;
 using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Models;
 
@@ -14,7 +13,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public readonly Supabase.Client _supabase;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
-        private readonly IResend _resend;
+        private readonly IEmailService _emailService;
         private readonly string _appBaseUrl;
         private readonly HttpClient _http;
         private readonly ActivityLogService _logs;
@@ -31,7 +30,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             PropertyNameCaseInsensitive = true,
         };
 
-        private const string FROM = "Samson Dental Center <onboarding@resend.dev>";
 
         public static readonly string[] ALL_SLOTS =
         {
@@ -49,7 +47,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             Supabase.Client supabase,
             string serviceRoleKey,
             string supabaseUrl,
-            IResend resend,
+            IEmailService emailService,
             string appBaseUrl,
             HttpClient http,
             ActivityLogService logs,
@@ -65,7 +63,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _supabase = supabase;
             _serviceRoleKey = serviceRoleKey;
             _supabaseUrl = supabaseUrl.TrimEnd('/');
-            _resend = resend;
+            _emailService = emailService;
             _appBaseUrl = appBaseUrl.TrimEnd('/');
             _http = http;
             _logs = logs;
@@ -1239,109 +1237,21 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var confirmUrl =
-                    $"{_appBaseUrl}/appointments/confirm?token={appt.ConfirmationToken}";
-                var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName =
-                    appt.Doctor?.Profile != null
-                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
-                        : null;
-
-                var msg = new EmailMessage();
-                msg.From = FROM;
-                msg.To.Add(appt.PatientEmail);
-                msg.Subject = $"Confirm Your Appointment — {appt.ServiceName}";
-                msg.HtmlBody = $"""
-                    <!DOCTYPE html>
-                    <html>
-                    <body style="font-family:sans-serif;background:#f8fafc;margin:0;padding:32px 0;">
-                      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;
-                                  border:1px solid #e2e8f0;overflow:hidden;">
-
-                        <!-- Header -->
-                        <div style="background:#0f5bcc;padding:28px 32px;">
-                          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:800;">
-                            Samson Dental Center
-                          </h1>
-                          <p style="margin:4px 0 0;color:#bfdbfe;font-size:13px;">
-                            Appointment Confirmation Required
-                          </p>
-                        </div>
-
-                        <div style="padding:28px 32px;">
-                          <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
-                            Hi <strong>{appt.PatientName}</strong>,
-                          </p>
-                          ${(appt.IsForOther ? $"""
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 16px;">
-                            You are receiving this because you booked an appointment for <strong>{appt.OtherFirstName} {appt.OtherLastName}</strong>.
-                          </p>
-                          """ : "")}
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
-                            You have a pending appointment. Please click the button below to
-                            confirm it — the link expires in <strong>24 hours</strong>.
-                          </p>
-
-                          <!-- Appointment card -->
-                          <div style="background:#f1f5f9;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
-                            <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Service</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.ServiceName}</td>
-                              </tr>
-                              {(docName != null ? $"""
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Doctor</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{docName}</td>
-                              </tr>
-                              """ : "")}
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Date</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{formattedDate}</td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Time</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.AppointmentTime}</td>
-                              </tr>
-                            </table>
-                          </div>
-
-                          <!-- CTA -->
-                          <div style="text-align:center;margin-bottom:24px;">
-                            <a href="{confirmUrl}"
-                               style="display:inline-block;background:#0f5bcc;color:#fff;font-size:14px;
-                                      font-weight:700;padding:14px 32px;border-radius:12px;
-                                      text-decoration:none;letter-spacing:.3px;">
-                              Confirm Appointment
-                            </a>
-                          </div>
-
-                          <p style="color:#94a3b8;font-size:11px;text-align:center;margin:0;">
-                            If you did not book this appointment, you can safely ignore this email.
-                          </p>
-                        </div>
-
-                        <!-- Footer -->
-                        <div style="border-top:1px solid #e2e8f0;padding:16px 32px;
-                                    background:#f8fafc;text-align:center;">
-                          <p style="margin:0;color:#94a3b8;font-size:11px;">
-                            © {DateTime.UtcNow.Year} Samson Dental Center · All rights reserved
-                          </p>
-                        </div>
-
-                      </div>
-                    </body>
-                    </html>
-                    """;
-
-                // Temporary log for manual confirmation without Resend subdomain
-                Console.WriteLine("\n=======================================================");
-                Console.WriteLine($"[MANUAL CONFIRMATION LINK] FOR {appt.PatientEmail}:");
-                Console.WriteLine(confirmUrl);
-                Console.WriteLine("=======================================================\n");
-
-                await _resend.EmailSendAsync(msg);
-                Console.WriteLine($"[Email] Guest confirmation sent → {appt.PatientEmail}");
+                var link = $"{_appBaseUrl}/Confirm-Guest?token={appt.ConfirmationToken}";
+                await _emailService.SendEmailAsync(
+                    appt.PatientEmail,
+                    appt.PatientName,
+                    "Confirm your Samson Dental Appointment Request",
+                    "GuestConfirmation",
+                    new
+                    {
+                        Name = appt.PatientName,
+                        Service = appt.ServiceName,
+                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
+                        Time = appt.AppointmentTime,
+                        Link = link
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -1354,95 +1264,25 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName =
-                    appt.Doctor?.Profile != null
-                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
-                        : null;
+                var docName = appt.Doctor?.Profile != null
+                    ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                    : null;
 
-                var msg = new EmailMessage();
-                msg.From = FROM;
-                msg.To.Add(appt.PatientEmail);
-                msg.Subject = $"Appointment Confirmed — {appt.ServiceName} on {formattedDate}";
-                msg.HtmlBody = $"""
-                    <!DOCTYPE html>
-                    <html>
-                    <body style="font-family:sans-serif;background:#f8fafc;margin:0;padding:32px 0;">
-                      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;
-                                  border:1px solid #e2e8f0;overflow:hidden;">
-
-                        <div style="background:#0f5bcc;padding:28px 32px;">
-                          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:800;">
-                            Samson Dental Center
-                          </h1>
-                          <p style="margin:4px 0 0;color:#bfdbfe;font-size:13px;">
-                            Your Appointment is Confirmed ✓
-                          </p>
-                        </div>
-
-                        <div style="padding:28px 32px;">
-                          <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
-                            Hi <strong>{appt.PatientName}</strong>,
-                          </p>
-                          ${(appt.IsForOther ? $"""
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 16px;">
-                            Your appointment for <strong>{appt.OtherFirstName} {appt.OtherLastName}</strong> has been confirmed.
-                          </p>
-                          """ : $"""
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
-                            Your appointment has been confirmed. We look forward to seeing you!
-                          </p>
-                          """)}
-
-                          <div style="background:#f1f5f9;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
-                            <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Reference</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;letter-spacing:1px;">
-                                  #APT-{(appt.Id?.Length >= 4 ? appt.Id[..4] : "0000").ToUpper()}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Service</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.ServiceName}</td>
-                              </tr>
-                              {(docName != null ? $"""
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Doctor</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{docName}</td>
-                              </tr>
-                              """ : "")}
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Date</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{formattedDate}</td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Time</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.AppointmentTime}</td>
-                              </tr>
-                            </table>
-                          </div>
-
-                          <p style="color:#475569;font-size:12px;line-height:1.6;margin:0;">
-                            Please arrive 10 minutes before your scheduled time. If you need to
-                            reschedule or cancel, contact us as soon as possible.
-                          </p>
-                        </div>
-
-                        <div style="border-top:1px solid #e2e8f0;padding:16px 32px;
-                                    background:#f8fafc;text-align:center;">
-                          <p style="margin:0;color:#94a3b8;font-size:11px;">
-                            © {DateTime.UtcNow.Year} Samson Dental Center · All rights reserved
-                          </p>
-                        </div>
-
-                      </div>
-                    </body>
-                    </html>
-                    """;
-
-                await _resend.EmailSendAsync(msg);
-                Console.WriteLine($"[Email] Booking confirmation sent → {appt.PatientEmail}");
+                await _emailService.SendEmailAsync(
+                    appt.PatientEmail,
+                    appt.PatientName,
+                    "Booking Confirmed - Samson Dental Center",
+                    "BookingConfirmation",
+                    new
+                    {
+                        Name = appt.PatientName,
+                        Reference = $"APT-{(appt.Id?.Length >= 4 ? appt.Id[..4] : "0000").ToUpper()}",
+                        Service = appt.ServiceName,
+                        Doctor = docName,
+                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
+                        Time = appt.AppointmentTime
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -1455,74 +1295,19 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-
-                var msg = new EmailMessage();
-                msg.From = FROM;
-                msg.To.Add(appt.PatientEmail);
-                msg.Subject = $"Appointment Cancelled — {appt.ServiceName} on {formattedDate}";
-                msg.HtmlBody = $"""
-                    <!DOCTYPE html>
-                    <html>
-                    <body style="font-family:sans-serif;background:#f8fafc;margin:0;padding:32px 0;">
-                      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;
-                                  border:1px solid #e2e8f0;overflow:hidden;">
-
-                        <div style="background:#dc2626;padding:28px 32px;">
-                          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:800;">
-                            Samson Dental Center
-                          </h1>
-                          <p style="margin:4px 0 0;color:#fecaca;font-size:13px;">
-                            Appointment Cancelled
-                          </p>
-                        </div>
-
-                        <div style="padding:28px 32px;">
-                          <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
-                            Hi <strong>{appt.PatientName}</strong>,
-                          </p>
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
-                            Your appointment has been cancelled. If you did not request this,
-                            please contact us immediately.
-                          </p>
-
-                          <div style="background:#fef2f2;border-radius:12px;padding:16px 20px;margin-bottom:24px;
-                                      border:1px solid #fecaca;">
-                            <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Service</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.ServiceName}</td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Date</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{formattedDate}</td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Time</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.AppointmentTime}</td>
-                              </tr>
-                            </table>
-                          </div>
-
-                          <p style="color:#475569;font-size:12px;line-height:1.6;margin:0;">
-                            To book a new appointment, visit our website or contact the clinic directly.
-                          </p>
-                        </div>
-
-                        <div style="border-top:1px solid #e2e8f0;padding:16px 32px;
-                                    background:#f8fafc;text-align:center;">
-                          <p style="margin:0;color:#94a3b8;font-size:11px;">
-                            © {DateTime.UtcNow.Year} Samson Dental Center · All rights reserved
-                          </p>
-                        </div>
-
-                      </div>
-                    </body>
-                    </html>
-                    """;
-
-                await _resend.EmailSendAsync(msg);
-                Console.WriteLine($"[Email] Cancellation sent → {appt.PatientEmail}");
+                await _emailService.SendEmailAsync(
+                    appt.PatientEmail,
+                    appt.PatientName,
+                    $"Appointment Cancelled — {appt.ServiceName}",
+                    "Cancellation",
+                    new
+                    {
+                        Name = appt.PatientName,
+                        Service = appt.ServiceName,
+                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
+                        Time = appt.AppointmentTime
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -1535,83 +1320,24 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName =
-                    appt.Doctor?.Profile != null
-                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
-                        : null;
+                var docName = appt.Doctor?.Profile != null
+                    ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                    : null;
 
-                var msg = new EmailMessage();
-                msg.From = FROM;
-                msg.To.Add(appt.PatientEmail);
-                msg.Subject = $"Appointment Rescheduled — {appt.ServiceName}";
-                msg.HtmlBody = $"""
-                    <!DOCTYPE html>
-                    <html>
-                    <body style="font-family:sans-serif;background:#f8fafc;margin:0;padding:32px 0;">
-                      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;
-                                  border:1px solid #e2e8f0;overflow:hidden;">
-
-                        <div style="background:#0f5bcc;padding:28px 32px;">
-                          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:800;">
-                            Samson Dental Center
-                          </h1>
-                          <p style="margin:4px 0 0;color:#bfdbfe;font-size:13px;">
-                            Your Appointment Has Been Rescheduled
-                          </p>
-                        </div>
-
-                        <div style="padding:28px 32px;">
-                          <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
-                            Hi <strong>{appt.PatientName}</strong>,
-                          </p>
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
-                            Your appointment has been rescheduled. Here are your updated details:
-                          </p>
-
-                          <div style="background:#f1f5f9;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
-                            <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Service</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.ServiceName}</td>
-                              </tr>
-                              {(docName != null ? $"""
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Doctor</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{docName}</td>
-                              </tr>
-                              """ : "")}
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">New Date</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{formattedDate}</td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">New Time</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.AppointmentTime}</td>
-                              </tr>
-                            </table>
-                          </div>
-
-                          <p style="color:#475569;font-size:12px;line-height:1.6;margin:0;">
-                            Please arrive 10 minutes before your scheduled time.
-                            Contact us if you have any questions.
-                          </p>
-                        </div>
-
-                        <div style="border-top:1px solid #e2e8f0;padding:16px 32px;
-                                    background:#f8fafc;text-align:center;">
-                          <p style="margin:0;color:#94a3b8;font-size:11px;">
-                            © {DateTime.UtcNow.Year} Samson Dental Center · All rights reserved
-                          </p>
-                        </div>
-
-                      </div>
-                    </body>
-                    </html>
-                    """;
-
-                await _resend.EmailSendAsync(msg);
-                Console.WriteLine($"[Email] Reschedule notice sent → {appt.PatientEmail}");
+                await _emailService.SendEmailAsync(
+                    appt.PatientEmail,
+                    appt.PatientName,
+                    $"Appointment Rescheduled — {appt.ServiceName}",
+                    "Reschedule",
+                    new
+                    {
+                        Name = appt.PatientName,
+                        Service = appt.ServiceName,
+                        Doctor = docName,
+                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
+                        Time = appt.AppointmentTime
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -1624,86 +1350,24 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var formattedDate = appt.AppointmentDate.ToString("MMMM dd, yyyy");
-                var docName =
-                    appt.Doctor?.Profile != null
-                        ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
-                        : null;
+                var docName = appt.Doctor?.Profile != null
+                    ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                    : null;
 
-                var msg = new EmailMessage();
-                msg.From = FROM;
-                msg.To.Add(appt.PatientEmail);
-                msg.Subject = $"Good News — A Slot Just Opened for {appt.ServiceName}!";
-                msg.HtmlBody = $"""
-                    <!DOCTYPE html>
-                    <html>
-                    <body style="font-family:sans-serif;background:#f8fafc;margin:0;padding:32px 0;">
-                      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;
-                                  border:1px solid #e2e8f0;overflow:hidden;">
-
-                        <div style="background:#059669;padding:28px 32px;">
-                          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:800;">
-                            Samson Dental Center
-                          </h1>
-                          <p style="margin:4px 0 0;color:#a7f3d0;font-size:13px;">
-                            You've Been Moved Off the Waitlist 🎉
-                          </p>
-                        </div>
-
-                        <div style="padding:28px 32px;">
-                          <p style="color:#1e293b;font-size:15px;margin:0 0 8px;">
-                            Hi <strong>{appt.PatientName}</strong>,
-                          </p>
-                          <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 24px;">
-                            Great news! A slot opened up and you've been automatically booked.
-                            Here are your appointment details:
-                          </p>
-
-                          <div style="background:#ecfdf5;border-radius:12px;padding:16px 20px;margin-bottom:24px;
-                                      border:1px solid #a7f3d0;">
-                            <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Service</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.ServiceName}</td>
-                              </tr>
-                              {(docName != null ? $"""
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Doctor</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{docName}</td>
-                              </tr>
-                              """ : "")}
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Date</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{formattedDate}</td>
-                              </tr>
-                              <tr>
-                                <td style="color:#64748b;padding:5px 0;">Time</td>
-                                <td style="color:#0f172a;font-weight:600;text-align:right;">{appt.AppointmentTime}</td>
-                              </tr>
-                            </table>
-                          </div>
-
-                          <p style="color:#475569;font-size:12px;line-height:1.6;margin:0;">
-                            Please arrive 10 minutes before your scheduled time.
-                            If you can no longer attend, please let us know as soon as possible
-                            so we can offer the slot to another patient.
-                          </p>
-                        </div>
-
-                        <div style="border-top:1px solid #e2e8f0;padding:16px 32px;
-                                    background:#f8fafc;text-align:center;">
-                          <p style="margin:0;color:#94a3b8;font-size:11px;">
-                            © {DateTime.UtcNow.Year} Samson Dental Center · All rights reserved
-                          </p>
-                        </div>
-
-                      </div>
-                    </body>
-                    </html>
-                    """;
-
-                await _resend.EmailSendAsync(msg);
-                Console.WriteLine($"[Email] Waitlist promotion sent → {appt.PatientEmail}");
+                await _emailService.SendEmailAsync(
+                    appt.PatientEmail,
+                    appt.PatientName,
+                    $"Good News — A Slot Just Opened for {appt.ServiceName}!",
+                    "Promotion",
+                    new
+                    {
+                        Name = appt.PatientName,
+                        Service = appt.ServiceName,
+                        Doctor = docName,
+                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
+                        Time = appt.AppointmentTime
+                    }
+                );
             }
             catch (Exception ex)
             {

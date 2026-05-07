@@ -9,15 +9,31 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using Resend;
 using SamsonDentalCenterManagementSystem.Data;
 using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Services;
 using Supabase;
 using Microsoft.Extensions.Caching.Distributed;
+using FluentEmail.Core;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── FluentEmail Registration ──────────────────────────────────────────────────
+var emailSettings = builder.Configuration.GetSection("EmailSettings");
+builder.Services
+    .AddFluentEmail(emailSettings["DefaultFromEmail"], emailSettings["DefaultFromName"])
+    .AddRazorRenderer()
+    .AddSmtpSender(() => new SmtpClient(emailSettings["Smtp:Host"])
+    {
+        Port = int.Parse(emailSettings["Smtp:Port"] ?? "587"),
+        Credentials = new System.Net.NetworkCredential(emailSettings["Smtp:User"], emailSettings["Smtp:Pass"]),
+        EnableSsl = bool.Parse(emailSettings["Smtp:EnableSsl"] ?? "true")
+    });
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<AppointmentReminderService>();
 
 // ── Supabase client ───────────────────────────────────────────────────────────
 var supabaseUrl =
@@ -29,7 +45,6 @@ var supabaseKey =
 var supabaseProjectRef = new Uri(supabaseUrl).Host.Split('.')[0];
 
 var jwtKid = builder.Configuration["Supabase:JwtKid"];
-var resendAPIToken = builder.Configuration["Resend:ApiToken"];
 var appBaseUrl = builder.Configuration["App:BaseUrl"];
 var outscraperKey = builder.Configuration["Outscraper:ApiKey"];
 
@@ -79,12 +94,6 @@ builder.Services.AddScoped<
     SamsonDentalCenterManagementSystem.Helpers.RoleClaimsTransformer
 >();
 
-builder.Services.AddHttpClient<ResendClient>();
-builder.Services.Configure<ResendClientOptions>(options =>
-{
-    options.ApiToken = resendAPIToken ?? throw new Exception("Resend API Token is missing");
-});
-builder.Services.AddTransient<IResend, ResendClient>();
 
 builder.Services.AddSingleton<ProfileService>(provider => new ProfileService(
     serviceClient,
@@ -111,7 +120,7 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         serviceClient,
         supabaseServiceKey,
         supabaseUrl,
-        provider.GetRequiredService<IResend>(),
+        provider.GetRequiredService<IEmailService>(),
         appBaseUrl ?? "http://localhost:5081",
         httpFactory.CreateClient("SupabaseClient"),
         provider.GetRequiredService<ActivityLogService>(),

@@ -144,7 +144,7 @@
         );
     };
 
-    window.closeModal = () => {
+    window.closeUserModal = () => {
         const modal = document.getElementById('userModal');
         gsap.to(modal.querySelector('.bg-white'), {
             scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
@@ -186,9 +186,9 @@
             });
 
             const data = await res.json();
-            if (data.ok) {
+                if (data.ok) {
                 Toast.show("Patient created successfully!", "success");
-                closeModal();
+                closeUserModal();
                 setTimeout(() => window.location.reload(), 1000);
             } else {
                 throw new Error(data.error || "Failed to save patient.");

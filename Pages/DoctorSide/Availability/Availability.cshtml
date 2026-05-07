@@ -8,11 +8,11 @@
 <div id="page-availability" class="page p-4 md:p-6 space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
         <div>
-            <h2 class="font-display text-xl font-bold text-brand-900">My Schedule</h2>
+            <h2 class="font-display text-xl font-bold text-brand">My Schedule</h2>
             <p class="text-[12px] text-brand-500 mt-0.5">Manage your weekly working hours and leave requests.</p>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="openLeaveModal()" class="bg-white border border-slate-200 text-brand-900 text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+            <button onclick="openLeaveModal()" class="bg-white border border-slate-200 text-brand text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
                 Request Leave
             </button>
             <button onclick="saveAvailability()" id="save-avail-btn" class="bg-primary text-white text-[12.5px] font-bold px-6 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20 hidden">
@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 
-                <h3 class="font-display font-bold text-brand-900 text-lg mb-1">Weekly Hours</h3>
+                <h3 class="font-display font-bold text-brand text-lg mb-1">Weekly Hours</h3>
                 <p class="text-[12.5px] text-brand-400 mb-8">Set your recurring weekly working schedule.</p>
 
                 <div id="availability-rows" class="space-y-3">
@@ -53,7 +53,7 @@
         <div class="space-y-6">
             <div class="bg-white rounded-[32px] border border-slate-200 p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-display font-bold text-brand-900">Recent Leaves</h3>
+                    <h3 class="font-display font-bold text-brand">Recent Leaves</h3>
                     <span class="text-[10px] font-bold text-brand-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded">History</span>
                 </div>
                 
@@ -63,7 +63,7 @@
             </div>
             
             <!-- Quick Help -->
-            <div class="bg-brand-900 rounded-[32px] p-6 text-white shadow-xl relative overflow-hidden">
+            <div class="bg-brand rounded-[32px] p-6 text-white shadow-xl relative overflow-hidden">
                 <div class="relative z-10">
                     <h4 class="font-display font-bold text-[15px] mb-2">Need help?</h4>
                     <p class="text-white/60 text-[12px] leading-relaxed mb-4">If you need to block specific dates or holidays, please contact the clinic administrator.</p>
@@ -78,10 +78,10 @@
 </div>
 
 <!-- Leave Modal -->
-<div id="leave-modal" class="hidden fixed inset-0 bg-brand-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+<div id="leave-modal" class="hidden fixed inset-0 bg-brand/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div class="p-8 pb-4">
-            <h3 class="font-display font-bold text-2xl text-brand-900">Request Leave</h3>
+            <h3 class="font-display font-bold text-2xl text-brand">Request Leave</h3>
             <p class="text-[12.5px] text-brand-500 mt-1">Submit your request for administrative review.</p>
         </div>
         <div class="p-8 space-y-5">
@@ -109,7 +109,7 @@
                 <textarea id="leave-reason" rows="3" placeholder="Brief explanation..." class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all resize-none"></textarea>
             </div>
             <div class="flex items-center gap-3 pt-2">
-                <button onclick="closeLeaveModal()" class="flex-1 text-[13px] font-bold text-brand-400 hover:text-brand-900 transition-colors">Cancel</button>
+                <button onclick="closeLeaveModal()" class="flex-1 text-[13px] font-bold text-brand-400 hover:text-brand transition-colors">Cancel</button>
                 <button onclick="submitLeave()" class="flex-1 bg-primary text-white text-[13px] font-bold py-3.5 rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
                     Submit Request
                 </button>
@@ -253,7 +253,7 @@
                     return `
                         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[13px] font-bold text-brand-900">${l.leaveType}</span>
+                                <span class="text-[13px] font-bold text-brand">${l.leaveType}</span>
                                 <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${statusClass}">${l.status}</span>
                             </div>
                             <div class="flex items-center gap-2 text-[11px] text-brand-400">
