@@ -244,6 +244,9 @@ function handleSignUp() {
 
         if (json.needsConfirmation) {
           Toast.show(json.message || "Check your email to confirm your account!", "success");
+          if (json.redirectUrl) {
+            setTimeout(() => (window.location.href = json.redirectUrl), 2000);
+          }
           return;
         }
         if (json.user) {
@@ -468,3 +471,7 @@ function resetBtn(btn, text) {
   btn.disabled = false;
   btn.innerHTML = text;
 }
+
+// ── Expose globals ──────────────────────────────────────────────────────────
+window.clearErr = clearErr;
+window.goStep   = goStep;

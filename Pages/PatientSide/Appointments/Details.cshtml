@@ -51,9 +51,10 @@
                     <label
                         class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Phone
                         Number <span class="text-primary">*</span></label>
-                    <input id="f_phone" type="tel" class="form-input" placeholder="+63 9XX XXX XXXX"
-                        oninput="clearErr('phone')" />
-                    <div id="err_phone" class="field-error">Phone number is required.</div>
+                    <input id="f_phone" type="tel" class="form-input" placeholder="09XXXXXXXXX"
+                        maxlength="11" pattern="09[0-9]{9}"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11); clearErr('phone')" />
+                    <div id="err_phone" class="field-error">Please enter a valid 11-digit phone number.</div>
                 </div>
             </div>
 

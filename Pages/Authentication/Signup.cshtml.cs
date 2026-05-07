@@ -4,6 +4,7 @@ using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
 using Supabase.Gotrue;
+using Microsoft.Extensions.Configuration;
 
 namespace SamsonDentalCenterManagementSystem.Pages.Authentication;
 
@@ -13,13 +14,19 @@ public class SignupModel : PageModel
     private readonly Supabase.Client _supabase;
     private readonly ProfileService _profileService;
     private readonly IEmailService _emailService;
+    private readonly OtpService _otpService;
+    private readonly string _appBaseUrl;
+    private readonly ILogger<SignupModel> _logger;
 
-    public SignupModel(Supabase.Client supabase, ReviewService reviewService, ProfileService profileService, IEmailService emailService)
+    public SignupModel(Supabase.Client supabase, ReviewService reviewService, ProfileService profileService, IEmailService emailService, OtpService otpService, IConfiguration config, ILogger<SignupModel> logger)
     {
         _reviewService = reviewService;
         _supabase = supabase;
         _profileService = profileService;
         _emailService = emailService;
+        _otpService = otpService;
+        _appBaseUrl = (config["App:BaseUrl"] ?? "").TrimEnd('/');
+        _logger = logger;
     }
 
     [BindProperty]
@@ -47,6 +54,11 @@ public class SignupModel : PageModel
             missingFields.Add("Password");
         if (Input.DateOfBirth == null)
             missingFields.Add("Date of Birth");
+
+        if (string.IsNullOrWhiteSpace(Input.PhoneNumber))
+            missingFields.Add("Phone Number");
+        else if (!System.Text.RegularExpressions.Regex.IsMatch(Input.PhoneNumber, "^09[0-9]{9}$"))
+            return Fail("Please enter a valid 11-digit phone number (e.g., 09XXXXXXXXX).");
 
         if (missingFields.Any())
             return Fail($"Required fields missing: {string.Join(", ", missingFields)}");
@@ -125,19 +137,22 @@ public class SignupModel : PageModel
                     }
                 );
                 
-                // Generate signup link
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
-                var link = await _profileService.GenerateLink("signup", Input.Email!, $"{baseUrl}/email-confirmed");
+                // Generate OTP
+                var otp = await _otpService.GenerateOtp(Input.Email!, "signup");
                 
-                if (link != null)
-                {
-                    await _emailService.SendConfirmationEmailAsync(Input.Email!, Input.FirstName!, link);
-                }
-                else
-                {
-                    // Fallback or error
-                    Console.WriteLine("[Signup] Failed to generate signup link.");
-                }
+                await _emailService.SendEmailAsync(
+                    Input.Email!,
+                    Input.FirstName!,
+                    "Verify your Samson Dental Account",
+                    "OtpNotification",
+                    new
+                    {
+                        Name = Input.FirstName,
+                        Action = "creating your account",
+                        Code = otp,
+                        Link = (string?)null
+                    }
+                );
             }
 
             // ── Update Profile ───────────────────────────────────────────────
@@ -158,8 +173,9 @@ public class SignupModel : PageModel
                 ok = true,
                 needsConfirmation = needsConfirmation,
                 message = needsConfirmation 
-                    ? "A confirmation email has been sent. Please verify your email before signing in."
+                    ? "A verification code has been sent to your email. Please enter it to continue."
                     : "Account set up successfully! You can now sign in.",
+                redirectUrl = needsConfirmation ? $"/Verify-Otp?email={Uri.EscapeDataString(Input.Email!)}&type=signup" : "/Sign-in",
                 errors = Array.Empty<string>(),
                 user = needsConfirmation ? null : new {
                     id = userId,

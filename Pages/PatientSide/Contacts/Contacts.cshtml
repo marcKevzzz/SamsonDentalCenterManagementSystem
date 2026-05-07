@@ -172,7 +172,9 @@
           </div>
           <div>
             <label class="block font-body text-[0.72rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Phone Number</label>
-            <input type="tel" id="phone" class="form-input" placeholder="+63 9XX XXX XXXX"/>
+            <input type="tel" id="phone" class="form-input" placeholder="09XXXXXXXXX"
+                maxlength="11" pattern="09[0-9]{9}"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)" />
           </div>
         </div>
 

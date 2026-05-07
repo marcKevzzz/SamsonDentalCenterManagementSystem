@@ -303,6 +303,13 @@ async function saveAllInfo() {
           }
         }
 
+        const phoneNumber = document.getElementById("contactNumber").value.trim();
+        if (phoneNumber && !/^09\d{9}$/.test(phoneNumber)) {
+          Toast.show("Please enter a valid 11-digit phone number (e.g., 09XXXXXXXXX).", "warning");
+          btn.disabled = false;
+          return;
+        }
+
         const res = await fetch("/api/settings/update-profile", {
           method: "PUT",
           credentials: "include",
@@ -313,7 +320,7 @@ async function saveAllInfo() {
             date_of_birth: document.getElementById("dateOfBirth").value || null,
             sex: document.getElementById("sex").value,
             email: document.getElementById("email").value.trim(),
-            phone_number: document.getElementById("contactNumber").value.trim(),
+            phone_number: phoneNumber,
             address: document.getElementById("address").value.trim(),
           }),
         });

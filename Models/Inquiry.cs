@@ -76,6 +76,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string InquiryId { get; set; } = "";
 
         [Column("sender_id")]
+        [JsonPropertyName("sender_id")]
         public string? SenderId { get; set; }
 
         [Column("message")]

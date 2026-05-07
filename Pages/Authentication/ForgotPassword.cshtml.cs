@@ -1,16 +1,19 @@
 using SamsonDentalCenterManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 
 namespace SamsonDentalCenterManagementSystem.Pages.Authentication
 {
     public class ForgotPasswordModel : PageModel
     {
         private readonly ProfileService _profileService;
+        private readonly string _appBaseUrl;
 
-        public ForgotPasswordModel(ProfileService profileService)
+        public ForgotPasswordModel(ProfileService profileService, IConfiguration config)
         {
             _profileService = profileService;
+            _appBaseUrl = (config["App:BaseUrl"] ?? "").TrimEnd('/');
         }
 
         [BindProperty]
@@ -28,14 +31,11 @@ namespace SamsonDentalCenterManagementSystem.Pages.Authentication
 
             try
             {
-                // Build the base URL here to pass to the service
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                // Call the service method
+                await _profileService.ResetPasswordForEmail(Email, _appBaseUrl);
 
-                // Call the service method we just fixed
-                await _profileService.ResetPasswordForEmail(Email, baseUrl);
-
-                TempData["Success"] =
-                    "If an account exists for this email, you will receive a reset link shortly.";
+                TempData["Success"] = "Verification code sent to your email.";
+                return RedirectToPage("/Authentication/Verify-Otp", new { email = Email, type = "password_reset" });
             }
             catch (Exception ex)
             {

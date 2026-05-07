@@ -50,7 +50,9 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[11px] font-medium text-slate-600 tracking-wide">Phone Number</label>
-                    <input id="mPhone" type="tel" placeholder="09XX XXX XXXX"
+                    <input id="mPhone" type="tel" placeholder="09XXXXXXXXX"
+                        maxlength="11" pattern="09[0-9]{9}"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
                         class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div class="flex flex-col gap-1.5">

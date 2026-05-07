@@ -12,19 +12,25 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly string _supabaseUrl;
         private readonly ActivityLogService _logs;
         private readonly string _serviceRoleKey;
+        private readonly OtpService _otpService;
+        private readonly IEmailService _emailService;
         private static readonly HttpClient _http = new HttpClient();
 
         public ProfileService(
             Supabase.Client supabase,
             string serviceRoleKey,
             string supabaseUrl,
-            ActivityLogService logs
+            ActivityLogService logs,
+            OtpService otpService,
+            IEmailService emailService
         )
         {
             _supabase = supabase;
             _serviceRoleKey = serviceRoleKey;
             _supabaseUrl = supabaseUrl;
             _logs = logs;
+            _otpService = otpService;
+            _emailService = emailService;
         }
 
         public async Task<Profile?> GetProfileById(string userId, string? email = null)
@@ -619,19 +625,41 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var options = new ResetPasswordForEmailOptions(email)
-                {
-                    // Use 'RedirectTo' property
-                    RedirectTo = $"{baseUrl}/reset-password",
-                };
+                var profile = await GetProfileByEmail(email);
+                if (profile == null) return; // Silent fail for security
 
-                await _supabase.Auth.ResetPasswordForEmail(options);
+                var otp = await _otpService.GenerateOtp(email, "password_reset");
+                await _emailService.SendEmailAsync(
+                    email,
+                    profile.FullName,
+                    "Password Reset Code",
+                    "OtpNotification",
+                    new
+                    {
+                        Name = profile.FirstName,
+                        Action = "resetting your password",
+                        Code = otp,
+                        Link = (string?)null
+                    }
+                );
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Password reset failed: {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<Profile?> GetProfileByEmail(string email)
+        {
+            await _supabase.InitializeAsync();
+            var res = await _supabase.From<Profile>().Where(x => x.Email == email).Get();
+            return res.Models.FirstOrDefault();
+        }
+
+        public async Task<bool> VerifyOtp(string email, string code, string type)
+        {
+            return await _otpService.VerifyOtp(email, code, type);
         }
 
         public async Task DeactivateAccount(string userId)

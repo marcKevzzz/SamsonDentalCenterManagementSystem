@@ -12,11 +12,11 @@ namespace SamsonDentalCenterManagementSystem.Helpers
     /// </summary>
     public class RoleClaimsTransformer : IClaimsTransformation
     {
-        private readonly ProfileService _profileService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public RoleClaimsTransformer(ProfileService profileService)
+        public RoleClaimsTransformer(IServiceProvider serviceProvider)
         {
-            _profileService = profileService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -34,7 +34,9 @@ namespace SamsonDentalCenterManagementSystem.Helpers
 
             try
             {
-                var profile = await _profileService.GetProfileById(userId);
+                using var scope = _serviceProvider.CreateScope();
+                var profileService = scope.ServiceProvider.GetRequiredService<ProfileService>();
+                var profile = await profileService.GetProfileById(userId);
                 var role = profile?.Role ?? "patient"; // default to patient
 
                 var identity = principal.Identity as ClaimsIdentity;

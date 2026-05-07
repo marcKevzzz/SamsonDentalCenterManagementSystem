@@ -848,6 +848,7 @@ public class AdminDataController : ControllerBase
                 {
                     id = l.Id,
                     profileId = l.ProfileId,
+                    avatarUrl = l.Profile?.AvatarUrl,
                     userName = l.Profile != null
                         ? $"{l.Profile.FirstName} {l.Profile.LastName}"
                         : "System",

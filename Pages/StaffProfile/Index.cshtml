@@ -136,7 +136,10 @@
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <label class="text-xs font-medium text-gray-600 tracking-wide">Contact Number</label>
-                        <input type="tel" value="@p?.PhoneNumber" placeholder="09XX XXX XXXX" id="contactNumber" class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
+                        <input type="tel" value="@p?.PhoneNumber" placeholder="09XXXXXXXXX" id="contactNumber"
+                            maxlength="11" pattern="09[0-9]{9}"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+                            class="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-gray-300" />
                     </div>
                 </div>
             </div>

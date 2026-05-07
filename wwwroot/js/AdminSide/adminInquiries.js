@@ -49,9 +49,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await refreshInquiries();
   await loadDoctorsForAssignment();
 
-  // Show Assign Doctor only for Admin
+  // Show Assign Doctor only for Admin and Doctor
   const role = document.body.dataset.role || 'admin';
-  if (role === 'admin') {
+  if (role === 'admin' || role === 'doctor') {
       const container = document.getElementById("assign-doctor-container");
       if (container) container.classList.remove("hidden");
   }
@@ -395,7 +395,7 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
     
     if (assignDoctorContainer) {
         const role = document.body.dataset.role || 'admin';
-        if (role === 'admin') assignDoctorContainer.classList.remove('hidden');
+        if (role === 'admin' || role === 'doctor') assignDoctorContainer.classList.remove('hidden');
     }
   }
 
@@ -595,8 +595,10 @@ async function fetchMessages() {
         lastDate = msgDate;
       }
 
-      const currentUserId = document.querySelector(selectors.adminId)?.value;
-      const isMe = msg.sender_id?.toLowerCase() === currentUserId?.toLowerCase();
+      const currentUserId = document.querySelector(selectors.adminId)?.value?.toLowerCase();
+      const senderId = msg.sender_id?.toLowerCase();
+      // Primary: match by UUID. Fallback: if sender_id missing, match by is_from_staff AND sender matches current user name hint
+      const isMe = senderId ? senderId === currentUserId : false;
 
       if (msg.is_internal) {
           html += `

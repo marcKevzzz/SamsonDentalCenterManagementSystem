@@ -36,7 +36,9 @@ namespace SamsonDentalCenterManagementSystem.Helpers
             PageHandlerExecutionDelegate next
         )
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.Identity?.Name;
+            var userId = User.FindFirst("sub")?.Value 
+                         ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                         ?? User.Identity?.Name;
 
             if (string.IsNullOrEmpty(userId))
             {

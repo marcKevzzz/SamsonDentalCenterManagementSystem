@@ -119,6 +119,7 @@ public class AppointmentsController : ControllerBase
                 isGuest           = appt.IsGuest,
                 isWaitlist        = appt.IsWaitlist,
                 needsConfirmation = appt.IsGuest && !appt.IsWaitlist,  // guest non-waitlist needs email confirm
+                token             = appt.ConfirmationToken,
                 refNumber         = $"SDC-{appt.Id[..8].ToUpper()}"
             });
         }

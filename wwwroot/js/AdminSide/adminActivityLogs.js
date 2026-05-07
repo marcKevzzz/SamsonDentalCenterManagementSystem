@@ -64,8 +64,11 @@
       <div class="flex gap-4 group transition-all hover:bg-slate-50/80 rounded-2xl p-3 cursor-pointer" 
            ${log.link ? `onclick="window.location.href='${log.link}'"` : ""}>
         <div class="flex flex-col items-center">
-          <div class="w-10 h-10 rounded-2xl ${actionColor.bg} ${actionColor.text} flex items-center justify-center text-[11px] font-bold shadow-sm flex-shrink-0 transition-transform group-hover:scale-110">
-            ${initials}
+          <div class="w-10 h-10 rounded-2xl ${actionColor.bg} ${actionColor.text} flex items-center justify-center text-[11px] font-bold shadow-sm flex-shrink-0 transition-transform group-hover:scale-110 overflow-hidden">
+            ${log.avatarUrl 
+                ? `<img src="${log.avatarUrl}" class="w-full h-full object-cover" onerror="this.outerHTML='${initials}'" />`
+                : initials
+            }
           </div>
           ${index !== logs.length - 1 ? '<div class="w-px flex-1 bg-slate-100 mt-2"></div>' : ""}
         </div>

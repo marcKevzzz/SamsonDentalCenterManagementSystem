@@ -21,11 +21,14 @@ namespace SamsonDentalCenterManagementSystem.Pages.Authentication
         [BindProperty]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        [BindProperty]
-        public string AccessToken { get; set; } = string.Empty;
+        [BindProperty(SupportsGet = true)]
+        public string Email { get; set; } = string.Empty;
 
-        [BindProperty]
-        public string RefreshToken { get; set; } = string.Empty;
+        [BindProperty(SupportsGet = true)]
+        public string Otp { get; set; } = string.Empty;
+
+        [BindProperty(SupportsGet = true)]
+        public bool Verified { get; set; } = false;
 
         public void OnGet() { }
 
@@ -43,28 +46,37 @@ namespace SamsonDentalCenterManagementSystem.Pages.Authentication
                 return Page();
             }
 
-            if (string.IsNullOrWhiteSpace(AccessToken))
+            if (!Verified)
             {
-                TempData["Error"] = "Session expired or invalid token. Please request a new link.";
-                return Page();
+                // If not pre-verified (e.g. directly hit this page), check OTP again
+                bool isValid = await _profiles.VerifyOtp(Email, Otp, "password_reset");
+                if (!isValid)
+                {
+                    // Also check for invitation type just in case
+                    isValid = await _profiles.VerifyOtp(Email, Otp, "invitation");
+                }
+
+                if (!isValid)
+                {
+                    TempData["Error"] = "Invalid or expired verification session. Please try again.";
+                    return Page();
+                }
             }
 
             try
             {
-                // SetSession requires a non-empty refreshToken — use the one from the URL hash.
-                var refreshToken = string.IsNullOrWhiteSpace(RefreshToken) ? AccessToken : RefreshToken;
-                var session = await _supabase.Auth.SetSession(AccessToken, refreshToken);
-
-                var attrs = new Supabase.Gotrue.UserAttributes { Password = NewPassword };
-                await _supabase.Auth.Update(attrs);
-
-                // Activate the user profile (handles shadow profiles or admin-created users)
-                if (session?.User?.Id != null)
+                var userId = await _profiles.GetUserIdByEmail(Email);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    await _profiles.ToggleUserActive(session.User.Id, true);
+                    TempData["Error"] = "User not found.";
+                    return Page();
                 }
 
-                TempData["Success"] = "Password updated successfully!";
+                await _profiles.UpdateUserPassword(userId, NewPassword);
+                await _profiles.ToggleUserActive(userId, true);
+
+                TempData["Success"] = "Password updated successfully! You can now sign in.";
+                return RedirectToPage("/Authentication/Signin");
             }
             catch (Exception ex)
             {

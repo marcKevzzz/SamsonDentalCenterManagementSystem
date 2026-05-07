@@ -110,19 +110,22 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Fetch availability from staff_availability (no FK embed needed) ─────
-        private async Task<Dictionary<string, List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>> FetchDoctorAvailabilityAsync()
+        private async Task<Dictionary<string, List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>> FetchDoctorAvailabilityAsync(string? staffId = null)
         {
             try
             {
-                var req = BuildRequest(HttpMethod.Get, "/staff_availability?staff_type=eq.doctor");
+                var path = "/staff_availability?select=*";
+                if (!string.IsNullOrEmpty(staffId)) path += $"&staff_id=eq.{staffId}";
+                
+                var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
-                if (!res.IsSuccessStatusCode) return new();
+                if (!res.IsSuccessStatusCode) return new(StringComparer.OrdinalIgnoreCase);
                 var json  = await res.Content.ReadAsStringAsync();
                 var slots = JsonSerializer.Deserialize<List<SamsonDentalCenterManagementSystem.Models.AvailabilityDto>>(json, _json) ?? new();
                 return slots.GroupBy(s => s.StaffId)
-                            .ToDictionary(g => g.Key, g => g.ToList());
+                            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
             }
-            catch { return new(); }
+            catch { return new(StringComparer.OrdinalIgnoreCase); }
         }
 
         // ── Fetch all doctors with profiles + availability ─────────────────────
@@ -137,7 +140,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var avail = await FetchDoctorAvailabilityAsync();
             foreach (var d in doctors)
-                d.Availability = avail.TryGetValue(d.Id, out var s) ? s : new();
+                d.Availability = (avail.TryGetValue(d.Id, out var s) || avail.TryGetValue(d.Id.ToLower(), out s)) ? s : new();
 
             return doctors;
         }
@@ -155,7 +158,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var avail = await FetchDoctorAvailabilityAsync();
             foreach (var d in doctors)
-                d.Availability = avail.TryGetValue(d.Id, out var s) ? s : new();
+                d.Availability = (avail.TryGetValue(d.Id, out var s) || avail.TryGetValue(d.Id.ToLower(), out s)) ? s : new();
 
             return doctors;
         }
@@ -175,8 +178,8 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             if (doc != null)
             {
-                var avail = await FetchDoctorAvailabilityAsync();
-                doc.Availability = avail.TryGetValue(doc.Id, out var s) ? s : new();
+                var avail = await FetchDoctorAvailabilityAsync(doc.Id);
+                doc.Availability = (avail.TryGetValue(doc.Id, out var s) || avail.TryGetValue(doc.Id.ToLower(), out s)) ? s : new();
             }
 
             return doc;

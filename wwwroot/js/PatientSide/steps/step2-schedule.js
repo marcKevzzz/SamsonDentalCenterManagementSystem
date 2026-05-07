@@ -147,10 +147,36 @@ export async function pickDate(dateStr) {
   await fetchAvailabilityForDate(dateStr);
   renderCalendar();
 
-  const isFull = isDateFullyBooked(dateStr);
+  const key = availCacheKey(STATE.service?.id, dateStr);
+  const slots = AVAILABILITY_CACHE[key] ?? {};
+  const hasAnySlots = Object.keys(slots).length > 0;
+  const isFull = hasAnySlots && isDateFullyBooked(dateStr);
   const fullyBar = document.getElementById("fullyBookedBar");
 
-  if (isFull) {
+  if (!hasAnySlots) {
+    // No clinic hours / no doctor coverage — block this date, no waitlist
+    if (timeWidget)
+      timeWidget.innerHTML = `
+        <div class="mb-2 flex items-center justify-between">
+            <div class="brand-font font-bold text-[.88rem] text-brand">
+                ${formatDate(dateStr, { weekday: "long", month: "long", day: "numeric" })}
+            </div>
+            <span class="font-body text-[.65rem] font-medium uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
+                No Availability
+            </span>
+        </div>
+        <p class="font-body text-[.82rem] text-muted leading-relaxed">
+            No appointment slots are available on this date. Please pick another day.
+        </p>`;
+
+    fullyBar?.classList.add("hidden");
+    document.getElementById("slotSummary")?.classList.add("hidden");
+    const btn = document.getElementById("step2Btn");
+    if (btn) btn.disabled = true;
+    STATE.date = null; // unset so the user must pick another day
+
+  } else if (isFull) {
+    // All time slots taken — offer waitlist
     if (timeWidget)
       timeWidget.innerHTML = `
         <div class="mb-2 flex items-center justify-between">

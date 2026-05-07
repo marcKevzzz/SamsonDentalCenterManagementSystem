@@ -1,19 +1,14 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "E:\\SamsonDentalCenterManagementSystem\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{722DDEFA-9C9F-3A2E-ED94-210C5B0E3C40}|SamsonDentalCenterManagementSystem.csproj|e:\\samsondentalcentermanagementsystem\\samsondentalcentermanagementsystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{722DDEFA-9C9F-3A2E-ED94-210C5B0E3C40}|SamsonDentalCenterManagementSystem.csproj|solutionrelative:samsondentalcentermanagementsystem.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 109,
+      "VerticalTabListWidth": 102,
       "DocumentGroups": [
         {
-          "DockedWidth": 346,
+          "DockedWidth": 247,
           "SelectedChildIndex": -1,
           "Children": [
             {
@@ -27,22 +22,9 @@
           ]
         },
         {
-          "DockedWidth": 54,
-          "SelectedChildIndex": 0,
+          "DockedWidth": 153,
+          "SelectedChildIndex": -1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "SamsonDentalCenterManagementSystem.csproj",
-              "DocumentMoniker": "E:\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
-              "RelativeDocumentMoniker": "SamsonDentalCenterManagementSystem.csproj",
-              "ToolTip": "E:\\SamsonDentalCenterManagementSystem\\SamsonDentalCenterManagementSystem.csproj",
-              "RelativeToolTip": "SamsonDentalCenterManagementSystem.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-04-25T00:10:27.776Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"

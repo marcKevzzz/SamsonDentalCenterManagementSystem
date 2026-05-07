@@ -1,20 +1,24 @@
 @page "/Receptionist/Inquiries"
 @model SamsonDentalCenterManagementSystem.Pages.ReceptionistSide.Inquiries.InquiriesModel
 @{
-Layout = "AdminSide/_StaffLayout";
+    Layout = "AdminSide/_StaffLayout";
 }
 
 <div id="page-inquiries" class="h-full flex flex-col md:flex-row gap-0 md:gap-6 p-0 md:p-6 overflow-hidden max-h-[calc(100vh_-_60px)]">
     <!-- ── LEFT: INQUIRY LIST ────────────────────────────────────────── -->
-    <div id="inquiry-sidebar" class="w-full max-h-full md:w-72 flex flex-col bg-white md:rounded-3xl border-b md:border border-slate-200 shadow-sm overflow-hidden shrink-0 transition-all duration-300">
-        <div class="p-4 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <div>
-                <h3 class="font-display font-bold text-brand text-lg">Inquiries</h3>
-                <p class="text-[11px] text-brand-400 font-medium uppercase tracking-wider mt-1">Patient Requests</p>
+    <div id="inquiry-sidebar" class="w-full max-h-full md:w-72 flex flex-col bg-white md:rounded-3xl border-b md:border border-slate-200 shadow-sm overflow-hidden shrink-0 transition-all duration-300 relative">
+        <div class="p-4 border-b border-slate-100 bg-slate-50/50 space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-display font-bold text-brand text-[15px] uppercase tracking-wider">Staff Discussion</h3>
+                    <p class="text-[9px] text-brand-400 font-bold uppercase tracking-widest">Internal Messages</p>
+                </div>
             </div>
-            <button class="md:hidden w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                <i class="fa-solid fa-filter text-xs"></i>
-            </button>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                <input type="text" id="inquiry-search" placeholder="Search conversations..." 
+                       class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] outline-none focus:border-primary transition-all shadow-sm">
+            </div>
         </div>
         <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="inquiry-list">
             <div class="p-8 text-center" id="inquiries-loading">
@@ -22,12 +26,20 @@ Layout = "AdminSide/_StaffLayout";
                 <p class="text-[12px] text-brand-400 font-medium">Loading inquiries...</p>
             </div>
         </div>
+        <div class="absolute bottom-2 right-2 z-[400]">
+    <button onclick="openNewInquiryModal()" 
+        class="w-10 h-10 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all group relative">
+        <i class="fa-solid fa-paper-plane text-sm"></i>
+        <span class="absolute right-full mr-3 px-3 py-1.5 bg-brand text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap shadow-xl">New Staff Message</span>
+    </button>
+</div>
+
     </div>
 
     <!-- ── RIGHT: CHAT INTERFACE ──────────────────────────────────────── -->
     <div id="chat-main" class="hidden max-h-full md:flex flex-1 flex flex-col bg-white md:rounded-3xl md:border border-slate-200 shadow-sm overflow-hidden relative transition-all duration-300">
         <!-- Empty State (No Chat Selected) -->
-        <div id="chat-empty" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-[40] transition-opacity duration-300">
+        <div id="chat-empty" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-[60] transition-opacity duration-300">
             <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
                 <i class="fa-solid fa-comments text-slate-200 text-3xl"></i>
             </div>
@@ -56,9 +68,17 @@ Layout = "AdminSide/_StaffLayout";
                             </div>
                         </div>
                     </div>
-                    <button onclick="markAsResolved()" id="resolve-btn" class="hidden px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[11px] font-bold hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-check-circle"></i> Mark as Resolved
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <div id="assign-doctor-container" class="hidden relative">
+                            <select id="assign-doctor-select" onchange="assignDoctor(this.value)" class="appearance-none pl-4 pr-8 py-2 bg-slate-50 text-brand-600 border border-slate-200 rounded-xl text-[11px] font-bold outline-none hover:bg-slate-100 transition-all cursor-pointer">
+                                <option value="">Assign to Doctor...</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                        </div>
+                        <button onclick="markAsResolved()" id="resolve-btn" class="hidden px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[11px] font-bold hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-check-circle"></i> Mark as Resolved
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Messages Area -->
@@ -76,9 +96,19 @@ Layout = "AdminSide/_StaffLayout";
 
                 <!-- Input Area -->
                 <div class="p-4 border-t border-slate-100 bg-white shrink-0">
+                    <div id="internal-note-container" class="flex items-center gap-2 mb-2">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <div class="relative">
+                                <input type="checkbox" id="internal-note-toggle" class="sr-only peer">
+                                <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-amber-400 transition-colors"></div>
+                                <div class="absolute left-1 top-1 w-2 h-2 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-amber-600 transition-colors">Internal Note</span>
+                        </label>
+                    </div>
                     <div class="relative flex items-end gap-3">
                         <textarea id="chat-input" placeholder="Type your reply here..." rows="1"
-                               class="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all shadow-inner resize-none overflow-y-auto max-h-32"></textarea>
+                                class="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-[13px] outline-none focus:bg-white focus:border-primary transition-all shadow-inner resize-none overflow-y-auto max-h-32"></textarea>
                         <button onclick="sendMessage()" id="send-btn" class="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-[1.05] active:scale-95 transition-all shrink-0">
                             <i class="fa-solid fa-paper-plane text-sm"></i>
                         </button>
@@ -95,6 +125,41 @@ Layout = "AdminSide/_StaffLayout";
             </div>
         </div>
     </div>
+
 </div>
 
+<div id="new-inquiry-modal" class="fixed inset-0 z-[1000] hidden">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-sm" onclick="closeNewInquiryModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
+            <div class="p-6 border-b border-slate-100 bg-slate-50">
+                <h3 class="text-lg font-bold text-brand-900">New Staff Message</h3>
+                <p class="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Initiate a private discussion with a colleague</p>
+            </div>
+            <form id="new-inquiry-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Select Staff Member</label>
+                    <select id="new-inquiry-patient" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none" required>
+                        <option value="">Loading staff...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Subject</label>
+                    <input type="text" id="new-inquiry-subject" placeholder="e.g., Follow-up on Appointment" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none" required />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Initial Message</label>
+                    <textarea id="new-inquiry-message" rows="4" placeholder="Type your message..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none resize-none" required></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeNewInquiryModal()" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-brand-600 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-white bg-primary shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">Create Thread</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <script type="module" src="~/js/AdminSide/adminInquiries.js" asp-append-version="true"></script>
+

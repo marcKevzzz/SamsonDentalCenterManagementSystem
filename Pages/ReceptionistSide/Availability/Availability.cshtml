@@ -15,9 +15,6 @@
             <button onclick="openLeaveModal()" class="bg-white border border-slate-200 text-brand-900 text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
                 Request Leave
             </button>
-            <button onclick="saveAvailability()" id="save-avail-btn" class="bg-primary text-white text-[12.5px] font-bold px-6 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20 hidden">
-                Save Changes
-            </button>
         </div>
     </div>
 
@@ -40,11 +37,8 @@
                     </div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-                    <button onclick="addAvailabilityRow()" class="text-primary text-[12.5px] font-bold hover:underline flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle"></i> Add another slot
-                    </button>
-                    <p class="text-[11px] text-slate-400 italic">Admin approval may be required for major changes.</p>
+                <div class="mt-8 pt-6 border-t border-slate-50">
+                    <p class="text-[11px] text-slate-400 italic">Schedule changes must be requested through clinic administration.</p>
                 </div>
             </div>
         </div>
@@ -148,88 +142,42 @@
                 return;
             }
             container.innerHTML = '';
-            slots.forEach((s, idx) => addRowUI(s, idx));
+            slots.forEach((s) => addRowUI(s));
         }
 
-        window.addAvailabilityRow = function() {
-            addRowUI({ dayOfWeek: 1, startTime: '09:00', endTime: '17:00' }, Date.now());
-            checkChanges();
-        };
+        function formatTime(t) {
+            if (!t) return "--:--";
+            const [h, m] = t.split(':');
+            const hh = parseInt(h);
+            const ampm = hh >= 12 ? 'PM' : 'AM';
+            const h12 = hh % 12 || 12;
+            return `${h12}:${m} ${ampm}`;
+        }
 
-        function addRowUI(slot, id) {
+        function addRowUI(slot) {
             const container = document.getElementById('availability-rows');
-            if (container.querySelector('.italic')) container.innerHTML = '';
             
             const row = document.createElement('div');
-            row.className = "flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 group";
-            row.dataset.id = id;
+            row.className = "flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 group animate-in fade-in slide-in-from-bottom-2 duration-300";
             row.innerHTML = `
                 <div class="flex-1 min-w-[120px]">
-                    <select class="avail-day w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-bold text-brand outline-none focus:border-primary/50" onchange="checkChanges()">
-                        ${DAY_LABELS.map((d, i) => `<option value="${i}" ${i === slot.dayOfWeek ? 'selected' : ''}>${d}</option>`).join('')}
-                    </select>
+                    <div class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] font-bold text-brand flex items-center justify-between">
+                        <span>${DAY_LABELS[slot.dayOfWeek]}</span>
+                        <i class="fa-regular fa-calendar-days text-slate-400"></i>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <input type="time" class="avail-start bg-white border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-medium text-brand outline-none focus:border-primary/50" value="${slot.startTime}" onchange="checkChanges()" />
-                    <span class="text-slate-300 text-[11px] font-bold">TO</span>
-                    <input type="time" class="avail-end bg-white border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-medium text-brand outline-none focus:border-primary/50" value="${slot.endTime}" onchange="checkChanges()" />
+                <div class="flex items-center gap-3">
+                    <div class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] font-medium text-brand">
+                        ${formatTime(slot.startTime)}
+                    </div>
+                    <span class="text-slate-300 text-[11px] font-bold uppercase tracking-widest">To</span>
+                    <div class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] font-medium text-brand">
+                        ${formatTime(slot.endTime)}
+                    </div>
                 </div>
-                <button onclick="this.parentElement.remove(); checkChanges()" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-500 hover:border-rose-200 transition-all ml-auto">
-                    <i class="fa-solid fa-trash-can text-[11px]"></i>
-                </button>
             `;
             container.appendChild(row);
         }
-
-        window.checkChanges = function() {
-            const current = getSlots();
-            const changed = JSON.stringify(current) !== JSON.stringify(initialSlots);
-            document.getElementById('save-avail-btn').classList.toggle('hidden', !changed);
-        };
-
-        function getSlots() {
-            return Array.from(document.querySelectorAll('#availability-rows [data-id]')).map(row => ({
-                dayOfWeek: parseInt(row.querySelector('.avail-day').value),
-                startTime: row.querySelector('.avail-start').value,
-                endTime: row.querySelector('.avail-end').value
-            }));
-        }
-
-        window.saveAvailability = async function() {
-            const btn = document.getElementById('save-avail-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-            try {
-                const resStaff = await fetch('/api/admin/data/receptionists');
-                const jsonStaff = await resStaff.json();
-                const profileId = '@Model.CurrentUserId';
-                const staff = (jsonStaff.data || jsonStaff).find(s => s.profileId === profileId);
-
-                if (!staff) throw new Error("Receptionist record not found");
-
-                const res = await fetch(`/api/admin/receptionists/${staff.id}/availability`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify(getSlots())
-                });
-
-                if (res.ok) {
-                    initialSlots = getSlots();
-                    checkChanges();
-                    if (window.Toast) window.Toast.show('Schedule updated successfully', 'success');
-                    else alert('Schedule updated');
-                }
-            } catch (e) {
-                alert('Failed to save: ' + e.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Save Changes';
-            }
-        };
 
         window.openLeaveModal = () => document.getElementById('leave-modal').classList.remove('hidden');
         window.closeLeaveModal = () => document.getElementById('leave-modal').classList.add('hidden');

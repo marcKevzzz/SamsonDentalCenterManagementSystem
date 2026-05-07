@@ -459,3 +459,34 @@
 - **Stability & Build Fixes**:
   - Resolved `CS0246` build errors by correcting `ClinicSettingsService` to `ClinicService` and adding missing `using SamsonDentalCenterManagementSystem.Models;` directives.
   - Verified successful compilation with `dotnet build`.
+- **Date**: 2026-05-07 (Availability & Inquiry Messaging Fixes)
+- **Identity & Auth Tracking**:
+  - **Robust UUID Capture**: Updated `AdminPageModel.cs` to check multiple claim types (`sub`, `nameid`) for the Supabase UUID. This ensures `isMe` logic in chat correctly aligns messages (sender on right, receiver on left).
+- **Inquiry Messaging Overhaul**:
+  - **Staff Discussion Mode**: Synchronized Doctor and Receptionist inquiry pages with the Admin's "Staff Discussion" feature set.
+  - **New Message Modal**: Added the ability for all staff roles to initiate new internal threads via a "New Staff Message" floating button and modal.
+  - **Internal Notes**: Implemented the internal note toggle across all staff portals, allowing private staff-only discussions within patient threads.
+  - **Doctor Assignment**: Enabled "Assign Doctor" functionality for the Doctor role, allowing doctors to manage inquiry assignments directly.
+  - **UI Search**: Added conversation search bars to all staff inquiry sidebars.
+- **Availability Optimization**:
+  - **Filtered Fetching**: Optimized `DoctorService` and `ReceptionistService` to fetch availability data using direct `staff_id` filters. This improves performance on "My Schedule" pages and avoids over-fetching the entire `staff_availability` table.
+- **Project Stability**:
+  - Verified message alignment across Admin, Doctor, and Receptionist roles.
+  - Ensured "Internal Note" toggle state is correctly handled in the `sendMessage` API payload.
+
+- **Date**: 2026-05-07 (OTP Verification Migration)
+- **Security & Reliability Overhaul**:
+  - **OTP Infrastructure**: Replaced fragile URL-based confirmation links with a robust, database-managed 6-digit One-Time Password (OTP) system.
+  - **New Database Table**: Created `otps` table to track verification codes, types (signup, invitation, appointment, password_reset), and 15-minute expiration windows.
+  - **Service Layer**: Implemented `OtpService.cs` for centralized code generation, storage, and validation.
+- **Workflow Transformations**:
+  - **Account Signup**: New patients now receive an OTP via email and are redirected to a dedicated [Verify-Otp](file:///e:/SamsonDentalCenterManagementSystem/Pages/Authentication/Verify-Otp.cshtml) page to activate their account.
+  - **Password Reset**: Migrated `ForgotPassword` and `ResetPassword` flows to OTP. Password updates are now performed securely via the Supabase Admin API after successful OTP verification.
+  - **Guest Appointments**: Guest bookings now require OTP confirmation. Created [Confirm-Guest](file:///e:/SamsonDentalCenterManagementSystem/Pages/PatientSide/Appointments/ConfirmGuest.cshtml) page to handle this flow.
+  - **Staff Invitations**: Admin-created staff accounts now receive an invitation OTP, allowing them to set their initial password securely via the verification page.
+- **Email System**:
+  - Created a premium [OtpNotification.cshtml](file:///e:/SamsonDentalCenterManagementSystem/Views/Emails/OtpNotification.cshtml) template.
+  - Updated all relevant services (`AppointmentService`, `ProfileService`, `AdminUsersController`) to distribute OTPs instead of recovery links.
+- **UI/UX Enhancements**:
+  - Implemented a sleek, multi-input 6-digit OTP field with auto-focus shifting for a premium mobile-first experience.
+  - Added optional "Verify Automatically" links in emails as a fallback for the OTP entry.

@@ -7,7 +7,6 @@ import {
 } from "../appointment-state.js";
 import { Toast } from "../../ui.js";
 
-
 let SERVICES = [];
 let _activeCat = CATEGORIES[0];
 let _servicesLoaded = false;
@@ -15,21 +14,21 @@ let _isLoading = false;
 
 // ── Load services from API ────────────────────────────────────────────────────
 export async function loadServices() {
-    if (_servicesLoaded) return;
-    
-    _isLoading = true;
-    renderServiceList(); // Initial render to show skeletons
+  if (_servicesLoaded) return;
 
-    try {
-        const res = await fetch("/api/services");
-        SERVICES = await res.json();
-        _servicesLoaded = true;
-    } catch (err) {
-        console.error("[step1] Failed to load services:", err);
-    } finally {
-        _isLoading = false;
-        renderServiceList(); // Final render to show data
-    }
+  _isLoading = true;
+  renderServiceList(); // Initial render to show skeletons
+
+  try {
+    const res = await fetch("/api/services");
+    SERVICES = await res.json();
+    _servicesLoaded = true;
+  } catch (err) {
+    console.error("[step1] Failed to load services:", err);
+  } finally {
+    _isLoading = false;
+    renderServiceList(); // Final render to show data
+  }
 }
 
 // ── Render step 1 ─────────────────────────────────────────────────────────────
@@ -67,7 +66,10 @@ function renderServiceList() {
   if (!el) return;
 
   if (_isLoading) {
-        el.innerHTML = Array(3).fill(0).map(() => `
+    el.innerHTML = Array(3)
+      .fill(0)
+      .map(
+        () => `
             <div class="animate-pulse bg-white border border-gray-100 rounded-2xl p-5 flex items-start gap-4">
                 <div class="w-5 h-5 rounded-full bg-gray-200 mt-1"></div>
                 <div class="flex-1 space-y-3">
@@ -82,9 +84,11 @@ function renderServiceList() {
                     </div>
                 </div>
             </div>
-        `).join("");
-        return;
-    }
+        `,
+      )
+      .join("");
+    return;
+  }
 
   const isRestricted =
     RESTRICTED_CATEGORIES.includes(_activeCat) && !isLoggedIn();
@@ -133,15 +137,15 @@ function renderServiceList() {
                             <h3 class="brand-font font-bold text-[1rem] text-brand">${s.name}</h3>
                             <p class="font-body text-[.8rem] text-muted mt-0.5">${s.tagline}</p>
                         </div>
-                        <span class="font-body text-[.78rem] font-medium text-primary whitespace-nowrap">${s.price}</span>
+                        <span class="font-body text-[.78rem] font-medium text-brand whitespace-nowrap">₱${s.price}</span>
                     </div>
                     <div class="flex items-center gap-4 mt-3">
                         ${
-                          (s.durationMinutes || s.duration)
+                          s.durationMinutes || s.duration
                             ? `<span class="flex items-center gap-1 font-body text-[.72rem] text-muted">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                            </svg>${s.durationMinutes ? s.durationMinutes + ' min' : s.duration}</span>`
+                            </svg>${s.durationMinutes ? s.durationMinutes + " min" : s.duration}</span>`
                             : ""
                         }
                         ${
@@ -174,8 +178,8 @@ function renderServiceList() {
                     </div>
                     <h3 class="brand-font font-bold text-[1.1rem]">${STATE.service.name}</h3>
                 </div>
-                <span class="font-body text-[.78rem] font-medium text-primary bg-white/10 px-3 py-1 rounded-full whitespace-nowrap">
-                    ${STATE.service.price}
+                <span class="font-body text-[.78rem] font-medium text-white bg-white/5 px-3 py-1 rounded-full whitespace-nowrap">
+                    ₱${STATE.service.price}
                 </span>
             </div>
             <p class="font-body text-[.85rem] text-white/60 leading-relaxed mb-5">

@@ -142,7 +142,10 @@ var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-l
         </div>
         <div>
           <label class="input-label">Phone Number</label>
-          <input type="tel" value="@p?.PhoneNumber" placeholder="09XX XXX XXXX" id="contactNumber" class="premium-input" />
+          <input type="tel" value="@p?.PhoneNumber" placeholder="09XXXXXXXXX" id="contactNumber"
+            maxlength="11" pattern="09[0-9]{9}"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+            class="premium-input" />
         </div>
       </div>
     </div>

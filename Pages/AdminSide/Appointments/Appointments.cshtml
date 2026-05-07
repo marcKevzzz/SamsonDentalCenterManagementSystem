@@ -431,7 +431,9 @@ Layout = "AdminSide/_StaffLayout";
               <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Phone Number</label>
               <div class="relative">
                 <i class="fa-solid fa-phone absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
-                <input id="book-patient-phone" type="tel" placeholder="+63 9XX XXX XXXX"
+                <input id="book-patient-phone" type="tel" placeholder="09XXXXXXXXX"
+                  maxlength="11" pattern="09[0-9]{9}"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
                   class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
               </div>
             </div>

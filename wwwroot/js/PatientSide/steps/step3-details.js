@@ -63,6 +63,7 @@ function renderDetailsForm() {
   if (!formContainer) return;
 
   const loggedIn = isLoggedIn();
+  const s = STATE.service;
 
   // On first render, seed details from server user data
   // On back-navigation, STATE.details already has values — keep those
@@ -370,6 +371,7 @@ function submitDetails() {
 
   // Validation
   const errors = [];
+  const nameRegex = /\d/; // Regex to check for numbers
 
   if (!isOther) {
     const fields = [
@@ -400,6 +402,19 @@ function submitDetails() {
             }
             el?.classList.add("error");
             errors.push("Invalid email format.");
+            ok = false;
+          }
+        }
+
+        if (f.id === "firstName" || f.id === "lastName") {
+          if (nameRegex.test(val)) {
+            const errEl = document.getElementById(`err_${f.id}`);
+            if (errEl) {
+              errEl.textContent = `${f.label} cannot contain numbers.`;
+              errEl.classList.add("show");
+            }
+            el?.classList.add("error");
+            errors.push(`${f.label} cannot contain numbers.`);
             ok = false;
           }
         }
@@ -449,6 +464,21 @@ function submitDetails() {
     if (!phoneVal || !/^(09|\+639|9)\d{9}$/.test(phoneVal)) {
         document.getElementById("err_otherPhone")?.classList.add("show");
         ph?.classList.add("error");
+        ok = false;
+    }
+
+    if (fn?.value && nameRegex.test(fn.value)) {
+        document.getElementById("err_otherFirstName")?.classList.add("show");
+        const errEl = document.getElementById("err_otherFirstName");
+        if (errEl) errEl.textContent = "First name cannot contain numbers.";
+        fn?.classList.add("error");
+        ok = false;
+    }
+    if (ln?.value && nameRegex.test(ln.value)) {
+        document.getElementById("err_otherLastName")?.classList.add("show");
+        const errEl = document.getElementById("err_otherLastName");
+        if (errEl) errEl.textContent = "Last name cannot contain numbers.";
+        ln?.classList.add("error");
         ok = false;
     }
 

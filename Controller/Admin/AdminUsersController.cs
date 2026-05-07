@@ -18,8 +18,10 @@ public class AdminUsersController : ControllerBase
 
     private readonly ActivityLogService _logs;
     private readonly IEmailService _emailService;
+    private readonly OtpService _otpService;
     private readonly string _serviceRoleKey;
     private readonly string _supabaseUrl;
+    private readonly string _appBaseUrl;
     private static readonly HttpClient _http = new HttpClient();
 
     public AdminUsersController(
@@ -27,6 +29,7 @@ public class AdminUsersController : ControllerBase
         Supabase.Client supabase,
         ActivityLogService logs,
         IEmailService emailService,
+        OtpService otpService,
         IConfiguration config
     )
     {
@@ -34,9 +37,11 @@ public class AdminUsersController : ControllerBase
         _supabase = supabase;
         _logs = logs;
         _emailService = emailService;
+        _otpService = otpService;
         _serviceRoleKey =
             config["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey is missing");
         _supabaseUrl = config["Supabase:Url"] ?? throw new Exception("Supabase:Url is missing");
+        _appBaseUrl = (config["App:BaseUrl"] ?? "").TrimEnd('/');
     }
 
     // ── POST /api/admin/users — Create user ───────────────────────────────────
@@ -50,7 +55,7 @@ public class AdminUsersController : ControllerBase
         {
             // 1. Create Auth User with random password
             var tempPassword = Guid.NewGuid().ToString() + "A1!";
-            
+
             _http.DefaultRequestHeaders.Clear();
             _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
             _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
@@ -60,15 +65,22 @@ public class AdminUsersController : ControllerBase
                 email = p.Email,
                 password = tempPassword,
                 email_confirm = true, // Still true so they don't have to verify email separately
-                user_metadata = new { 
-                    first_name = p.FirstName, 
+                user_metadata = new
+                {
+                    first_name = p.FirstName,
                     last_name = p.LastName,
-                    role = p.Role?.ToLower() ?? "patient"
-                }
+                    role = p.Role?.ToLower() ?? "patient",
+                },
             };
 
-            var res = await _http.PostAsync($"{_supabaseUrl}/auth/v1/admin/users", 
-                new StringContent(System.Text.Json.JsonSerializer.Serialize(authPayload), System.Text.Encoding.UTF8, "application/json"));
+            var res = await _http.PostAsync(
+                $"{_supabaseUrl}/auth/v1/admin/users",
+                new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(authPayload),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                )
+            );
 
             if (!res.IsSuccessStatusCode)
             {
@@ -82,8 +94,14 @@ public class AdminUsersController : ControllerBase
 
             // 2. Trigger Recovery Email (Invitation)
             // Headers already set above on line 51-53
-            await _http.PostAsync($"{_supabaseUrl}/auth/v1/recover",
-                new StringContent(System.Text.Json.JsonSerializer.Serialize(new { email = p.Email }), System.Text.Encoding.UTF8, "application/json"));
+            await _http.PostAsync(
+                $"{_supabaseUrl}/auth/v1/recover",
+                new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(new { email = p.Email }),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                )
+            );
 
             // 2. Create Profile Record
             p.Id = id;
@@ -92,20 +110,22 @@ public class AdminUsersController : ControllerBase
             // 3. Handle Staff Logic (Bio / Availability)
             if (p.Role?.ToLower() == "doctor")
             {
-                var doc = new Doctor { 
+                var doc = new Doctor
+                {
                     Id = Guid.NewGuid().ToString(),
                     ProfileId = id,
                     Title = p.Title ?? "Dr.",
                     Specialties = p.Specialties ?? Array.Empty<string>(),
                     Bio = p.Bio,
                     IsActive = p.IsActive ?? true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
                 };
                 await _supabase.From<Doctor>().Insert(doc);
-                
+
                 if (p.Availability != null && p.Availability.Any())
                 {
-                    foreach(var av in p.Availability) {
+                    foreach (var av in p.Availability)
+                    {
                         av.Id = Guid.NewGuid().ToString();
                         av.StaffId = doc.Id;
                         av.StaffType = "doctor";
@@ -115,19 +135,21 @@ public class AdminUsersController : ControllerBase
             }
             else if (p.Role?.ToLower() == "receptionist")
             {
-                var rec = new Receptionist {
+                var rec = new Receptionist
+                {
                     Id = Guid.NewGuid().ToString(),
                     ProfileId = id,
                     DeskLocation = p.DeskLocation,
                     Bio = p.Bio,
                     IsActive = p.IsActive ?? true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
                 };
                 await _supabase.From<Receptionist>().Insert(rec);
 
                 if (p.Availability != null && p.Availability.Any())
                 {
-                    foreach(var av in p.Availability) {
+                    foreach (var av in p.Availability)
+                    {
                         av.Id = Guid.NewGuid().ToString();
                         av.StaffId = rec.Id;
                         av.StaffType = "receptionist";
@@ -136,15 +158,26 @@ public class AdminUsersController : ControllerBase
                 }
             }
 
-            // 4. Send Welcome Email (Invitation flow)
-            try {
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
-                var link = await _profileService.GenerateLink("recovery", p.Email, $"{baseUrl}/reset-password");
-                if (link != null)
-                {
-                    await _emailService.SendEmailAsync(p.Email, $"{p.FirstName} {p.LastName}", "Welcome to Samson Dental Center", "Invitation", new { Name = p.FirstName, Link = link });
-                }
-            } catch (Exception ex) {
+            // 4. Send Welcome Email (OTP flow)
+            try
+            {
+                var otp = await _otpService.GenerateOtp(p.Email, "invitation");
+                await _emailService.SendEmailAsync(
+                    p.Email,
+                    $"{p.FirstName} {p.LastName}",
+                    "Welcome to Samson Dental Center",
+                    "OtpNotification",
+                    new
+                    {
+                        Name = p.FirstName,
+                        Action = "setting up your account",
+                        Code = otp,
+                        Link = (string?)null
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine($"[CreateUser] Welcome email failed: {ex.Message}");
             }
 
@@ -225,8 +258,6 @@ public class AdminUsersController : ControllerBase
     {
         try
         {
-            
-
             await _profileService.ToggleUserActive(id, isActive);
 
             return Ok(new { ok = true });
@@ -244,20 +275,34 @@ public class AdminUsersController : ControllerBase
         try
         {
             var profile = await _profileService.GetProfileById(id);
-            if (profile == null) return NotFound();
+            if (profile == null)
+                return NotFound();
 
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var link = await _profileService.GenerateLink("recovery", profile.Email, $"{baseUrl}/reset-password");
-            
-            if (link == null)
-            {
-                return BadRequest(new { ok = false, error = "Failed to generate invitation link." });
-            }
+            var otp = await _otpService.GenerateOtp(profile.Email, "invitation");
+            await _emailService.SendEmailAsync(
+                profile.Email,
+                profile.FullName,
+                "Invitation to Samson Dental Center Portal",
+                "OtpNotification",
+                new
+                {
+                    Name = profile.FirstName,
+                    Action = "setting up your account",
+                    Code = otp,
+                    Link = (string?)null
+                }
+            );
 
-            await _emailService.SendEmailAsync(profile.Email, profile.FullName, "Invitation to Samson Dental Center Portal", "Invitation", new { Name = profile.FirstName, Link = link });
-
-            string rolePath = profile.Role?.ToLower() == "patient" ? "/Admin/Patients" : "/Admin/Staff/Doctors";
-            await _logs.LogActionAsync(id, "resent invitation", $"User: {profile.FullName}", null, "Admin", rolePath);
+            string rolePath =
+                profile.Role?.ToLower() == "patient" ? "/Admin/Patients" : "/Admin/Staff/Doctors";
+            await _logs.LogActionAsync(
+                id,
+                "resent invitation",
+                $"User: {profile.FullName}",
+                null,
+                "Admin",
+                rolePath
+            );
             return Ok(new { ok = true });
         }
         catch (Exception ex)

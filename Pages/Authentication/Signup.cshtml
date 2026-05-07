@@ -272,9 +272,10 @@ Layout = "_AuthLayout";
               </svg>
             </span>
             <input asp-for="Input.PhoneNumber" id="su_phone" type="tel" class="auth-input"
-              placeholder="+63 9XX XXX XXXX" />
+              placeholder="09XXXXXXXXX" maxlength="11" pattern="09[0-9]{9}"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11); clearErr('su_phone')" />
             <div id="err_su_phone" class="field-error">
-              Phone number is required.
+              Please enter a valid 11-digit phone number (e.g., 09XXXXXXXXX).
             </div>
           </div>
         </div>

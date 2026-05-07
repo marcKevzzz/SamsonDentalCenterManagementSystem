@@ -23,6 +23,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly IHubContext<AdminHub> _hubContext;
         private readonly ProfileService _profiles;
         private readonly RecordService _recordService;
+        private readonly OtpService _otpService;
         private readonly IDistributedCache _cache;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
@@ -57,7 +58,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             BlockedDateService blockedDates,
             ProfileService profiles,
             RecordService recordService,
-            IDistributedCache cache
+            IDistributedCache cache,
+            OtpService otpService
         )
         {
             _supabase = supabase;
@@ -74,6 +76,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _profiles = profiles;
             _recordService = recordService;
             _cache = cache;
+            _otpService = otpService;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -331,6 +334,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             if (p.IsWaitlist)
                 return "waitlist";
+
+            // If not a guest (logged in), auto-confirm to bypass email confirmation
+            if (!p.IsGuest)
+                return "confirmed";
 
             // Staff-created appointments (Admin/Receptionist/Walk-in) are auto-confirmed if doctor is assigned
             var src = (p.Source ?? "").ToLower();
@@ -702,6 +709,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                             .Set(x => x.EmailStatus, "confirmed")
                             .Set(x => x.ConfirmedAt, DateTime.UtcNow)
                             .Update();
+
+                        // Send booking confirmation email now that email is verified
+                        await SendBookingConfirmationEmail(createdAppt);
 
                         return createdAppt;
                     }
@@ -1251,25 +1261,63 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var link = $"{_appBaseUrl}/Confirm-Guest?token={appt.ConfirmationToken}";
+                var otp = await _otpService.GenerateOtp(appt.PatientEmail, "appointment");
+                var link = $"{_appBaseUrl}/Confirm-Guest?email={Uri.EscapeDataString(appt.PatientEmail)}";
+                
                 await _emailService.SendEmailAsync(
                     appt.PatientEmail,
                     appt.PatientName,
-                    "Confirm your Samson Dental Appointment Request",
-                    "GuestConfirmation",
+                    "Verify your Samson Dental Appointment",
+                    "OtpNotification",
                     new
                     {
                         Name = appt.PatientName,
-                        Service = appt.ServiceName,
-                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
-                        Time = appt.AppointmentTime,
-                        Link = link
+                        Action = "confirming your appointment booking",
+                        Code = otp,
+                        Link = link // In case they want to click
                     }
                 );
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[SendGuestConfirmationEmail] {ex.Message}");
+            }
+        }
+
+        public async Task<Appointment?> ConfirmByOtp(string email, string code, string? token = null)
+        {
+            try
+            {
+                // If we have a token, it might be a cached guest booking
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var apptFromToken = await ConfirmByToken(token);
+                    if (apptFromToken != null) return apptFromToken;
+                }
+
+                // Find pending appointment for this email in database
+                var res = await _supabase.From<Appointment>()
+                    .Where(x => x.PatientEmail == email && x.EmailStatus == "pending")
+                    .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                var appt = res.Models.FirstOrDefault();
+                if (appt == null) return null;
+
+                // Mark as confirmed
+                appt.EmailStatus = "confirmed";
+                appt.ConfirmedAt = DateTime.UtcNow;
+                await _supabase.From<Appointment>().Upsert(appt);
+
+                // Send confirmation email
+                await SendBookingConfirmationEmail(appt);
+
+                return appt;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ConfirmByOtp] {ex.Message}");
+                return null;
             }
         }
 

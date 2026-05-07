@@ -145,7 +145,18 @@ export function renderStep5(apiResult = {}) {
 
     // ── Actions ───────────────────────────────────────────────────────────────
     const actionsEl = document.getElementById("successActions");
+    const verifyBtn = document.getElementById("verifyBtn");
+    
     if (actionsEl) {
-        actionsEl.classList.toggle("hidden", guest && !isWL);
+        actionsEl.classList.remove("hidden"); // Always show for all
+    }
+    
+    if (verifyBtn) {
+        if (guest && !isWL) {
+            verifyBtn.classList.remove("hidden");
+            verifyBtn.href = `/Confirm-Guest?email=${encodeURIComponent(d.email)}`;
+        } else {
+            verifyBtn.classList.add("hidden");
+        }
     }
 }

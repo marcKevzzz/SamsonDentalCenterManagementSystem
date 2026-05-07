@@ -86,6 +86,7 @@ var serviceClient = new Supabase.Client(
 await serviceClient.InitializeAsync();
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton(new OtpService(serviceClient));
 builder.Services.AddScoped<SessionHelper>();
 
 // ── RBAC: Claims Transformer — injects app_role from profiles table ──────────
@@ -95,14 +96,16 @@ builder.Services.AddScoped<
 >();
 
 
-builder.Services.AddSingleton<ProfileService>(provider => new ProfileService(
+builder.Services.AddScoped<ProfileService>(provider => new ProfileService(
     serviceClient,
     supabaseServiceKey,
     supabaseUrl,
-    provider.GetRequiredService<ActivityLogService>()
+    provider.GetRequiredService<ActivityLogService>(),
+    provider.GetRequiredService<OtpService>(),
+    provider.GetRequiredService<IEmailService>()
 ));
 
-builder.Services.AddSingleton<DentalServiceService>(provider => new DentalServiceService(
+builder.Services.AddScoped<DentalServiceService>(provider => new DentalServiceService(
     serviceClient,
     provider.GetRequiredService<ActivityLogService>()
 ));
@@ -130,7 +133,8 @@ builder.Services.AddScoped<AppointmentService>(provider =>
         provider.GetRequiredService<BlockedDateService>(),
         provider.GetRequiredService<ProfileService>(),
         provider.GetRequiredService<RecordService>(),
-        provider.GetRequiredService<IDistributedCache>()
+        provider.GetRequiredService<IDistributedCache>(),
+        provider.GetRequiredService<OtpService>()
     );
 });
 

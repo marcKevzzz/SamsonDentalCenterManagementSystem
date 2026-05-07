@@ -40,7 +40,7 @@ export function renderStep4() {
                 <div class="font-body text-[.65rem] font-medium tracking-[.1em] uppercase text-white/40 mb-1">
                     Starting at
                 </div>
-                <div class="brand-font font-bold text-primary text-[1.05rem]">${s?.price}</div>
+                <div class="brand-font font-bold text-brand text-[1.05rem]">₱${s?.price}</div>
             </div>
         </div>
         <div class="flex flex-wrap gap-4 mt-4 pt-4 border-t border-white/10">
@@ -198,11 +198,16 @@ export async function confirmBooking() {
         }
 
         // Success — go to step 5
-        STATE.ref  = result.refNumber ?? "";
-        STATE.step = 5;
-        showPanel(5, "forward");
-        updateChrome();
-        renderStep5(result);
+        if (loggedIn || STATE.isWaitlist) {
+            STATE.ref  = result.refNumber ?? "";
+            STATE.step = 5;
+            showPanel(5, "forward");
+            updateChrome();
+            renderStep5(result);
+        } else {
+            // Guest non-waitlist -> Redirect to OTP page immediately
+            window.location.href = `/Confirm-Guest?email=${encodeURIComponent(d.email)}&token=${result.token || ""}`;
+        }
 
     } catch (err) {
         console.error("[step4] confirmBooking:", err);

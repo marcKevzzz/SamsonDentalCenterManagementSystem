@@ -105,6 +105,11 @@ async function saveUser() {
     return;
   }
 
+  if (payload.phoneNumber && !/^09\d{9}$/.test(payload.phoneNumber)) {
+    Toast.show("Please enter a valid 11-digit phone number (e.g., 09XXXXXXXXX).", "danger");
+    return;
+  }
+
   saveBtn.disabled = true;
   saveBtn.textContent = "Saving…";
 

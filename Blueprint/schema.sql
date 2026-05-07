@@ -16,8 +16,6 @@ CREATE TABLE public.activity_logs (
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   patient_id uuid,
-  patient_first_name text NOT NULL,
-  patient_last_name text NOT NULL,
   patient_email text NOT NULL,
   patient_phone text NOT NULL,
   patient_sex text,
@@ -45,6 +43,8 @@ CREATE TABLE public.appointments (
   other_email text,
   other_phone text,
   source text NOT NULL DEFAULT 'online'::text,
+  patient_first_name text NOT NULL,
+  patient_last_name text NOT NULL,
   reminder_sent boolean NOT NULL DEFAULT false,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
@@ -100,7 +100,7 @@ CREATE TABLE public.dental_services (
   updated_at timestamp with time zone DEFAULT now(),
   duration_minutes integer NOT NULL DEFAULT 60,
   buffer_minutes integer NOT NULL DEFAULT 15,
-  needs_xray boolean NOT NULL DEFAULT false,
+  needs_xray boolean DEFAULT false,
   CONSTRAINT dental_services_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.doctors (
@@ -126,6 +126,7 @@ CREATE TABLE public.inquiries (
   guest_last_name text,
   guest_phone text,
   is_read boolean NOT NULL DEFAULT false,
+  is_from_staff boolean NOT NULL DEFAULT false,
   assigned_doctor_id uuid,
   CONSTRAINT inquiries_pkey PRIMARY KEY (id),
   CONSTRAINT inquiries_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
@@ -137,8 +138,8 @@ CREATE TABLE public.inquiry_messages (
   sender_id uuid,
   message text NOT NULL,
   is_from_staff boolean NOT NULL DEFAULT false,
-  is_internal boolean NOT NULL DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
+  is_internal boolean NOT NULL DEFAULT false,
   CONSTRAINT inquiry_messages_pkey PRIMARY KEY (id),
   CONSTRAINT inquiry_messages_inquiry_id_fkey FOREIGN KEY (inquiry_id) REFERENCES public.inquiries(id),
   CONSTRAINT inquiry_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id)
@@ -303,3 +304,15 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
+
+CREATE TABLE public.otps (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  code text NOT NULL,
+  type text NOT NULL, -- 'signup', 'appointment', 'password_reset', 'invitation'
+  expires_at timestamp with time zone NOT NULL,
+  is_used boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT otps_pkey PRIMARY KEY (id)
+);
+CREATE INDEX idx_otps_email_code ON public.otps USING btree (email, code);
