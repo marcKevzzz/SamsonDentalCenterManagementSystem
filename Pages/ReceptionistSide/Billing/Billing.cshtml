@@ -291,4 +291,118 @@
     </div>
 </div>
 
-<!-- <script type="module" src="~/js/AdminSide/transactions.js"></script> -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- RECEIPT VIEW MODAL                                                       -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="receipt-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeReceiptModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto transform transition-all duration-500 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-brand font-display">Invoice Receipt</h3>
+                    <p class="text-[11px] text-brand/40 font-bold uppercase tracking-widest mt-1">Digital Preview & Export</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportReceipt('pdf')" class="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-[12px] font-bold hover:opacity-90 transition-all shadow-lg shadow-brand/20">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                    </button>
+                    <button onclick="exportReceipt('image')" class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-brand rounded-xl text-[12px] font-bold hover:bg-slate-200 transition-all">
+                        <i class="fa-solid fa-image"></i> Image
+                    </button>
+                    <div class="w-px h-6 bg-slate-200 mx-1"></div>
+                    <button onclick="closeReceiptModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-300 hover:text-slate-600 transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Receipt Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+                <!-- Actual Receipt Template (This is what will be captured) -->
+                <div id="receipt-capture" class="bg-white p-12 shadow-sm rounded-2xl mx-auto max-w-[500px] border border-slate-100 relative overflow-hidden">
+                    <!-- Premium Background Accent -->
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
+                    
+                    <!-- Clinic Header -->
+                    <div class="text-center mb-10 relative">
+                        <img src="@(string.IsNullOrEmpty(Model.Settings.LogoUrl) ? "/images/logo.svg" : Model.Settings.LogoUrl)" class="w-16 h-16 mx-auto mb-4 object-contain" />
+                        <h1 class="text-xl font-bold text-brand uppercase tracking-tighter">@Model.Settings.ClinicName</h1>
+                        <p class="text-[10px] text-brand/50 font-medium max-w-[240px] mx-auto leading-relaxed mt-1">@Model.Settings.LocationAddress</p>
+                        <div class="flex items-center justify-center gap-4 mt-3 text-[9px] font-bold text-brand/40 uppercase tracking-widest">
+                            <span><i class="fa-solid fa-phone mr-1"></i> @Model.Settings.ContactPhone</span>
+                            <span><i class="fa-solid fa-envelope mr-1"></i> @Model.Settings.ContactEmail</span>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t-2 border-dashed border-slate-100 mb-8"></div>
+
+                    <!-- Info Grid -->
+                    <div class="grid grid-cols-2 gap-y-6 mb-10">
+                        <div>
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Receipt To</p>
+                            <p id="receipt-patient-name" class="text-[13px] font-bold text-brand">Patient Name</p>
+                            <p id="receipt-patient-phone" class="text-[9px] text-brand/50 mt-0.5 font-bold"></p>
+                            <p id="receipt-patient-address" class="text-[9px] text-brand/50 leading-tight mt-0.5 italic"></p>
+                            <p id="receipt-patient-email" class="text-[9px] text-brand/50"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Invoice Info</p>
+                            <p id="receipt-id" class="text-[13px] font-bold text-brand">#INV-000000</p>
+                            <p id="receipt-date" class="text-[10px] text-brand/50">Date</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Dental Specialist</p>
+                            <p id="receipt-doctor-name" class="text-[11px] font-bold text-brand/70">Doctor Name</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Payment Status</p>
+                            <span id="receipt-status-badge" class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-bold uppercase tracking-wider border border-emerald-100">Paid</span>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="mb-10">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-slate-100">
+                                    <th class="py-2 text-[9px] font-bold text-brand/30 uppercase tracking-widest">Description</th>
+                                    <th class="py-2 text-[9px] font-bold text-brand/30 uppercase tracking-widest text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receipt-items-list" class="divide-y divide-slate-50">
+                                <!-- Items injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="bg-slate-50/50 rounded-2xl p-6 space-y-3">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-brand/40 font-medium">Subtotal</span>
+                            <span id="receipt-subtotal" class="text-brand font-bold">₱0.00</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-brand/40 font-medium">Discount</span>
+                            <span id="receipt-discount" class="text-emerald-500 font-bold">-₱0.00</span>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                            <span class="text-[12px] text-brand font-bold uppercase tracking-widest">Grand Total</span>
+                            <span id="receipt-total" class="text-[18px] text-brand font-bold font-display">₱0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-12 text-center">
+                        <p class="text-[10px] text-brand/30 font-medium italic">Thank you for choosing Samson Dental Center!</p>
+                        <p class="text-[8px] text-brand/20 uppercase tracking-[0.2em] mt-4">This is a system-generated receipt</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="~/js/AdminSide/transactions.js"></script>

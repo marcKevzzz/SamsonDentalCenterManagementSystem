@@ -24,6 +24,7 @@ export function toggleNavbar() {
     if (window.scrollY > lastScrollY && !isNavHidden) {
       navbar.classList.add("nav-hidden");
       isNavHidden = true;
+      closeMega();
     } else if (window.scrollY < lastScrollY && isNavHidden) {
       navbar.classList.remove("nav-hidden");
       isNavHidden = false;
@@ -99,6 +100,26 @@ export function syncActiveLink() {
   }
 }
 
+export function closeMega() {
+  const panel = document.getElementById("megaPanel");
+  const servicesMega = document.getElementById("servicesMega");
+  const chevronIcon = document.getElementById("chevronIcon");
+  
+  if (!panel || !servicesMega || !chevronIcon) return;
+  if (servicesMega.classList.contains("servicesMega-hidden")) return;
+
+  gsap.to(panel, {
+    opacity: 0,
+    y: -10,
+    scale: 0.98,
+    duration: 0.2,
+    onComplete: () => {
+      servicesMega.classList.add("servicesMega-hidden");
+      chevronIcon.classList.remove("rotate-180");
+    },
+  });
+}
+
 // ── Services mega menu ────────────────────────
 
 export function initServicesMenu() {
@@ -123,19 +144,6 @@ export function initServicesMenu() {
       closeMega();
     }
   });
-
-  function closeMega() {
-    gsap.to(panel, {
-      opacity: 0,
-      y: -10,
-      scale: 0.98,
-      duration: 0.2,
-      onComplete: () => {
-        servicesMega.classList.add("servicesMega-hidden");
-        chevronIcon.classList.remove("rotate-180");
-      },
-    });
-  }
 
   document.addEventListener("click", (e) => {
     if (!servicesMega?.contains(e.target) && !servicesBtn?.contains(e.target)) {
@@ -297,7 +305,7 @@ async function loadDynamicServices() {
         const desktopLink = document.createElement("a");
         desktopLink.href = `/Services/${service.slug}`;
         desktopLink.className =
-          "block py-1.5 text-[0.9rem] font-[400] hover:text-primary";
+          "block py-1.5 text-[0.9rem] font-[300] hover:text-primary";
         desktopLink.textContent = service.name;
         containers[cat].appendChild(desktopLink);
       }
@@ -308,7 +316,7 @@ async function loadDynamicServices() {
         const mobileLink = document.createElement("a");
         mobileLink.href = `/Services/${service.slug}`;
         mobileLink.className =
-          "block py-2 pl-3 text-sm text-gray-600 hover:text-primary";
+          "block py-1 pl-3 text-sm text-gray-600 hover:text-primary";
         mobileLink.textContent = service.name;
 
         // You previously had containers[cat].appendChild(mobileLink)

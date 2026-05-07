@@ -29,13 +29,13 @@ ViewData["Title"] = "About page";
         <span class="w-2 h-2 rounded-full bg-primary"></span>
         Our Story
       </div>
-      <h2 class="brand-font font-bold leading-[1.1] text-brand mb-6" style="font-size:clamp(2rem,4vw,2.8rem);">
+      <h2 class="brand-font font-extrabold leading-[1] text-brand mb-6" style="font-size:clamp(2rem,4vw,2.8rem);">
         A Legacy of Dental <br>Excellence Since 1964.
       </h2>
-      <p class="font-body text-[0.93rem] text-muted leading-relaxed mb-4">
+      <p class="font-body text-[0.93rem] text-lighter text-muted leading-relaxed mb-4">
         Samson Dental Center has its roots since 1964. Now on its 3rd generation of management, it has lived up to its commitment of being the pioneer on dental advancements both in expertise, facilities and equipments over the years.
       </p>
-      <p class="font-body text-[0.93rem] text-muted leading-relaxed">
+      <p class="font-body text-[0.93rem] text-lighter text-muted leading-relaxed">
         It is unique and distinctive because we incorporate skill, experience and technology under one roof. Our clinic branch at Porta Vaga and our main center at S Building continue to provide services based on the highest standards of professionalism.
       </p>
 
@@ -202,7 +202,7 @@ ViewData["Title"] = "About page";
           <i class="fa-solid fa-eye text-primary text-xl group-hover:text-white transition-colors"></i>
         </div>
         <h3 class="brand-font font-bold text-2xl mb-4 text-brand">Our Vision</h3>
-        <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
+        <p class="font-body text-[0.9rem] text-muted/80 text-[300] leading-relaxed">
            To be the leading provider of high-standard professional dental services, continuously innovating and preserving our legacy of excellence for generations to come.
         </p>
       </div>
@@ -213,7 +213,7 @@ ViewData["Title"] = "About page";
           <i class="fa-solid fa-bullseye text-primary text-xl group-hover:text-white transition-colors"></i>
         </div>
         <h3 class="brand-font font-bold text-2xl mb-4 text-brand">Our Mission</h3>
-        <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
+        <p class="font-body text-[0.9rem] text-muted/80 text-[300] leading-relaxed">
           Incorporating skill, experience, and technology under one roof to ensure complete patient care and satisfaction in every treatment.
         </p>
       </div>
@@ -256,13 +256,13 @@ ViewData["Title"] = "About page";
                                      class="w-full h-full object-cover grayscale-[40%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
                                 <div class="absolute inset-0 bg-gradient-to-t from-brand to-transparent opacity-60"></div>
                                 <div class="absolute bottom-6 left-6">
-                                    <div class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Specialist</div>
-                                    <div class="text-white text-sm font-medium">@string.Join(" • ", doc.Specialties)</div>
+                                    <div class="text-[10px] font-bold text-primary uppercase tracking-[0.12em] mb-1">Specialist</div>
+                                    <div class="text-white text-xs font-medium">@string.Join(" • ", doc.Specialties)</div>
                                 </div>
                             </div>
                             <div class="p-8 flex-1 flex flex-col">
-                                <h3 class="brand-font font-medium text-2xl text-white mb-2">@doc.Profile?.FirstName @doc.Profile?.LastName</h3>
-                                <p class="font-body text-[0.85rem] text-white/50 leading-relaxed line-clamp-4 mb-6">
+                                <h3 class="brand-font font-bold text-xl text-white mb-2">@doc.Profile?.FirstName @doc.Profile?.LastName</h3>
+                                <p class="font-body text-[0.75rem] text-white/40 line-clamp-4 mb-6">
                                     @(string.IsNullOrEmpty(doc.Bio) ? "Experienced dental specialist dedicated to providing high-standard oral care and patient satisfaction." : doc.Bio)
                                 </p>
                                 <div class="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
@@ -326,8 +326,8 @@ ViewData["Title"] = "About page";
                 <i class="fa-solid fa-medal text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Quality Care</h3>
-                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
+                <h3 class="brand-font font-black text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Quality Care</h3>
+                <p class="font-body text-[0.9rem] font-[300] text-muted/80 leading-relaxed">
                     Our quality of dental care is outstanding. Our main clinic is located at a new modern facility in S Building, Baguio City.
                 </p>
             </div>
@@ -337,8 +337,8 @@ ViewData["Title"] = "About page";
                 <i class="fa-solid fa-bolt text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Fast Service</h3>
-                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
+                <h3 class="brand-font font-black text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Fast Service</h3>
+                <p class="font-body text-[0.9rem] font-[300] text-muted/80 leading-relaxed">
                     We make efforts to accommodate you and your scheduling needs and desires, ensuring prompt and efficient treatment.
                 </p>
             </div>
@@ -348,8 +348,8 @@ ViewData["Title"] = "About page";
                 <i class="fa-solid fa-tags text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Affordable Prices</h3>
-                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
+                <h3 class="brand-font font-black text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Affordable Prices</h3>
+                <p class="font-body text-[0.9rem] font-[300] text-muted/80 leading-relaxed">
                     Our prices are substantially affordable. We provide high-end care without the high-end price tag.
                 </p>
             </div>
@@ -359,8 +359,8 @@ ViewData["Title"] = "About page";
                 <i class="fa-solid fa-heart text-primary text-3xl group-hover:text-white transition-colors"></i>
             </div>
             <div>
-                <h3 class="brand-font font-bold text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Patient Priority</h3>
-                <p class="font-body text-[0.95rem] text-muted/80 leading-relaxed">
+                <h3 class="brand-font font-black text-2xl text-brand mb-4 group-hover:text-primary transition-colors">Patient Priority</h3>
+                <p class="font-body text-[0.9rem] font-[300] text-muted/80 leading-relaxed">
                     We strive to make the patient our priority. We work hard to see you promptly and achieve your complete satisfaction.
                 </p>
             </div>

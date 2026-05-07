@@ -100,6 +100,7 @@ CREATE TABLE public.dental_services (
   updated_at timestamp with time zone DEFAULT now(),
   duration_minutes integer NOT NULL DEFAULT 60,
   buffer_minutes integer NOT NULL DEFAULT 15,
+  needs_xray boolean NOT NULL DEFAULT false,
   CONSTRAINT dental_services_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.doctors (
@@ -125,8 +126,10 @@ CREATE TABLE public.inquiries (
   guest_last_name text,
   guest_phone text,
   is_read boolean NOT NULL DEFAULT false,
+  assigned_doctor_id uuid,
   CONSTRAINT inquiries_pkey PRIMARY KEY (id),
-  CONSTRAINT inquiries_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
+  CONSTRAINT inquiries_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
+  CONSTRAINT inquiries_assigned_doctor_id_fkey FOREIGN KEY (assigned_doctor_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.inquiry_messages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),

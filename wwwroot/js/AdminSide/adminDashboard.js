@@ -3,6 +3,8 @@ import { AdminStore } from './AdminStore.js';
 /**
  * Samson Dental Center - Admin Dashboard Module
  */
+let DASHBOARD_DATA = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
     const role = document.getElementById('currentUserRole')?.value?.toLowerCase() || 'admin';
     
@@ -13,14 +15,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const leaves = role === 'admin' ? await AdminStore.loadData('leaves', '/api/staff/leave/all') : [];
     const inqs = await AdminStore.loadData('inquiries', '/api/admin/data/inquiries');
     
-    hydrateDashboard({
+    DASHBOARD_DATA = {
         stats: stats,
         appointments: appts,
         logs: logs,
         leaves: leaves,
         inquiries: inqs
-    });
+    };
+    
+    hydrateDashboard(DASHBOARD_DATA);
+    initDashboardEvents();
 });
+
+function initDashboardEvents() {
+    const btnWeek = document.getElementById('btn-visits-week');
+    const btnMonth = document.getElementById('btn-visits-month');
+
+    if (btnWeek && btnMonth) {
+        btnWeek.addEventListener('click', () => {
+            btnWeek.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white";
+            btnMonth.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors";
+            if (DASHBOARD_DATA?.stats?.weeklyVisits) {
+                initVisitsChart(DASHBOARD_DATA.stats.weeklyVisits);
+            }
+        });
+
+        btnMonth.addEventListener('click', () => {
+            btnMonth.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white";
+            btnWeek.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors";
+            if (DASHBOARD_DATA?.stats?.monthlyVisits) {
+                initVisitsChart(DASHBOARD_DATA.stats.monthlyVisits);
+            }
+        });
+    }
+}
 
 function hydrateDashboard(data) {
     if (!data) return;
@@ -100,9 +128,6 @@ function hydrateDashboard(data) {
                                 </div>
                                 ${appt.patientId ? `<a href="/Admin/Patients/Details?id=${appt.patientId}" class="hover:text-primary transition-colors font-medium">${appt.patientName}</a>` : `<span>${appt.patientName}</span>`}
                             </div>
-                        </td>
-                        <td class="px-4 py-3 text-[12.5px] text-brand-500 font-medium">
-                            ${appt.doctorName || 'Unassigned'}
                         </td>
                         <td class="px-4 py-3 text-[12.5px] font-medium">${appt.serviceName}</td>
                         <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap font-medium">${appt.appointmentTime}</td>

@@ -1,0 +1,56 @@
+@using System
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; background-color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 520px; margin: 0 auto; background-color: #fff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .header { background-color: #059669; padding: 28px 32px; color: #fff; }
+        .content { padding: 28px 32px; }
+        .receipt-card { background-color: #f1f5f9; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; }
+        .footer { border-top: 1px solid #e2e8f0; padding: 16px 32px; background-color: #f8fafc; text-align: center; font-size: 11px; color: #94a3b8; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .status-paid { background-color: #d1fae5; color: #065f46; }
+        .status-partial { background-color: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin:0; font-size: 20px;">Samson Dental Center</h1>
+            <p style="margin:4px 0 0; color:#a7f3d0; font-size: 13px;">Payment Receipt</p>
+        </div>
+        <div class="content">
+            <p>Hi <strong>@Model.Name</strong>,</p>
+            <p>Thank you for your payment. We have successfully recorded your payment for invoice <strong>#@Model.InvoiceNumber</strong>.</p>
+
+            <div class="receipt-card">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 12px; color: #64748b;">Amount Paid:</span>
+                    <span style="font-size: 14px; font-weight: bold; color: #059669;">@Model.AmountPaid</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 12px; color: #64748b;">Payment Method:</span>
+                    <span style="font-size: 13px; font-weight: 500;">@Model.Method</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 12px; color: #64748b;">Remaining Balance:</span>
+                    <span style="font-size: 13px; font-weight: 500;">@Model.Balance</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                    <span style="font-size: 12px; color: #64748b;">Invoice Status:</span>
+                    <span class="status-badge @(Model.Status == "paid" ? "status-paid" : "status-partial")">@Model.Status</span>
+                </div>
+            </div>
+            
+            <p style="font-size: 12px; color: #64748b;">You can view and download your full itemized receipt in the patient portal.</p>
+        </div>
+        <div class="footer">
+            &copy; @DateTime.Now.Year Samson Dental Center. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

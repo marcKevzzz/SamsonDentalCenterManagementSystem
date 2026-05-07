@@ -4,6 +4,20 @@
 Layout = "AdminSide/_StaffLayout";
 }
 
+<style>
+    @@media print {
+        body * { visibility: hidden; }
+        #page-reports, #page-reports * { visibility: visible; }
+        #page-reports { position: absolute; left: 0; top: 0; width: 100%; }
+        .flex.items-center.gap-2, #btn-print-report, #btn-update-reports { display: none !important; }
+        .sidebar, .top-nav, header, footer { display: none !important; }
+        canvas { max-width: 100% !important; height: auto !important; }
+        .xl\:max-h-\[40vh\] { max-height: none !important; overflow: visible !important; }
+        .bg-slate-50 { background-color: white !important; }
+        .border { border-color: #eee !important; }
+    }
+</style>
+
 
 <!-- ── REPORTS ── -->
 <div id="page-reports" class="page p-4 md:p-6  relative xl:overflow-hidden">
@@ -16,11 +30,16 @@ Layout = "AdminSide/_StaffLayout";
     </div>
     
     <!-- Section A: Date Range Picker -->
-    <div class="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-1">
-        <input type="date" id="report-start" class="text-[11px] font-medium text-brand border-none outline-none focus:ring-0 px-2 py-1.5 rounded-lg bg-transparent" />
-        <span class="text-slate-300 text-[10px]">to</span>
-        <input type="date" id="report-end" class="text-[11px] font-medium text-brand border-none outline-none focus:ring-0 px-2 py-1.5 rounded-lg bg-transparent" />
-        <button id="btn-update-reports" class="bg-primary text-white text-[10.5px] font-bold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors">Apply</button>
+    <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-1">
+            <input type="date" id="report-start" class="text-[11px] font-medium text-brand border-none outline-none focus:ring-0 px-2 py-1.5 rounded-lg bg-transparent" />
+            <span class="text-slate-300 text-[10px]">to</span>
+            <input type="date" id="report-end" class="text-[11px] font-medium text-brand border-none outline-none focus:ring-0 px-2 py-1.5 rounded-lg bg-transparent" />
+            <button id="btn-update-reports" class="bg-primary text-white text-[10.5px] font-bold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors">Apply</button>
+        </div>
+        <button id="btn-print-report" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 text-white text-[10.5px] font-bold hover:bg-slate-900 transition-all shadow-lg shadow-slate-200">
+            <i class="fa-solid fa-print"></i> Print Report
+        </button>
     </div>
   </div>
 

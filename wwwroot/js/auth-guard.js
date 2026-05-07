@@ -6,7 +6,12 @@
  */
 
 (function () {
-  const SIGNIN_URL = "/Authentication/Signin?expired=1";
+  // Immediately clear storage if we arrived here because of an expiry redirect
+  if (window.location.search.includes("expired=1")) {
+    localStorage.clear();
+  }
+
+  const SIGNIN_URL = "/sign-in?expired=1";
 
   function clearAllStorage() {
     localStorage.clear();

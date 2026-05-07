@@ -26,7 +26,6 @@ Layout = "AdminSide/_StaffLayout";
 
     <!-- ── RIGHT: CHAT INTERFACE ──────────────────────────────────────── -->
     <div id="chat-main" class="hidden max-h-full md:flex flex-1 flex flex-col bg-white md:rounded-3xl md:border border-slate-200 shadow-sm overflow-hidden relative transition-all duration-300">
-        <input type="hidden" id="admin-id" value="@Model.CurrentUserId" />
         <!-- Empty State (No Chat Selected) -->
         <div id="chat-empty" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-[40] transition-opacity duration-300">
             <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
@@ -68,7 +67,7 @@ Layout = "AdminSide/_StaffLayout";
                 </div>
 
                 <!-- Predefined Answers Row -->
-                <div class="px-4 py-2 border-t border-slate-100 bg-white flex-wrap whitespace-nowrap scrollbar-hide flex gap-2">
+                <div id="predefined-replies" class="px-4 py-2 border-t border-slate-100 bg-white flex-wrap whitespace-nowrap scrollbar-hide flex gap-2">
                     <button onclick="usePredefined('schedule')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">📅 Reschedule</button>
                     <button onclick="usePredefined('billing')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">💰 Billing Info</button>
                     <button onclick="usePredefined('followup')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">✅ Follow-up</button>

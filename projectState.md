@@ -439,3 +439,23 @@
 - **Safety**:
   - Strictly omitted "Delete Account" functionality per user requirements; only "Deactivate/Activate" is permitted.
   - Omitted "Edit Profile" from the account actions to focus on status and invitation management.
+
+- **Date**: 2026-05-07 (Authentication Token Fixes)
+
+* **Sign Out Token Leaks**:
+  - Identified an issue where logging out of staff portals left the \sb-[PROJECT]-auth-token\ in \localStorage\, causing the Patient Portal (guest booking) to automatically authenticate the staff member.
+  - Updated \Signout.cshtml\, \AdminSide/site.js\, and \PatientSide/profile.js\ to execute a complete \localStorage.clear()\ and \sessionStorage.clear()\ rather than piecemeal item removal.
+  - This ensures users are fully unauthenticated and can freely test guest features or switch accounts without cookie/token conflicts.
+- **Date**: 2026-05-07 (Billing Receipt Export System)
+- **New Feature: Digital Receipts**:
+  - Implemented a premium, branded receipt viewing and export system for Admin, Doctor, and Receptionist portals.
+  - **Export Capabilities**: Integrated `html2pdf.js` and `html2canvas` for high-quality PDF and image (PNG) receipt downloads.
+  - **Data Hydration**: Created a new detailed invoice retrieval endpoint `GET /api/admin/data/invoices/{id}` in `AdminDataController.cs`.
+  - **Branding**: Integrated `ClinicService` to dynamically pull clinic logo, address, and contact info into generated receipts.
+- **Portal-Specific Implementations**:
+  - **Admin**: Integrated receipt view into the main Billing management table.
+  - **Doctor**: Added "View Receipt" action to the Recent Treatments table in `doctorInvoice.js`.
+  - **Receptionist**: Restored the Billing page by implementing `transactions.js` and adding the receipt modal.
+- **Stability & Build Fixes**:
+  - Resolved `CS0246` build errors by correcting `ClinicSettingsService` to `ClinicService` and adding missing `using SamsonDentalCenterManagementSystem.Models;` directives.
+  - Verified successful compilation with `dotnet build`.

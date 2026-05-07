@@ -200,6 +200,7 @@ export function signOut(e) {
     cancelText: "Cancel",
     onConfirm: () => {
       localStorage.clear();
+      sessionStorage.clear();
       window.location.href = "/signout";
     },
   });

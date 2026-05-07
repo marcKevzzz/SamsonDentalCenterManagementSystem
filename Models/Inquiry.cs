@@ -51,9 +51,17 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("is_from_staff")]
         public bool IsFromStaff { get; set; } = false;
 
-        [Reference(typeof(Profile))]
+        [Reference(typeof(Profile), foreignKey: "patient_id")]
         [JsonPropertyName("patient")]
         public Profile? Patient { get; set; }
+
+        [Column("assigned_doctor_id")]
+        [JsonPropertyName("assigned_doctor_id")]
+        public string? AssignedDoctorId { get; set; }
+
+        [Reference(typeof(Profile), foreignKey: "assigned_doctor_id")]
+        [JsonPropertyName("assigned_doctor")]
+        public Profile? AssignedDoctor { get; set; }
 
         public List<InquiryMessage> Messages { get; set; } = new();
     }
@@ -85,7 +93,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Reference(typeof(Profile))]
+        [Reference(typeof(Profile), foreignKey: "sender_id")]
         [JsonPropertyName("sender")]
         public Profile? Sender { get; set; }
     }

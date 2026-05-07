@@ -54,7 +54,7 @@
                     <h3 class="text-lg font-bold text-brand-900">@p?.FirstName @p?.LastName</h3>
                     <div class="mt-1 flex items-center gap-1.5 justify-center">
                         <span class="px-2 py-0.5 bg-slate-100 text-[8px] font-bold uppercase tracking-widest text-brand-400 rounded-md">#@p?.Id.Substring(0, 8).ToUpper()</span>
-                        <span class="px-2 py-0.5 bg-brand-50 text-[8px] font-bold uppercase tracking-widest text-brand-600 rounded-md">@p?.Role</span>
+                        <span class="px-2 py-0.5 @(p?.IsActive == true ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600") text-[8px] font-bold uppercase tracking-widest rounded-md">@(p?.IsActive == true ? "ACTIVE" : "INACTIVE")</span>
                     </div>
                 </div>
 

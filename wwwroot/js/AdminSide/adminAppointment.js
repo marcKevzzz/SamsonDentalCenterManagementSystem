@@ -27,6 +27,7 @@ const post = (url, body) =>
 let ALL_APPT = [];
 let ALL_DOCS = [];
 let ALL_SVCS = [];
+let ALL_PATIENTS = [];
 const PAGE_SIZE = 20;
 let currentPage = 1;
 let filtered = [];
@@ -43,12 +44,14 @@ async function refreshData(force = false) {
   );
   const docs = await AdminStore.loadData("doctors", "/api/admin/data/doctors", { force });
   const svcs = await AdminStore.loadData("services", "/api/services/all", { force });
+  const pts = await AdminStore.loadData("patients", "/api/admin/data/patients", { force });
 
   if (appts) {
     initializeWithData({
       appointments: appts,
       doctors: docs?.data || docs,
       services: svcs,
+      patients: pts?.data || pts
     });
   }
 }
@@ -64,22 +67,10 @@ async function checkUrlParams() {
   const openModal = params.get('openModal');
 
   if (patientId) {
-    // Load patients to find the match
-    const patientsData = await AdminStore.loadData('patients', '/api/admin/data/patients');
-    if (patientsData) {
-      const patient = patientsData.find(p => p.id === patientId);
+    if (ALL_PATIENTS && ALL_PATIENTS.length > 0) {
+      const patient = ALL_PATIENTS.find(p => p.id === patientId);
       if (patient) {
-        const elId = document.getElementById('book-patient-id');
-        const elFirstName = document.getElementById('book-patient-first-name');
-        const elLastName = document.getElementById('book-patient-last-name');
-        const elEmail = document.getElementById('book-patient-email');
-        const elPhone = document.getElementById('book-patient-phone');
-
-        if (elId) elId.value = patient.id;
-        if (elFirstName) elFirstName.value = patient.firstName || '';
-        if (elLastName) elLastName.value = patient.lastName || '';
-        if (elEmail) elEmail.value = patient.email;
-        if (elPhone) elPhone.value = patient.phone || '';
+        window.selectPatient(patient.id);
         
         // Auto-assign doctor from past appointments
         if (ALL_APPT && ALL_APPT.length > 0) {
@@ -108,6 +99,7 @@ function initializeWithData(data) {
   ALL_APPT = data.appointments || [];
   ALL_DOCS = data.doctors || [];
   ALL_SVCS = data.services || [];
+  ALL_PATIENTS = data.patients || [];
 
   // Transform appointments to include formatted fields if missing
   ALL_APPT.forEach((a) => {
@@ -257,7 +249,7 @@ function rowHTML(appt) {
   } else if (appt.status === "confirmed") {
     workflowBtn = `<button onclick='updateStatus(${idStr}, "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>`;
   } else if (appt.status === "arrived") {
-    workflowBtn = `<button onclick='updateStatus(${idStr}, "completed")' class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">Checkout</button>`;
+    workflowBtn = ""; // Handled by doctor treatment
   }
 
   const avatarHtml = (() => {
@@ -288,10 +280,6 @@ function rowHTML(appt) {
       </td>
       <td class="px-4 py-4">
         <div class="text-[12.5px] font-medium text-brand-800">${appt.serviceName}</div>
-        <div class="text-[11px] text-brand-400">
-          <i class="fa-solid fa-user-doctor text-[9px] mr-1"></i>
-          ${appt.doctorName || "Unassigned"}
-        </div>
       </td>
       <td class="px-4 py-4">
         ${renderSourceBadge(appt.source)}
@@ -317,7 +305,7 @@ function rowHTML(appt) {
                 ${status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ""}
                 ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ""}
                 ${
-                  status === "confirmed" || status === "arrived"
+                  status === "confirmed"
                     ? `
                   <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
                   <button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
@@ -452,11 +440,49 @@ function getBookFormState() {
 window.openBookModal = (skipReset = false) => {
   if (!skipReset) {
     // Reset fields to ensure clean state on open
-    const fields = ["book-patient-id", "book-patient-first-name", "book-patient-last-name", "book-patient-email", "book-patient-phone", "book-service", "book-doctor", "book-date", "book-time", "book-notes"];
+    const fields = ["book-patient-id", "book-patient-search", "book-patient-first-name", "book-patient-last-name", "book-patient-email", "book-patient-phone", "book-service", "book-doctor", "book-date", "book-time", "book-notes"];
     fields.forEach(f => {
       const el = document.getElementById(f);
-      if(el) el.value = "";
+      if(el) {
+          el.value = "";
+          if (el.tagName === 'INPUT') el.readOnly = false;
+      }
     });
+    
+    const dropdown = document.getElementById('patient-search-results');
+    if (dropdown) dropdown.classList.add('hidden');
+  }
+
+  // Bind patient search input
+  const searchInput = document.getElementById("book-patient-search");
+  if (searchInput && !searchInput.hasAttribute('data-bound')) {
+      searchInput.setAttribute('data-bound', 'true');
+      searchInput.addEventListener('input', (e) => {
+          const q = e.target.value.trim().toLowerCase();
+          const dropdown = document.getElementById('patient-search-results');
+          if (!q) {
+              dropdown.classList.add('hidden');
+              return;
+          }
+          
+          const matches = ALL_PATIENTS.filter(p => 
+              p.firstName?.toLowerCase().includes(q) || 
+              p.lastName?.toLowerCase().includes(q) || 
+              p.email?.toLowerCase().includes(q)
+          ).slice(0, 5);
+          
+          if (matches.length > 0) {
+              dropdown.innerHTML = matches.map(p => `
+                  <div class="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0" onclick="selectPatient('${p.id}')">
+                      <div class="text-[13px] font-bold text-brand">${p.firstName} ${p.lastName}</div>
+                      <div class="text-[10px] text-brand/40">${p.email}</div>
+                  </div>
+              `).join('');
+              dropdown.classList.remove('hidden');
+          } else {
+              dropdown.classList.add('hidden');
+          }
+      });
   }
 
   // Bind patient email blur event for auto-assign doctor
@@ -471,7 +497,6 @@ window.openBookModal = (skipReset = false) => {
           const docEl = document.getElementById('book-doctor');
           if (docEl && !docEl.value) { // only auto-assign if currently empty
             docEl.value = pastAppt.doctorId;
-            Toast.show("Auto-selected previous doctor.", "info");
           }
         }
       }
@@ -480,6 +505,43 @@ window.openBookModal = (skipReset = false) => {
 
   initialBookFormState = getBookFormState();
   showModal("book-modal");
+};
+
+window.selectPatient = (id) => {
+    const p = ALL_PATIENTS.find(x => x.id === id);
+    if (!p) return;
+    
+    const fields = {
+        'book-patient-id': p.id,
+        'book-patient-search': `${p.firstName} ${p.lastName}`,
+        'book-patient-first-name': p.firstName,
+        'book-patient-last-name': p.lastName,
+        'book-patient-email': p.email,
+        'book-patient-phone': p.phone || ''
+    };
+    
+    for (const [fid, val] of Object.entries(fields)) {
+        const el = document.getElementById(fid);
+        if (el) {
+            el.value = val;
+            if (fid !== 'book-patient-search' && fid !== 'book-patient-id' && fid !== 'book-patient-phone') {
+                el.readOnly = true;
+            }
+        }
+    }
+    
+    document.getElementById('patient-search-results').classList.add('hidden');
+}
+
+window.clearPatientSelection = () => {
+    const fields = ["book-patient-id", "book-patient-search", "book-patient-first-name", "book-patient-last-name", "book-patient-email", "book-patient-phone"];
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if(el) {
+          el.value = "";
+          el.readOnly = false;
+      }
+    });
 };
 
 window.closeBookModal = () => {

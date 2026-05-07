@@ -13,20 +13,25 @@ namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Treatments
         private readonly DoctorService _doctorService;
         private readonly AppointmentService _appointmentService;
         private readonly DentalServiceService _dentalServiceService;
+        private readonly ClinicService _settingsService;
 
         public TreatmentsModel(
             ProfileService profileService,
             InvoiceService invoiceService,
             DoctorService doctorService,
             AppointmentService appointmentService,
-            DentalServiceService dentalServiceService)
+            DentalServiceService dentalServiceService,
+            ClinicService settingsService)
             : base(profileService)
         {
             _invoiceService = invoiceService;
             _doctorService = doctorService;
             _appointmentService = appointmentService;
             _dentalServiceService = dentalServiceService;
+            _settingsService = settingsService;
         }
+
+        public ClinicSettings Settings { get; set; } = new();
 
         public List<Invoice> Invoices { get; set; } = new();
 
@@ -43,6 +48,7 @@ namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Treatments
         {
             // Load services for the invoice modal
             Services = await _dentalServiceService.GetAll(activeOnly: true);
+            Settings = await _settingsService.GetSettingsAsync() ?? new();
 
             if (CurrentUserRole == "doctor")
             {

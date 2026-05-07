@@ -17,10 +17,7 @@
 @import url("https://fonts.cdnfonts.com/css/optima");
 
 body {
-  font-family: "coolvetica", sans-serif;
-  font-size: 19px;
-  font-weight: 400;
-  letter-spacing: 0.03em;
+  font-family: "Aileron", sans-serif;
   color: var(--text-main);
   background-color: var(--bg-soft);
 }
@@ -30,7 +27,7 @@ h2,
 h3,
 h4,
 .brand-font {
-  font-family: "coolvetica", sans-serif;
+  font-family: "Aileron", sans-serif;
   font-weight: 500;
 }
 
@@ -82,12 +79,18 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 100;
+  z-index: 990;
   pointer-events: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
    max-width: 85dvw;
   margin-inline: auto;
+}
+
+@media (max-width: 610px) {
+  .nav-island-container {
+    max-width: 90dvw;
+  }
 }
 
 .nav-island {
@@ -108,11 +111,11 @@ html {
 
 .logo-island { padding: 4px 15px; }
 .links-island { padding: 8px 32px; }
-.cta-island { padding: 6px 12px 6px 8px; gap: 12px; }
+.cta-island { padding: 4px 12px 4px 8px; gap: 12px; }
 
 /* Scrolled State */
 .nav-scrolled .nav-island {
-  background: rgba(255, 255, 255, 0.4); /* Glassy white on scroll */
+  background: rgba(255, 255, 255, 0.6); /* Glassy white on scroll */
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
   border-color: rgba(255, 255, 255, 0.35);
@@ -132,12 +135,12 @@ html {
 
 .nav-link {
   position: relative;
-  font-size: 0.8rem;
-  font-weight: 400;
-  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: inherit;
-  padding: 8px 0;
+  padding: 5px 0;
   transition: opacity 0.3s ease;
 }
 
@@ -165,10 +168,12 @@ html {
 
 .nav-link.active {
   color: var(--primary);
+  filter: brightness(1.25);
 }
 
 .nav-scrolled .nav-link.active {
   color: var(--primary);
+   filter: brightness(1);
 }
 
 #profilePanel {
@@ -873,6 +878,21 @@ textarea.form-input {
 
 #track-2 {
   transform: translateX(-50%); 
+}
+
+@media (max-width: 580px) {
+  .marquee-track,
+  .marquee-track-reverse {
+    animation-duration: 20s; /* Faster on mobile */
+  }
+/*   
+  #track-1 {
+    transform: translateX(100%); 
+  } */
+  
+  #track-2 {
+    transform: translateX(-300%); 
+  }
 }
 
 .review-card {

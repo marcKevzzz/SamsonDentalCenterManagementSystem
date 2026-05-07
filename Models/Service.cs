@@ -143,6 +143,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("price")]
         public decimal Price { get; set; }
 
+        [Column("needs_xray")]
+        public bool NeedsXray { get; set; }
+
         // ← Store as object to let the Supabase client handle JSONB natively
         [Column("benefits")]
         public object? BenefitsRaw { get; set; }

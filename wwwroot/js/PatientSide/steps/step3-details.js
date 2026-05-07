@@ -77,7 +77,7 @@ function renderDetailsForm() {
   const dob = d.dob || p.dob || "";
 
   formContainer.innerHTML = `
-    <div class="bg-white rounded-2xl shadow-sm mb-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm mb-6">
 
         ${loggedIn ? `
         <!-- Logged-in: show account badge -->

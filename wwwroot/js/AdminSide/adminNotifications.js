@@ -30,7 +30,6 @@
     dot.classList.remove("hidden");
     fetchNotifications();
     fetchCounts();
-    Toast.show(`New: ${n.title}`, "info");
   });
 
   async function startSignalR() {

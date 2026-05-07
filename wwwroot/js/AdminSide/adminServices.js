@@ -66,6 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("modalSaveBtn")?.addEventListener("click", saveService);
   document
+    .getElementById("deleteCloseBtn")?.addEventListener("click", closeDeleteModal);
+  document
     .getElementById("cancelDeleteBtn")?.addEventListener("click", closeDeleteModal);
   document
     .getElementById("addBenefitBtn")?.addEventListener("click", () => addBenefitRow(""));
@@ -177,7 +179,6 @@ function cardHTML(s) {
       <!-- Category & Price -->
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2">
-          ${s.icon ? `<i class="fa-solid ${s.icon} text-primary text-[10px]"></i>` : ''}
           <span class="px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold border border-slate-100">${s.category}</span>
         </div>
         <span class="text-[12px] font-bold text-brand-900">₱${Number(s.price).toLocaleString()}</span>
@@ -214,12 +215,11 @@ function getSvcFormState() {
     t: document.getElementById("mTagline").value,
     s: document.getElementById("mSummary").value,
     p: document.getElementById("mPrice").value,
-    d: document.getElementById("mDuration").value,
     dm: document.getElementById("mDurationMinutes").value,
     bm: document.getElementById("mBufferMinutes").value,
     r: document.getElementById("mRecovery").value,
     a: document.getElementById("mIsActive").checked,
-    i: document.getElementById("mIcon").value,
+    nx: document.getElementById("mNeedsXray").checked,
     bLen: getBenefits().length,
     sLen: getSteps().length,
     fLen: getFaqs().length,
@@ -250,13 +250,12 @@ function openEditModal(id) {
   document.getElementById("mTagline").value = s.tagline;
   document.getElementById("mSummary").value = s.summary ?? "";
   document.getElementById("mPrice").value = s.price;
-  document.getElementById("mDuration").value = s.duration ?? "";
   document.getElementById("mDurationMinutes").value = s.durationMinutes ?? 60;
   document.getElementById("mBufferMinutes").value = s.bufferMinutes ?? 15;
   document.getElementById("mRecovery").value = s.recovery ?? "";
   document.getElementById("mIsActive").checked = s.isActive;
+  document.getElementById("mNeedsXray").checked = s.needsXray ?? false;
   document.getElementById("mHero").value = s.hero ?? "";
-  document.getElementById("mIcon").value = s.icon ?? "";
 
   document.getElementById("benefitsList").innerHTML = "";
   (s.benefits ?? []).forEach((b) => addBenefitRow(b));
@@ -329,12 +328,11 @@ async function saveService() {
       summary: document.getElementById("mSummary").value.trim(),
       hero: heroUrl, // Final URL (either old one or the one we just uploaded)
       price: document.getElementById("mPrice").value.trim(),
-      duration: document.getElementById("mDuration").value.trim(),
       durationMinutes: parseInt(document.getElementById("mDurationMinutes").value) || 60,
       bufferMinutes: parseInt(document.getElementById("mBufferMinutes").value) || 15,
       recovery: document.getElementById("mRecovery").value.trim(),
       isActive: document.getElementById("mIsActive").checked,
-      icon: document.getElementById("mIcon").value.trim(),
+      needsXray: document.getElementById("mNeedsXray").checked,
       benefits: getBenefits(),
       steps: getSteps(),
       faqs: getFaqs(),
@@ -436,7 +434,7 @@ function addBenefitRow(value = "") {
   row.className = "flex items-center gap-2 group/benefit";
   row.innerHTML = `
     <div class="relative flex-1">
-      <i class="fa-solid fa-check absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 text-[12px]"></i>
+      <i class="fa-solid fa-check absolute left-3 top-1/2 translate-half text-emerald-400 text-[12px]"></i>
       <input type="text" value="${value.replace(/"/g, "&quot;")}"
         placeholder="e.g. No downtime"
         class="benefit-input w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[12px] outline-none
@@ -460,7 +458,7 @@ function addStepRow(value = "") {
   row.className = "flex items-center gap-2 group/step";
   row.innerHTML = `
     <div class="relative flex-1">
-      <i class="fa-solid fa-arrow-right absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-[12px]"></i>
+      <i class="fa-solid fa-arrow-right absolute left-3 top-1/2 translate-half text-blue-400 text-[12px]"></i>
       <input type="text" value="${value.replace(/"/g, "&quot;")}"
         placeholder="e.g. Initial Consultation"
         class="step-input w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[12px] outline-none
@@ -569,11 +567,12 @@ function closeModal() {
   });
 }
 function clearModalFields() {
-  ["mName", "mTagline", "mSummary", "mPrice", "mDuration", "mDurationMinutes", "mBufferMinutes", "mRecovery", "mIcon"].forEach(
+  ["mName", "mTagline", "mSummary", "mPrice", "mDurationMinutes", "mBufferMinutes", "mRecovery"].forEach(
     (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("mCategory").value = "General Dentistry";
   document.getElementById("mIsActive").checked = true;
+  document.getElementById("mNeedsXray").checked = false;
   document.getElementById("benefitsList").innerHTML = "";
   document.getElementById("stepsList").innerHTML = "";
   document.getElementById("faqsList").innerHTML = "";

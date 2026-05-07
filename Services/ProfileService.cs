@@ -379,20 +379,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     }
                 }
 
-                // Add guests as dummy profiles
-                var guests = apptResponse.Models
-                    .Where(a => a.IsGuest || string.IsNullOrEmpty(a.PatientId))
-                    .GroupBy(a => new { a.PatientFirstName, a.PatientLastName })
-                    .Select(g => new Profile
-                    {
-                        Id = "guest_" + Guid.NewGuid().ToString().Substring(0, 8),
-                        FirstName = g.Key.PatientFirstName ?? "Guest",
-                        LastName = g.Key.PatientLastName ?? "",
-                        Role = "patient",
-                        IsActive = true
-                    });
-                
-                profiles.AddRange(guests);
+
 
                 return profiles;
             }

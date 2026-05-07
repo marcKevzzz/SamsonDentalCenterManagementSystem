@@ -163,8 +163,9 @@ function hydrateUI() {
                         <span class="px-3 py-1 ${statusClass} border rounded-full text-[10px] font-bold uppercase tracking-wider">${treat.status}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="openViewTreatmentModal('${treat.id}')" class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-eye text-xs"></i></button>
-                        <button class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-print text-xs"></i></button>
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="openViewTreatmentModal('${treat.id}')" title="View Treatment Notes" class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-notes-medical text-xs"></i></button>
+                        </div>
                     </td>
                 </tr>`;
         }).join('');
@@ -637,7 +638,7 @@ window.submitInvoice = async function() {
     // Vitals moved to medical info
 
     // Gather treatments
-    const treatmentBlocks = document.querySelectorAll('#treatment-body > div');
+    const treatmentBlocks = document.querySelectorAll('#treatment-body .treatment-block');
     const treatments = Array.from(treatmentBlocks).map(block => {
         const isXRay = block.querySelector('.inv-treat-is-xray').value === "true";
         let toothData = {};
@@ -742,6 +743,39 @@ function showToast(msg, type) {
     }
 }
 
+
+// Helper to render tooth chart for view modal
+function renderToothChart(toothData) {
+    if (!toothData) return '';
+    try {
+        const data = typeof toothData === 'string' ? JSON.parse(toothData) : toothData;
+        const renderViewRow = (start, end, reverse = false) => {
+            const arr = [];
+            if (reverse) for (let i = start; i >= end; i--) arr.push(i);
+            else for (let i = start; i <= end; i++) arr.push(i);
+            
+            return arr.map(t => {
+                const status = data[t] || 'Healthy';
+                return `<div class="w-5 h-7 text-[8px] font-bold rounded border flex items-center justify-center ${getToothColorClass(status)}" title="Tooth ${t}: ${status}">${t}</div>`;
+            }).join('');
+        };
+
+        return `
+            <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="flex items-center justify-between mb-3">
+                    <h6 class="text-[10px] font-bold text-brand uppercase tracking-wider">Odontogram Snapshot</h6>
+                    <span class="text-[8px] text-slate-400">Status at time of treatment</span>
+                </div>
+                <div class="flex flex-col gap-1 items-center">
+                    <div class="flex gap-1 flex-wrap justify-center">${renderViewRow(1, 16)}</div>
+                    <div class="w-full h-px bg-slate-200 my-0.5"></div>
+                    <div class="flex gap-1 flex-wrap justify-center">${renderViewRow(32, 17, true)}</div>
+                </div>
+            </div>
+        `;
+    } catch(e) { return ''; }
+}
+
 window.openViewTreatmentModal = function(treatmentId) {
     const treat = RECENT_TREATMENTS.find(t => t.id === treatmentId);
     if (!treat) return;
@@ -757,7 +791,7 @@ window.openViewTreatmentModal = function(treatmentId) {
     // Render Treatment
     const container = document.getElementById('view-treat-body');
     container.innerHTML = `
-        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-3">
+        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-4">
             <div class="flex items-center justify-between">
                 <h5 class="text-[13px] font-bold text-brand flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-[10px]">1</span>
@@ -765,16 +799,48 @@ window.openViewTreatmentModal = function(treatmentId) {
                 </h5>
                 <span class="px-2 py-0.5 ${treat.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} text-[9px] font-bold rounded-md uppercase tracking-wider">${treat.status}</span>
             </div>
+
+            ${treat.toothNumbers ? `
+            <div class="bg-white/50 p-3 rounded-xl border border-slate-100/50">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Affected Teeth</label>
+                <div class="flex flex-wrap gap-2">
+                    ${treat.toothNumbers.split(',').map(n => `
+                        <div class="w-8 h-10 border border-slate-200 bg-white rounded-md flex flex-col items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-tooth text-slate-300 text-[10px] mb-0.5"></i>
+                            <span class="text-[9px] font-bold text-brand">${n.trim()}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+
+            ${renderToothChart(treat.toothData)}
+
             ${treat.diagnosis ? `
             <div class="bg-white/50 p-3 rounded-xl border border-slate-100/50">
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Diagnosis</label>
                 <p class="text-[12px] text-brand-600 italic">${treat.diagnosis}</p>
             </div>
             ` : ''}
+
             <div class="text-[12px] text-brand-600 bg-white/50 p-3 rounded-xl border border-slate-100/50 italic">
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Procedure Details</label>
                 ${treat.procedureDetails || "No specific procedure details recorded."}
             </div>
+
+            ${treat.xrayData ? `
+            <div class="mt-4">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Radiograph / X-Ray</label>
+                <div class="rounded-2xl border border-slate-200 overflow-hidden bg-black flex items-center justify-center aspect-video">
+                    <img src="${treat.xrayData}" class="max-w-full max-h-full object-contain" alt="Treatment X-Ray" />
+                </div>
+                <div class="mt-2 text-center">
+                    <a href="${treat.xrayData}" download="XRay_${treat.id.slice(0,8)}.png" class="text-[10px] font-bold text-primary hover:underline">
+                        <i class="fa-solid fa-download mr-1"></i> Download Original
+                    </a>
+                </div>
+            </div>
+            ` : ''}
         </div>
     `;
 
@@ -791,4 +857,84 @@ window.closeViewTreatmentModal = function() {
     setTimeout(() => {
         document.getElementById('view-treatment-modal').classList.add('hidden');
     }, 300);
+};
+
+window.viewInvoice = async function(id) {
+    const modal = document.getElementById('receipt-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    
+    // Show loading state if needed
+    document.getElementById('receipt-id').innerText = "#" + id.substring(0, 8).toUpperCase();
+    
+    try {
+        const res = await fetch(`/api/admin/data/invoices/${id}`);
+        const data = await res.json();
+        
+        if (data.ok && data.invoice) {
+            const inv = data.invoice;
+            
+            // Populate Modal
+            document.getElementById('receipt-patient-name').innerText = inv.patient?.fullName || "Guest";
+            document.getElementById('receipt-patient-email').innerText = inv.patient?.email || "No email";
+            document.getElementById('receipt-date').innerText = new Date(inv.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+            document.getElementById('receipt-doctor-name').innerText = "Dr. " + (inv.doctor?.profile?.lastName || "TBD");
+            
+            // Status Badge
+            const statusBadge = document.getElementById('receipt-status-badge');
+            statusBadge.innerText = inv.status;
+            statusBadge.className = `px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${
+                inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                (inv.status === 'cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100')
+            }`;
+
+            // Items
+            const itemsList = document.getElementById('receipt-items-list');
+            itemsList.innerHTML = (inv.items || []).map(item => `
+                <tr>
+                    <td class="py-3">
+                        <p class="text-[11px] font-bold text-brand">${item.description}</p>
+                        <p class="text-[9px] text-brand/30">Qty: ${item.quantity} × ₱${parseFloat(item.unitPrice).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
+                    </td>
+                    <td class="py-3 text-right text-[11px] font-bold text-brand">
+                        ₱${parseFloat(item.totalPrice).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                    </td>
+                </tr>
+            `).join('');
+
+            // Totals
+            document.getElementById('receipt-subtotal').innerText = "₱" + parseFloat(inv.totalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+            document.getElementById('receipt-discount').innerText = "-₱" + parseFloat(inv.discountAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+            document.getElementById('receipt-total').innerText = "₱" + parseFloat(inv.finalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+        }
+    } catch (err) {
+        console.error('[ViewInvoice Error]', err);
+        showToast('Failed to load invoice details.', 'danger');
+    }
+};
+
+window.closeReceiptModal = function() {
+    document.getElementById('receipt-modal').classList.add('hidden');
+};
+
+window.exportReceipt = async function(format) {
+    const element = document.getElementById('receipt-capture');
+    const invId = document.getElementById('receipt-id').innerText;
+    
+    if (format === 'pdf') {
+        const opt = {
+            margin: 0.5,
+            filename: `SamsonDental_Receipt_${invId}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 3, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    } else if (format === 'image') {
+        const canvas = await html2canvas(element, { scale: 3, useCORS: true });
+        const link = document.createElement('a');
+        link.download = `SamsonDental_Receipt_${invId}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
 };

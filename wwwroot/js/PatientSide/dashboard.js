@@ -38,20 +38,27 @@ setTimeout(() => {
   if (ring) ring.style.strokeDashoffset = "33"; /* 220 * (1 - 0.85) = 33 */
 }, 400);
 
-document.getElementById("getDirections").addEventListener("click", () => {
-  Toast.show("Action confirmed!", "success");
-});
-document.getElementById("viewAll").addEventListener("click", () => {
-  Modal.open({
-    title: "Delete Record",
-    message: "This action cannot be undone.",
-    type: "info",
-    confirmText: "Delete",
-    onConfirm: () => {
-      Toast.show("Deleted successfully", "success");
-    },
+const getDirectionsBtn = document.getElementById("getDirections");
+if (getDirectionsBtn) {
+  getDirectionsBtn.addEventListener("click", () => {
+    Toast.show("Action confirmed!", "success");
   });
-});
+}
+
+const viewAllBtn = document.getElementById("viewAll");
+if (viewAllBtn) {
+  viewAllBtn.addEventListener("click", () => {
+    Modal.open({
+      title: "Delete Record",
+      message: "This action cannot be undone.",
+      type: "info",
+      confirmText: "Delete",
+      onConfirm: () => {
+        Toast.show("Deleted successfully", "success");
+      },
+    });
+  });
+}
 
 /* Shadow Profile Logic */
 document.addEventListener("DOMContentLoaded", async () => {

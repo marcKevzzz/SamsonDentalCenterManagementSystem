@@ -2,11 +2,10 @@
 const svcSearch = document.getElementById("svcSearch");
 const categoryTabs = document.querySelectorAll(".acat-tab");
 const clearSearchBtn = document.getElementById("clearSearchBtn");
-const sections = {
-  all: null,
-  "General Dentistry": document.getElementById("section-general"),
-  Cosmetic: document.getElementById("section-cosmetic"),
-  Specialized: document.getElementById("section-specialized"),
+const sectionIds = {
+  "General Dentistry": "section-general",
+  Cosmetic: "section-cosmetic",
+  Specialized: "section-specialized",
 };
 
 /* ── Initialization ── */
@@ -118,28 +117,40 @@ function filterServices(cat) {
   );
 
   // 2. Logic: Show/Hide Sections
-  const sectionList = Object.keys(sections).filter((k) => k !== "all");
+  const sectionKeys = Object.keys(sectionIds);
 
   if (cat === "all") {
-    sectionList.forEach((key) => (sections[key].style.display = ""));
+    sectionKeys.forEach((key) => {
+      const el = document.getElementById(sectionIds[key]);
+      if (el) el.style.display = "";
+    });
     // Reset hidden cards
     document
       .querySelectorAll(".service-card-item")
       .forEach((el) => el.classList.remove("hidden-card"));
   } else {
-    sectionList.forEach((key) => {
-      sections[key].style.display = key === cat ? "" : "none";
+    sectionKeys.forEach((key) => {
+      const el = document.getElementById(sectionIds[key]);
+      if (el) el.style.display = key === cat ? "" : "none";
     });
   }
 
+  // Refresh ScrollTrigger to recalculate positions after layout change
+  if (typeof ScrollTrigger !== "undefined") {
+    setTimeout(() => ScrollTrigger.refresh(), 50);
+  }
+
   // 3. UI: Scroll to target
-  if (cat !== "all" && sections[cat]) {
-    setTimeout(() => {
-      window.scrollTo({
-        top: sections[cat].offsetTop - 140, // Offset for sticky header
-        behavior: "smooth",
-      });
-    }, 50);
+  if (cat !== "all" && sectionIds[cat]) {
+    const targetEl = document.getElementById(sectionIds[cat]);
+    if (targetEl) {
+      setTimeout(() => {
+        window.scrollTo({
+          top: targetEl.offsetTop - 140, // Offset for sticky header
+          behavior: "smooth",
+        });
+      }, 100);
+    }
   }
 
   // Clear search input when switching categories for better UX
@@ -185,6 +196,11 @@ function searchServices(val) {
 
     section.style.display = visibleInThisSection || query === "" ? "" : "none";
   });
+
+  // Refresh ScrollTrigger to recalculate positions after layout change
+  if (typeof ScrollTrigger !== "undefined") {
+    setTimeout(() => ScrollTrigger.refresh(), 50);
+  }
 
   // 4. Toggle Empty State
   if (noResults) {

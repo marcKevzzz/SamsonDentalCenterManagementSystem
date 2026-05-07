@@ -102,11 +102,11 @@ Layout = "AdminSide/_StaffLayout";
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                     <h3 class="font-display text-[13.5px] font-bold text-brand">Patient Visits</h3>
-                    <p class="text-[10.5px] text-brand-500 mt-0.5">Weekly overview — March 2026</p>
+                    <p class="text-[10.5px] text-brand-500 mt-0.5">Weekly overview — @DateTime.Now.ToString("MMMM yyyy")</p>
                 </div>
                 <div class="flex gap-1.5">
-                    <button class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white">Week</button>
-                    <button
+                    <button id="btn-visits-week" class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white">Week</button>
+                    <button id="btn-visits-month"
                         class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors">Month</button>
                 </div>
             </div>
@@ -142,9 +142,6 @@ Layout = "AdminSide/_StaffLayout";
                             <th
                                 class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display">
                                 Patient</th>
-                            <th
-                                class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display">
-                                Doctor</th>
                             <th
                                 class="text-left text-[10px] font-bold uppercase tracking-wider text-brand px-4 py-2.5 font-display">
                                 Service</th>

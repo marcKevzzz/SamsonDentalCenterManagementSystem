@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReports();
 
     document.getElementById('btn-update-reports').addEventListener('click', loadReports);
+    document.getElementById('btn-print-report')?.addEventListener('click', printReport);
 });
 
 function initDatePicker() {
@@ -182,4 +183,21 @@ function renderProviderTable(providers) {
             </td>
         </tr>
     `).join('');
+}
+
+function printReport() {
+    const start = document.getElementById('report-start')?.value;
+    const end = document.getElementById('report-end')?.value;
+    const content = document.getElementById('reports-content');
+    
+    if (!content) return;
+
+    // We can use window.print() but it needs some CSS handling to look good.
+    // For a more professional feel, we'll use html2pdf if available or just a clean print.
+    const originalTitle = document.title;
+    document.title = `SamsonDental_Report_${start}_to_${end}`;
+    
+    window.print();
+    
+    document.title = originalTitle;
 }

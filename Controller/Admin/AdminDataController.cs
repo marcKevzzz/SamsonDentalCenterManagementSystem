@@ -221,6 +221,56 @@ public class AdminDataController : ControllerBase
         }
     }
 
+    [HttpGet("invoices/{id}")]
+    public async Task<IActionResult> GetInvoice(string id)
+    {
+        try
+        {
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+            if (invoice == null) return NotFound(new { ok = false, error = "Invoice not found" });
+
+            return Ok(new
+            {
+                ok = true,
+                invoice = new
+                {
+                    id = invoice.Id,
+                    appointmentId = invoice.AppointmentId,
+                    patientId = invoice.PatientId,
+                    patient = invoice.Patient != null ? new {
+                        fullName = $"{invoice.Patient.FirstName} {invoice.Patient.LastName}",
+                        email = invoice.Patient.Email,
+                        phone = invoice.Patient.PhoneNumber,
+                        address = invoice.Patient.Address,
+                        avatarUrl = invoice.Patient.AvatarUrl
+                    } : null,
+                    doctorId = invoice.DoctorId,
+                    doctor = invoice.Doctor != null ? new {
+                        fullName = $"{invoice.Doctor.Title} {invoice.Doctor.Profile?.FirstName} {invoice.Doctor.Profile?.LastName}".Trim(),
+                        profile = new { lastName = invoice.Doctor.Profile?.LastName }
+                    } : null,
+                    totalAmount = invoice.TotalAmount,
+                    discountAmount = invoice.DiscountAmount,
+                    finalAmount = invoice.FinalAmount,
+                    status = invoice.Status,
+                    createdAt = invoice.CreatedAt,
+                    items = invoice.Items?.Select(item => new
+                    {
+                        id = item.Id,
+                        description = item.Description,
+                        unitPrice = item.UnitPrice,
+                        quantity = item.Quantity,
+                        totalPrice = item.TotalPrice,
+                    }).ToList()
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
     [HttpGet("treatments")]
     public async Task<IActionResult> GetTreatments()
     {
@@ -236,12 +286,15 @@ public class AdminDataController : ControllerBase
                     status = t.Status,
                     procedureDetails = t.ProcedureDetails,
                     diagnosis = t.Diagnosis,
+                    toothNumbers = t.ToothNumbers,
                     patientName = t.Invoice?.Patient != null
                         ? $"{t.Invoice.Patient.FirstName} {t.Invoice.Patient.LastName}"
                         : "Unknown",
                     patientAvatarUrl = t.Invoice?.Patient?.AvatarUrl,
                     doctorId = t.Invoice?.DoctorId,
                     amount = t.Invoice?.FinalAmount ?? 0,
+                    toothData = t.ToothData,
+                    xrayData = t.XrayData,
                 })
                 .ToList();
             return Ok(new { ok = true, data = dtos });
@@ -276,6 +329,15 @@ public class AdminDataController : ControllerBase
         try
         {
             var data = await _inquiryService.GetAllInquiriesAsync();
+
+            var currentUserId = User.FindFirst("sub")?.Value;
+            var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
+
+            if (currentUserRole == "doctor" && !string.IsNullOrEmpty(currentUserId))
+            {
+                data = data.Where(i => i.AssignedDoctorId == currentUserId).ToList();
+            }
+
             var dtos = data.Select(i => new
                 {
                     id = i.Id,
@@ -288,8 +350,10 @@ public class AdminDataController : ControllerBase
                     subject = i.Subject,
                     status = i.Status,
                     isRead = i.IsRead,
+                    assignedDoctorId = i.AssignedDoctorId,
                     createdAt = i.CreatedAt,
                     updatedAt = i.UpdatedAt,
+                    isFromStaff = i.IsFromStaff,
                     patient = i.Patient != null
                         ? new
                         {
@@ -337,6 +401,22 @@ public class AdminDataController : ControllerBase
             string id = body.GetProperty("id").GetString() ?? "";
             string status = body.GetProperty("status").GetString() ?? "";
             await _inquiryService.UpdateStatusAsync(id, status);
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { ok = false, error = ex.Message });
+        }
+    }
+
+    [HttpPost("inquiries/assign")]
+    public async Task<IActionResult> AssignInquiry([FromBody] System.Text.Json.JsonElement body)
+    {
+        try
+        {
+            string id = body.GetProperty("id").GetString() ?? "";
+            string? doctorId = body.TryGetProperty("doctorId", out var prop) && prop.ValueKind != System.Text.Json.JsonValueKind.Null ? prop.GetString() : null;
+            await _inquiryService.UpdateAssignedDoctorAsync(id, doctorId);
             return Ok(new { ok = true });
         }
         catch (Exception ex)
@@ -491,6 +571,16 @@ public class AdminDataController : ControllerBase
                 weeklyVisits[days[i]] = count;
             }
 
+            // Calculate Monthly Visits (Days of the current month)
+            var monthlyVisits = new Dictionary<string, int>();
+            int daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+            for (int d = 1; d <= daysInMonth; d++)
+            {
+                var day = new DateTime(today.Year, today.Month, d);
+                var count = appointments.Count(a => a.AppointmentDate.Date == day && a.Status != "cancelled" && a.Status != "no_show");
+                monthlyVisits[d.ToString()] = count;
+            }
+
             // Calculate Department Load
             var departmentLoad = new Dictionary<string, int>();
             var activeAppointments = appointments.Where(a => a.Status != "completed" && a.Status != "cancelled" && a.Status != "no_show").ToList();
@@ -532,6 +622,7 @@ public class AdminDataController : ControllerBase
                 TodayAppointments = appointments.Count(a => a.AppointmentDate.Date == today),
                 MonthlyRevenue = currentMonthInvoices.Sum(i => i.FinalAmount),
                 WeeklyVisits = weeklyVisits,
+                MonthlyVisits = monthlyVisits,
                 DepartmentLoad = departmentLoad,
                 MonthlyRevenueTrend = monthlyRevenueTrend,
                 KeyMetrics = keyMetrics

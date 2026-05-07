@@ -27,17 +27,17 @@ ViewData["Title"] = "Services page";
             <!-- Right Stats -->
             <div class="flex gap-6 shrink-0">
                 <div class="text-center">
-                    <div class="brand-font font-bold text-white text-2xl">12</div>
+                    <div class="brand-font font-bold text-white text-2xl">@Model.Services.Count</div>
                     <div class="text-xs text-white/40 uppercase">Services</div>
                 </div>
                 <div class="w-px bg-white/10"></div>
                 <div class="text-center">
-                    <div class="brand-font font-bold text-white text-2xl">3</div>
+                    <div class="brand-font font-bold text-white text-2xl">@Model.Services.Select(s => s.Category).Distinct().Count()</div>
                     <div class="text-xs text-white/40 uppercase">Specialties</div>
                 </div>
                 <div class="w-px bg-white/10"></div>
                 <div class="text-center">
-                    <div class="brand-font font-bold text-white text-2xl">16+</div>
+                    <div class="brand-font font-bold text-white text-2xl">@(DateTime.Now.Year - 1964)+</div>
                     <div class="text-xs text-white/40 uppercase">Years</div>
                 </div>
             </div>
@@ -48,7 +48,7 @@ ViewData["Title"] = "Services page";
 
 
 <!-- ═════════════════ FILTER BAR ═════════════════ -->
-<div id="filterBar" class="sticky top-[68px] z-40 border-b border-gray-200 px-2 md:px-12 py-4 bg-white backdrop-blur">
+<div id="filterBar" class="sticky top-[72px] z-40 border-b border-gray-200 px-2 md:px-12 py-4 bg-white backdrop-blur">
 
     <div class="max-w mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4 lg:px-8">
 

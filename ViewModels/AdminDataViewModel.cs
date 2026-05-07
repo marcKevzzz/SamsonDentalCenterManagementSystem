@@ -53,6 +53,9 @@ public class AdminStats
     [JsonPropertyName("weeklyVisits")]
     public Dictionary<string, int> WeeklyVisits { get; set; } = new();
 
+    [JsonPropertyName("monthlyVisits")]
+    public Dictionary<string, int> MonthlyVisits { get; set; } = new();
+
     [JsonPropertyName("departmentLoad")]
     public Dictionary<string, int> DepartmentLoad { get; set; } = new();
 

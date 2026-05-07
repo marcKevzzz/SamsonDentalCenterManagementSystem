@@ -1,328 +1,408 @@
 @page "/Admin/Billing"
 @model AdminBillingModel
 @{
-    Layout = "AdminSide/_StaffLayout";
     ViewData["Title"] = "Billing";
+    Layout = "AdminSide/_StaffLayout";
 }
 
-<div class="page p-6">
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+
+<div id="page-transactions" class="page p-4 md:p-6">
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h2 class="text-2xl font-bold text-brand tracking-tight">Billing & Invoices</h2>
-            <p class="text-[13px] text-brand/40 mt-1">Manage and track your generated treatment billings</p>
+            <h2 class="font-display text-xl font-bold text-brand">Billing</h2>
+            <p class="text-[12px] text-muted mt-0.5">Manage all billing and payment records</p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="relative min-w-[200px]">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 translate-half text-slate-400 text-xs"></i>
-                <input type="text" id="invoiceSearch" placeholder="Search patient..." 
-                    class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all" />
-            </div>
-            <select id="statusFilter" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-brand/70 outline-none focus:border-primary transition-all">
-                <option value="">All Status</option>
-                <option value="paid">Paid</option>
-                <option value="pending">Pending</option>
-                <option value="partial">Partial</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
-            <span class="px-4 py-2 bg-brand-50 border border-brand-100 rounded-xl text-[12px] font-bold text-brand">
-                Total: @Model.Invoices.Count
-            </span>
+        <button id="addTxnBtn"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New Billing Record
+        </button>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Total Revenue</p>
+            <p class="text-[22px] font-bold text-brand font-display" id="summaryRevenue">₱0.00</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Billing Records</p>
+            <p class="text-[22px] font-bold text-brand font-display" id="summaryCount">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Paid</p>
+            <p class="text-[22px] font-bold text-emerald-600 font-display" id="summaryPaid">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-muted font-display mb-1">Pending</p>
+            <p class="text-[22px] font-bold text-amber-500 font-display" id="summaryPending">0</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto overflow-y-hidden">
-        <table class="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-                <tr class="bg-slate-50/50 border-b border-slate-100">
-                    <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest">Date</th>
-                    <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest">Patient</th>
-                    <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest">Services</th>
-                    <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest text-right">Amount</th>
-                    <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest text-center">Status</th>
-                    <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-50">
-                @if (!Model.Invoices.Any())
-                {
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+
+        <div class="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100">
+            <div class="relative flex-1 min-w-[140px] max-w-[240px]">
+                <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input id="searchInput" placeholder="Search patient or service…"
+                    class="w-full pl-7 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary/40" />
+            </div>
+            <select id="statusFilter"
+                class="px-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-muted outline-none">
+                <option value="">All Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Partial">Partial</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <select id="categoryFilter"
+                class="px-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-muted outline-none">
+                <option value="">All Categories</option>
+                <option value="General Dentistry">General Dentistry</option>
+                <option value="Cosmetic">Cosmetic</option>
+                <option value="Specialized">Specialized</option>
+            </select>
+            <span class="ml-auto text-[11px] text-slate-400" id="txnCount">0 records</span>
+        </div>
+
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[900px] table-fixed">
+                <colgroup>
+                    <col class="w-[18%]" />
+                    <col class="w-[16%]" />
+                    <col class="w-[11%]" />
+                    <col class="w-[12%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[10%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[6%]" />
+                    <col class="w-[7%]" />
+                </colgroup>
+                <thead class="bg-slate-50">
                     <tr>
-                        <td colspan="6" class="px-6 py-20 text-center">
-                            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                                <i class="fa-solid fa-file-invoice text-slate-200 text-2xl"></i>
-                            </div>
-                            <p class="text-[13px] text-brand/40 font-medium">No invoices found yet.</p>
-                        </td>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Patient</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Service</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Category</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Doctor</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Fee</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Paid</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Method</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Status</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Date</th>
+                        <th
+                            class="text-left text-[10px] font-bold uppercase tracking-wider text-muted px-4 py-2.5 font-display">
+                            Actions</th>
                     </tr>
-                }
-                @foreach (var invoice in Model?.Invoices ?? Enumerable.Empty<SamsonDentalCenterManagementSystem.Models.Invoice>())
-                {
-                    <tr class="hover:bg-slate-50/50 transition-colors group">
-                        <td class="px-6 py-4">
-                            <div class="text-[13px] font-bold text-brand">@invoice.CreatedAt.ToString("MMM dd, yyyy")</div>
-                            <div class="text-[10px] text-brand/40">@invoice.CreatedAt.ToString("hh:mm tt")</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full overflow-hidden shadow-sm flex-shrink-0">
-                                    @if (!string.IsNullOrEmpty(invoice.Patient?.AvatarUrl))
-                                    {
-                                        <img src="@invoice.Patient.AvatarUrl" class="w-full h-full object-cover" />
-                                    }
-                                    else
-                                    {
-                                        var name = invoice.Patient?.FullName ?? "P";
-                                        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                                        var initials = parts.Length > 1 
-                                            ? $"{parts[0][0]}{parts[^1][0]}".ToUpper() 
-                                            : (parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "P");
-                                        <div class="w-full h-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">@initials</div>
-                                    }
-                                </div>
-                                <div>
-                                    <div class="text-[13px] font-bold text-brand">@(invoice.Patient?.FullName ?? "Unknown Patient")</div>
-                                    <div class="text-[10px] text-brand/40">#@invoice.Id.Substring(0, 8)</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap gap-1 max-w-[200px]">
-                                @foreach (var item in invoice.Items?.Take(2) ?? Enumerable.Empty<SamsonDentalCenterManagementSystem.Models.InvoiceItem>())
-                                {
-                                    <span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand/70 font-medium">@item.Description</span>
-                                }
-                                @if ((invoice.Items?.Count ?? 0) > 2)
-                                {
-                                    <span class="px-2 py-0.5 bg-brand-50 rounded-md text-[10px] text-brand/70 font-bold">+@(invoice.Items.Count - 2)</span>
-                                }
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="text-[13px] font-bold text-brand">₱@invoice.FinalAmount.ToString("N2")</div>
-                            @if (invoice.DiscountAmount > 0)
-                            {
-                                <div class="text-[10px] text-emerald-500 font-bold">-₱@invoice.DiscountAmount.ToString("N2") Disc.</div>
-                            }
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            @if (invoice.Status == "paid")
-                            {
-                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Paid</span>
-                            }
-                            else if (invoice.Status == "cancelled")
-                            {
-                                <span class="px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Cancelled</span>
-                            }
-                            else if (invoice.Status == "partial")
-                            {
-                                <span title="Partial: Procedure done, payment partially collected" class="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-[10px] font-bold uppercase tracking-wider cursor-help">Partial</span>
-                            }
-                            else
-                            {
-                                <span class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Pending</span>
-                            }
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            @if (invoice.Status != "paid" && invoice.Status != "cancelled")
-                            {
-                                <button onclick="openPaymentModal('@invoice.Id', '@(invoice.Patient?.FullName ?? "Patient")', @invoice.FinalAmount)" 
-                                    class="w-8 h-8 rounded-lg border border-emerald-100 text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all mr-1" title="Confirm Payment">
-                                    <i class="fa-solid fa-check text-xs"></i>
-                                </button>
-                            }
-                            <button onclick="viewInvoice('@invoice.Id')" class="w-8 h-8 rounded-lg border border-slate-100 text-brand/40 hover:text-brand hover:border-brand/20 transition-all">
-                                <i class="fa-solid fa-eye text-xs"></i>
-                            </button>
-                            <button onclick="window.print()" class="w-8 h-8 rounded-lg border border-slate-100 text-brand/40 hover:text-brand hover:border-brand/20 transition-all">
-                                <i class="fa-solid fa-print text-xs"></i>
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="txnTableBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+
+            <div id="emptyState" class="hidden py-16 text-center">
+                <div class="text-slate-300 text-4xl mb-3">🧾</div>
+                <p class="text-[13px] text-slate-400 font-medium">No transactions found</p>
+                <p class="text-[11px] text-slate-300 mt-1">Try adjusting your search or filters</p>
+            </div>
+        </div>
+
+        <div id="paginationBar"
+            class="hidden flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100">
+            <span class="text-[10.5px] text-muted" id="paginationInfo"></span>
+            <div class="flex gap-1.5" id="paginationBtns"></div>
+        </div>
+    </div>
+</div>
+
+<div id="txnModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <div>
+                <h3 id="modalTitle" class="font-display font-bold text-[15px] text-brand">New Billing Record</h3>
+                <p class="text-[11px] text-muted mt-0.5">Fill in details provided by the doctor</p>
+            </div>
+            <button id="closeModalBtn" class="text-slate-400 hover:text-slate-700 transition-colors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-4">
+            <input type="hidden" id="modalTxnId" />
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Patient <span
+                        class="text-red-400">*</span></label>
+                <select id="mPatient"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                    <option value="">Select patient…</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Service Name <span
+                            class="text-red-400">*</span></label>
+                    <input id="mServiceName" type="text" placeholder="e.g. Teeth Cleaning"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Category</label>
+                    <select id="mCategory"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="General Dentistry">General Dentistry</option>
+                        <option value="Cosmetic">Cosmetic</option>
+                        <option value="Specialized">Specialized</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Doctor / Dentist</label>
+                <input id="mDoctorName" type="text" placeholder="e.g. Dr. Santos"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Service Fee (₱) <span
+                            class="text-red-400">*</span></label>
+                    <input id="mFee" type="number" min="0" step="0.01" placeholder="0.00"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Discount (₱)</label>
+                    <input id="mDiscount" type="number" min="0" step="0.01" placeholder="0.00"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Amount Paid (₱)</label>
+                    <input id="mAmountPaid" type="number" min="0" step="0.01" placeholder="0.00"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl px-4 py-3 flex items-center justify-between">
+                <span class="text-[12px] text-muted font-medium">Balance Due</span>
+                <span id="balancePreview" class="text-[14px] font-bold text-brand font-display">₱0.00</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Payment Method</label>
+                    <select id="mPaymentMethod"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="Cash">Cash</option>
+                        <option value="GCash">GCash</option>
+                        <option value="Maya">Maya</option>
+                        <option value="Card">Card</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Status</label>
+                    <select id="mStatus"
+                        class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10">
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-medium text-slate-600 tracking-wide">Notes</label>
+                <textarea id="mNotes" rows="2" placeholder="Additional notes from doctor or receptionist…"
+                    style="resize:none"
+                    class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"></textarea>
+            </div>
+
+            <p id="modalError" class="hidden text-[12px] text-red-500 font-medium"></p>
+        </div>
+
+        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
+            <button id="cancelModalBtn"
+                class="px-4 py-2 text-[12.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                Cancel
+            </button>
+            <button id="modalSaveBtn"
+                class="px-5 py-2 text-[12.5px] font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors">
+                Save Billing Record
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+        </div>
+        <h3 class="font-display font-bold text-[15px] text-brand mb-1">Delete Billing Record</h3>
+        <p class="text-[13px] text-slate-500 mb-5">
+            Are you sure you want to delete this billing record for <strong id="deleteTxnName"></strong>? This cannot be
+            undone.
+        </p>
+        <div class="flex gap-2 justify-end">
+            <button id="cancelDeleteBtn"
+                class="px-4 py-2 text-[12.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                Cancel
+            </button>
+            <button id="confirmDeleteBtn"
+                class="px-5 py-2 text-[12.5px] font-medium text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">
+                Delete
+            </button>
+        </div>
     </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════════════════ -->
-<!-- PAYMENT MODAL                                                            -->
+<!-- RECEIPT VIEW MODAL                                                       -->
 <!-- ══════════════════════════════════════════════════════════════════════════ -->
-<div id="payment-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closePaymentModal()"></div>
+<div id="receipt-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeReceiptModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto transform transition-all duration-300">
-            <div class="p-8">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-xl font-bold text-brand">Confirm Payment</h3>
-                        <p id="payment-patient-name" class="text-[12px] text-brand/40 mt-1 font-medium"></p>
-                    </div>
-                    <button onclick="closePaymentModal()" class="text-slate-300 hover:text-slate-600">
+        <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto transform transition-all duration-500 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-brand font-display">Invoice Receipt</h3>
+                    <p class="text-[11px] text-brand/40 font-bold uppercase tracking-widest mt-1">Digital Preview & Export</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportReceipt('pdf')" class="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-[12px] font-bold hover:opacity-90 transition-all shadow-lg shadow-brand/20">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                    </button>
+                    <button onclick="exportReceipt('image')" class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-brand rounded-xl text-[12px] font-bold hover:bg-slate-200 transition-all">
+                        <i class="fa-solid fa-image"></i> Image
+                    </button>
+                    <div class="w-px h-6 bg-slate-200 mx-1"></div>
+                    <button onclick="closeReceiptModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-300 hover:text-slate-600 transition-colors">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
+            </div>
 
-                <div class="space-y-4">
-                    <input type="hidden" id="pay-invoice-id" />
-                    <input type="hidden" id="pay-invoice-total" />
+            <!-- Receipt Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+                <!-- Actual Receipt Template (This is what will be captured) -->
+                <div id="receipt-capture" class="bg-white p-12 shadow-sm rounded-2xl mx-auto max-w-[500px] border border-slate-100 relative overflow-hidden">
+                    <!-- Premium Background Accent -->
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
                     
-                    <div>
-                        <label class="block text-[11px] font-bold text-brand uppercase tracking-wider mb-1.5">Amount Paid (₱)</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 translate-half text-slate-400 font-bold">₱</span>
-                            <input type="number" id="pay-amount" step="0.01" min="0.01"
-                                class="w-full pl-9 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[15px] font-bold text-brand outline-none focus:bg-white focus:border-primary transition-all" />
+                    <!-- Clinic Header -->
+                    <div class="text-center mb-10 relative">
+                        <img src="@(string.IsNullOrEmpty(Model.Settings.LogoUrl) ? "/images/logo.svg" : Model.Settings.LogoUrl)" class="w-16 h-16 mx-auto mb-4 object-contain" />
+                        <h1 class="text-xl font-bold text-brand uppercase tracking-tighter">@Model.Settings.ClinicName</h1>
+                        <p class="text-[10px] text-brand/50 font-medium max-w-[240px] mx-auto leading-relaxed mt-1">@Model.Settings.LocationAddress</p>
+                        <div class="flex items-center justify-center gap-4 mt-3 text-[9px] font-bold text-brand/40 uppercase tracking-widest">
+                            <span><i class="fa-solid fa-phone mr-1"></i> @Model.Settings.ContactPhone</span>
+                            <span><i class="fa-solid fa-envelope mr-1"></i> @Model.Settings.ContactEmail</span>
                         </div>
-                        <p id="pay-amount-hint" class="text-[10px] text-brand/40 mt-1 ml-1"></p>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-brand uppercase tracking-wider mb-1.5">Payment Method</label>
-                        <select id="pay-method" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-bold text-brand outline-none focus:bg-white focus:border-primary transition-all">
-                            <option value="Cash">Cash</option>
-                            <option value="GCash">GCash</option>
-                            <option value="Maya">Maya</option>
-                            <option value="Card">Credit/Debit Card</option>
-                            <option value="Bank">Bank Transfer</option>
-                        </select>
-                    </div>
+                    <!-- Divider -->
+                    <div class="border-t-2 border-dashed border-slate-100 mb-8"></div>
 
-                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
-                        <label class="block text-[10px] font-bold text-brand/40 uppercase tracking-wider mb-1">Generated Reference</label>
-                        <div class="flex items-center justify-between">
-                            <span id="pay-ref-display" class="text-[15px] font-mono font-bold text-brand tracking-widest">--------</span>
-                            <i class="fa-solid fa-barcode text-slate-300"></i>
+                    <!-- Info Grid -->
+                    <div class="grid grid-cols-2 gap-y-6 mb-10">
+                        <div>
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Receipt To</p>
+                            <p id="receipt-patient-name" class="text-[13px] font-bold text-brand">Patient Name</p>
+                            <p id="receipt-patient-phone" class="text-[9px] text-brand/50 mt-0.5 font-bold"></p>
+                            <p id="receipt-patient-address" class="text-[9px] text-brand/50 leading-tight mt-0.5 italic"></p>
+                            <p id="receipt-patient-email" class="text-[9px] text-brand/50"></p>
                         </div>
-                        <input type="hidden" id="pay-ref" />
+                        <div class="text-right">
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Invoice Info</p>
+                            <p id="receipt-id" class="text-[13px] font-bold text-brand">#INV-000000</p>
+                            <p id="receipt-date" class="text-[10px] text-brand/50">Date</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Dental Specialist</p>
+                            <p id="receipt-doctor-name" class="text-[11px] font-bold text-brand/70">Doctor Name</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-1">Payment Status</p>
+                            <span id="receipt-status-badge" class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-bold uppercase tracking-wider border border-emerald-100">Paid</span>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-brand uppercase tracking-wider mb-1.5">Notes</label>
-                        <textarea id="pay-notes" rows="2" placeholder="Internal remarks..."
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[12px] font-medium text-brand outline-none focus:bg-white focus:border-primary transition-all resize-none"></textarea>
+                    <!-- Items Table -->
+                    <div class="mb-10">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-slate-100">
+                                    <th class="py-2 text-[9px] font-bold text-brand/30 uppercase tracking-widest">Description</th>
+                                    <th class="py-2 text-[9px] font-bold text-brand/30 uppercase tracking-widest text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receipt-items-list" class="divide-y divide-slate-50">
+                                <!-- Items injected via JS -->
+                            </tbody>
+                        </table>
                     </div>
-                </div>
 
-                <div class="mt-8">
-                    <button onclick="submitPayment()" id="btn-submit-payment"
-                        class="w-full py-4 bg-primary text-white rounded-2xl text-[14px] font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
-                        Record Payment
-                    </button>
+                    <!-- Summary -->
+                    <div class="bg-slate-50/50 rounded-2xl p-6 space-y-3">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-brand/40 font-medium">Subtotal</span>
+                            <span id="receipt-subtotal" class="text-brand font-bold">₱0.00</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-brand/40 font-medium">Discount</span>
+                            <span id="receipt-discount" class="text-emerald-500 font-bold">-₱0.00</span>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                            <span class="text-[12px] text-brand font-bold uppercase tracking-widest">Grand Total</span>
+                            <span id="receipt-total" class="text-[18px] text-brand font-bold font-display">₱0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-12 text-center">
+                        <p class="text-[10px] text-brand/30 font-medium italic">Thank you for choosing Samson Dental Center!</p>
+                        <p class="text-[8px] text-brand/20 uppercase tracking-[0.2em] mt-4">This is a system-generated receipt</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function generateRef() {
-        return Math.random().toString(36).substring(2, 10).toUpperCase();
-    }
-
-    function openPaymentModal(id, name, amount) {
-        const ref = generateRef();
-        document.getElementById('pay-invoice-id').value = id;
-        document.getElementById('pay-invoice-total').value = amount;
-        document.getElementById('payment-patient-name').innerText = "Invoice for " + name;
-        document.getElementById('pay-amount').value = amount.toFixed ? amount.toFixed(2) : amount;
-        document.getElementById('pay-amount-hint').textContent = `Total due: ₱${parseFloat(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
-        
-        // Auto-set ref
-        const refInput = document.getElementById('pay-ref');
-        refInput.value = ref;
-        
-        // Show ref in UI (optional, but good for transparency)
-        const refDisplay = document.getElementById('pay-ref-display');
-        if (refDisplay) refDisplay.textContent = ref;
-
-        document.getElementById('payment-modal').classList.remove('hidden');
-    }
-
-    function closePaymentModal() {
-        document.getElementById('payment-modal').classList.add('hidden');
-    }
-
-    async function submitPayment() {
-        const btn = document.getElementById('btn-submit-payment');
-        if (btn.disabled) return; // double-click guard
-
-        const id = document.getElementById('pay-invoice-id').value;
-        const amount = parseFloat(document.getElementById('pay-amount').value);
-        const total = parseFloat(document.getElementById('pay-invoice-total').value);
-        const method = document.getElementById('pay-method').value;
-        const ref = document.getElementById('pay-ref').value;
-        const notes = document.getElementById('pay-notes').value;
-
-        const fullPaymentMethods = ['Cash', 'GCash', 'Maya', 'Bank Transfer'];
-        if (fullPaymentMethods.includes(method) && amount < total) {
-            window.Toast?.show(`${method} requires full payment of ₱${total.toFixed(2)}.`, 'warning');
-            return;
-        }
-
-        if (amount > total) {
-            window.Toast?.show(`Payment (₱${amount.toFixed(2)}) exceeds invoice total (₱${total.toFixed(2)}). Please correct the amount.`, 'danger');
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Processing…';
-
-        try {
-            const res = await fetch('/api/invoice/pay', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    invoiceId: id,
-                    amount: amount,
-                    paymentMethod: method,
-                    referenceNumber: ref,
-                    notes: notes
-                })
-            });
-
-            const data = await res.json();
-            if (data.ok) {
-                window.Toast?.show('Payment recorded successfully', 'success');
-                setTimeout(() => window.location.reload(), 900);
-            } else {
-                window.Toast?.show(data.error || 'Payment failed', 'danger');
-                btn.disabled = false;
-                btn.innerHTML = 'Record Payment';
-            }
-        } catch (err) {
-            console.error('[RecordPayment Error]', err);
-            window.Toast?.show('Network error — please try again.', 'danger');
-            btn.disabled = false;
-            btn.innerHTML = 'Record Payment';
-        }
-    }
-
-    function viewInvoice(id) {
-        // Just a simple eye view for now, could redirect to a detail page
-        alert("Invoice ID: " + id + "\nFeature coming soon: Full PDF View");
-    }
-
-    // Client-side filtering
-    document.getElementById('invoiceSearch').addEventListener('input', filterTable);
-    document.getElementById('statusFilter').addEventListener('change', filterTable);
-
-    // SignalR real-time reload
-    window.addEventListener("admin:invoices:updated", () => {
-        window.location.reload();
-    });
-
-    function filterTable() {
-        const query = document.getElementById('invoiceSearch').value.toLowerCase();
-        const status = document.getElementById('statusFilter').value.toLowerCase();
-        const rows = document.querySelectorAll('tbody tr:not(.empty-row)');
-
-        rows.forEach(row => {
-            const patient = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
-            const rowStatus = row.querySelector('td:nth-child(5)').innerText.toLowerCase();
-            
-            const matchesSearch = patient.includes(query);
-            const matchesStatus = !status || rowStatus.includes(status);
-
-            row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
-        });
-    }
-</script>
+<script type="module" src="~/js/AdminSide/transactions.js"></script>

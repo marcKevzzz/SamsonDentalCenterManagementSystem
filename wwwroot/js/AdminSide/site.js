@@ -381,5 +381,6 @@ window.addEventListener("resize", () => {
 
 function signout() {
   localStorage.clear(); // wipe sb_user + all admin_v2_* cache
+  sessionStorage.clear();
   window.location.href = "/signout";
 }

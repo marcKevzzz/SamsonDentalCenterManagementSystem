@@ -16,24 +16,26 @@
 
   <div class="p-5">
     <div class="flex items-center justify-between mb-2">
-      <div class="flex items-center gap-2">
-        @if (!string.IsNullOrEmpty(Model.Icon))
+      <div class="flex items-center">
+        <span class="badge bg-offwhite text-muted/90">@Model.Category</span>
+        @if (Model.NeedsXray)
         {
-          <i class="fa-solid @Model.Icon text-primary text-xs"></i>
+            <span class="badge bg-red-50 text-red-600 border border-red-100 flex items-center gap-1.5 px-2 ml-1" title="X-Ray Required">
+                <i class="fa-solid fa-x-ray text-[0.7rem]"></i>
+            </span>
         }
-        <span class="badge bg-offwhite text-muted">@Model.Category</span>
       </div>
       <span class="font-body text-[0.75rem] font-medium text-brand"
         >₱@Model.Price.ToString("N0")</span
       >
     </div>
 
-    <h3 class="brand-font font-semibold text-brand text-[1.2rem] mb-1">
+    <h3 class="brand-font font-bold text-brand text-[1.2rem] mb-1">
       @Model.Name
     </h3>
 
     <p
-      class="font-body text-[0.85rem] text-muted leading-relaxed mb-4 line-clamp-2"
+      class="font-body text-[0.85rem] text-muted/80 leading-relaxed mb-4 line-clamp-2"
     >
       @Model.Tagline
     </p>
@@ -42,7 +44,7 @@
       <span
         class="flex items-center gap-1.5 font-body text-[0.8rem] text-muted"
       >
-        ⏱ @Model.Duration
+        ⏱ @Model.DurationMinutes min
       </span>
 
       <div class="card-arrow">→</div>

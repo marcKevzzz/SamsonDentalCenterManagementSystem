@@ -114,7 +114,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var req = BuildRequest(HttpMethod.Get, "/staff_availability?staff_type=eq.doctor&is_active=eq.true");
+                var req = BuildRequest(HttpMethod.Get, "/staff_availability?staff_type=eq.doctor");
                 var res = await _http.SendAsync(req);
                 if (!res.IsSuccessStatusCode) return new();
                 var json  = await res.Content.ReadAsStringAsync();

@@ -649,9 +649,19 @@ namespace SamsonDentalCenterManagementSystem.Services
                 );
             }
 
-            // Send email for guest non-waitlist bookings
-            if (p.IsGuest && !p.IsWaitlist)
-                await SendGuestConfirmationEmail(created);
+            // Send email
+            if (!p.IsWaitlist)
+            {
+                if (p.IsGuest && !p.IsGuestConfirmed)
+                {
+                    await SendGuestConfirmationEmail(created);
+                }
+                else
+                {
+                    // For confirmed guests, logged-in users, or staff-created walk-ins
+                    await SendBookingConfirmationEmail(created);
+                }
+            }
 
             Console.WriteLine(
                 $"[Appointment] Created {created.Id} emailstatus={emailStatus} guest={p.IsGuest} waitlist={p.IsWaitlist}"
@@ -711,6 +721,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                 appt.ConfirmedAt = DateTime.UtcNow;
                 // appt.Status stays "pending" — don't touch it here
                 await _supabase.From<Appointment>().Upsert(appt);
+
+                // Send booking confirmation email now that email is verified
+                await SendBookingConfirmationEmail(appt);
+
                 return appt;
             }
             catch (Exception ex)

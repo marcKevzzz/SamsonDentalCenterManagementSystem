@@ -16,21 +16,15 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly ActivityLogService _logs;
         private readonly NotificationService _notifs;
         private readonly IHubContext<AdminHub> _hubContext;
+        private readonly IEmailService _emailService;
+        private readonly string _appBaseUrl;
 
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true,
         };
 
-        public InvoiceService(
-            Supabase.Client supabase,
-            HttpClient http,
-            string supabaseUrl,
-            string serviceRoleKey,
-            ActivityLogService logs,
-            NotificationService notifs,
-            IHubContext<AdminHub> hubContext
-        )
+        public InvoiceService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs, IHubContext<AdminHub> hubContext, IEmailService emailService, string appBaseUrl)
         {
             _supabase = supabase;
             _http = http;
@@ -39,6 +33,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             _logs = logs;
             _notifs = notifs;
             _hubContext = hubContext;
+            _emailService = emailService;
+            _appBaseUrl = appBaseUrl.TrimEnd('/');
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -274,6 +270,34 @@ namespace SamsonDentalCenterManagementSystem.Services
                         ? "paid"
                         : (totalPaid > 0 ? "partial" : "pending");
                 await UpdateInvoiceStatusAsync(invoice.Id, newStatus);
+
+                // Send Email Receipt
+                try
+                {
+                    var patientRes = await _supabase.From<Profile>().Where(x => x.Id == invoice.PatientId).Get();
+                    var patient = patientRes.Models.FirstOrDefault();
+                    if (patient != null && !string.IsNullOrEmpty(patient.Email))
+                    {
+                        await _emailService.SendEmailAsync(
+                            patient.Email,
+                            $"{patient.FirstName} {patient.LastName}",
+                            $"Payment Receipt - Invoice #{invoice.Id[..8].ToUpper()}",
+                            "InvoiceReceipt",
+                            new {
+                                Name = $"{patient.FirstName} {patient.LastName}",
+                                InvoiceNumber = invoice.Id[..8].ToUpper(),
+                                AmountPaid = payment.Amount.ToString("C"),
+                                Method = payment.PaymentMethod,
+                                Balance = (invoice.FinalAmount - totalPaid).ToString("C"),
+                                Status = newStatus
+                            }
+                        );
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"[InvoiceReceiptEmail] Failed to send: {ex.Message}");
+                }
             }
         }
     }

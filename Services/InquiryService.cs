@@ -16,13 +16,15 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly ActivityLogService _logs;
         private readonly NotificationService _notifs;
         private readonly IHubContext<AdminHub> _hubContext;
+        private readonly IEmailService _emailService;
+        private readonly string _appBaseUrl;
 
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public InquiryService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs, IHubContext<AdminHub> hubContext)
+        public InquiryService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs, IHubContext<AdminHub> hubContext, IEmailService emailService, string appBaseUrl)
         {
             _supabase = supabase;
             _http = http;
@@ -31,6 +33,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             _logs = logs;
             _notifs = notifs;
             _hubContext = hubContext;
+            _emailService = emailService;
+            _appBaseUrl = appBaseUrl.TrimEnd('/');
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -151,8 +155,42 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             if (isFromStaff && senderId != null)
             {
-                // If staff replies, notify patient
-                // We need patient_id from inquiry, but for now let's assume senderId is staff
+                // If staff replies, notify patient via email
+                try
+                {
+                    var inqRes = await _supabase.From<Inquiry>()
+                        .Select("*, patient:profiles!patient_id(*)")
+                        .Where(x => x.Id == inquiryId)
+                        .Get();
+                    var inquiry = inqRes.Models.FirstOrDefault();
+                    
+                    if (inquiry != null)
+                    {
+                        string targetEmail = inquiry.Patient?.Email ?? inquiry.GuestEmail ?? "";
+                        string targetName = inquiry.Patient != null ? $"{inquiry.Patient.FirstName} {inquiry.Patient.LastName}" : $"{inquiry.GuestFirstName} {inquiry.GuestLastName}";
+                        
+                        if (!string.IsNullOrEmpty(targetEmail))
+                        {
+                            await _emailService.SendEmailAsync(
+                                targetEmail,
+                                targetName,
+                                $"Reply to your inquiry: {inquiry.Subject}",
+                                "InquiryReply",
+                                new {
+                                    Name = targetName,
+                                    Subject = inquiry.Subject,
+                                    Message = message,
+                                    Link = inquiry.PatientId != null ? $"{_appBaseUrl}/Portal/Inquiries" : $"{_appBaseUrl}/Contact"
+                                }
+                            );
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"[InquiryEmail] Failed to send reply notification: {ex.Message}");
+                }
+
                 await _logs.LogActionAsync(senderId, "replied to inquiry", $"Inquiry ID: {inquiryId}", null, "Inquiry", $"/Admin/Inquiries?id={inquiryId}");
             }
         }
@@ -174,6 +212,17 @@ namespace SamsonDentalCenterManagementSystem.Services
             await _http.SendAsync(req);
 
             await _hubContext.Clients.All.SendAsync("ReceiveInquiryUpdate", new { action = "status", id = inquiryId, status = status });
+        }
+
+        public async Task UpdateAssignedDoctorAsync(string inquiryId, string? doctorId)
+        {
+            var req = BuildRequest(HttpMethod.Patch, $"/inquiries?id=eq.{inquiryId}");
+            req.Content = new StringContent(
+                JsonSerializer.Serialize(new { assigned_doctor_id = doctorId, updated_at = DateTime.UtcNow.ToString("o") }),
+                Encoding.UTF8, "application/json");
+            await _http.SendAsync(req);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveInquiryUpdate", new { action = "assign", id = inquiryId, assignedDoctorId = doctorId });
         }
     }
 }

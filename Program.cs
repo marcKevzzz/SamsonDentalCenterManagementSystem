@@ -175,7 +175,9 @@ builder.Services.AddScoped<InvoiceService>(provider =>
         supabaseServiceKey,
         provider.GetRequiredService<ActivityLogService>(),
         provider.GetRequiredService<NotificationService>(),
-        provider.GetRequiredService<IHubContext<AdminHub>>()
+        provider.GetRequiredService<IHubContext<AdminHub>>(),
+        provider.GetRequiredService<IEmailService>(),
+        appBaseUrl ?? "http://localhost:5081"
     );
 });
 
@@ -189,7 +191,9 @@ builder.Services.AddScoped<InquiryService>(provider =>
         supabaseServiceKey,
         provider.GetRequiredService<ActivityLogService>(),
         provider.GetRequiredService<NotificationService>(),
-        provider.GetRequiredService<IHubContext<AdminHub>>()
+        provider.GetRequiredService<IHubContext<AdminHub>>(),
+        provider.GetRequiredService<IEmailService>(),
+        appBaseUrl ?? "http://localhost:5081"
     );
 });
 
@@ -364,7 +368,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
+                .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "https://gnomic-larraine-unbombastic.ngrok-free.dev")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials(); // SignalR MUST have this

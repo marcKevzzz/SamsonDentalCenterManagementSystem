@@ -240,10 +240,31 @@ Layout = "AdminSide/_StaffLayout";
         
         <!-- Section: Patient Details -->
         <div class="space-y-4">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand/40">Patient Information</h4>
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              <h4 class="text-[11px] font-bold uppercase tracking-wider text-brand/40">Patient Information</h4>
+            </div>
+            <button onclick="clearPatientSelection()" class="text-[10px] font-bold text-primary hover:text-brand transition-colors">
+              <i class="fa-solid fa-rotate-left mr-1"></i> Clear Selection
+            </button>
           </div>
+          
+          <div class="relative mb-6">
+            <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Search Existing Patient</label>
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 translate-half text-brand/20 text-xs"></i>
+              <input id="book-patient-search" type="text" placeholder="Search by name or email…"
+                class="w-full text-[13px] pl-10 pr-4 py-3 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none" />
+              
+              <!-- Search Results Dropdown -->
+              <div id="patient-search-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-[70] overflow-hidden">
+                <!-- Results will be injected here -->
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="book-patient-id" />
           
           <div class="grid grid-cols-2 gap-4">
             <div>

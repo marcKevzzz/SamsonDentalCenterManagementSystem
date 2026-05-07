@@ -8,8 +8,8 @@ tailwind.config = {
         offwhite: "#F8FAFC", // replace COLORS.offwhite
       },
       fontFamily: {
-        display: ["coolvetica", "sans-serif"],
-        body: ["coolvetica", "sans-serif"],
+        display: ["Aileron", "sans-serif"],
+        body: ["Aileron", "sans-serif"],
       },
     },
   },

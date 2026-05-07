@@ -297,8 +297,8 @@ function initReviewsPin() {
     },
   });
 
-  tl.to(track1, { x: "-50%", duration: 3, ease: "none" }, 0);
-  tl.to(track2, { x: "50%", duration: 3, ease: "none" }, 0);
+  tl.to(track1, { x: isMobile ? "-300%" : "-50%", duration: isMobile ? 5 : 3, ease: "none" }, 0);
+  tl.to(track2, { x: isMobile ? "0%" : "50%", duration: isMobile ? 5 : 3, ease: "none" }, 0);
 
   // Scale cards on active
   gsap.utils.toArray(".review-card").forEach((card) => {

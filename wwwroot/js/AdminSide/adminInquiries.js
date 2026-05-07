@@ -44,8 +44,17 @@ async function refreshInquiries(force = false) {
 document.addEventListener("DOMContentLoaded", async () => {
   window.openNewInquiryModal = openNewInquiryModal;
   window.closeNewInquiryModal = closeNewInquiryModal;
+  window.assignDoctor = assignDoctor;
 
   await refreshInquiries();
+  await loadDoctorsForAssignment();
+
+  // Show Assign Doctor only for Admin
+  const role = document.body.dataset.role || 'admin';
+  if (role === 'admin') {
+      const container = document.getElementById("assign-doctor-container");
+      if (container) container.classList.remove("hidden");
+  }
 
   // Check for patientId in URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -345,6 +354,11 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
     avatarBox.classList.add("bg-brand");
   }
 
+  const select = document.getElementById("assign-doctor-select");
+  if (select) {
+    select.value = inq.assignedDoctorId || "";
+  }
+
   // Render Patient Details Sidebar
   renderPatientSidebar(inq);
 
@@ -355,16 +369,20 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
     renderInquiryList();
   }
 
-  // Show/Hide patient-specific features if it's a staff-to-staff thread
-  const isStaffThread = inq.isFromStaff === true;
+  // Show/Hide features if it's a staff-to-staff thread
+  const isStaffThread = inq.isFromStaff === true || inq.is_from_staff === true;
   const resolveBtn = document.getElementById('resolve-btn');
   const predefinedReplies = document.getElementById('predefined-replies');
+  const patientSidebar = document.getElementById('inquiry-patient-sidebar');
   const internalNoteContainer = document.getElementById('internal-note-container');
+  const assignDoctorContainer = document.getElementById('assign-doctor-container');
 
   if (isStaffThread) {
     if (resolveBtn) resolveBtn.classList.add('hidden');
     if (predefinedReplies) predefinedReplies.classList.add('hidden');
+    if (patientSidebar) patientSidebar.classList.add('hidden');
     if (internalNoteContainer) internalNoteContainer.classList.add('hidden');
+    if (assignDoctorContainer) assignDoctorContainer.classList.add('hidden');
   } else {
     // Show them for patient threads
     if (resolveBtn) {
@@ -372,10 +390,57 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
         else resolveBtn.classList.remove('hidden');
     }
     if (predefinedReplies) predefinedReplies.classList.remove('hidden');
+    if (patientSidebar) patientSidebar.classList.remove('hidden');
     if (internalNoteContainer) internalNoteContainer.classList.remove('hidden');
+    
+    if (assignDoctorContainer) {
+        const role = document.body.dataset.role || 'admin';
+        if (role === 'admin') assignDoctorContainer.classList.remove('hidden');
+    }
   }
 
   await fetchMessages();
+}
+
+async function loadDoctorsForAssignment() {
+  const select = document.getElementById("assign-doctor-select");
+  if (!select) return;
+  try {
+    const res = await fetch("/api/admin/data/doctors");
+    const data = await res.json();
+    if (data.ok) {
+      let html = '<option value="">Assign to Doctor...</option>';
+      data.data.forEach(d => {
+        html += `<option value="${d.profileId}">${d.title} ${d.profile?.firstName || ''} ${d.profile?.lastName || ''}</option>`;
+      });
+      select.innerHTML = html;
+    }
+  } catch (e) {
+    console.error("Failed to load doctors for assignment", e);
+  }
+}
+
+async function assignDoctor(doctorId) {
+  if (!ACTIVE_INQUIRY_ID) return;
+  
+  try {
+    const res = await fetch("/api/admin/data/inquiries/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: ACTIVE_INQUIRY_ID, doctorId: doctorId || null })
+    });
+    
+    if (res.ok) {
+      const inq = ALL_INQUIRIES.find(x => x.id === ACTIVE_INQUIRY_ID);
+      if (inq) inq.assignedDoctorId = doctorId || null;
+      Toast.show(doctorId ? "Inquiry assigned to doctor" : "Doctor assignment removed", "success");
+    } else {
+      throw new Error("Failed to assign doctor");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to assign doctor");
+  }
 }
 
 window.markAsResolved = async function() {
@@ -530,6 +595,9 @@ async function fetchMessages() {
         lastDate = msgDate;
       }
 
+      const currentUserId = document.querySelector(selectors.adminId)?.value;
+      const isMe = msg.sender_id?.toLowerCase() === currentUserId?.toLowerCase();
+
       if (msg.is_internal) {
           html += `
                 <div class="flex justify-center my-2">
@@ -543,12 +611,11 @@ async function fetchMessages() {
                     </div>
                 </div>`;
       } else {
-          const isStaff = msg.is_from_staff;
           html += `
-                <div class="flex ${isStaff ? "justify-end" : "justify-start"}">
+                <div class="flex ${isMe ? "justify-end" : "justify-start"}">
                     <div class="max-w-[85%] md:max-w-[70%]">
-                        ${isStaff ? `<div class="text-right text-[9px] font-bold text-slate-400 mb-1 px-1">${msg.sender_name} (${msg.sender_role})</div>` : ''}
-                        <div class="px-4 py-3 rounded-2xl text-[12.5px] ${isStaff ? "bg-primary text-white rounded-tr-none shadow-md shadow-primary/20" : "bg-slate-100 border border-slate-200 text-brand rounded-tl-none shadow-sm shadow-slate-900/15"}">
+                        ${!isMe ? `<div class="text-left text-[9px] font-bold text-slate-400 mb-1 px-1">${msg.sender_name} (${msg.sender_role})</div>` : ''}
+                        <div class="px-4 py-3 rounded-2xl text-[12.5px] ${isMe ? "bg-primary text-white rounded-tr-none shadow-md shadow-primary/20" : "bg-slate-100 border border-slate-200 text-brand rounded-tl-none shadow-sm shadow-slate-900/15"}">
                             <p class="leading-relaxed font-medium whitespace-pre-wrap">${msg.message}</p>
                             <div class="text-[9px] mt-1.5 opacity-60 font-bold">${new Date(dStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                         </div>

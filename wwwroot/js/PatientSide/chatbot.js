@@ -568,7 +568,7 @@ function setQuickReplies(replies) {
   replies.forEach((r) => {
     const btn = document.createElement("button");
     btn.className =
-      "font-body text-[0.75rem] font-medium px-3.5 py-1.5 rounded-full border-[1.5px] border-[#e5e7eb] bg-white text-[#1a1a2e] cursor-pointer whitespace-nowrap hover:border-primary hover:text-primary hover:bg-red-50 transition-all";
+      "font-body text-[0.75rem] font-medium px-3.5 py-1.5 rounded-full border-[1.5px] border-[#e5e7eb] bg-white text-[#1a1a2e] cursor-pointer whitespace-nowrap hover:border-primary hover:text-primary hover:bg-blue-50 transition-all";
     btn.textContent = r;
     btn.onclick = () => sendMessage(r);
     wrap.appendChild(btn);
