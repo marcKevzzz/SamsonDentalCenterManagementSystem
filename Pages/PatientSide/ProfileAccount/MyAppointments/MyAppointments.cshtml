@@ -64,7 +64,7 @@ ViewData["Title"] = "My Appointments page";
           <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600">
               <i class="fa-solid fa-star"></i>
           </div>
-          <div class="brand-font font-bold text-brand text-[1.5rem]">4.8</div>
+          <div class="brand-font font-bold text-brand @(Model.AverageRating == "No reviews yet" ? "text-[0.9rem]" : "text-[1.5rem]")">@Model.AverageRating</div>
       </div>
       <div class="font-body text-[0.7rem] font-bold uppercase tracking-wider text-muted">Rating</div>
     </div>
@@ -225,7 +225,7 @@ ViewData["Title"] = "My Appointments page";
                        <button class="w-full py-3 bg-emerald-600 text-white brand-font font-bold text-[0.8rem] tracking-widest uppercase rounded-xl hover:bg-emerald-700 transition-all">
                           Download Receipt
                       </button>
-                      <button class="w-full py-3 text-brand font-bold text-[0.8rem] tracking-widest uppercase hover:bg-slate-100 rounded-xl transition-all">
+                      <button onclick="openReviewModal()" class="w-full py-3 text-brand font-bold text-[0.8rem] tracking-widest uppercase hover:bg-slate-100 rounded-xl transition-all">
                           Leave a Review
                       </button>
                   </div>
@@ -239,6 +239,57 @@ ViewData["Title"] = "My Appointments page";
       <p class="text-muted font-body text-[0.9rem]">No appointments match your search or filter.</p>
       <button onclick="clearFilters()" class="text-primary font-bold text-[0.8rem] mt-2 underline">Clear all filters</button>
   </div>
+</div>
+
+<!-- Feedback Modal -->
+<div id="reviewModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
+    <div class="fixed inset-0 bg-brand/30 backdrop-blur-md" onclick="closeReviewModal()"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-slide-up">
+            <!-- Modal Header -->
+            <div class="p-8 pb-4 flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2 font-body text-[0.6rem] font-bold tracking-[0.2em] uppercase text-primary mb-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>Feedback
+                    </div>
+                    <h3 class="brand-font font-bold text-brand text-[1.4rem]">Leave a Review</h3>
+                </div>
+                <button onclick="closeReviewModal()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-brand/40 hover:bg-slate-100 transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-8 pt-4 space-y-8">
+                <p class="text-muted text-xs leading-relaxed">Your feedback helps us improve our services and helps other patients choose the best care. Thank you for sharing your experience!</p>
+
+                <!-- Rating Selection -->
+                <div class="space-y-3">
+                    <label class="block text-[0.65rem] font-bold text-brand uppercase tracking-widest">Rate your experience</label>
+                    <div class="flex items-center gap-2 text-2xl">
+                        <button type="button" class="star-btn text-slate-200 hover:text-yellow-400 transition-colors" data-rating="1" onclick="setRating(1)"><i class="fa-solid fa-star"></i></button>
+                        <button type="button" class="star-btn text-slate-200 hover:text-yellow-400 transition-colors" data-rating="2" onclick="setRating(2)"><i class="fa-solid fa-star"></i></button>
+                        <button type="button" class="star-btn text-slate-200 hover:text-yellow-400 transition-colors" data-rating="3" onclick="setRating(3)"><i class="fa-solid fa-star"></i></button>
+                        <button type="button" class="star-btn text-slate-200 hover:text-yellow-400 transition-colors" data-rating="4" onclick="setRating(4)"><i class="fa-solid fa-star"></i></button>
+                        <button type="button" class="star-btn text-slate-200 hover:text-yellow-400 transition-colors" data-rating="5" onclick="setRating(5)"><i class="fa-solid fa-star"></i></button>
+                    </div>
+                </div>
+
+                <!-- Review Text -->
+                <div class="space-y-3">
+                    <label for="reviewText" class="block text-[0.65rem] font-bold text-brand uppercase tracking-widest">Your Comments</label>
+                    <textarea id="reviewText" rows="4" placeholder="Tell us what you think about your visit..." 
+                        class="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 text-[0.85rem] focus:border-primary outline-none transition-all resize-none"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button id="btnSubmitReview" onclick="submitReview()" class="w-full py-4 bg-brand text-white brand-font font-bold text-[0.85rem] tracking-widest uppercase rounded-2xl hover:bg-primary transition-all shadow-xl shadow-brand/10 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Submit Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 

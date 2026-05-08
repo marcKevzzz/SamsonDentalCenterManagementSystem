@@ -136,7 +136,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Fetch all doctors with profiles + availability ─────────────────────
         public async Task<List<DoctorDto>> GetAllWithProfilesAsync()
         {
-            var req = BuildRequest(HttpMethod.Get, "/doctors?select=*,profile:profiles(*)&order=created_at.asc");
+            var req = BuildRequest(HttpMethod.Get, "/doctors?select=*,profile:profiles!profile_id(*)&order=created_at.asc");
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
@@ -159,7 +159,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
 
             var req = BuildRequest(HttpMethod.Get,
-                "/doctors?select=*,profile:profiles(*)&is_active=eq.true&order=created_at.asc");
+                "/doctors?select=*,profile:profiles!profile_id(*)&is_active=eq.true&order=created_at.asc");
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
@@ -179,7 +179,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             if (string.IsNullOrEmpty(profileId)) return null;
             var req = BuildRequest(HttpMethod.Get,
-                $"/doctors?select=*,profile:profiles(*)&profile_id=eq.{profileId}");
+                $"/doctors?select=*,profile:profiles!profile_id(*)&profile_id=eq.{profileId}");
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 

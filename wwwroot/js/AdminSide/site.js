@@ -68,10 +68,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (userPopup && !userPopup.contains(e.target)) {
       userPopup.classList.add("hidden");
     }
-    if (settingsPopup && !settingsPopup.contains(e.target) && !settingsBtn?.contains(e.target)) {
+    if (
+      settingsPopup &&
+      !settingsPopup.contains(e.target) &&
+      !settingsBtn?.contains(e.target)
+    ) {
       settingsPopup.classList.add("hidden");
     }
-    if (staffPopup && !staffPopup.contains(e.target) && !staffBtn?.contains(e.target)) {
+    if (
+      staffPopup &&
+      !staffPopup.contains(e.target) &&
+      !staffBtn?.contains(e.target)
+    ) {
       staffPopup.classList.add("hidden");
     }
   });
@@ -108,15 +116,19 @@ document.addEventListener("DOMContentLoaded", () => {
         sidebarNav.scrollTop = parseInt(savedScroll, 10);
         // Double check after another frame for dynamic content
         requestAnimationFrame(() => {
-            sidebarNav.scrollTop = parseInt(savedScroll, 10);
+          sidebarNav.scrollTop = parseInt(savedScroll, 10);
         });
       });
     }
 
     // 2. Save scroll position on scroll
-    sidebarNav.addEventListener("scroll", () => {
-      localStorage.setItem("sidebarScrollTop", sidebarNav.scrollTop);
-    }, { passive: true });
+    sidebarNav.addEventListener(
+      "scroll",
+      () => {
+        localStorage.setItem("sidebarScrollTop", sidebarNav.scrollTop);
+      },
+      { passive: true },
+    );
 
     // 3. Save on click to ensure it's captured before navigation
     sidebarNav.addEventListener("click", () => {
@@ -181,33 +193,68 @@ function UpdateSidebar() {
     document.getElementById(id)?.classList.add("active");
   }
 
-  if (currentPath === "/admin" || currentPath === "/admin/dashboard" || currentPath === "/doctor/dashboard" || currentPath === "/receptionist/dashboard") {
+  if (
+    currentPath === "/admin" ||
+    currentPath === "/admin/dashboard" ||
+    currentPath === "/doctor/dashboard" ||
+    currentPath === "/receptionist/dashboard"
+  ) {
     setActive("admin-dashboard");
-  } else if (currentPath.startsWith("/admin/patients") || currentPath.startsWith("/doctor/patients") || currentPath.startsWith("/receptionist/patients")) {
+  } else if (
+    currentPath.startsWith("/admin/patients") ||
+    currentPath.startsWith("/doctor/patients") ||
+    currentPath.startsWith("/receptionist/patients")
+  ) {
     setActive("admin-patients");
   } else if (currentPath.startsWith("/admin/doctors")) {
     setActive("admin-doctors");
   } else if (currentPath.startsWith("/admin/users")) {
     setActive("admin-users");
-  } else if (currentPath.startsWith("/admin/appointments") || currentPath.startsWith("/doctor/appointments") || currentPath.startsWith("/receptionist/appointments")) {
+  } else if (
+    currentPath.startsWith("/admin/appointments") ||
+    currentPath.startsWith("/doctor/appointments") ||
+    currentPath.startsWith("/receptionist/appointments")
+  ) {
     setActive("admin-appointments");
   } else if (currentPath.startsWith("/admin/blockeddates")) {
     setActive("admin-blocked-dates");
-  } else if (currentPath.startsWith("/admin/treatments") || currentPath.startsWith("/doctor/treatments") || currentPath.startsWith("/receptionist/treatments")) {
+  } else if (
+    currentPath.startsWith("/admin/treatments") ||
+    currentPath.startsWith("/doctor/treatments") ||
+    currentPath.startsWith("/receptionist/treatments")
+  ) {
     setActive("admin-invoices");
   } else if (currentPath.startsWith("/admin/services")) {
     setActive("admin-services-link");
-  } else if (currentPath.startsWith("/admin/availability") || currentPath.startsWith("/doctor/availability") || currentPath.startsWith("/receptionist/availability")) {
+  } else if (
+    currentPath.startsWith("/admin/availability") ||
+    currentPath.startsWith("/doctor/availability") ||
+    currentPath.startsWith("/receptionist/availability")
+  ) {
     setActive("staff-availability");
-  } else if (currentPath.startsWith("/admin/billing") || currentPath.startsWith("/receptionist/billing")) {
+  } else if (
+    currentPath.startsWith("/admin/billing") ||
+    currentPath.startsWith("/receptionist/billing")
+  ) {
     setActive("admin-transactions");
   } else if (currentPath.startsWith("/admin/reviews")) {
     setActive("admin-reviews");
-  } else if (currentPath.startsWith("/admin/reports") || currentPath.startsWith("/doctor/reports") || currentPath.startsWith("/receptionist/reports")) {
+  } else if (
+    currentPath.startsWith("/admin/reports") ||
+    currentPath.startsWith("/doctor/reports") ||
+    currentPath.startsWith("/receptionist/reports")
+  ) {
     setActive("admin-reports");
-  } else if (currentPath.startsWith("/admin/inquiries") || currentPath === "/receptionist/inquiries") {
+  } else if (
+    currentPath.startsWith("/admin/inquiries") ||
+    currentPath === "/receptionist/inquiries"
+  ) {
     setActive("admin-inquiries");
-  } else if (currentPath.startsWith("/admin/activitylogs") || currentPath.startsWith("/receptionist/activitylogs") || currentPath === "/doctor/activitylogs") {
+  } else if (
+    currentPath.startsWith("/admin/activitylogs") ||
+    currentPath.startsWith("/receptionist/activitylogs") ||
+    currentPath === "/doctor/activitylogs"
+  ) {
     setActive("admin-activitylogs");
   } else if (currentPath.startsWith("/admin/staff")) {
     setActive("staff-dropdown-btn");
@@ -216,18 +263,18 @@ function UpdateSidebar() {
   // Notification Badges Logic
   async function updateNotificationBadges() {
     try {
-      const res = await fetch('/api/admin/data/counts');
+      const res = await fetch("/api/admin/data/counts");
       if (res.ok) {
         const json = await res.json();
         const d = json.data;
-        
-        updateBadge('notif-appointments-count', d.pendingAppointments);
-        updateBadge('notif-inquiries-count', d.unreadInquiries);
-        updateBadge('notif-leaves-count', d.pendingLeaves);
-        updateBadge('notif-reviews-count', d.pendingReviews);
-        updateBadge('notif-patients-count', d.totalPatients);
-        updateBadge('notif-staff-count', d.totalStaff);
-        updateBadge('notif-services-count', d.totalServices);
+
+        updateBadge("notif-appointments-count", d.pendingAppointments);
+        updateBadge("notif-inquiries-count", d.unreadInquiries);
+        updateBadge("notif-leaves-count", d.pendingLeaves);
+        updateBadge("notif-reviews-count", d.pendingReviews);
+        updateBadge("notif-patients-count", d.totalPatients);
+        updateBadge("notif-staff-count", d.totalStaff);
+        updateBadge("notif-services-count", d.totalServices);
       }
     } catch (e) {
       console.error("Failed to update badges:", e);
@@ -238,28 +285,33 @@ function UpdateSidebar() {
     const badge = document.getElementById(id);
     if (!badge) return;
     if (count > 0) {
-      badge.innerText = count > 99 ? '99+' : count;
-      badge.classList.remove('hidden');
+      badge.innerText = count > 99 ? "99+" : count;
+      badge.classList.remove("hidden");
     } else {
-      badge.classList.add('hidden');
+      badge.classList.add("hidden");
     }
   }
 
   updateNotificationBadges();
   setInterval(updateNotificationBadges, 30000); // 30s refresh
 
-  window.addEventListener('admin:appointments:updated', updateNotificationBadges);
-  window.addEventListener('admin:inquiries:updated', updateNotificationBadges);
+  window.addEventListener(
+    "admin:appointments:updated",
+    updateNotificationBadges,
+  );
+  window.addEventListener("admin:inquiries:updated", updateNotificationBadges);
 
   if (currentPath.startsWith("/admin/staff")) {
     // Keep dropdown open if not collapsed
     if (!document.documentElement.classList.contains("sb-collapsed")) {
-       document.getElementById("staff-dropdown")?.classList.remove("hidden");
-       document.getElementById("staff-arrow")?.classList.add("rotate-180");
+      document.getElementById("staff-dropdown")?.classList.remove("hidden");
+      document.getElementById("staff-arrow")?.classList.add("rotate-180");
     }
     // Highlight the active sub-link
-    const staffLinks = document.querySelectorAll("#staff-dropdown a, #staff-popup a");
-    staffLinks.forEach(link => {
+    const staffLinks = document.querySelectorAll(
+      "#staff-dropdown a, #staff-popup a",
+    );
+    staffLinks.forEach((link) => {
       if (link.getAttribute("href").toLowerCase() === currentPath) {
         link.classList.add("text-white", "bg-white/10");
         link.classList.remove("text-white/60");
@@ -269,13 +321,15 @@ function UpdateSidebar() {
     setActive("settings-dropdown-btn");
     // Also keep dropdown open if not collapsed
     if (!document.documentElement.classList.contains("sb-collapsed")) {
-       document.getElementById("settings-dropdown")?.classList.remove("hidden");
-       document.getElementById("settings-arrow")?.classList.add("rotate-180");
+      document.getElementById("settings-dropdown")?.classList.remove("hidden");
+      document.getElementById("settings-arrow")?.classList.add("rotate-180");
     }
-    
+
     // Highlight sub-link
-    const settingsLinks = document.querySelectorAll("#settings-dropdown a, #settings-popup a");
-    settingsLinks.forEach(link => {
+    const settingsLinks = document.querySelectorAll(
+      "#settings-dropdown a, #settings-popup a",
+    );
+    settingsLinks.forEach((link) => {
       if (link.getAttribute("href").toLowerCase() === currentPath) {
         link.classList.add("text-white", "bg-white/10");
         link.classList.remove("text-white/60");
@@ -286,7 +340,6 @@ function UpdateSidebar() {
 }
 
 UpdateSidebar();
-
 
 function updateHeader(pageId) {
   const t = pageTitles[pageId] || [
@@ -316,7 +369,7 @@ function toggleSidebar() {
 function openSidebar() {
   const sb = document.getElementById("sidebar");
 
-  sb.classList.remove("translate-x-full");
+  sb.classList.remove("-translate-x-full");
   sb.classList.add("translate-x-0");
 
   document.getElementById("overlay")?.classList.remove("hidden");
@@ -326,7 +379,7 @@ function openSidebar() {
 function closeSidebar() {
   const sb = document.getElementById("sidebar");
 
-  sb?.classList.add("translate-x-full");
+  sb?.classList.add("-translate-x-full");
   sb?.classList.remove("translate-x-0");
 
   document.getElementById("overlay")?.classList.add("hidden");
@@ -344,7 +397,7 @@ window.addEventListener("resize", () => {
 
   if (window.innerWidth >= 1024) {
     // Desktop mode
-    sb?.classList.remove("translate-x-full");
+    sb?.classList.remove("-translate-x-full");
     sb?.classList.add("translate-x-0");
 
     // Restore sidebar state (collapsed/expanded)
@@ -352,27 +405,27 @@ window.addEventListener("resize", () => {
 
     document.getElementById("overlay")?.classList.add("hidden");
     document.body.style.overflow = "";
-    
+
     // Clear any manual mobile styles
     if (main) main.style.marginLeft = "";
     if (header) {
-        header.style.left = "";
-        header.style.width = "";
+      header.style.left = "";
+      header.style.width = "";
     }
   } else {
     // Mobile mode
     // Always remove sb-collapsed on mobile to prevent width issues
     document.documentElement.classList.remove("sb-collapsed");
-    
+
     if (sb) {
-        sb.classList.remove(SIDEBAR_COLLAPSED);
-        sb.classList.add(SIDEBAR_EXPANDED);
+      sb.classList.remove(SIDEBAR_COLLAPSED);
+      sb.classList.add(SIDEBAR_EXPANDED);
     }
 
     if (main) main.style.marginLeft = "0";
     if (header) {
-        header.style.left = "0";
-        header.style.width = "100%";
+      header.style.left = "0";
+      header.style.width = "100%";
     }
 
     closeSidebar();

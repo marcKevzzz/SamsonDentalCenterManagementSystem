@@ -25,7 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 var emailSettings = builder.Configuration.GetSection("EmailSettings");
 builder.Services
     .AddFluentEmail(emailSettings["DefaultFromEmail"], emailSettings["DefaultFromName"])
-    .AddRazorRenderer()
+    .AddRazorRenderer(Path.Combine(Directory.GetCurrentDirectory(), "Views", "Emails"))
     .AddSmtpSender(() => new SmtpClient(emailSettings["Smtp:Host"])
     {
         Port = int.Parse(emailSettings["Smtp:Port"] ?? "587"),

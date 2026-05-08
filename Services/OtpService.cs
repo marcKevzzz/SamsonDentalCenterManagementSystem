@@ -14,6 +14,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<string> GenerateOtp(string email, string type, int expiryMinutes = 30)
         {
+            email = email.Trim().ToLower();
             // Invalidate old OTPs of same type for this email
             await _supabase.From<Otp>()
                 .Where(x => x.Email == email)
@@ -40,6 +41,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<bool> VerifyOtp(string email, string code, string type)
         {
+            email = email.Trim().ToLower();
             var now = DateTime.UtcNow;
             var res = await _supabase.From<Otp>()
                 .Where(x => x.Email == email)
@@ -52,7 +54,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             
             if (otp == null)
             {
-                Console.WriteLine($"[OtpService] No valid OTP found for {email} / {type}");
+                Console.WriteLine($"[OtpService] No valid OTP found for {email} / {type} (Code: {code})");
                 return false;
             }
 

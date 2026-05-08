@@ -262,6 +262,7 @@ CREATE TABLE public.reviews (
   is_visible boolean NOT NULL DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
   review_date timestamp with time zone,
+  patient_id uuid REFERENCES public.profiles(id),
   CONSTRAINT reviews_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.staff_availability (

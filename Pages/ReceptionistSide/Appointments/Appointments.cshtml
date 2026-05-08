@@ -157,21 +157,26 @@ Layout = "AdminSide/_StaffLayout";
 
             // Serialize appointment to JSON for JS
             var apptJson = System.Text.Json.JsonSerializer.Serialize(new {
-              id              = appt.Id,
-              source          = appt.Source,
+              id               = appt.Id,
+              source           = appt.Source,
               patientFirstName = appt.PatientFirstName,
               patientLastName  = appt.PatientLastName,
               patientName      = appt.PatientName,
-              patientEmail    = appt.PatientEmail,
-              patientPhone    = appt.PatientPhone,
-              doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
-              serviceName     = appt.ServiceName,
-              serviceId       = appt.ServiceId,
-              serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
-              appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd"),
-              appointmentTime = appt.AppointmentTime,
-              status          = appt.Status,
-              notes           = appt.Notes
+              patientEmail     = appt.PatientEmail,
+              patientPhone     = appt.PatientPhone,
+              isForOther       = appt.IsForOther,
+              otherFirstName   = appt.OtherFirstName,
+              otherLastName    = appt.OtherLastName,
+              otherEmail       = appt.OtherEmail,
+              otherPhone       = appt.OtherPhone,
+              doctorName       = appt.Doctor?.Profile != null ? $"{(appt.Doctor.Title == "Admin" ? "Staff" : appt.Doctor.Title)} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned",
+              serviceName      = appt.ServiceName,
+              serviceId        = appt.ServiceId,
+              serviceCategory  = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
+              appointmentDate  = appt.AppointmentDate.ToString("yyyy-MM-dd"),
+              appointmentTime  = appt.AppointmentTime,
+              status           = appt.Status,
+              notes            = appt.Notes
             });
 
             <tr class="group hover:bg-slate-50/80 transition-colors" 
@@ -203,39 +208,32 @@ Layout = "AdminSide/_StaffLayout";
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-medium text-brand/80">@appt.ServiceName</div>
-                <div class="text-[11px] text-brand/40">
-                  <i class="fa-solid fa-user-doctor text-[9px] mr-1"></i>
-                  @(appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned")
+                <div class="text-[11px] text-brand/40 flex items-center gap-1 mt-0.5">
+                  <i class="fa-solid fa-user-doctor text-[9px]"></i>
+                  @{
+                    var docProfile = appt.Doctor?.Profile ?? appt.Doctor?.Profile; // Handle potential naming diffs
+                    var docName = docProfile != null ? $"{(appt.Doctor.Title == "Admin" ? "Staff" : appt.Doctor.Title)} {docProfile.FirstName} {docProfile.LastName}" : "Unassigned";
+                  }
+                  @docName
                 </div>
               </td>
               <td class="px-4 py-4">
-                @if (string.Equals(appt.Source, "guest", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-user-secret text-[9px]"></i> Guest</span>
-                }
-                else if (string.Equals(appt.Source, "admin", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-[9px]"></i> Office</span>
-                }
-                else if (string.Equals(appt.Source, "walk_in", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-person-walking text-[9px]"></i> Walk-in</span>
-                }
-                else if (string.Equals(appt.Source, "phone", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-phone text-[9px]"></i> Phone</span>
-                }
-                else
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-globe text-[9px]"></i> Online</span>
-                }
+                <div class="flex flex-col gap-1">
+                  @if (!string.IsNullOrEmpty(appt.Notes))
+                  {
+                    <div class="text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100/50 inline-block max-w-[150px] truncate font-medium" title="@appt.Notes">
+                      <i class="fa-solid fa-note-sticky mr-1.5 opacity-70"></i> @appt.Notes
+                    </div>
+                  }
+                  <span class="text-[9px] font-bold text-brand/30 uppercase tracking-widest ml-0.5">@appt.Source?.ToUpper()</span>
+                </div>
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-bold text-brand">@appt.AppointmentDate.ToString("MMM dd")</div>
                 <div class="text-[11px] text-brand/40">@appt.AppointmentTime</div>
               </td>
               <td class="px-4 py-4 text-center">
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
                   @statusLabel
                 </span>
               </td>
@@ -275,8 +273,12 @@ Layout = "AdminSide/_StaffLayout";
       <i class="fa-solid fa-ellipsis-vertical"></i>
     </button>
 
-    <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-50 overflow-hidden">
+    <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-50 overflow-hidden">
       <div class="py-1">
+        <button onclick='openViewModal(@Html.Raw(apptJson))' 
+                class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand hover:bg-slate-50 flex items-center gap-3 transition-colors">
+          <i class="fa-solid fa-eye w-4"></i> View Details
+        </button>
         @if (appt.Status == "pending")
         {
           <button onclick='confirmAppt(@Html.Raw(apptJson))' 
@@ -291,18 +293,17 @@ Layout = "AdminSide/_StaffLayout";
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
             <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
           </button>
+          <button onclick='updateStatus(@Html.Raw(apptJson), "no_show")' 
+                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
+          </button>
         }
 
-        @if (appt.Status is "confirmed" or "arrived")
+        @if (appt.Status == "arrived")
         {
           <button onclick='updateStatus(@Html.Raw(apptJson), "completed")' 
                   class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
             <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
-          </button>
-          
-          <button onclick='updateStatus(@Html.Raw(apptJson), "no_show")' 
-                  class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
           </button>
         }
         
@@ -648,5 +649,8 @@ Layout = "AdminSide/_StaffLayout";
 </div>
 
 
+
+
+<partial name="AdminSide/_AppointmentViewModal" />
 
     <script type="module" src="~/js/AdminSide/adminAppointment.js"></script>

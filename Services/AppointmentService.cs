@@ -95,7 +95,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    "/doctors?select=*,profile:profiles(*)&is_active=eq.true&order=title.asc";
+                    "/doctors?select=*,profile:profiles!profile_id(*)&is_active=eq.true&order=title.asc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -428,6 +428,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Create appointment ────────────────────────────────────────────────
         public async Task<Appointment> Create(AppointmentPayload p)
         {
+            if (!string.IsNullOrEmpty(p.PatientEmail)) p.PatientEmail = p.PatientEmail.Trim().ToLower();
+            if (!string.IsNullOrEmpty(p.OtherEmail)) p.OtherEmail = p.OtherEmail.Trim().ToLower();
+
             // ── Validation ───────────────────────────────────────────────────
             if (!p.IsWaitlist)
             {
@@ -580,7 +583,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             // 2. Waitlist
             // 3. Already confirmed
             // 4. Match found in database (Patient has an account/profile)
-            if (p.IsGuest && !p.IsWaitlist && !p.IsGuestConfirmed && string.IsNullOrEmpty(p.PatientId))
+            if (p.IsGuest && !p.IsWaitlist && !p.IsGuestConfirmed)
             {
                 var cacheToken = Guid.NewGuid().ToString("N");
                 var cacheJson = JsonSerializer.Serialize(p);
@@ -964,7 +967,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 updateData["confirmed_at"] = DateTime.UtcNow;
             }
 
-            if (doctorId != null)
+            if (!string.IsNullOrEmpty(doctorId) && doctorId != "any")
             {
                 updateData["doctor_id"] = doctorId;
             }
@@ -1110,7 +1113,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*))&id=eq.{id}&limit=1";
+                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles!profile_id(*))&id=eq.{id}&limit=1";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 if (!res.IsSuccessStatusCode)
@@ -1156,7 +1159,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 ["status"] = "confirmed",
             };
 
-            if (doctorId != null)
+            if (!string.IsNullOrEmpty(doctorId) && doctorId != "any")
                 payload["doctor_id"] = doctorId;
 
             var req = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
@@ -1198,7 +1201,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    "/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*)),patient_profile:profiles!patient_id(*)&order=created_at.desc";
+                    "/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles!profile_id(*)),patient_profile:profiles!patient_id(*)&order=created_at.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -1221,7 +1224,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*)),patient_profile:profiles!patient_id(*)&patient_id=eq.{patientId}&order=created_at.desc";
+                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles!profile_id(*)),patient_profile:profiles!patient_id(*)&patient_id=eq.{patientId}&order=created_at.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -1244,7 +1247,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             try
             {
                 var path =
-                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles(*)),patient_profile:profiles!patient_id(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
+                    $"/appointments?select=*,dental_service:dental_services!service_id(*),doctor:doctors(*,profile:profiles!profile_id(*)),patient_profile:profiles!patient_id(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -1461,6 +1464,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Appointment?> ConfirmByOtp(string email, string code, string? token = null)
         {
+            email = email.Trim().ToLower();
             try
             {
                 // If we have a token, it might be a cached guest booking

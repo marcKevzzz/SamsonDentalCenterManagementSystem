@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using SamsonDentalCenterManagementSystem.Models;
 using Supabase;
 using Supabase.Gotrue;
+using System.Text.Json;
 
 namespace SamsonDentalCenterManagementSystem.Services
 {
@@ -751,46 +752,33 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                int page = 1;
-                while (page <= 5) // Limit to 5 pages (250 users) for performance
-                {
-                    var req = new HttpRequestMessage(HttpMethod.Get, $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users?page={page}&per_page=50");
-                    req.Headers.Add("apikey", _serviceRoleKey);
-                    req.Headers.Add("Authorization", $"Bearer {_serviceRoleKey}");
-                    
-                    var res = await _http.SendAsync(req);
-                    if (!res.IsSuccessStatusCode) break;
+                _http.DefaultRequestHeaders.Clear();
+                _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+                _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+                
+                var res = await _http.GetAsync($"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users?per_page=100");
+                if (!res.IsSuccessStatusCode) return null;
 
-                    var json = await res.Content.ReadAsStringAsync();
-                    using var doc = System.Text.Json.JsonDocument.Parse(json);
-                    
-                    System.Text.Json.JsonElement users;
-                    if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                var json = await res.Content.ReadAsStringAsync();
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                
+                JsonElement users;
+                if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    users = doc.RootElement;
+                }
+                else if (doc.RootElement.TryGetProperty("users", out var usersProp) && usersProp.ValueKind == JsonValueKind.Array)
+                {
+                    users = usersProp;
+                }
+                else return null;
+
+                foreach (var user in users.EnumerateArray())
+                {
+                    if (user.TryGetProperty("email", out var e) && e.GetString()?.Equals(email, StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        users = doc.RootElement;
+                        return user.GetProperty("id").GetString();
                     }
-                    else if (doc.RootElement.TryGetProperty("users", out var usersProp) && usersProp.ValueKind == System.Text.Json.JsonValueKind.Array)
-                    {
-                        users = usersProp;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"[GetUserIdByEmail] Unexpected response format: {json.Substring(0, Math.Min(100, json.Length))}");
-                        break;
-                    }
-                    
-                    bool foundAny = false;
-                    foreach (var user in users.EnumerateArray())
-                    {
-                        foundAny = true;
-                        if (user.GetProperty("email").GetString()?.Equals(email, StringComparison.OrdinalIgnoreCase) == true)
-                        {
-                            return user.GetProperty("id").GetString();
-                        }
-                    }
-                    
-                    if (!foundAny) break;
-                    page++;
                 }
                 return null;
             }
@@ -881,6 +869,21 @@ namespace SamsonDentalCenterManagementSystem.Services
                 if (!res.IsSuccessStatusCode)
                 {
                     var err = await res.Content.ReadAsStringAsync();
+                    if (err.Contains("email_exists") || err.Contains("already been registered"))
+                    {
+                        // Check if the existing user's ID matches the one we want
+                        var existingId = await GetUserIdByEmail(email);
+                        if (existingId == id)
+                        {
+                            // ID matches! Just update the password.
+                            await UpdateUserPassword(id, password);
+                            return id;
+                        }
+                        
+                        // If we are claiming a record, we might need to merge IDs later,
+                        // but for now, we error if the email belongs to a DIFFERENT ID.
+                        throw new Exception($"This email is already registered to a different account. (ID: {existingId})");
+                    }
                     Console.WriteLine($"[CreateUserWithId] Failed: {err}");
                     throw new Exception($"Auth creation failed: {err}");
                 }
@@ -896,7 +899,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
-        public async Task<Profile?> FindExistingPatientRecord(string firstName, string lastName, DateTime? dob, string? phone)
+        public async Task<Profile?> FindExistingPatientRecord(string firstName, string lastName, DateTime? dob, string? phone, string? email)
         {
             await _supabase.InitializeAsync();
             var response = await _supabase.From<Profile>()
@@ -909,7 +912,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             return profiles.FirstOrDefault(p => 
                 p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase) && 
                 p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase) && 
-                ((dob.HasValue && p.DateOfBirth == dob.Value) || (!string.IsNullOrEmpty(phone) && p.PhoneNumber == phone))
+                (
+                    (dob.HasValue && p.DateOfBirth == dob.Value) || 
+                    (!string.IsNullOrEmpty(phone) && p.PhoneNumber == phone) ||
+                    (!string.IsNullOrEmpty(email) && p.Email != null && p.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
+                )
             );
         }
         public async Task MergeProfile(string sourceId, string targetId)

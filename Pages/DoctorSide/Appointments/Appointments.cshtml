@@ -105,10 +105,11 @@ Layout = "AdminSide/_StaffLayout";
           <tr>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Ref ID</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Patient</th>
-            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Service</th>
+            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Service & Doctor</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Source</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Schedule</th>
             <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Status</th>
+            <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-3 font-display">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="appointments-body">
@@ -145,7 +146,12 @@ Layout = "AdminSide/_StaffLayout";
               patientName     = appt.PatientName,
               patientEmail    = appt.PatientEmail,
               patientPhone    = appt.PatientPhone,
-              doctorName      = appt.Doctor?.Profile != null ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : null,
+              isForOther      = appt.IsForOther,
+              otherFirstName  = appt.OtherFirstName,
+              otherLastName   = appt.OtherLastName,
+              otherEmail      = appt.OtherEmail,
+              otherPhone      = appt.OtherPhone,
+              doctorName      = appt.Doctor?.Profile != null ? $"{(appt.Doctor.Title == "Admin" ? "Staff" : appt.Doctor.Title)} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}" : "Unassigned",
               serviceName     = appt.ServiceName,
               serviceId       = appt.ServiceId,
               serviceCategory = Model.Services.FirstOrDefault(s => s.Id == appt.ServiceId)?.Category ?? "",
@@ -175,37 +181,90 @@ Layout = "AdminSide/_StaffLayout";
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-medium text-brand/80">@appt.ServiceName</div>
+                <div class="text-[11px] text-brand/40 flex items-center gap-1 mt-0.5">
+                  <i class="fa-solid fa-user-doctor text-[9px]"></i>
+                  @{
+                    var docProfile = appt.Doctor?.Profile;
+                    var docName = docProfile != null ? $"{(appt.Doctor.Title == "Admin" ? "Staff" : appt.Doctor.Title)} {docProfile.FirstName} {docProfile.LastName}" : "Unassigned";
+                  }
+                  @docName
+                </div>
               </td>
               <td class="px-4 py-4">
-                @if (string.Equals(appt.Source, "guest", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-user-secret text-[9px]"></i> Guest</span>
-                }
-                else if (string.Equals(appt.Source, "admin", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-shield-halved text-[9px]"></i> Office</span>
-                }
-                else if (string.Equals(appt.Source, "walk_in", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-person-walking text-[9px]"></i> Walk-in</span>
-                }
-                else if (string.Equals(appt.Source, "phone", StringComparison.OrdinalIgnoreCase))
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-phone text-[9px]"></i> Phone</span>
-                }
-                else
-                {
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider"><i class="fa-solid fa-globe text-[9px]"></i> Online</span>
-                }
+                <div class="flex flex-col gap-1">
+                  @if (!string.IsNullOrEmpty(appt.Notes))
+                  {
+                    <div class="text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100/50 inline-block max-w-[150px] truncate font-medium" title="@appt.Notes">
+                       @appt.Notes
+                    </div>
+                  }
+                  <span class="text-[9px] font-bold text-brand/30 uppercase tracking-widest ml-0.5">@appt.Source?.ToUpper()</span>
+                </div>
               </td>
               <td class="px-4 py-4">
                 <div class="text-[12.5px] font-bold text-brand">@appt.AppointmentDate.ToString("MMM dd")</div>
                 <div class="text-[11px] text-brand/40">@appt.AppointmentTime</div>
               </td>
               <td class="px-4 py-4 text-center">
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
                   @statusLabel
                 </span>
+              </td>
+              <td class="px-4 py-4 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2">
+                  @if (appt.Status.ToLower() == "pending")
+                  {
+                    <button onclick='confirmAppt("@appt.Id")' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>
+                  }
+                  else if (appt.Status.ToLower() == "confirmed")
+                  {
+                    <button onclick='updateStatus("@appt.Id", "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>
+                  }
+
+                  <div class="inline-block text-left action-dropdown relative">
+                    <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand/40 transition-colors">
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <div class="dropdown-menu hidden absolute right-0 w-48 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/10 z-[60] overflow-hidden">
+                      <div class="py-1">
+                        <button onclick='openViewModal(@Html.Raw(apptJson))' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                          <i class="fa-solid fa-eye w-4"></i> View Details
+                        </button>
+                        @if (appt.Status.ToLower() == "pending")
+                        {
+                          <button onclick='confirmAppt("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
+                            <i class="fa-solid fa-check-circle w-4"></i> Confirm Booking
+                          </button>
+                        }
+                        @if (appt.Status.ToLower() == "confirmed")
+                        {
+                          <button onclick='updateStatus("@appt.Id", "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
+                            <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
+                          </button>
+                          <button onclick='updateStatus("@appt.Id", "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
+                          </button>
+                        }
+                        @if (appt.Status.ToLower() == "arrived")
+                        {
+                          <button onclick='updateStatus("@appt.Id", "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
+                            <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
+                          </button>
+                        }
+                        <div class="h-px bg-slate-100 my-1"></div>
+                        @if (new[] { "confirmed", "pending", "arrived" }.Contains(appt.Status.ToLower()))
+                        {
+                          <button onclick='openEditModal("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand/60 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                            <i class="fa-solid fa-rotate w-4"></i> Reschedule
+                          </button>
+                          <button onclick='cancelAppt("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors">
+                            <i class="fa-solid fa-ban w-4"></i> Cancel
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </td>
             </tr>
           }
@@ -455,6 +514,7 @@ Layout = "AdminSide/_StaffLayout";
       </div>
 
       <input type="hidden" id="confirm-appt-id" />
+      <input type="hidden" id="confirm-doctor" value="" />
 
       <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
         <button onclick="closeConfirmModal()"
@@ -471,5 +531,8 @@ Layout = "AdminSide/_StaffLayout";
 </div>
 
 
+
+
+<partial name="AdminSide/_AppointmentViewModal" />
 
     <script type="module" src="~/js/AdminSide/adminAppointment.js"></script>

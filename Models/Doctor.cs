@@ -31,12 +31,13 @@ namespace SamsonDentalCenterManagementSystem.Models
         public DateTime CreatedAt { get; set; }
 
         // ── Nested join — populated by .Select("*, profiles(*)") ─────────────
-        [JsonProperty("profiles")]
-        [JsonPropertyName("profiles")]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Profile? Profile { get; set; }
 
         // ── Availability join ─────────────────────────────────────────────────────
-        [JsonProperty("staff_availability")]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public List<StaffAvailability>? Availability { get; set; }
     }
 

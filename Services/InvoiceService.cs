@@ -150,7 +150,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Invoice?> GetInvoiceByIdAsync(string id)
         {
-            var path = $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&id=eq.{id}";
+            var path = $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*)&id=eq.{id}";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             
@@ -162,7 +162,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)
         {
-            var path = $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&appointment_id=eq.{appointmentId}";
+            var path = $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*)&appointment_id=eq.{appointmentId}";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
 
@@ -188,7 +188,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task<List<Invoice>> GetAllInvoicesAsync()
         {
             var path =
-                "/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&order=created_at.desc";
+                "/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*)&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -200,7 +200,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task<List<Invoice>> GetInvoicesByDoctorIdAsync(string doctorId)
         {
             var path =
-                $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
+                $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*)&doctor_id=eq.{doctorId}&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -212,7 +212,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task<List<Invoice>> GetInvoicesByPatientIdAsync(string patientId)
         {
             var path =
-                $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&patient_id=eq.{patientId}&order=created_at.desc";
+                $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*)&patient_id=eq.{patientId}&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();

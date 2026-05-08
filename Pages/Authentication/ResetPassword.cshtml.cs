@@ -34,6 +34,7 @@ namespace SamsonDentalCenterManagementSystem.Pages.Authentication
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (!string.IsNullOrEmpty(Email)) Email = Email.Trim().ToLower();
             if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
             {
                 TempData["Error"] = "Password must be at least 8 characters.";

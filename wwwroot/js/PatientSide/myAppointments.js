@@ -159,3 +159,85 @@ window.rescheduleAppointment = function(id) {
         }
     });
 }
+
+// ── Review Logic ─────────────────────────────────────────────────────────────
+let CURRENT_RATING = 0;
+
+window.openReviewModal = function() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setRating(5); // Default to 5
+    }
+}
+
+window.closeReviewModal = function() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        // Reset form
+        CURRENT_RATING = 0;
+        const text = document.getElementById('reviewText');
+        if (text) text.value = '';
+    }
+}
+
+window.setRating = function(rating) {
+    CURRENT_RATING = rating;
+    const stars = document.querySelectorAll('.star-btn');
+    stars.forEach(btn => {
+        const r = parseInt(btn.dataset.rating);
+        if (r <= rating) {
+            btn.classList.remove('text-slate-200');
+            btn.classList.add('text-yellow-400');
+        } else {
+            btn.classList.remove('text-yellow-400');
+            btn.classList.add('text-slate-200');
+        }
+    });
+}
+
+window.submitReview = async function() {
+    const text = document.getElementById('reviewText')?.value || '';
+    const btn = document.getElementById('btnSubmitReview');
+
+    if (CURRENT_RATING === 0) {
+        Toast.show("Please select a rating", "warning");
+        return;
+    }
+
+    if (!text.trim()) {
+        Toast.show("Please enter your comments", "warning");
+        return;
+    }
+
+    try {
+        if (btn) btn.disabled = true;
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
+
+        const res = await fetch('/api/patient/data/submit-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                rating: CURRENT_RATING,
+                reviewText: text
+            })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+            Toast.show(data.message, "success");
+            closeReviewModal();
+        } else {
+            Toast.show(data.error || "Failed to submit review", "danger");
+        }
+    } catch (err) {
+        console.error("Review Error:", err);
+        Toast.show("An error occurred. Please try again.", "danger");
+    } finally {
+        if (btn) btn.disabled = false;
+        if (btn) btn.innerHTML = 'Submit Review';
+    }
+}

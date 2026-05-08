@@ -15,6 +15,10 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("author_name")]
         public string AuthorName { get; set; } = "";
 
+        [Column("patient_id")]
+        [JsonPropertyName("patient_id")]
+        public string? PatientId { get; set; }
+
         [Column("author_avatar")]
         [JsonPropertyName("author_avatar")]
         public string? AuthorAvatar { get; set; }

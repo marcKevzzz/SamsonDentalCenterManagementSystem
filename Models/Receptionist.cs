@@ -25,12 +25,13 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("profile_id")]
         public string ProfileId { get; set; } = string.Empty;
 
-        [JsonProperty("profiles")]
-        [System.Text.Json.Serialization.JsonPropertyName("profiles")]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Profile? Profile { get; set; }
 
         // Uses unified staff_availability table
-        [JsonProperty("staff_availability")]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public List<StaffAvailability>? Availability { get; set; }
     }
 }

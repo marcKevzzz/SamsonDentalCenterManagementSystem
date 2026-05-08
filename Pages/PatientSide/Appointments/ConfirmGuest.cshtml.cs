@@ -28,6 +28,7 @@ namespace SamsonDentalCenterManagementSystem.Pages.PatientSide.Appointments
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (!string.IsNullOrEmpty(Email)) Email = Email.Trim().ToLower();
             if (string.IsNullOrWhiteSpace(Code) || Code.Length != 6)
             {
                 TempData["Error"] = "Please enter a valid 6-digit code.";

@@ -14,13 +14,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const logs = await AdminStore.loadData('activity-logs', '/api/admin/data/activity-logs');
     const leaves = role === 'admin' ? await AdminStore.loadData('leaves', '/api/staff/leave/all') : [];
     const inqs = await AdminStore.loadData('inquiries', '/api/admin/data/inquiries');
+    const invoices = await AdminStore.loadData('invoices', '/api/admin/data/invoices');
     
     DASHBOARD_DATA = {
         stats: stats,
         appointments: appts,
         logs: logs,
         leaves: leaves,
-        inquiries: inqs
+        inquiries: inqs,
+        invoices: invoices
     };
     
     hydrateDashboard(DASHBOARD_DATA);
@@ -213,8 +215,10 @@ function hydrateDashboard(data) {
         }
     }
 
-    // 5. Hydrate Inquiries
+    // 5. Hydrate Inquiries or Pending Payments (Receptionist)
     const inqsBody = document.getElementById('dashboard-inquiries-body');
+    const paymentsBody = document.getElementById('pending-payments-body');
+
     if (inqsBody) {
         const unread = (data.inquiries || [])
             .filter(i => !i.isRead)
@@ -238,6 +242,35 @@ function hydrateDashboard(data) {
                             <span class="text-[9px] text-slate-400 font-medium whitespace-nowrap">${timeAgo(inq.createdAt)}</span>
                         </div>
                         <p class="text-[11px] text-brand/50 line-clamp-1 mt-0.5">${inq.message}</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+    }
+
+    if (paymentsBody) {
+        const pending = (data.invoices || [])
+            .filter(inv => inv.status?.toLowerCase() === 'pending' || inv.status?.toLowerCase() === 'partial')
+            .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+            .slice(0, 6);
+
+        if (pending.length === 0) {
+            paymentsBody.innerHTML = `<div class="py-12 text-center text-slate-400 text-[12px] italic">No pending payments.</div>`;
+        } else {
+            paymentsBody.innerHTML = pending.map(inv => `
+                <a href="/Receptionist/Billing" class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all group">
+                    <div class="w-9 h-9 rounded-xl ${inv.status?.toLowerCase() === 'partial' ? 'bg-amber-50 text-amber-600' : 'bg-orange-50 text-orange-600'} flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-file-invoice-dollar text-[13px]"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-[12.5px] font-bold text-brand truncate">${inv.patientName || 'Unknown Patient'}</span>
+                            <span class="text-[10px] font-bold text-brand/70">₱${(inv.totalAmount || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-0.5">
+                            <p class="text-[11px] text-brand/50 line-clamp-1">${inv.serviceName || 'Dental Service'}</p>
+                            <span class="text-[9px] uppercase font-bold tracking-tighter ${inv.status?.toLowerCase() === 'partial' ? 'text-amber-500' : 'text-orange-500'}">${inv.status}</span>
+                        </div>
                     </div>
                 </a>
             `).join('');

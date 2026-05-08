@@ -40,18 +40,26 @@ async function refreshData(force = false) {
   const appts = await AdminStore.loadData(
     "appointments",
     "/api/admin/data/appointments",
-    { force }
+    { force },
   );
-  const docs = await AdminStore.loadData("doctors", "/api/admin/data/doctors", { force });
-  const svcs = await AdminStore.loadData("services", "/api/services/all", { force });
-  const pts = await AdminStore.loadData("patients", "/api/admin/data/patients", { force });
+  const docs = await AdminStore.loadData("doctors", "/api/admin/data/doctors", {
+    force,
+  });
+  const svcs = await AdminStore.loadData("services", "/api/services/all", {
+    force,
+  });
+  const pts = await AdminStore.loadData(
+    "patients",
+    "/api/admin/data/patients",
+    { force },
+  );
 
   if (appts) {
     initializeWithData({
       appointments: appts,
       doctors: docs?.data || docs,
       services: svcs,
-      patients: pts?.data || pts
+      patients: pts?.data || pts,
     });
   }
 }
@@ -63,25 +71,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function checkUrlParams() {
   const params = new URLSearchParams(window.location.search);
-  const patientId = params.get('patientId');
-  const openModal = params.get('openModal');
+  const patientId = params.get("patientId");
+  const openModal = params.get("openModal");
 
   if (patientId) {
     if (ALL_PATIENTS && ALL_PATIENTS.length > 0) {
-      const patient = ALL_PATIENTS.find(p => p.id === patientId);
+      const patient = ALL_PATIENTS.find((p) => p.id === patientId);
       if (patient) {
         window.selectPatient(patient.id);
-        
+
         // Auto-assign doctor from past appointments
         if (ALL_APPT && ALL_APPT.length > 0) {
-          const pastAppt = ALL_APPT.find(a => a.patientId === patient.id && a.doctorId);
+          const pastAppt = ALL_APPT.find(
+            (a) => a.patientId === patient.id && a.doctorId,
+          );
           if (pastAppt && pastAppt.doctorId) {
-            const docEl = document.getElementById('book-doctor');
+            const docEl = document.getElementById("book-doctor");
             if (docEl) docEl.value = pastAppt.doctorId;
           }
         }
 
-        if (openModal === 'true') {
+        if (openModal === "true") {
           window.openBookModal(true);
         }
       }
@@ -110,8 +120,15 @@ function initializeWithData(data) {
         day: "numeric",
       });
     }
-    if (!a.doctorName && a.doctor && a.doctor.profile) {
-      a.doctorName = `${a.doctor.title} ${a.doctor.profile.firstName} ${a.doctor.profile.lastName}`;
+    if (!a.doctorName && a.doctor) {
+      const d = a.doctor;
+      const p = d.profile || d.Profile;
+      if (p) {
+        const displayTitle = d.title === "Admin" ? "Staff" : d.title || "";
+        const fn = p.first_name || p.firstName || "";
+        const ln = p.last_name || p.lastName || "";
+        a.doctorName = `${displayTitle} ${fn} ${ln}`.trim();
+      }
     }
     if (!a.serviceName && a.service) {
       a.serviceName = a.service.name;
@@ -127,11 +144,34 @@ function initializeWithData(data) {
 
 function renderStats(stats) {
   const s = stats || {};
-  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  setEl("stat-confirmed", s.appointmentsConfirmed !== undefined ? s.appointmentsConfirmed : ALL_APPT.filter((a) => a.status === "confirmed").length);
-  setEl("stat-pending",   s.appointmentsPending   !== undefined ? s.appointmentsPending   : ALL_APPT.filter((a) => a.status === "pending").length);
-  setEl("stat-waitlist",  s.appointmentsWaitlist  !== undefined ? s.appointmentsWaitlist  : ALL_APPT.filter((a) => a.status === "waitlist").length);
-  setEl("stat-cancelled", s.appointmentsCancelled !== undefined ? s.appointmentsCancelled : ALL_APPT.filter((a) => a.status === "cancelled").length);
+  const setEl = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  setEl(
+    "stat-confirmed",
+    s.appointmentsConfirmed !== undefined
+      ? s.appointmentsConfirmed
+      : ALL_APPT.filter((a) => a.status === "confirmed").length,
+  );
+  setEl(
+    "stat-pending",
+    s.appointmentsPending !== undefined
+      ? s.appointmentsPending
+      : ALL_APPT.filter((a) => a.status === "pending").length,
+  );
+  setEl(
+    "stat-waitlist",
+    s.appointmentsWaitlist !== undefined
+      ? s.appointmentsWaitlist
+      : ALL_APPT.filter((a) => a.status === "waitlist").length,
+  );
+  setEl(
+    "stat-cancelled",
+    s.appointmentsCancelled !== undefined
+      ? s.appointmentsCancelled
+      : ALL_APPT.filter((a) => a.status === "cancelled").length,
+  );
 }
 
 function hydrateDropdowns() {
@@ -159,11 +199,15 @@ function hydrateDropdowns() {
       '<option value="">Any available specialist</option>' +
       ALL_DOCS.map((d) => {
         const profile = d.profile || d.Profile;
-        const displayTitle = (d.title === "Admin") ? "Staff" : d.title;
+        const displayTitle = d.title === "Admin" ? "Staff" : d.title;
         const name = profile
           ? `${displayTitle} ${profile.first_name || profile.firstName} ${profile.last_name || profile.lastName}`
           : "Unknown";
-        const specs = d.specialties ? (Array.isArray(d.specialties) ? d.specialties.join(",") : d.specialties) : "";
+        const specs = d.specialties
+          ? Array.isArray(d.specialties)
+            ? d.specialties.join(",")
+            : d.specialties
+          : "";
         return `<option value="${d.id}" data-name="${name}" data-specialties="${specs}">${name}</option>`;
       }).join("");
     el.value = val;
@@ -193,7 +237,8 @@ function renderTable() {
       pagBar.classList.remove("hidden");
       pagBar.classList.add("flex");
       const infoEl = document.getElementById("paginationInfo");
-      if (infoEl) infoEl.textContent = `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length} appointments`;
+      if (infoEl)
+        infoEl.textContent = `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length} appointments`;
       renderPaginationBtns(totalPages);
     } else {
       pagBar.classList.add("hidden");
@@ -274,11 +319,17 @@ function rowHTML(appt) {
     if (appt.patientAvatarUrl) {
       return `<img src="${appt.patientAvatarUrl}" alt="${appt.patientName}" class="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-200" />`;
     }
-    const firstName = appt.patientFirstName || '';
-    const lastName = appt.patientLastName || '';
-    const initials = (firstName && lastName) 
-      ? (firstName[0] + lastName[0]).toUpperCase() 
-      : (firstName?.[0] || lastName?.[0] || appt.patientName?.[0] || 'G').toUpperCase();
+    const firstName = appt.patientFirstName || "";
+    const lastName = appt.patientLastName || "";
+    const initials =
+      firstName && lastName
+        ? (firstName[0] + lastName[0]).toUpperCase()
+        : (
+            firstName?.[0] ||
+            lastName?.[0] ||
+            appt.patientName?.[0] ||
+            "G"
+          ).toUpperCase();
     return `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">${initials}</div>`;
   })();
 
@@ -298,34 +349,44 @@ function rowHTML(appt) {
       </td>
       <td class="px-4 py-4">
         <div class="text-[12.5px] font-medium text-brand/80">${appt.serviceName}</div>
+        <div class="text-[10.5px] text-brand/40 flex items-center gap-1 mt-0.5">
+          <i class="fa-solid fa-user-doctor text-[9px]"></i>
+          ${appt.doctorName || "Unassigned"}
+        </div>
       </td>
       <td class="px-4 py-4">
-        ${renderSourceBadge(appt.source)}
+        <div class="flex flex-col gap-1">
+          ${appt.notes ? `<div class="text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100/50 inline-block max-w-[150px] truncate font-medium" title="${appt.notes}">${appt.notes}</div>` : ""}
+          <span class="text-[9px] font-bold text-brand/30 uppercase tracking-widest ml-0.5">${appt.source.toUpperCase()}</span>
+        </div>
       </td>
       <td class="px-4 py-4">
         <div class="text-[12.5px] font-bold text-brand">${appt.appointmentDateFormatted}</div>
         <div class="text-[11px] text-brand/40">${appt.appointmentTime}</div>
       </td>
       <td class="px-4 py-4 text-center">
-        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border ${config.classes} font-display uppercase tracking-wider">
+        <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border ${config.classes} font-display uppercase tracking-wider">
           ${config.label}
         </span>
         ${priorityBadge}
       </td>
       <td class="px-4 py-4 text-right whitespace-nowrap">
-        ${document.body.dataset.role === 'doctor' ? '' : `
         <div class="flex items-center justify-end gap-2">
           ${workflowBtn}
           <div class="inline-block text-left action-dropdown relative">
             <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand/40 transition-colors">
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
-            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-[60] overflow-hidden">
+            <div class="dropdown-menu hidden absolute right-0 w-48 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/10 z-[60] overflow-hidden">
               <div class="py-1">
+                <button onclick='openViewModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                  <i class="fa-solid fa-eye w-4"></i> View Details
+                </button>
                 ${status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ""}
                 ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ""}
+                ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>` : ""}
                 ${
-                  status === "confirmed"
+                  status === "arrived"
                     ? `
                   <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
                   <button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
@@ -341,33 +402,51 @@ function rowHTML(appt) {
                 `
                     : ""
                 }
-                ${["cancelled", "no_show", "no-show", "completed"].includes(status) ? `<button onclick='openBookModal()' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-primary hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-plus w-4"></i> Book Again</button>` : ""}
-                ${["waitlist", "no_show", "no-show", "cancelled", "completed"].includes(status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ""}
+                ${document.body.dataset.role === "admin" && ["waitlist", "no_show", "no-show", "cancelled", "completed"].includes(status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ""}
               </div>
             </div>
           </div>
-        </div>`}
+        </div>
       </td>
     </tr>`;
 }
 
-function renderSourceBadge(source) {
+function getSourceConfig(source) {
   const s = (source || "online").toLowerCase();
   const role = document.body.dataset.role || "admin";
-  const label = s === "admin" ? (role === "admin" ? "Admin" : "Office") : (s === "guest" ? "Guest" : (s === "walk_in" ? "Walk-in" : (s === "phone" ? "Phone" : "Online")));
-  
   const configs = {
-    guest:   { classes: "bg-slate-100 border-slate-200 text-slate-600", icon: "fa-user-secret" },
-    admin:   { classes: "bg-blue-50 border-blue-100 text-blue-600",   icon: "fa-shield-halved" },
-    walk_in: { classes: "bg-amber-50 border-amber-100 text-amber-600", icon: "fa-person-walking" },
-    phone:   { classes: "bg-purple-50 border-purple-100 text-purple-600", icon: "fa-phone" },
-    online:  { classes: "bg-emerald-50 border-emerald-100 text-emerald-600", icon: "fa-globe" }
+    guest: {
+      classes: "bg-slate-100 border-slate-200 text-slate-600",
+      icon: "fa-user-secret",
+      label: "Guest",
+    },
+    admin: {
+      classes: "bg-blue-50 border-blue-100 text-blue-600",
+      icon: "fa-shield-halved",
+      label: role === "admin" ? "Admin" : "Office",
+    },
+    walk_in: {
+      classes: "bg-amber-50 border-amber-100 text-amber-600",
+      icon: "fa-person-walking",
+      label: "Walk-in",
+    },
+    phone: {
+      classes: "bg-purple-50 border-purple-100 text-purple-600",
+      icon: "fa-phone",
+      label: "Phone",
+    },
+    online: {
+      classes: "bg-emerald-50 border-emerald-100 text-emerald-600",
+      icon: "fa-globe",
+      label: "Online",
+    },
   };
+  return configs[s] || configs.online;
+}
 
-  const c = configs[s] || configs.online;
-  const displayLabel = s === "admin" ? (role === "admin" ? "Admin" : "Office") : label;
-
-  return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full ${c.classes} text-[10px] font-bold uppercase tracking-wider border"><i class="fa-solid ${c.icon} text-[9px]"></i> ${displayLabel}</span>`;
+function renderSourceBadge(source) {
+  const c = getSourceConfig(source);
+  return `<span class="inline-flex items-center px-2 py-0.5 rounded-full ${c.classes} text-[10px] font-bold uppercase tracking-wider border shadow-sm">${c.label}</span>`;
 }
 
 function renderPaginationBtns(totalPages) {
@@ -397,16 +476,23 @@ window.filterTable = () => {
     const matchSearch =
       !q ||
       appt.patientName.toLowerCase().includes(q) ||
-      (appt.patientFirstName && appt.patientFirstName.toLowerCase().includes(q)) ||
-      (appt.patientLastName && appt.patientLastName.toLowerCase().includes(q)) ||
+      (appt.patientFirstName &&
+        appt.patientFirstName.toLowerCase().includes(q)) ||
+      (appt.patientLastName &&
+        appt.patientLastName.toLowerCase().includes(q)) ||
       (appt.doctorName && appt.doctorName.toLowerCase().includes(q)) ||
       appt.serviceName.toLowerCase().includes(q);
-      
+
     // Split status filter into array to handle comma-separated values
-    const statusArray = status ? status.toLowerCase().split(',').map(s => s.trim()) : [];
+    const statusArray = status
+      ? status
+          .toLowerCase()
+          .split(",")
+          .map((s) => s.trim())
+      : [];
     const matchStatus =
       !status || statusArray.includes(appt.status.toLowerCase());
-      
+
     const matchDate = !date || appt.appointmentDate === date;
     return matchSearch && matchStatus && matchDate;
   });
@@ -453,88 +539,111 @@ function getBookFormState() {
     d: document.getElementById("book-doctor")?.value || "",
     dt: document.getElementById("book-date")?.value || "",
     t: document.getElementById("book-time")?.value || "",
-    nt: document.getElementById("book-notes")?.value || ""
+    nt: document.getElementById("book-notes")?.value || "",
   });
 }
 
 window.openBookModal = (skipReset = false) => {
   if (!skipReset) {
     // Reset fields to ensure clean state on open
-    const fields = ["book-patient-id", "book-patient-search", "book-patient-first-name", "book-patient-last-name", "book-patient-email", "book-patient-phone", "book-service", "book-doctor", "book-date", "book-time", "book-notes"];
-    fields.forEach(f => {
+    const fields = [
+      "book-patient-id",
+      "book-patient-search",
+      "book-patient-first-name",
+      "book-patient-last-name",
+      "book-patient-email",
+      "book-patient-phone",
+      "book-service",
+      "book-doctor",
+      "book-date",
+      "book-time",
+      "book-notes",
+    ];
+    fields.forEach((f) => {
       const el = document.getElementById(f);
-      if(el) {
-          el.value = "";
-          if (el.tagName === 'INPUT') el.readOnly = false;
+      if (el) {
+        el.value = "";
+        if (el.tagName === "INPUT") el.readOnly = false;
       }
     });
 
-    const dropdown = document.getElementById('patient-search-results');
-    if (dropdown) dropdown.classList.add('hidden');
+    const dropdown = document.getElementById("patient-search-results");
+    if (dropdown) dropdown.classList.add("hidden");
 
     // Add listeners for doctor availability
     const svcEl = document.getElementById("book-service");
     const dateEl = document.getElementById("book-date");
     const timeEl = document.getElementById("book-time");
     const updateDocs = () => {
-        const cat = svcEl.selectedOptions[0]?.dataset.category || "";
-        const dt = dateEl.value;
-        const tm = timeEl.value;
-        if (cat && dt && tm) {
-            window.fetchAvailableDoctors("book-doctor", cat, dt, tm);
-        }
+      const cat = svcEl.selectedOptions[0]?.dataset.category || "";
+      const dt = dateEl.value;
+      const tm = timeEl.value;
+      if (cat && dt && tm) {
+        window.fetchAvailableDoctors("book-doctor", cat, dt, tm);
+      }
     };
-    if (svcEl && !svcEl.hasAttribute('data-bound-avail')) {
-        svcEl.setAttribute('data-bound-avail', 'true');
-        svcEl.addEventListener('change', updateDocs);
-        dateEl.addEventListener('change', updateDocs);
-        timeEl.addEventListener('change', updateDocs);
+    if (svcEl && !svcEl.hasAttribute("data-bound-avail")) {
+      svcEl.setAttribute("data-bound-avail", "true");
+      svcEl.addEventListener("change", updateDocs);
+      dateEl.addEventListener("change", updateDocs);
+      timeEl.addEventListener("change", updateDocs);
     }
   }
 
   // Bind patient search input
   const searchInput = document.getElementById("book-patient-search");
-  if (searchInput && !searchInput.hasAttribute('data-bound')) {
-      searchInput.setAttribute('data-bound', 'true');
-      searchInput.addEventListener('input', (e) => {
-          const q = e.target.value.trim().toLowerCase();
-          const dropdown = document.getElementById('patient-search-results');
-          if (!q) {
-              dropdown.classList.add('hidden');
-              return;
-          }
-          
-          const matches = ALL_PATIENTS.filter(p => 
-              p.firstName?.toLowerCase().includes(q) || 
-              p.lastName?.toLowerCase().includes(q) || 
-              p.email?.toLowerCase().includes(q)
-          ).slice(0, 5);
-          
-          if (matches.length > 0) {
-              dropdown.innerHTML = matches.map(p => `
+  if (searchInput && !searchInput.hasAttribute("data-bound")) {
+    searchInput.setAttribute("data-bound", "true");
+    searchInput.addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const dropdown = document.getElementById("patient-search-results");
+      if (!q) {
+        dropdown.classList.add("hidden");
+        return;
+      }
+
+      const matches = ALL_PATIENTS.filter(
+        (p) =>
+          p.firstName?.toLowerCase().includes(q) ||
+          p.lastName?.toLowerCase().includes(q) ||
+          p.email?.toLowerCase().includes(q),
+      ).slice(0, 5);
+
+      if (matches.length > 0) {
+        dropdown.innerHTML = matches
+          .map(
+            (p) => `
                   <div class="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0" onclick="selectPatient('${p.id}')">
                       <div class="text-[13px] font-bold text-brand">${p.firstName} ${p.lastName}</div>
                       <div class="text-[10px] text-brand/40">${p.email}</div>
                   </div>
-              `).join('');
-              dropdown.classList.remove('hidden');
-          } else {
-              dropdown.classList.add('hidden');
-          }
-      });
+              `,
+          )
+          .join("");
+        dropdown.classList.remove("hidden");
+      } else {
+        dropdown.classList.add("hidden");
+      }
+    });
   }
 
   // Bind patient email blur event for auto-assign doctor
   const emailInput = document.getElementById("book-patient-email");
-  if (emailInput && !emailInput.hasAttribute('data-bound')) {
-    emailInput.setAttribute('data-bound', 'true');
-    emailInput.addEventListener('blur', () => {
+  if (emailInput && !emailInput.hasAttribute("data-bound")) {
+    emailInput.setAttribute("data-bound", "true");
+    emailInput.addEventListener("blur", () => {
       const email = emailInput.value.trim().toLowerCase();
       if (email && ALL_APPT && ALL_APPT.length > 0) {
-        const pastAppt = ALL_APPT.find(a => a.patientEmail && a.patientEmail.toLowerCase() === email && a.doctorId);
+        const pastAppt = ALL_APPT.find(
+          (a) =>
+            a.patientEmail &&
+            a.patientEmail.toLowerCase() === email &&
+            a.doctorId,
+        );
         if (pastAppt && pastAppt.doctorId) {
-          const docEl = document.getElementById('book-doctor');
-          if (docEl && !docEl.value) { // only auto-assign if currently empty
+          const docEl = document.getElementById("book-doctor");
+          if (docEl && !docEl.value) {
+            // only auto-assign if currently empty
             docEl.value = pastAppt.doctorId;
           }
         }
@@ -547,54 +656,66 @@ window.openBookModal = (skipReset = false) => {
 };
 
 window.selectPatient = (id) => {
-    const p = ALL_PATIENTS.find(x => x.id === id);
-    if (!p) return;
-    
-    const fields = {
-        'book-patient-id': p.id,
-        'book-patient-search': `${p.firstName} ${p.lastName}`,
-        'book-patient-first-name': p.firstName,
-        'book-patient-last-name': p.lastName,
-        'book-patient-email': p.email,
-        'book-patient-phone': p.phone || ''
-    };
-    
-    for (const [fid, val] of Object.entries(fields)) {
-        const el = document.getElementById(fid);
-        if (el) {
-            el.value = val;
-            if (fid !== 'book-patient-search' && fid !== 'book-patient-id' && fid !== 'book-patient-phone') {
-                el.readOnly = true;
-            }
-        }
+  const p = ALL_PATIENTS.find((x) => x.id === id);
+  if (!p) return;
+
+  const fields = {
+    "book-patient-id": p.id,
+    "book-patient-search": `${p.firstName} ${p.lastName}`,
+    "book-patient-first-name": p.firstName,
+    "book-patient-last-name": p.lastName,
+    "book-patient-email": p.email,
+    "book-patient-phone": p.phone || "",
+  };
+
+  for (const [fid, val] of Object.entries(fields)) {
+    const el = document.getElementById(fid);
+    if (el) {
+      el.value = val;
+      if (
+        fid !== "book-patient-search" &&
+        fid !== "book-patient-id" &&
+        fid !== "book-patient-phone"
+      ) {
+        el.readOnly = true;
+      }
     }
-    
-    document.getElementById('patient-search-results').classList.add('hidden');
-}
+  }
+
+  document.getElementById("patient-search-results").classList.add("hidden");
+};
 
 window.clearPatientSelection = () => {
-    const fields = ["book-patient-id", "book-patient-search", "book-patient-first-name", "book-patient-last-name", "book-patient-email", "book-patient-phone"];
-    fields.forEach(f => {
-      const el = document.getElementById(f);
-      if(el) {
-          el.value = "";
-          el.readOnly = false;
-      }
-    });
+  const fields = [
+    "book-patient-id",
+    "book-patient-search",
+    "book-patient-first-name",
+    "book-patient-last-name",
+    "book-patient-email",
+    "book-patient-phone",
+  ];
+  fields.forEach((f) => {
+    const el = document.getElementById(f);
+    if (el) {
+      el.value = "";
+      el.readOnly = false;
+    }
+  });
 };
 
 window.closeBookModal = () => {
   if (initialBookFormState && getBookFormState() !== initialBookFormState) {
     Modal.open({
       title: "Discard Changes?",
-      message: "You have unsaved changes. Are you sure you want to discard them?",
+      message:
+        "You have unsaved changes. Are you sure you want to discard them?",
       type: "warning",
       confirmText: "Discard",
       cancelText: "Keep Editing",
       onConfirm: () => {
         initialBookFormState = getBookFormState();
         closeBookModal();
-      }
+      },
     });
     return;
   }
@@ -602,8 +723,12 @@ window.closeBookModal = () => {
 };
 
 window.submitBook = async () => {
-  const firstName = document.getElementById("book-patient-first-name").value.trim();
-  const lastName = document.getElementById("book-patient-last-name").value.trim();
+  const firstName = document
+    .getElementById("book-patient-first-name")
+    .value.trim();
+  const lastName = document
+    .getElementById("book-patient-last-name")
+    .value.trim();
   const email = document.getElementById("book-patient-email").value.trim();
   const phone = document.getElementById("book-patient-phone").value.trim();
   const svcEl = document.getElementById("book-service");
@@ -649,32 +774,117 @@ window.submitBook = async () => {
   }
 };
 
-// ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
-window.fetchAvailableDoctors = async (targetId, category, date, time, currentId = null) => {
-    const sel = document.getElementById(targetId);
-    if (!sel) return;
-    
-    sel.innerHTML = '<option value="">Any available specialist</option>';
-    sel.disabled = true;
-    
-    try {
-        const res = await fetch(`/api/admin/data/available-doctors?category=${encodeURIComponent(category)}&date=${date}&time=${encodeURIComponent(time)}`);
-        const data = await res.json();
-        
-        if (data.ok && data.data) {
-            data.data.forEach(d => {
-                const opt = document.createElement("option");
-                opt.value = d.id;
-                opt.textContent = d.name;
-                sel.appendChild(opt);
-            });
-            if (currentId) sel.value = currentId;
-        }
-    } catch (err) {
-        console.error("Failed to fetch available doctors", err);
-    } finally {
-        sel.disabled = false;
+// ── VIEW MODAL ───────────────────────────────────────────────────────────────
+window.openViewModal = (apptInput) => {
+  const appt = getAppt(apptInput);
+  if (!appt) return;
+
+  const setEl = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val || "-";
+  };
+
+  setEl("view-appt-id", "#APT-" + appt.id.slice(0, 4).toUpperCase());
+  setEl("view-patient-name", appt.patientName);
+  setEl("view-patient-email", appt.patientEmail);
+  setEl("view-patient-phone", appt.patientPhone);
+  setEl("view-service", appt.serviceName);
+  setEl("view-category", appt.serviceCategory);
+  setEl("view-doctor", appt.doctorName || "Unassigned");
+  setEl("view-date", appt.appointmentDateFormatted || appt.appointmentDate);
+  setEl("view-time", appt.appointmentTime);
+  setEl("view-status", appt.status.toUpperCase());
+  setEl("view-source", appt.source.toUpperCase());
+  setEl("view-notes", appt.notes || "No additional notes.");
+
+  // Status Badge Classes
+  const statusEl = document.getElementById("view-status-badge");
+  if (statusEl) {
+    const status = appt.status.toLowerCase();
+    statusEl.innerHTML = `<span id="view-status">${status.toUpperCase()}</span>`;
+    statusEl.className =
+      "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border flex items-center ";
+    if (status === "confirmed" || status === "completed")
+      statusEl.className += " bg-emerald-50 text-emerald-600 border-emerald-100";
+    else if (status === "pending")
+      statusEl.className += " bg-orange-50 text-orange-600 border-orange-100";
+    else if (status === "arrived")
+      statusEl.className += " bg-blue-50 text-blue-600 border-blue-100";
+    else if (status === "cancelled" || status === "no_show")
+      statusEl.className += " bg-red-50 text-red-600 border-red-100";
+    else
+      statusEl.className += " bg-slate-50 text-slate-600 border-slate-100";
+  }
+
+  // Handle "Booked For" (IsForOther)
+  const otherSection = document.getElementById("view-other-section");
+  if (otherSection) {
+    if (appt.isForOther || appt.IsForOther) {
+      otherSection.classList.remove("hidden");
+      const otherName =
+        (appt.otherFirstName || appt.OtherFirstName || "") +
+        " " +
+        (appt.otherLastName || appt.OtherLastName || "");
+      document.getElementById("view-other-name").textContent =
+        otherName.trim() || "-";
+      document.getElementById("view-other-email").textContent =
+        appt.otherEmail || appt.OtherEmail || "-";
+      document.getElementById("view-other-phone").textContent =
+        appt.otherPhone || appt.OtherPhone || "-";
+
+      // Update header to indicate "Booked for Others"
+      document.getElementById("view-patient-type-badge").textContent =
+        "Managed Profile";
+      document.getElementById("view-patient-type-badge").className =
+        "text-[9px] font-bold bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded ml-2 border border-purple-100";
+    } else {
+      otherSection.classList.add("hidden");
+      document.getElementById("view-patient-type-badge").textContent =
+        appt.isGuest ? "Guest" : "Verified Patient";
+      document.getElementById("view-patient-type-badge").className =
+        `text-[9px] font-bold ${appt.isGuest ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-emerald-50 text-emerald-600 border-emerald-100"} px-1.5 py-0.5 rounded ml-2 border`;
     }
+  }
+
+  showModal("view-modal");
+};
+
+window.closeViewModal = () => hideModal("view-modal");
+
+// ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
+window.fetchAvailableDoctors = async (
+  targetId,
+  category,
+  date,
+  time,
+  currentId = null,
+) => {
+  const sel = document.getElementById(targetId);
+  if (!sel) return;
+
+  sel.innerHTML = '<option value="">Any available specialist</option>';
+  sel.disabled = true;
+
+  try {
+    const res = await fetch(
+      `/api/admin/data/available-doctors?category=${encodeURIComponent(category)}&date=${date}&time=${encodeURIComponent(time)}`,
+    );
+    const data = await res.json();
+
+    if (data.ok && data.data) {
+      data.data.forEach((d) => {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.name;
+        sel.appendChild(opt);
+      });
+      if (currentId) sel.value = currentId;
+    }
+  } catch (err) {
+    console.error("Failed to fetch available doctors", err);
+  } finally {
+    sel.disabled = false;
+  }
 };
 
 window.confirmAppt = async (apptInput) => {
@@ -687,17 +897,28 @@ window.confirmAppt = async (apptInput) => {
   const hint = document.getElementById("doctor-hint");
 
   if (!docSel || !hint) {
-    console.warn("Confirm appointment modal elements not found in current view.");
+    console.warn(
+      "Confirm appointment modal elements not found in current view.",
+    );
     showModal("confirm-modal");
     return;
   }
 
   hint.classList.remove("hidden");
   hint.textContent = "Checking specialist availability...";
-  
-  await window.fetchAvailableDoctors("confirm-doctor", appt.serviceCategory || "", appt.appointmentDate, appt.appointmentTime, appt.doctorId);
-  
-  hint.textContent = docSel.options.length > 1 ? `Matching specialists for ${appt.serviceCategory} shown.` : "No available specialists found for this slot!";
+
+  await window.fetchAvailableDoctors(
+    "confirm-doctor",
+    appt.serviceCategory || "",
+    appt.appointmentDate,
+    appt.appointmentTime,
+    appt.doctorId,
+  );
+
+  hint.textContent =
+    docSel.options.length > 1
+      ? `Matching specialists for ${appt.serviceCategory} shown.`
+      : "No available specialists found for this slot!";
   showModal("confirm-modal");
 };
 
@@ -710,7 +931,7 @@ window.submitConfirm = async () => {
   if (!doctorId) {
     // Pick the first available doctor from the dropdown if "Any" is selected
     const docSel = document.getElementById("confirm-doctor");
-    if (docSel && docSel.options.length > 1) {
+    if (docSel && (docSel.tagName === 'SELECT' || docSel.options) && docSel.options && docSel.options.length > 1) {
       // Find first option with a value
       for (let i = 0; i < docSel.options.length; i++) {
         if (docSel.options[i].value) {
@@ -720,7 +941,7 @@ window.submitConfirm = async () => {
       }
     }
 
-    if (!doctorId) {
+    if (!doctorId && docSel && docSel.tagName === "SELECT") {
       Toast.show(
         "No available specialists found to confirm this appointment.",
         "warning",
@@ -848,7 +1069,7 @@ function getEditFormState() {
   return JSON.stringify({
     dt: document.getElementById("edit-date")?.value || "",
     t: document.getElementById("edit-time")?.value || "",
-    d: document.getElementById("edit-doctor")?.value || ""
+    d: document.getElementById("edit-doctor")?.value || "",
   });
 }
 
@@ -856,17 +1077,23 @@ function _setupEditModal(appt) {
   document.getElementById("edit-appt-id").value = appt.id;
   document.getElementById("edit-date").value = appt.appointmentDate;
   document.getElementById("edit-time").value = appt.appointmentTime;
-  
+
   const dateEl = document.getElementById("edit-date");
   const timeEl = document.getElementById("edit-time");
   const updateDocs = () => {
-      window.fetchAvailableDoctors("edit-doctor", appt.serviceCategory || "", dateEl.value, timeEl.value, appt.doctorId);
+    window.fetchAvailableDoctors(
+      "edit-doctor",
+      appt.serviceCategory || "",
+      dateEl.value,
+      timeEl.value,
+      appt.doctorId,
+    );
   };
-  
-  if (!dateEl.hasAttribute('data-bound-avail')) {
-      dateEl.setAttribute('data-bound-avail', 'true');
-      dateEl.addEventListener('change', updateDocs);
-      timeEl.addEventListener('change', updateDocs);
+
+  if (!dateEl.hasAttribute("data-bound-avail")) {
+    dateEl.setAttribute("data-bound-avail", "true");
+    dateEl.addEventListener("change", updateDocs);
+    timeEl.addEventListener("change", updateDocs);
   }
 
   updateDocs();
@@ -877,14 +1104,15 @@ window.closeEditModal = () => {
   if (initialEditFormState && getEditFormState() !== initialEditFormState) {
     Modal.open({
       title: "Discard Changes?",
-      message: "You have unsaved changes. Are you sure you want to discard them?",
+      message:
+        "You have unsaved changes. Are you sure you want to discard them?",
       type: "warning",
       confirmText: "Discard",
       cancelText: "Keep Editing",
       onConfirm: () => {
         initialEditFormState = getEditFormState();
         closeEditModal();
-      }
+      },
     });
     return;
   }
@@ -925,12 +1153,10 @@ window.toggleDropdown = (event, btn) => {
   const isHidden = menu.classList.contains("hidden");
 
   // Close all other menus
-  document
-    .querySelectorAll(".dropdown-menu")
-    .forEach((m) => {
-      m.classList.add("hidden");
-      m.style.position = ""; // reset fixed style
-    });
+  document.querySelectorAll(".dropdown-menu").forEach((m) => {
+    m.classList.add("hidden");
+    m.style.position = ""; // reset fixed style
+  });
 
   if (isHidden) {
     menu.classList.remove("hidden");
@@ -938,7 +1164,7 @@ window.toggleDropdown = (event, btn) => {
     // --- Smart Positioning using Fixed to escape overflow clip ---
     const btnRect = btn.getBoundingClientRect();
     const winH = window.innerHeight;
-    
+
     menu.style.position = "fixed";
     menu.style.left = `${btnRect.right - menu.offsetWidth}px`;
     menu.style.margin = "0";
@@ -965,7 +1191,9 @@ let _blockedDates = [];
 
 async function loadBlockedDates() {
   try {
-    const res = await fetch("/api/admin/blocked-dates", { credentials: "include" });
+    const res = await fetch("/api/admin/blocked-dates", {
+      credentials: "include",
+    });
     if (!res.ok) return;
     const json = await res.json();
     _blockedDates = json.data || [];
@@ -979,13 +1207,20 @@ function renderBlockedList() {
   const container = document.getElementById("blocked-dates-list");
   if (!container) return;
   if (_blockedDates.length === 0) {
-    container.innerHTML = '<p class="text-[11px] text-brand/40 italic">No dates are currently blocked.</p>';
+    container.innerHTML =
+      '<p class="text-[11px] text-brand/40 italic">No dates are currently blocked.</p>';
     return;
   }
-  container.innerHTML = _blockedDates.map(b => {
-    const d = new Date(b.blockedDate + "T00:00:00");
-    const label = d.toLocaleDateString("en-PH", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
-    return `
+  container.innerHTML = _blockedDates
+    .map((b) => {
+      const d = new Date(b.blockedDate + "T00:00:00");
+      const label = d.toLocaleDateString("en-PH", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      return `
       <div class="flex items-center justify-between px-3 py-2 bg-red-50 border border-red-100 rounded-xl group">
         <div>
           <span class="text-[12px] font-bold text-red-700">${label}</span>
@@ -996,39 +1231,55 @@ function renderBlockedList() {
           Remove
         </button>
       </div>`;
-  }).join("");
+    })
+    .join("");
 }
 
 window.openBlockDateModal = async function () {
   const modal = document.getElementById("block-date-modal");
   const box = document.getElementById("block-date-modal-box");
   modal.classList.remove("hidden");
-  gsap.fromTo(box, { scale: 0.9, opacity: 0, y: 20 }, { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" });
+  gsap.fromTo(
+    box,
+    { scale: 0.9, opacity: 0, y: 20 },
+    { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" },
+  );
   await loadBlockedDates();
 };
 
 window.closeBlockDateModal = function () {
   const modal = document.getElementById("block-date-modal");
   const box = document.getElementById("block-date-modal-box");
-  gsap.to(box, { scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
+  gsap.to(box, {
+    scale: 0.95,
+    opacity: 0,
+    y: 10,
+    duration: 0.2,
+    ease: "power2.in",
     onComplete: () => {
       modal.classList.add("hidden");
       document.getElementById("block-date-input").value = "";
       document.getElementById("block-date-reason").value = "";
-    }
+    },
   });
 };
 
 window.submitBlockDate = async function () {
   const date = document.getElementById("block-date-input").value;
   const reason = document.getElementById("block-date-reason").value.trim();
-  if (!date) { Toast.show("Please select a date.", "warning"); return; }
+  if (!date) {
+    Toast.show("Please select a date.", "warning");
+    return;
+  }
 
   try {
     const res = await fetch("/api/admin/blocked-dates", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json", RequestVerificationToken: getToken() },
+      headers: {
+        "Content-Type": "application/json",
+        RequestVerificationToken: getToken(),
+      },
       body: JSON.stringify({ date, reason: reason || null }),
     });
     const json = await res.json();
@@ -1060,7 +1311,9 @@ function showConflictModal(data) {
 
   summary.textContent = `${data.conflictCount} active appointment${data.conflictCount > 1 ? "s" : ""} found on ${data.blockedDate}.`;
 
-  list.innerHTML = data.conflicts.map(c => `
+  list.innerHTML = data.conflicts
+    .map(
+      (c) => `
     <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
       <div>
         <div class="text-[12.5px] font-bold text-brand">${c.patientFirstName} ${c.patientLastName}</div>
@@ -1068,17 +1321,28 @@ function showConflictModal(data) {
         <div class="text-[10px] text-brand/40">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
       </div>
       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase">${c.status}</span>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 
   modal.classList.remove("hidden");
-  gsap.fromTo(box, { scale: 0.9, opacity: 0, y: 20 }, { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" });
+  gsap.fromTo(
+    box,
+    { scale: 0.9, opacity: 0, y: 20 },
+    { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: "back.out(1.7)" },
+  );
 }
 
 window.closeConflictModal = function () {
   const modal = document.getElementById("conflict-modal");
   const box = document.getElementById("conflict-modal-box");
-  gsap.to(box, { scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
-    onComplete: () => modal.classList.add("hidden")
+  gsap.to(box, {
+    scale: 0.95,
+    opacity: 0,
+    y: 10,
+    duration: 0.2,
+    ease: "power2.in",
+    onComplete: () => modal.classList.add("hidden"),
   });
 };
 
@@ -1099,7 +1363,9 @@ window.unblockDate = async function (id) {
           Toast.show("Date unblocked.", "success");
           await loadBlockedDates();
         }
-      } catch { Toast.show("Network error.", "danger"); }
-    }
+      } catch {
+        Toast.show("Network error.", "danger");
+      }
+    },
   });
 };

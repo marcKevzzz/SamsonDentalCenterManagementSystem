@@ -115,6 +115,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                         review_text = review.ReviewText,
                         platform = review.Platform,
                         is_visible = review.IsVisible,
+                        patient_id = review.PatientId,
                     }
                 ),
                 Encoding.UTF8,
@@ -373,6 +374,25 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             _cache.Set(CacheKeyStats, stats, TimeSpan.FromMinutes(10));
             return stats;
+        }
+
+        public async Task<(double average, int count)> GetPatientReviewStatsAsync(string patientId)
+        {
+            var req = BuildRequest(
+                HttpMethod.Get,
+                $"/reviews?patient_id=eq.{patientId}&order=created_at.desc"
+            );
+            var res = await _http.SendAsync(req);
+            if (!res.IsSuccessStatusCode) return (0, 0);
+            
+            var json = await res.Content.ReadAsStringAsync();
+            var reviews = JsonSerializer.Deserialize<List<Review>>(json, _json) ?? new();
+
+            if (!reviews.Any()) return (0, 0);
+
+            double avg = reviews.Average(r => r.Rating);
+            int count = reviews.Count;
+            return (Math.Round(avg, 1), count);
         }
 
         private void InvalidateCache()
