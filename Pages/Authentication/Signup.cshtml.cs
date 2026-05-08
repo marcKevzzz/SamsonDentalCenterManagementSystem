@@ -92,33 +92,20 @@ public class SignupModel : PageModel
 
         try
         {
-            // ── Check if Email exists in Auth first ───────────────────────────
+            // ── Check if Account exists (Auth or Profile) ───────────────────
             var authUserId = await _profileService.GetUserIdByEmail(Input.Email!);
             if (authUserId != null)
             {
-                // Email exists in Auth.
-                var profileByAuthId = await _profileService.GetProfileById(authUserId);
-                if (profileByAuthId != null && profileByAuthId.IsActive)
+                // Account exists. Check if it's an active profile.
+                var profile = await _profileService.GetProfileById(authUserId);
+                if (profile != null && profile.IsActive)
                 {
                     return Fail("An account with this email already exists. Please sign in.");
                 }
                 
-                // If profile doesn't exist or is not active, set ClaimId to the Auth ID
+                // If profile doesn't exist or is not active, set as ClaimId
                 Input.ClaimId = authUserId;
-                _logger.LogInformation($"[Signup] Email {Input.Email} found in Auth (ID: {authUserId}). Setting as ClaimId.");
-            }
-
-            // ── Pre-check for existing account by Profile Email ───────────────
-            var existingProfile = await _profileService.GetProfileByEmail(Input.Email!);
-            if (existingProfile != null && existingProfile.IsActive)
-            {
-                return Fail("An account with this email already exists.");
-            }
-
-            // If an inactive profile exists with this email, it's a shadow profile -> Auto set ClaimId
-            if (existingProfile != null && !existingProfile.IsActive && string.IsNullOrEmpty(Input.ClaimId))
-            {
-                Input.ClaimId = existingProfile.Id;
+                _logger.LogInformation($"[Signup] Account found for {Input.Email} (ID: {authUserId}). Setting as ClaimId.");
             }
 
             // ── Identity Claim Check (By Name/Phone/DOB) ──────────────────────

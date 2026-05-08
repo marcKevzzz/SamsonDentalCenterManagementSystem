@@ -53,6 +53,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             var tomorrow = DateTime.UtcNow.AddDays(1).Date;
             
             var response = await supabase.From<Appointment>()
+                .Select("id, patient_email, patient_first_name, patient_last_name, appointment_date, appointment_time, service_id")
                 .Where(x => x.AppointmentDate == tomorrow)
                 .Where(x => x.Status == "confirmed")
                 .Where(x => x.ReminderSent == false)

@@ -1,11 +1,15 @@
 using System.Net;
+using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using FluentEmail.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -14,24 +18,25 @@ using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Services;
 using Supabase;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using FluentEmail.Core;
-using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ── FluentEmail Registration ──────────────────────────────────────────────────
 var emailSettings = builder.Configuration.GetSection("EmailSettings");
-builder.Services
-    .AddFluentEmail(emailSettings["DefaultFromEmail"], emailSettings["DefaultFromName"])
+builder
+    .Services.AddFluentEmail(emailSettings["DefaultFromEmail"], emailSettings["DefaultFromName"])
     .AddRazorRenderer(Path.Combine(Directory.GetCurrentDirectory(), "Views", "Emails"))
-    .AddSmtpSender(() => new SmtpClient(emailSettings["Smtp:Host"])
-    {
-        Port = int.Parse(emailSettings["Smtp:Port"] ?? "587"),
-        Credentials = new System.Net.NetworkCredential(emailSettings["Smtp:User"], emailSettings["Smtp:Pass"]),
-        EnableSsl = bool.Parse(emailSettings["Smtp:EnableSsl"] ?? "true")
-    });
+    .AddSmtpSender(() =>
+        new SmtpClient(emailSettings["Smtp:Host"])
+        {
+            Port = int.Parse(emailSettings["Smtp:Port"] ?? "587"),
+            Credentials = new System.Net.NetworkCredential(
+                emailSettings["Smtp:User"],
+                emailSettings["Smtp:Pass"]
+            ),
+            EnableSsl = bool.Parse(emailSettings["Smtp:EnableSsl"] ?? "true"),
+        }
+    );
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<AppointmentReminderService>();
@@ -96,14 +101,14 @@ builder.Services.AddScoped<
     SamsonDentalCenterManagementSystem.Helpers.RoleClaimsTransformer
 >();
 
-
 builder.Services.AddScoped<ProfileService>(provider => new ProfileService(
     serviceClient,
     supabaseServiceKey,
     supabaseUrl,
     provider.GetRequiredService<ActivityLogService>(),
     provider.GetRequiredService<OtpService>(),
-    provider.GetRequiredService<IEmailService>()
+    provider.GetRequiredService<IEmailService>(),
+    provider.GetRequiredService<IHttpClientFactory>()
 ));
 
 builder.Services.AddScoped<DentalServiceService>(provider => new DentalServiceService(
@@ -223,7 +228,11 @@ builder.Services.AddScoped<ReviewService>(provider =>
 
 builder.Services.AddScoped<ClinicService>(provider =>
 {
-    return new ClinicService(serviceClient, provider.GetRequiredService<ActivityLogService>(), provider.GetRequiredService<IMemoryCache>());
+    return new ClinicService(
+        serviceClient,
+        provider.GetRequiredService<ActivityLogService>(),
+        provider.GetRequiredService<IMemoryCache>()
+    );
 });
 
 builder.Services.AddScoped<BlockedDateService>(_ => new BlockedDateService(serviceClient));
@@ -377,7 +386,11 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "https://gnomic-larraine-unbombastic.ngrok-free.dev")
+                .WithOrigins(
+                    "http://127.0.0.1:5500",
+                    "http://localhost:5500",
+                    "https://gnomic-larraine-unbombastic.ngrok-free.dev"
+                )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials(); // SignalR MUST have this

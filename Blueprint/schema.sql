@@ -322,4 +322,10 @@ CREATE INDEX idx_reviews_created_at ON public.reviews USING btree (created_at DE
 CREATE INDEX idx_profiles_created_at ON public.profiles USING btree (created_at DESC);
 CREATE INDEX idx_staff_leaves_created_at ON public.staff_leaves USING btree (created_at DESC);
 CREATE INDEX idx_invoices_created_at ON public.invoices USING btree (created_at DESC);
-CREATE INDEX idx_staff_availability_staff_type ON public.staff_availability USING btree (staff_type);
+CREATE INDEX idx_staff_availability_staff_type ON public.staff_availability USING btree (staff_type);
+CREATE INDEX idx_appointments_date ON public.appointments USING btree (appointment_date DESC);
+CREATE INDEX idx_appointments_status ON public.appointments USING btree (status);
+CREATE INDEX idx_appointments_reminder_sent ON public.appointments USING btree (reminder_sent);
+CREATE INDEX idx_appointments_patient_id ON public.appointments USING btree (patient_id);
+CREATE INDEX idx_appointments_doctor_id ON public.appointments USING btree (doctor_id);
+CREATE INDEX idx_appointments_created_at ON public.appointments USING btree (created_at DESC);
