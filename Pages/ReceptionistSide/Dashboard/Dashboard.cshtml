@@ -230,31 +230,36 @@
 
 <script type="module" src="~/js/AdminSide/adminDashboard.js" asp-append-version="true"></script>
 
-<script>
-    function openLeaveModal() { document.getElementById('leave-modal').classList.remove('hidden'); }
-    function closeLeaveModal() { document.getElementById('leave-modal').classList.add('hidden'); }
+<script type="module">
+    import { Toast } from '../../js/ui.js';
 
-    async function submitLeave() {
+    window.openLeaveModal = function() { document.getElementById('leave-modal').classList.remove('hidden'); }
+    window.closeLeaveModal = function() { document.getElementById('leave-modal').classList.add('hidden'); }
+
+    window.submitLeave = async function() {
         const payload = {
-            leaveType: document.getElementById('leave-type').value,
-            startDate: document.getElementById('leave-start').value,
-            endDate: document.getElementById('leave-end').value,
+            leave_type: document.getElementById('leave-type').value,
+            start_date: document.getElementById('leave-start').value,
+            end_date: document.getElementById('leave-end').value,
             reason: document.getElementById('leave-reason').value
         };
 
-        if(!payload.startDate || !payload.endDate) return alert('Select dates');
+        if(!payload.startDate || !payload.endDate) return Toast.show('Select dates', 'warning');
 
         const res = await fetch('/api/staff/leave/apply', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
             body: JSON.stringify(payload)
         });
 
         if(res.ok) {
-            alert('Request submitted');
-            location.reload();
+            Toast.show('Request submitted', 'success');
+            setTimeout(() => location.reload(), 1500);
         } else {
-            alert('Failed to submit');
+            Toast.show('Failed to submit', 'danger');
         }
     }
 </script>

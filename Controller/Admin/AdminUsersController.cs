@@ -19,9 +19,12 @@ public class AdminUsersController : ControllerBase
     private readonly ActivityLogService _logs;
     private readonly IEmailService _emailService;
     private readonly OtpService _otpService;
+    private readonly DoctorService _doctorService;
+    private readonly ReceptionistService _receptionistService;
     private readonly string _serviceRoleKey;
     private readonly string _supabaseUrl;
     private readonly string _appBaseUrl;
+    private readonly ILogger<AdminUsersController> _logger;
     private static readonly HttpClient _http = new HttpClient();
 
     public AdminUsersController(
@@ -30,7 +33,10 @@ public class AdminUsersController : ControllerBase
         ActivityLogService logs,
         IEmailService emailService,
         OtpService otpService,
-        IConfiguration config
+        DoctorService doctorService,
+        ReceptionistService receptionistService,
+        IConfiguration config,
+        ILogger<AdminUsersController> logger
     )
     {
         _profileService = profileService;
@@ -38,10 +44,13 @@ public class AdminUsersController : ControllerBase
         _logs = logs;
         _emailService = emailService;
         _otpService = otpService;
+        _doctorService = doctorService;
+        _receptionistService = receptionistService;
         _serviceRoleKey =
             config["Supabase:ServiceKey"] ?? throw new Exception("Supabase:ServiceKey is missing");
         _supabaseUrl = config["Supabase:Url"] ?? throw new Exception("Supabase:Url is missing");
         _appBaseUrl = (config["App:BaseUrl"] ?? "").TrimEnd('/');
+        _logger = logger;
     }
 
     // ── POST /api/admin/users — Create user ───────────────────────────────────
@@ -53,108 +62,162 @@ public class AdminUsersController : ControllerBase
 
         try
         {
-            // 1. Create Auth User with random password
-            var tempPassword = Guid.NewGuid().ToString() + "A1!";
+            // 0. Check if user already exists
+            var existingId = await _profileService.GetUserIdByEmail(p.Email);
+            string id = "";
 
-            _http.DefaultRequestHeaders.Clear();
-            _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
-            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
-
-            var authPayload = new
+            if (!string.IsNullOrEmpty(existingId))
             {
-                email = p.Email,
-                password = tempPassword,
-                email_confirm = true, // Still true so they don't have to verify email separately
-                user_metadata = new
+                id = existingId;
+                // Update profile role to match requested staff role
+                await _profileService.UpdateProfilePartial(id, new Dictionary<string, object> { { "role", p.Role?.ToLower() ?? "patient" } });
+            }
+            else
+            {
+                // 1. Create Auth User with random password
+                var tempPassword = Guid.NewGuid().ToString() + "A1!";
+
+                _http.DefaultRequestHeaders.Clear();
+                _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+                _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+
+                var authPayload = new
                 {
-                    first_name = p.FirstName,
-                    last_name = p.LastName,
-                    role = p.Role?.ToLower() ?? "patient",
-                },
-            };
+                    email = p.Email,
+                    password = tempPassword,
+                    email_confirm = true,
+                    user_metadata = new
+                    {
+                        first_name = p.FirstName,
+                        last_name = p.LastName,
+                        role = p.Role?.ToLower() ?? "patient",
+                    },
+                };
 
-            var res = await _http.PostAsync(
-                $"{_supabaseUrl}/auth/v1/admin/users",
-                new StringContent(
-                    System.Text.Json.JsonSerializer.Serialize(authPayload),
-                    System.Text.Encoding.UTF8,
-                    "application/json"
-                )
-            );
+                var res = await _http.PostAsync(
+                    $"{_supabaseUrl}/auth/v1/admin/users",
+                    new StringContent(
+                        System.Text.Json.JsonSerializer.Serialize(authPayload),
+                        System.Text.Encoding.UTF8,
+                        "application/json"
+                    )
+                );
 
-            if (!res.IsSuccessStatusCode)
-            {
-                var error = await res.Content.ReadAsStringAsync();
-                return BadRequest(new { ok = false, error = $"Auth creation failed: {error}" });
+                if (!res.IsSuccessStatusCode)
+                {
+                    var error = await res.Content.ReadAsStringAsync();
+                    return BadRequest(new { ok = false, error = $"Auth creation failed: {error}" });
+                }
+
+                var resStr = await res.Content.ReadAsStringAsync();
+                var json = System.Text.Json.JsonDocument.Parse(resStr);
+                id = json.RootElement.GetProperty("id").GetString()!;
+
+                // 2. Trigger Recovery Email (Invitation)
+                await _http.PostAsync(
+                    $"{_supabaseUrl}/auth/v1/recover",
+                    new StringContent(
+                        System.Text.Json.JsonSerializer.Serialize(new { email = p.Email }),
+                        System.Text.Encoding.UTF8,
+                        "application/json"
+                    )
+                );
+
+                // 3. Create Profile Record (Only if new)
+                p.Id = id;
+                await _profileService.CreateProfile(p);
             }
 
-            var resStr = await res.Content.ReadAsStringAsync();
-            var json = System.Text.Json.JsonDocument.Parse(resStr);
-            var id = json.RootElement.GetProperty("id").GetString()!;
-
-            // 2. Trigger Recovery Email (Invitation)
-            // Headers already set above on line 51-53
-            await _http.PostAsync(
-                $"{_supabaseUrl}/auth/v1/recover",
-                new StringContent(
-                    System.Text.Json.JsonSerializer.Serialize(new { email = p.Email }),
-                    System.Text.Encoding.UTF8,
-                    "application/json"
-                )
-            );
-
-            // 2. Create Profile Record
-            p.Id = id;
-            await _profileService.CreateProfile(p);
-
-            // 3. Handle Staff Logic (Bio / Availability)
+            // 4. Handle Staff Logic (Bio / Availability)
             if (p.Role?.ToLower() == "doctor")
             {
-                var doc = new Doctor
+                try
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    ProfileId = id,
-                    Title = p.Title ?? "Dr.",
-                    Specialties = p.Specialties ?? Array.Empty<string>(),
-                    Bio = p.Bio,
-                    IsActive = p.IsActive ?? true,
-                    CreatedAt = DateTime.UtcNow,
-                };
-                await _supabase.From<Doctor>().Insert(doc);
-
-                if (p.Availability != null && p.Availability.Any())
-                {
-                    foreach (var av in p.Availability)
+                    _logger.LogInformation("[DEBUG] Attempting to create doctor record for profile {Id}", id);
+                    // Check if doctor record already exists for this profile
+                    var existing = await _doctorService.GetDoctorByProfileIdAsync(id);
+                    if (existing == null)
                     {
-                        av.Id = Guid.NewGuid().ToString();
-                        av.StaffId = doc.Id;
-                        av.StaffType = "doctor";
+                        var doc = await _doctorService.CreateAsync(
+                            id,
+                            p.Title ?? "Dr.",
+                            p.Specialties ?? Array.Empty<string>(),
+                            p.Bio,
+                            p.IsActive ?? true
+                        );
+
+                        if (doc != null)
+                        {
+                            _logger.LogInformation("[DEBUG] Doctor record created successfully: {DocId}", doc.Id);
+                            if (p.Availability != null && p.Availability.Any())
+                            {
+                                var slots = p.Availability.Select(av => new AvailabilityDto
+                                {
+                                    DayOfWeek = av.DayOfWeek,
+                                    StartTime = av.StartTime,
+                                    EndTime = av.EndTime,
+                                    IsActive = true
+                                }).ToList();
+                                await _doctorService.SetAvailabilityAsync(doc.Id, slots);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("[DEBUG] DoctorService.CreateAsync returned null for profile {Id}", id);
+                        }
                     }
-                    await _supabase.From<StaffAvailability>().Insert(p.Availability);
+                    else
+                    {
+                        _logger.LogInformation("[DEBUG] Doctor record already exists for profile {Id}", id);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[DEBUG] Failed to create doctor record for profile {Id}", id);
                 }
             }
             else if (p.Role?.ToLower() == "receptionist")
             {
-                var rec = new Receptionist
+                try
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    ProfileId = id,
-                    DeskLocation = p.DeskLocation,
-                    Bio = p.Bio,
-                    IsActive = p.IsActive ?? true,
-                    CreatedAt = DateTime.UtcNow,
-                };
-                await _supabase.From<Receptionist>().Insert(rec);
-
-                if (p.Availability != null && p.Availability.Any())
-                {
-                    foreach (var av in p.Availability)
+                    _logger.LogInformation("[DEBUG] Attempting to create receptionist record for profile {Id}", id);
+                    var existing = await _receptionistService.GetReceptionistByProfileIdAsync(id);
+                    if (existing == null)
                     {
-                        av.Id = Guid.NewGuid().ToString();
-                        av.StaffId = rec.Id;
-                        av.StaffType = "receptionist";
+                        var rec = await _receptionistService.CreateAsync(
+                            id,
+                            p.DeskLocation,
+                            p.IsActive ?? true
+                        );
+
+                        if (rec != null)
+                        {
+                            _logger.LogInformation("[DEBUG] Receptionist record created successfully: {RecId}", rec.Id);
+                            if (p.Availability != null && p.Availability.Any())
+                            {
+                                var slots = p.Availability.Select(av => new AvailabilityDto
+                                {
+                                    DayOfWeek = av.DayOfWeek,
+                                    StartTime = av.StartTime,
+                                    EndTime = av.EndTime,
+                                    IsActive = true
+                                }).ToList();
+                                await _receptionistService.SetAvailabilityAsync(rec.Id, slots);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("[DEBUG] ReceptionistService.CreateAsync returned null for profile {Id}", id);
+                        }
                     }
-                    await _supabase.From<StaffAvailability>().Insert(p.Availability);
+                    else
+                    {
+                        _logger.LogInformation("[DEBUG] Receptionist record already exists for profile {Id}", id);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[DEBUG] Failed to create receptionist record for profile {Id}", id);
                 }
             }
 

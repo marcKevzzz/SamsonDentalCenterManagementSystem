@@ -1,4 +1,4 @@
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 import { Modal } from '../ui.js';
 
 /**
@@ -33,11 +33,18 @@ export class ClinicSettings {
 
     init() {
         this.initStatusToggle();
+        
+        // Eager hydration from Razor-rendered hidden inputs
+        this.initHours();
+        this.initFaqs();
+        this.initPhotos();
+        
         this.initialState = this.getFormState();
         
         (async () => {
             const data = await AdminStore.loadData('settings', '/api/admin/data/settings');
             if (data) {
+                console.log("[ClinicSettings] Hydrating with data:", data);
                 this.initializeWithData({ settings: data });
                 this.initialState = this.getFormState(); // update after hydration
             }
@@ -55,6 +62,7 @@ export class ClinicSettings {
         window.uploadPhoto = (el) => this.uploadPhoto(el);
         window.uploadLogo = (el) => this.uploadLogo(el);
         window.removePhoto = (i) => this.removePhoto(i);
+        window.saveGallery = (btn) => this.saveSection('Photos', btn);
 
         const toastMsg = document.getElementById('toast-msg')?.value;
         const toastType = document.getElementById('toast-type')?.value;
@@ -106,6 +114,58 @@ export class ClinicSettings {
 
     isDirty() {
         return this.initialState && this.getFormState() !== this.initialState;
+    }
+
+    async saveSection(section, btn) {
+        if (btn) {
+            btn.disabled = true;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...`;
+            btn.dataset.original = originalContent;
+        }
+
+        try {
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+            
+            const resp = await fetch(form.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            });
+
+            const res = await resp.json();
+            if (res.ok) {
+                AdminStore.invalidate('settings');
+                this.initialState = this.getFormState(); // Reset dirty state
+                
+                Modal.open({
+                    title: "Changes Saved",
+                    message: res.message || "Your gallery has been updated and is now live on the homepage.",
+                    type: "success",
+                    confirmText: "Great"
+                });
+                
+                if (window.Toast) window.Toast.show(res.message, 'success');
+            } else {
+                Modal.open({
+                    title: "Save Failed",
+                    message: res.error || "An error occurred while saving your changes.",
+                    type: "danger"
+                });
+            }
+        } catch (e) {
+            console.error("Save error:", e);
+            window.Toast?.show("Network error during save", "danger");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original;
+            }
+        }
     }
 
     // --- Hours Logic ---
@@ -276,7 +336,7 @@ export class ClinicSettings {
                     </div>
                 `).join('')}
                 <label class="aspect-square rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-brand hover:bg-slate-50 transition-all group">
-                    <input type="file" class="hidden" onchange="uploadPhoto(this)" accept="image/*">
+                    <input type="file" class="hidden" onchange="uploadPhoto(this)" accept="image/*" multiple>
                     <i class="fa-solid fa-plus text-slate-300 group-hover:text-brand text-[10px]"></i>
                 </label>
             </div>
@@ -317,16 +377,17 @@ export class ClinicSettings {
     }
 
     async uploadPhoto(el) {
-        const file = el.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
+        const files = Array.from(el.files);
+        if (files.length === 0) return;
         
         // Visual feedback: show a "loading" state on the plus icon
         const label = el.parentElement;
         const icon = label.querySelector('i');
+        const originalClass = icon.className;
         icon.className = "fa-solid fa-spinner fa-spin text-brand text-[10px]";
+
+        const formData = new FormData();
+        files.forEach(file => formData.append('files', file)); // Matches 'List<IFormFile> files'
 
         try {
             const resp = await fetch('?handler=UploadPhoto', {
@@ -339,16 +400,20 @@ export class ClinicSettings {
             if (res.ok) {
                 const input = document.querySelector(this.selectors.photosJson);
                 const photos = JSON.parse(input.value || '[]');
-                photos.push(res.url); // Add new URL to staged list
-                this.renderPhotos(photos);
-                window.Toast?.show('Photo staged for saving', 'success');
+                
+                // res.urls is the array from the server
+                if (res.urls && Array.isArray(res.urls)) {
+                    res.urls.forEach(url => photos.push(url));
+                    this.renderPhotos(photos);
+                    window.Toast?.show(`${res.urls.length} photo(s) staged for saving`, 'success');
+                }
             } else {
                 window.Toast?.show(res.error || 'Upload failed', 'danger');
             }
         } catch (e) {
-            window.Toast?.show('Upload error', 'danger');
+            window.Toast?.show('An unexpected error occurred during upload', 'danger');
         } finally {
-            icon.className = "fa-solid fa-plus text-slate-300 group-hover:text-brand text-[10px]";
+            icon.className = originalClass;
             el.value = ""; // Reset input
         }
     }

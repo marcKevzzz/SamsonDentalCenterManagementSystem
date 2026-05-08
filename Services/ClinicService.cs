@@ -25,19 +25,34 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 return cachedSettings;
             }
-
+ 
             try
             {
                 var response = await _supabase.From<ClinicSettings>()
                     .Where(x => x.Id == DefaultSettingsId)
                     .Get();
-
+ 
                 var settings = response.Models.FirstOrDefault();
+                
+                if (settings == null)
+                {
+                    var anyResponse = await _supabase.From<ClinicSettings>().Limit(1).Get();
+                    settings = anyResponse.Models.FirstOrDefault();
+                }
+ 
                 if (settings == null)
                 {
                     settings = new ClinicSettings { Id = DefaultSettingsId };
                 }
-
+                else if (string.IsNullOrEmpty(settings.Id))
+                {
+                    settings.Id = DefaultSettingsId;
+                }
+ 
+                settings.ClinicPhotos ??= new();
+                settings.ClinicalHours ??= new();
+                settings.Faqs ??= new();
+ 
                 _cache.Set(CacheKey, settings, TimeSpan.FromMinutes(10));
                 return settings;
             }
@@ -47,35 +62,60 @@ namespace SamsonDentalCenterManagementSystem.Services
                 return new ClinicSettings { Id = DefaultSettingsId };
             }
         }
-
+ 
         public async Task UpdateSettingsAsync(ClinicSettings settings)
         {
             try
             {
-                settings.Id = DefaultSettingsId;
+                if (string.IsNullOrEmpty(settings.Id)) 
+                    settings.Id = DefaultSettingsId;
+                    
                 settings.UpdatedAt = DateTime.UtcNow;
                 await _supabase.From<ClinicSettings>().Upsert(settings);
-
+ 
                 _cache.Remove(CacheKey);
                 await _logs.LogActionAsync(null, "updated clinic settings", null, null, "Settings", "/Admin/Settings");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[ClinicService] Error updating settings: {ex.Message}");
                 throw new Exception($"Failed to save settings: {ex.Message}");
             }
         }
 
-        public async Task<string> UploadPhotoAsync(string fileName, byte[] data, string contentType)
+        public async Task<List<ChatbotConversation>> GetChatbotHistoryAsync(string sessionId, string? userId = null)
+        {
+            try
+            {
+                var query = _supabase.From<ChatbotConversation>()
+                    .Filter("session_id", Supabase.Postgrest.Constants.Operator.Equals, sessionId);
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    query = query.Filter("user_id", Supabase.Postgrest.Constants.Operator.Equals, userId);
+                }
+
+                var response = await query.Order("created_at", Supabase.Postgrest.Constants.Ordering.Ascending).Get();
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ClinicService] Error fetching chatbot history: {ex.Message}");
+                return new List<ChatbotConversation>();
+            }
+        }
+
+        public async Task<string> UploadPhotoAsync(string fileName, byte[] data, string contentType, string bucket = "clinic-photos")
         {
             try
             {
                 var uniqueName = $"{Guid.NewGuid()}_{fileName}";
-                var path = await _supabase.Storage.From("clinic-photos").Upload(data, uniqueName, new Supabase.Storage.FileOptions { ContentType = contentType });
-                return _supabase.Storage.From("clinic-photos").GetPublicUrl(uniqueName);
+                var path = await _supabase.Storage.From(bucket).Upload(data, uniqueName, new Supabase.Storage.FileOptions { ContentType = contentType });
+                return _supabase.Storage.From(bucket).GetPublicUrl(uniqueName);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Photo upload failed: {ex.Message}");
+                throw new Exception($"File upload to {bucket} failed: {ex.Message}");
             }
         }
 
@@ -89,6 +129,19 @@ namespace SamsonDentalCenterManagementSystem.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"[ClinicService] Error deleting photo: {ex.Message}");
+            }
+        }
+
+        public async Task SaveChatbotConversationAsync(ChatbotConversation conv)
+        {
+            try
+            {
+                await _supabase.From<ChatbotConversation>().Insert(conv);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ClinicService] Error saving chatbot conversation: {ex.Message}");
+                throw;
             }
         }
     }

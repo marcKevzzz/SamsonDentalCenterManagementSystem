@@ -50,7 +50,7 @@ export function renderStep2b() {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
       if (d.getDay() === 0) continue; // skip Sundays
-      const str = d.toISOString().split("T")[0];
+      const str = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       // Only show if we have data and it's not fully booked, or if we don't have data yet
       if (!AVAILABILITY_CACHE[str] || !isDateFullyBooked(str)) {
         alts.push({

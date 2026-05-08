@@ -55,7 +55,8 @@ namespace SamsonDentalCenterManagementSystem.Services
         )
         {
             // 1. Resolve performing user (the one who did the action)
-            string? performerId = _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
+            string? performerId = _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value 
+                                ?? _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             
             // 2. Resolve IP if not provided
             if (string.IsNullOrEmpty(ipAddress))

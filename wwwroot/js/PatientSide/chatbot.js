@@ -1,11 +1,11 @@
-/* ── Knowledge Base ── */
-const KB = {
+/* ── Knowledge Base (Initialized with defaults) ── */
+let KB = {
   clinic: {
     name: "Samson Dental Center",
     address: "7 Himlayan Rd, Tandang Sora, Quezon City, Metro Manila",
     phone: "+63 2 8888 1234",
     email: "hello@samsondentalph",
-    founded: "2008",
+    founded: "1964",
   },
   hours: {
     weekdays: "9:00 AM – 6:00 PM",
@@ -13,404 +13,552 @@ const KB = {
     sunday: "Closed (By Appointment Only)",
   },
   services: {
-    general: [
-      "Dental Checkup (₱500+)",
-      "Teeth Cleaning (₱800+)",
-      "Tooth Filling (₱1,200+)",
-      "Fluoride Treatment (₱400+)",
-    ],
-    cosmetic: [
-      "Teeth Whitening (₱3,500+)",
-      "Dental Veneers (₱8,000+/tooth)",
-      "Smile Makeover (₱15,000+)",
-      "Composite Bonding (₱2,500+/tooth)",
-    ],
-    specialized: [
-      "Root Canal (₱5,000+)",
-      "Braces & Aligners (₱25,000+)",
-      "Dental Implants (₱35,000+)",
-      "Oral Surgery (₱2,500+)",
-    ],
+    general: [],
+    cosmetic: [],
+    specialized: [],
   },
-  promos: [
-    {
-      name: "New Patient Special",
-      discount: "20% OFF",
-      code: "NEW20",
-      desc: "First exam, X-rays & cleaning",
-    },
-    {
-      name: "Teeth Whitening",
-      discount: "₱100 OFF",
-      code: "BRIGHT100",
-      desc: "In-office whitening treatment",
-    },
-    {
-      name: "Invisalign Consult",
-      discount: "FREE",
-      code: "SMILEFREE",
-      desc: "Complimentary Invisalign consult",
-    },
-  ],
-  team: [
-    { name: "Dr. Marcus Rivera", role: "Chief Oral Surgeon", exp: "16 years" },
-    {
-      name: "Dr. Leila Santos",
-      role: "Orthodontics Specialist",
-      exp: "11 years",
-    },
-    { name: "Dr. James Ocampo", role: "Pediatric Dentist", exp: "9 years" },
-  ],
+  faqs: [],
+  team: [],
   insurance: ["Maxicare", "Intellicare", "Medicard", "PhilHealth"],
+  integrity: "",
+  leadership: { ceo: "", admin: "" }
 };
+
+let chatbotName = "SDC Assistant";
+let welcomeMessage = "Hi there! 👋 Welcome to **Samson Dental Center**.\n\nI'm your virtual assistant — here to help with services, schedules, pricing, and anything about our clinic. What can I help you with today?";
+let chatSessionId = localStorage.getItem("chatbot_session_id") || crypto.randomUUID();
+localStorage.setItem("chatbot_session_id", chatSessionId);
+
+/* ── Dynamic Initialization ── */
+async function initChatbot() {
+  try {
+    const res = await fetch('/api/public/init');
+    if (!res.ok) throw new Error('Failed to fetch chatbot data');
+    const data = await res.json();
+
+    // Update KB with dynamic data
+    if (data.settings) {
+      KB.clinic.name = data.settings.name || KB.clinic.name;
+      KB.clinic.address = data.settings.address || KB.clinic.address;
+      KB.clinic.phone = data.settings.phone || KB.clinic.phone;
+      KB.clinic.email = data.settings.email || KB.clinic.email;
+      KB.faqs = data.settings.faqs || [];
+      KB.integrity = data.settings.integrity || "";
+      KB.leadership = data.settings.leadership || { ceo: "Dr. Marcus Rivera", admin: "Samson Admin" };
+      
+      if (data.settings.chatbot) {
+        chatbotName = data.settings.chatbot.name || chatbotName;
+        welcomeMessage = data.settings.chatbot.welcome || welcomeMessage;
+      }
+
+      if (data.settings.hours && Array.isArray(data.settings.hours)) {
+        const weekdays = data.settings.hours.filter(h => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].includes(h.day));
+        const sat = data.settings.hours.find(h => h.day === "Saturday");
+        const sun = data.settings.hours.find(h => h.day === "Sunday");
+
+        if (weekdays.length > 0) {
+            const first = weekdays[0];
+            KB.hours.weekdays = first.closed ? "Closed" : `${formatTimeSimple(first.open)} – ${formatTimeSimple(first.close)}`;
+        }
+        if (sat) KB.hours.saturday = sat.closed ? "Closed" : `${formatTimeSimple(sat.open)} – ${formatTimeSimple(sat.close)}`;
+        if (sun) KB.hours.sunday = sun.closed ? "Closed" : `${formatTimeSimple(sun.open)} – ${formatTimeSimple(sun.close)}`;
+      }
+    }
+
+    if (data.services) {
+      KB.services.all = data.services;
+      KB.services.general = data.services.filter(s => s.category === "General Dentistry").map(s => `${s.name} (₱${s.price.toLocaleString()})`);
+      KB.services.cosmetic = data.services.filter(s => s.category === "Cosmetic").map(s => `${s.name} (₱${s.price.toLocaleString()})`);
+      KB.services.specialized = data.services.filter(s => s.category === "Specialized").map(s => `${s.name} (₱${s.price.toLocaleString()})`);
+    }
+
+    if (data.doctors) {
+      KB.team = data.doctors.map(d => ({ name: d.name, role: d.specialties.join(", ") || "Dental Specialist" }));
+    }
+
+    // Update UI
+    const nameEl = document.querySelector('.win-header .text-\\[13px\\]');
+    if (nameEl) nameEl.textContent = chatbotName;
+    
+    // Load History
+    const user = JSON.parse(localStorage.getItem("sb_user") || "{}");
+    const historyRes = await fetch(`/api/public/chatbot/history?sessionId=${chatSessionId}${user.id ? `&userId=${user.id}` : ''}`);
+    const history = await historyRes.json();
+
+    document.getElementById('chatMessages').innerHTML = ''; 
+    addDivider("Today");
+
+    if (history.ok && history.data && history.data.length > 0) {
+        history.data.forEach(msg => {
+            if (msg.is_bot) {
+                appendBot(msg.message, [], null, false);
+            } else {
+                appendUser(msg.message, false);
+            }
+        });
+    } else {
+        appendBot(welcomeMessage, [
+            "What are your hours?",
+            "What services do you offer?",
+            "How do I book?",
+            "Meet the team",
+        ], null, false); // Don't save initial welcome message automatically
+    }
+
+  } catch (err) {
+    console.error('[Chatbot] Init Error:', err);
+    // Fallback to static if needed
+    appendBot(welcomeMessage, ["How do I book?", "Contact us"]);
+  }
+}
+
+async function saveMessage(text, isBot) {
+    try {
+        const user = JSON.parse(localStorage.getItem("sb_user") || "{}");
+        await fetch('/api/public/chatbot/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: chatSessionId,
+                user_id: user.id || null,
+                message: text,
+                is_bot: isBot
+            })
+        });
+    } catch (err) {
+        console.error('[Chatbot] Save Error:', err);
+    }
+}
+
+function formatTimeSimple(time) {
+    if (!time) return "9:00 AM";
+    if (time.includes('AM') || time.includes('PM')) return time; // Already formatted
+    const [h, m] = time.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${m} ${ampm}`;
+}
 
 /* ── Intent definitions ── */
 const INTENTS = [
+  // ── Greeting ──
   {
-    keys: [
-      "hi",
-      "hello",
-      "hey",
-      "good morning",
-      "good afternoon",
-      "good evening",
-      "sup",
-      "start",
-    ],
+    keys: ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "sup", "start"],
     reply: () => ({
-      text: `Hi there! 👋 Welcome to **Samson Dental Center**.\n\nI'm your virtual assistant — here to help with services, schedules, pricing, and more. What can I help you with today?`,
-      quick: [
-        "Book appointment",
-        "Our services",
-        "Opening hours",
-        "Where are you?",
-      ],
+      text: `Hi there! 👋 Welcome to **${KB.clinic.name}**.\n\nI'm ${chatbotName} — here to help with services, schedules, pricing, and anything about our clinic. What can I help you with today?`,
+      quick: ["What are your hours?", "What services do you offer?", "How do I book?", "Meet the team"],
     }),
   },
+
+  // ── About / History ──
   {
-    keys: [
-      "hour",
-      "open",
-      "schedule",
-      "time",
-      "operating",
-      "when",
-      "close",
-      "weekend",
-      "saturday",
-      "sunday",
-    ],
+    keys: ["history", "founded", "established", "story", "about us", "about the clinic", "since", "background", "how long have you"],
     reply: () => ({
-      text: `🕐 **Our Operating Hours:**\n\n• **Mon – Fri:** ${KB.hours.weekdays}\n• **Saturday:** ${KB.hours.saturday}\n• **Sunday:** ${KB.hours.sunday}\n\nWe're currently accepting appointments!`,
+      text: `🏛️ **Our History:**\n\n**${KB.clinic.name}** has been proudly serving patients since **${KB.clinic.founded}** — over 60 years of trusted dental care in Quezon City, Metro Manila.\n\nWhat began as a small family dental practice has grown into a full-service center offering general, cosmetic, and specialized dental treatments. We remain committed to the same values we started with: gentle care, honest pricing, and healthy smiles.`,
+      quick: ["Meet the team", "Our services", "Location"],
+    }),
+  },
+
+  // ── Leadership ──
+  {
+    keys: ["ceo", "admin", "leadership", "owner", "boss", "head of"],
+    reply: () => ({
+      text: `🏢 **Clinic Leadership:**\n\n• **CEO / Head Dentist:** ${KB.leadership.ceo}\n• **Administrator:** ${KB.leadership.admin}\n\nOur clinic is led by experienced professionals dedicated to delivering the highest standard of dental care.`,
+      quick: ["Meet the team", "Contact us"],
+    }),
+  },
+
+  // ── Security / Integrity ──
+  {
+    keys: ["integrity", "security", "safe", "encryption", "hipaa", "protection", "secure"],
+    reply: () => ({
+      text: `🛡️ **System Integrity & Security:**\n\n${KB.integrity || "We follow industry-standard security protocols to protect your medical records and personal data."}\n\nYour privacy is our priority. All patient data is encrypted, stored securely, and never shared without your consent.`,
+      quick: ["Privacy policy", "Contact us"],
+    }),
+  },
+
+  // ── Privacy Policy & Terms ──
+  {
+    keys: ["privacy policy", "terms of service", "terms and condition", "data policy", "your policy", "legal"],
+    reply: () => ({
+      text: `🔒 **Privacy & Terms:**\n\nWe take your personal and medical data seriously.\n\n• All records are encrypted and stored securely\n• We never sell or share your information with third parties\n• You may request access or deletion of your data at any time\n• Our systems comply with Philippine Data Privacy Act (RA 10173)\n\nFor the full documents, please contact us at **${KB.clinic.email}** or visit the clinic.`,
+      quick: ["Security info", "Contact us", "Book appointment"],
+    }),
+  },
+
+  // ── Opening Hours ──
+  {
+    keys: ["hour", "open", "schedule", "time", "operating", "when", "close", "weekend", "saturday", "sunday", "what time do you"],
+    reply: () => ({
+      text: `🕐 **Operating Hours (Philippine Standard Time):**\n\n• **Monday – Friday:** ${KB.hours.weekdays}\n• **Saturday:** ${KB.hours.saturday}\n• **Sunday:** ${KB.hours.sunday}\n\n💡 Tip: For Sunday visits, please call ahead to confirm your slot at **${KB.clinic.phone}**.`,
       quick: ["Book an appointment", "Walk-in patients?", "Contact us"],
     }),
   },
+
+  // ── Availability Check ──
   {
-    keys: [
-      "service",
-      "treat",
-      "procedure",
-      "offer",
-      "available",
-      "what can you",
-      "list",
-      "do you do",
-    ],
+    keys: ["available", "availability", "check date", "slot", "when can i", "free", "opening on", "what time", "when is"],
+    reply: async (input) => {
+      const date = extractDate(input);
+      if (!date) {
+        return {
+          text: "To check availability, please specify a date (e.g., 'May 10' or 'next Tuesday').",
+          quick: ["Available today", "Check tomorrow", "Opening hours"],
+        };
+      }
+      showTyping();
+      try {
+        const res = await fetch(`/api/public/availability?date=${date}`);
+        const data = await res.json();
+        removeTyping();
+        if (data.status === "blocked") {
+          return {
+            text: `I checked our schedule for **${formatFriendlyDate(date)}**. Unfortunately that date is unavailable due to a scheduled clinic event. Would you like to try another day?`,
+            quick: ["Check another date", "Opening hours"],
+          };
+        }
+        if (data.status === "closed") {
+          return {
+            text: `We're closed on **${data.day}s**. ${data.day === "Sunday" ? "Sunday visits are by appointment only — call us at **" + KB.clinic.phone + "** to arrange." : "Would you like to check a weekday instead?"}`,
+            quick: ["Check Monday", "Opening hours", "Contact us"],
+          };
+        }
+        const openTime = data.hours?.open ? formatTimeSimple(data.hours.open) : "9:00 AM";
+        const closeTime = data.hours?.close ? formatTimeSimple(data.hours.close) : "6:00 PM";
+        return {
+          text: `✅ We have slots available on **${formatFriendlyDate(date)}**!\n\n• First slot: **${openTime}**\n• Last slot: **${closeTime}**\n\nWould you like to book one of these times?`,
+          quick: [openTime, "1:30 PM", "4:00 PM", "Book online"],
+        };
+      } catch (err) {
+        removeTyping();
+        return { text: "I had trouble checking the schedule. Please try again or call us at **" + KB.clinic.phone + "**.", quick: ["Call us", "Opening hours"] };
+      }
+    },
+  },
+
+  // ── Walk-in ──
+  {
+    keys: ["walk in", "walk-in", "no appointment", "drop by", "just come", "without booking"],
     reply: () => ({
-      text: `🦷 **Our Services:**\n\n**General Dentistry**\n${KB.services.general.map((s) => "• " + s).join("\n")}\n\n**Cosmetic**\n${KB.services.cosmetic.map((s) => "• " + s).join("\n")}\n\n**Specialized**\n${KB.services.specialized.map((s) => "• " + s).join("\n")}\n\nWant details on a specific service?`,
-      quick: [
-        "Teeth whitening",
-        "Dental implants",
-        "Braces & aligners",
-        "Root canal",
-      ],
+      text: `🚶 **Walk-in Patients:**\n\nWalk-ins are welcome during operating hours, subject to doctor availability. However, we **strongly recommend booking** in advance to secure your preferred time slot and avoid waiting.\n\n📞 Call **${KB.clinic.phone}** to check same-day availability.`,
+      quick: ["Book appointment", "Opening hours", "Contact us"],
     }),
   },
+
+  // ── First Visit ──
   {
-    keys: [
-      "location",
-      "address",
-      "where",
-      "find",
-      "direction",
-      "map",
-      "how to get",
-      "near",
-    ],
+    keys: ["first time", "new patient", "first visit", "never been", "first appointment"],
     reply: () => ({
-      text: `📍 **Find Us:**\n\n**${KB.clinic.address}**\n\nLocated near Tandang Sora Market, accessible via Commonwealth Avenue. Ample on-site parking available.\n\n→ <a href="https://maps.google.com/?q=Tandang+Sora+Quezon+City" target="_blank" style="color:#c0392b">Open in Google Maps</a>`,
-      quick: ["Parking available?", "Contact number", "Book appointment"],
+      text: `👋 **Welcome, new patient!**\n\nHere's what to expect on your first visit:\n\n1. **Registration** — Bring a valid ID and any existing dental records\n2. **Initial Consultation** — Your dentist will review your dental history\n3. **Oral Examination** — Full checkup including X-rays if needed\n4. **Treatment Plan** — We'll discuss your options and pricing\n\n⏱️ Allow about **60–90 minutes** for your first visit. We recommend booking an early slot!`,
+      quick: ["Book appointment", "What to bring", "Pricing", "Opening hours"],
     }),
   },
+
+  // ── Cancellation / Reschedule ──
   {
-    keys: [
-      "price",
-      "cost",
-      "fee",
-      "how much",
-      "rate",
-      "promo",
-      "discount",
-      "offer",
-      "deal",
-      "package",
-      "afford",
-    ],
+    keys: ["cancel", "reschedule", "move appointment", "change booking", "postpone"],
     reply: () => ({
-      text: `💰 **Pricing & Promotions:**\n\nServices start at ₱400 (fluoride) up to ₱35,000+ (implants).\n\n**Current Promos:**\n${KB.promos.map((p) => `• **${p.name}** — ${p.discount} *(${p.code})*`).join("\n")}\n\nWant pricing on a specific treatment?`,
-      quick: [
-        "Whitening price",
-        "Implant cost",
-        "All services",
-        "Promos explained",
-      ],
+      text: `📋 **Cancellation & Rescheduling:**\n\nWe understand plans change! Please notify us at least **24 hours in advance** to cancel or reschedule.\n\n📞 **${KB.clinic.phone}**\n📧 **${KB.clinic.email}**\n\nLate cancellations (less than 24 hours) may affect future priority booking.`,
+      quick: ["Book new appointment", "Contact us", "Opening hours"],
     }),
   },
+
+  // ── Booking Limit ──
   {
-    keys: [
-      "insurance",
-      "hmo",
-      "medicard",
-      "maxicare",
-      "intellicare",
-      "philhealth",
-      "coverage",
-      "plan",
-    ],
+    keys: ["how many", "book twice", "multiple appointment", "two appointment", "book more", "book again", "book limit"],
     reply: () => ({
-      text: `🏥 **Accepted HMO & Insurance:**\n\n${KB.insurance.map((i) => "• " + i).join("\n")}\n\nBring your HMO card on your visit and our front desk will verify coverage. Questions? Call **${KB.clinic.phone}**.`,
-      quick: ["What's covered?", "Book appointment", "Contact us"],
+      text: `📋 **Booking Policy:**\n\nYou may book **one appointment per day** per doctor. If you need multiple services, we can schedule them within a single extended visit depending on availability.\n\nNeed help planning your visit? Call us at **${KB.clinic.phone}** and our team will assist.`,
+      quick: ["Book appointment", "Check availability", "Contact us"],
     }),
   },
+
+  // ── Services (all + specific lookup) ──
   {
-    keys: [
-      "book",
-      "appointment",
-      "reserve",
-      "slot",
-      "visit",
-      "consult",
-      "schedule a",
-    ],
+    keys: ["service", "treat", "procedure", "offer", "available", "what can you do", "list", "do you do"],
+    reply: (input) => {
+      const lower = input?.toLowerCase() || "";
+      if (KB.services.all) {
+        const aliases = {
+          "filling": "filling", "cavity": "filling", "restoration": "filling",
+          "whitening": "whitening", "bleaching": "whitening", "bright": "whitening",
+          "braces": "braces", "orthodon": "braces", "aligner": "braces", "retainer": "braces",
+          "implant": "implant", "missing tooth": "implant",
+          "root canal": "root canal", "pulp": "root canal", "nerve": "root canal",
+          "extraction": "extraction", "pull tooth": "extraction", "remove tooth": "extraction",
+          "cleaning": "cleaning", "prophylaxis": "cleaning", "scale": "cleaning",
+          "veneer": "veneer", "porcelain": "veneer", "laminate": "veneer",
+        };
+        const aliasKey = Object.keys(aliases).find(k => lower.includes(k));
+        const searchTerm = aliasKey ? aliases[aliasKey] : null;
+        const matched = KB.services.all.find(s =>
+          lower.includes(s.name.toLowerCase()) ||
+          (searchTerm && s.name.toLowerCase().includes(searchTerm))
+        );
+        if (matched) {
+          let res = `🦷 **${matched.name}**\n\n📁 Category: ${matched.category}\n\n`;
+          if (matched.benefits?.length) res += `✨ **Benefits:**\n${matched.benefits.map(b => `• ${b}`).join("\n")}\n\n`;
+          if (matched.steps?.length) res += `📝 **Procedure Steps:**\n${matched.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\n`;
+          res += `💰 **Price:** Starts at ₱${matched.price.toLocaleString()}\n⏱️ **Duration:** ~${matched.duration} mins`;
+          return { text: res, quick: ["Other services", "Book appointment", "Pricing"] };
+        }
+      }
+      return {
+        text: `🦷 **Our Services:**\n\n**General Dentistry**\n${KB.services.general.map(s => "• " + s).join("\n") || "• Checkup & Consultation\n• Teeth Cleaning\n• Dental Fillings\n• Tooth Extraction"}\n\n**Cosmetic**\n${KB.services.cosmetic.map(s => "• " + s).join("\n") || "• Teeth Whitening\n• Veneers\n• Smile Makeover"}\n\n**Specialized**\n${KB.services.specialized.map(s => "• " + s).join("\n") || "• Dental Implants\n• Root Canal\n• Orthodontics / Braces"}\n\nAsk me about any specific procedure for full details!`,
+        quick: ["Dental fillings", "Root canal", "Teeth whitening", "Pricing"],
+      };
+    },
+  },
+
+  // ── General Dentistry Process ──
+  {
+    keys: ["general dentistry", "checkup process", "routine checkup", "dental checkup", "what happens during", "what to expect", "oral exam", "examination process"],
     reply: () => ({
-      text: `📅 **Book an Appointment:**\n\nYou can book online through our portal or reach us directly:\n\n📞 **${KB.clinic.phone}**\n📧 **${KB.clinic.email}**`,
-      quick: ["Call us", "Opening hours", "Walk-in available?"],
-      action: { label: "📅 Book Online", url: "appointment/index.html" },
+      text: `🦷 **General Dentistry — What to Expect:**\n\n**1. Check-in & Medical History Review**\nWe review your health history and any concerns you have.\n\n**2. Oral Examination**\nYour dentist examines teeth, gums, tongue, and jaw for signs of issues.\n\n**3. X-Rays (if needed)**\nDigital X-rays help detect cavities, bone loss, or hidden problems.\n\n**4. Professional Cleaning**\nRemoval of plaque and tartar buildup followed by polishing.\n\n**5. Diagnosis & Treatment Plan**\nYour dentist explains findings and recommends next steps.\n\n**6. Preventive Advice**\nPersonalized tips on brushing, flossing, and diet.\n\n⏱️ A standard checkup takes about **45–60 minutes**.`,
+      quick: ["Book a checkup", "Pricing", "What to bring", "Services"],
     }),
   },
+
+  // ── Dental Fillings ──
   {
-    keys: ["contact", "phone", "call", "email", "reach", "number"],
+    keys: ["filling", "cavity", "tooth decay", "decayed tooth", "cavities"],
     reply: () => ({
-      text: `📞 **Contact Us:**\n\n• **Phone:** ${KB.clinic.phone}\n• **Email:** ${KB.clinic.email}\n• **Address:** ${KB.clinic.address}\n\nAvailable **Mon–Fri 9AM–6PM** and **Sat 8AM–5PM**.`,
-      quick: ["Opening hours", "Book appointment", "Where are you?"],
+      text: `🦷 **Dental Fillings — Procedure:**\n\n**1. Examination & X-ray**\nWe identify the extent of decay using digital imaging.\n\n**2. Anesthesia**\nLocal anesthesia is applied so you feel no pain.\n\n**3. Decay Removal**\nThe decayed portion of the tooth is carefully removed.\n\n**4. Tooth Preparation**\nThe cavity is cleaned and shaped to hold the filling.\n\n**5. Filling Placement**\nWe use tooth-colored composite resin for a natural look.\n\n**6. Bite Check & Polish**\nWe ensure your bite is perfect and polish the filling.\n\n⏱️ Duration: **30–60 minutes** per tooth\n💰 Price: Check our general dentistry rates or ask at the front desk.`,
+      quick: ["Pricing", "Book appointment", "Other procedures"],
     }),
   },
+
+  // ── Teeth Cleaning ──
   {
-    keys: ["walk", "walkin", "walk-in", "no appointment", "drop in", "drop-in"],
+    keys: ["cleaning", "prophylaxis", "scale", "polish", "tartar", "plaque removal"],
     reply: () => ({
-      text: `✅ **Yes, we accept walk-in patients!**\n\nHowever, booking in advance guarantees your preferred time and reduces wait time. Would you like to book now?`,
-      quick: ["Book appointment", "Opening hours", "Location"],
+      text: `🦷 **Teeth Cleaning (Prophylaxis) — Procedure:**\n\n**1. Initial Assessment**\nYour dentist checks gum health and plaque levels.\n\n**2. Scaling**\nUltrasonic tools remove hardened tartar above and below the gumline.\n\n**3. Polishing**\nA gritty paste removes surface stains and smooths enamel.\n\n**4. Flossing**\nProfessional flossing clears debris between teeth.\n\n**5. Fluoride Treatment (optional)**\nA fluoride gel strengthens enamel and prevents cavities.\n\n⏱️ Duration: **30–45 minutes**\n📅 Recommended: Every **6 months**`,
+      quick: ["Pricing", "Book cleaning", "General services"],
     }),
   },
+
+  // ── Tooth Extraction ──
   {
-    keys: ["park", "parking", "car"],
+    keys: ["extraction", "pull tooth", "remove tooth", "tooth pulled", "cabutan"],
     reply: () => ({
-      text: `🚗 **Yes, we have ample parking on-site** at 7 Himlayan Rd, Tandang Sora. Additional street parking is available along Commonwealth Avenue.`,
-      quick: ["Get directions", "Opening hours", "Contact us"],
+      text: `🦷 **Tooth Extraction — Procedure:**\n\n**1. Examination & X-ray**\nWe assess the tooth position and root structure.\n\n**2. Anesthesia**\nLocal anesthesia ensures a pain-free experience.\n\n**3. Loosening the Tooth**\nYour dentist gently widens the socket using specialized tools.\n\n**4. Extraction**\nThe tooth is carefully removed.\n\n**5. Aftercare Instructions**\nWe provide gauze and detailed post-extraction care tips.\n\n⏱️ Duration: **20–40 minutes**\n\n⚠️ Avoid hard foods, smoking, and using straws for 24 hours after.`,
+      quick: ["Pricing", "Book appointment", "Dental implants", "Other services"],
     }),
   },
+
+  // ── Root Canal ──
   {
-    keys: [
-      "child",
-      "kid",
-      "children",
-      "baby",
-      "pedia",
-      "pediatric",
-      "young",
-      "son",
-      "daughter",
-    ],
+    keys: ["root canal", "pulp", "nerve treatment", "infected tooth", "endodont"],
     reply: () => ({
-      text: `👶 **Yes! We specialize in pediatric care.**\n\n**Dr. James Ocampo** (9 years experience) makes dental visits fun and comfortable for children. We recommend a child's first visit around age 1 or when their first tooth appears.`,
-      quick: ["Book kids appointment", "All services", "Contact us"],
+      text: `🦷 **Root Canal Treatment — Procedure:**\n\n**1. Diagnosis**\nX-rays confirm infection or nerve damage.\n\n**2. Anesthesia**\nLocal anesthesia — most patients feel little to no pain.\n\n**3. Pulp Removal**\nThe infected pulp (nerve) is carefully removed.\n\n**4. Canal Cleaning & Shaping**\nThe root canals are cleaned, shaped, and disinfected.\n\n**5. Filling the Canal**\nCanals are sealed with a biocompatible material (gutta-percha).\n\n**6. Crown Placement**\nA crown is placed over the tooth to restore strength.\n\n⏱️ Duration: **60–90 minutes** (may require 2 visits)\n\n💡 Root canals save teeth — early treatment avoids extraction.`,
+      quick: ["Pricing", "Book appointment", "Dental crowns", "Services"],
     }),
   },
+
+  // ── Teeth Whitening ──
   {
-    keys: [
-      "emergency",
-      "urgent",
-      "pain",
-      "ache",
-      "broken",
-      "chip",
-      "crack",
-      "swollen",
-      "bleeding",
-    ],
+    keys: ["whitening", "bleaching", "bright teeth", "whiter teeth", "stain removal", "pampaputi"],
     reply: () => ({
-      text: `🚨 **Dental Emergency?**\n\nCall us immediately at **${KB.clinic.phone}**. We accommodate same-day emergency appointments whenever possible.\n\nFor severe pain or swelling, please call rather than waiting for a chat response.`,
-      quick: ["Call us now", "Location", "Opening hours"],
+      text: `✨ **Teeth Whitening — Procedure:**\n\n**1. Shade Assessment**\nWe record your current tooth shade as a baseline.\n\n**2. Gum Protection**\nA protective gel shields your gums before treatment.\n\n**3. Whitening Gel Application**\nProfessional-grade whitening gel is applied to teeth.\n\n**4. Activation**\nA special light activates the gel for deeper whitening.\n\n**5. Rinse & Reveal**\nGel is removed and your new shade is compared!\n\n⏱️ Duration: **45–60 minutes**\n💡 Results can last **6–12 months** with proper care.\n\n⚠️ Avoid coffee, tea, and colored drinks for 48 hours after.`,
+      quick: ["Pricing", "Book whitening", "Veneers", "Cosmetic services"],
     }),
   },
+
+  // ── Braces / Orthodontics ──
   {
-    keys: [
-      "whiten",
-      "whitening",
-      "white",
-      "bright",
-      "stain",
-      "yellow",
-      "shade",
-    ],
+    keys: ["braces", "orthodon", "aligner", "retainer", "crooked teeth", "malocclusion", "teeth alignment"],
     reply: () => ({
-      text: `✨ **Teeth Whitening at SDC:**\n\n• **Price:** From ₱3,500\n• **Promo:** ₱100 OFF with code **BRIGHT100**\n• **Duration:** 60–90 minutes\n• **Results:** Up to 8 shades lighter in one visit\n• **Take-home kit** also available\n\nResults last 1–3 years.`,
-      quick: ["Book whitening", "All cosmetic services", "Current promos"],
+      text: `😁 **Orthodontic Treatment (Braces) — Overview:**\n\n**Types we offer:**\n• Metal braces — most affordable, highly effective\n• Ceramic braces — tooth-colored, less visible\n• Clear aligners — removable, nearly invisible\n\n**General Process:**\n1. Consultation & X-rays / photos\n2. Custom treatment plan\n3. Braces / aligner fitting\n4. Monthly adjustments\n5. Retainer phase after completion\n\n⏱️ Treatment duration: **12–24 months** on average\n\n📅 Regular check-ins every **4–6 weeks** are required.`,
+      quick: ["Pricing", "Book consultation", "Clear aligners", "Services"],
     }),
   },
+
+  // ── Dental Implants ──
   {
-    keys: ["implant", "missing tooth", "replace tooth", "artificial tooth"],
+    keys: ["implant", "missing tooth", "replace tooth", "artificial tooth", "tanim ngipin"],
     reply: () => ({
-      text: `🦷 **Dental Implants:**\n\n• **Price:** From ₱35,000/implant\n• **Timeline:** 3–6 months (implant fuses with jawbone)\n• **Result:** Looks, feels, and functions like a natural tooth\n• Preserves jawbone density\n• Brush and floss normally\n\nA free consultation is available to assess your candidacy.`,
-      quick: [
-        "Book implant consult",
-        "Implant pricing",
-        "All specialized services",
-      ],
+      text: `🦷 **Dental Implants — Procedure:**\n\n**1. Consultation & Bone Assessment**\nX-rays and 3D scans determine if you're a candidate.\n\n**2. Implant Placement (Surgery)**\nA titanium post is placed into the jawbone under local anesthesia.\n\n**3. Healing Period (Osseointegration)**\nThe implant fuses with bone over **3–6 months**.\n\n**4. Abutment Placement**\nA connector piece is attached once healing is complete.\n\n**5. Crown Attachment**\nA custom crown is placed — looks and feels like a real tooth!\n\n⏱️ Total process: **3–9 months** depending on healing\n💡 Implants can last **20+ years** with proper care.`,
+      quick: ["Pricing", "Book consultation", "Tooth extraction", "Services"],
     }),
   },
+
+  // ── Veneers ──
   {
-    keys: [
-      "brace",
-      "aligner",
-      "invisalign",
-      "ortho",
-      "crooked",
-      "gap",
-      "spacing",
-      "straight",
-    ],
+    keys: ["veneer", "porcelain veneer", "laminate", "chipped tooth", "gap tooth", "cosmetic shell"],
     reply: () => ({
-      text: `😁 **Braces & Aligners:**\n\n• **Braces from:** ₱25,000\n• **Clear aligners from:** ₱45,000\n• **Duration:** 12–24 months typical\n• Retainer included after treatment\n• **Free Invisalign consult** with code **SMILEFREE**`,
-      quick: ["Book ortho consult", "Aligners vs braces", "All services"],
+      text: `✨ **Dental Veneers — Procedure:**\n\n**1. Consultation**\nWe assess your smile goals and tooth condition.\n\n**2. Tooth Preparation**\nA thin layer of enamel is removed to make space for the veneer.\n\n**3. Impression / Digital Scan**\nA mold is sent to the dental lab to craft your custom veneer.\n\n**4. Temporary Veneer**\nTemporary shells protect teeth while your veneers are made.\n\n**5. Bonding**\nVeneers are permanently bonded to your teeth and polished.\n\n⏱️ Duration: **2 visits over 1–2 weeks**\n💡 Veneers can fix chips, gaps, stains, and uneven teeth.`,
+      quick: ["Pricing", "Book consultation", "Whitening", "Cosmetic services"],
     }),
   },
+
+  // ── Pricing ──
   {
-    keys: ["root canal", "nerve", "pulp", "infection", "abscess"],
+    keys: ["price", "cost", "fee", "how much", "rate", "promo", "discount", "offer", "deal", "package", "afford", "magkano", "presyo"],
     reply: () => ({
-      text: `🔬 **Root Canal Treatment:**\n\nDespite its reputation, a modern root canal is no more painful than a filling — we use full local anesthesia.\n\n• **Price:** From ₱5,000\n• **Duration:** 60–90 min (1–2 visits)\n• **Recovery:** Mild soreness 2–3 days\n• Saves your natural tooth from extraction`,
-      quick: ["Book root canal", "All specialized services", "Pain management"],
+      text: `💰 **Pricing Guide:**\n\n**General Dentistry**\n${KB.services.general.slice(0, 4).map(s => "• " + s).join("\n") || "• Consultation — ₱300–₱500\n• Cleaning — ₱800–₱1,500\n• Filling — ₱1,000–₱2,500\n• Extraction — ₱500–₱2,000"}\n\n**Cosmetic**\n${KB.services.cosmetic.slice(0, 3).map(s => "• " + s).join("\n") || "• Whitening — ₱3,000–₱8,000\n• Veneers — ₱8,000–₱15,000 per tooth"}\n\n**Specialized**\n${KB.services.specialized.slice(0, 3).map(s => "• " + s).join("\n") || "• Root Canal — ₱5,000–₱12,000\n• Implants — ₱50,000–₱80,000\n• Braces — ₱35,000–₱80,000"}\n\n💡 Prices vary by complexity. Book a consultation for an exact quote!`,
+      quick: ["Book consultation", "Insurance coverage", "Payment methods", "All services"],
     }),
   },
+
+  // ── Payment Methods ──
   {
-    keys: [
-      "veneer",
-      "porcelain",
-      "makeover",
-      "composite",
-      "bonding",
-      "cosmetic",
-    ],
+    keys: ["payment", "pay", "gcash", "maya", "credit card", "debit", "cash", "installment", "how to pay"],
     reply: () => ({
-      text: `💎 **Cosmetic Services:**\n\n• **Veneers** — ₱8,000+/tooth (10–15 yr lifespan)\n• **Whitening** — ₱3,500+ (8 shades lighter)\n• **Bonding** — ₱2,500+/tooth (chips & gaps)\n• **Smile Makeover** — ₱15,000+ (fully customized)\n\nAll include a **digital smile preview** before you commit.`,
-      quick: ["Book cosmetic consult", "Current promos", "Cosmetic prices"],
+      text: `💳 **Accepted Payment Methods:**\n\n• 💵 Cash\n• 💳 Credit & Debit Cards (Visa, Mastercard)\n• 📱 GCash\n• 📱 Maya (PayMaya)\n• 🏥 HMO / Insurance (Maxicare, Intellicare, Medicard, PhilHealth)\n\n💡 Installment plans may be available for major procedures. Ask our front desk for details.\n\n📞 **${KB.clinic.phone}**`,
+      quick: ["Insurance coverage", "Pricing", "Book appointment"],
     }),
   },
+
+  // ── Insurance / HMO ──
   {
-    keys: [
-      "team",
-      "doctor",
-      "dentist",
-      "specialist",
-      "staff",
-      "who are",
-      "dr ",
-      "physician",
-    ],
+    keys: ["insurance", "hmo", "medicard", "maxicare", "intellicare", "philhealth", "coverage", "plan"],
     reply: () => ({
-      text: `👨‍⚕️ **Our Dental Team:**\n\n${KB.team.map((d) => `• **${d.name}** — ${d.role} (${d.exp})`).join("\n")}\n\nAll doctors are licensed, highly experienced, and committed to gentle, patient-first care.`,
-      quick: ["Book with a doctor", "Our services", "About us"],
+      text: `🏥 **Accepted HMO & Insurance:**\n\n${KB.insurance.map(i => "• " + i).join("\n")}\n\n**How it works:**\n1. Bring your HMO card on your visit\n2. Our front desk verifies your coverage\n3. Covered services are billed directly to your HMO\n\n⚠️ Not all procedures may be covered. Call us to confirm before your visit.\n📞 **${KB.clinic.phone}**`,
+      quick: ["Payment methods", "Book appointment", "Contact us"],
     }),
   },
+
+  // ── Location ──
   {
-    keys: ["about", "story", "history", "since", "founded", "clinic", "samson"],
+    keys: ["location", "address", "where", "find", "direction", "map", "how to get", "near", "saan"],
     reply: () => ({
-      text: `🏥 **About Samson Dental Center:**\n\nFounded in **${KB.clinic.founded}** in Quezon City, SDC bridges world-class medical precision with genuine hospitality.\n\nToday we serve **2,000+ happy patients** with **12 expert specialists** across general, cosmetic, and specialized dentistry.`,
-      quick: ["Meet our team", "Our services", "Location & hours"],
+      text: `📍 **Find Us:**\n\n**${KB.clinic.address}**\n\n🚗 Ample on-site parking is available.\n🚌 Accessible via public transport along Tandang Sora Ave.\n\n→ <a href="https://maps.google.com/?q=${encodeURIComponent(KB.clinic.address)}" target="_blank" style="color:#c0392b">Open in Google Maps</a>`,
+      quick: ["Parking info", "Contact number", "Book appointment"],
     }),
   },
+
+  // ── Parking ──
   {
-    keys: [
-      "payment",
-      "pay",
-      "cash",
-      "credit",
-      "card",
-      "installment",
-      "gcash",
-      "maya",
-      "bank",
-    ],
+    keys: ["parking", "park", "car", "vehicle", "motor", "garage"],
     reply: () => ({
-      text: `💳 **Payment Options:**\n\n• Cash\n• Credit & debit cards\n• Major HMO cards\n• Installment plans available for select procedures\n\nAsk our coordinators about financing options for implants, veneers, or orthodontics.`,
-      quick: ["HMO & insurance", "Pricing", "Book appointment"],
+      text: `🚗 **Parking:**\n\nYes! We have **free on-site parking** available for patients at **${KB.clinic.name}**.\n\nFor motorcycles and bicycles, there is also a designated area near the entrance.\n\n📍 **${KB.clinic.address}**`,
+      quick: ["Get directions", "Book appointment", "Opening hours"],
     }),
   },
+
+  // ── Contact ──
   {
-    keys: ["promo", "code", "voucher", "discount", "special", "deal"],
+    keys: ["contact", "phone", "call", "email", "reach", "number", "makipag-ugnayan"],
     reply: () => ({
-      text: `🎁 **Current Promotions:**\n\n${KB.promos.map((p) => `• **${p.name}** — ${p.discount}\n  Code: **${p.code}**\n  _(${p.desc})_`).join("\n\n")}\n\nMention your promo code when booking!`,
-      quick: ["Book with promo", "All services", "Pricing"],
+      text: `📞 **Contact Us:**\n\n• **Phone:** ${KB.clinic.phone}\n• **Email:** ${KB.clinic.email}\n• **Address:** ${KB.clinic.address}\n\n🕐 Available **Monday – Saturday** during clinic hours.\n\nFor urgent dental concerns outside clinic hours, please leave a message and we'll get back to you the next business day.`,
+      quick: ["Opening hours", "Book appointment", "Location"],
     }),
   },
+
+  // ── Book Appointment ──
   {
-    keys: [
-      "thank",
-      "thanks",
-      "great",
-      "awesome",
-      "perfect",
-      "nice",
-      "helpful",
-      "appreciate",
-    ],
+    keys: ["book", "appointment", "reserve", "slot", "visit", "consult", "schedule a", "mag-book"],
     reply: () => ({
-      text: `You're very welcome! 😊 Is there anything else I can help you with? Feel free to ask anytime or call us at **${KB.clinic.phone}**.`,
-      quick: ["Book appointment", "More questions", "Goodbye"],
+      text: `📅 **Book an Appointment:**\n\nChoose the option that works best for you:\n\n📞 **Call us:** ${KB.clinic.phone}\n📧 **Email us:** ${KB.clinic.email}\n🌐 **Book online:** Use our patient portal below\n\n💡 We recommend booking at least **1–2 days in advance** to secure your preferred slot.`,
+      quick: ["Check availability", "Opening hours", "Location"],
+      action: { label: "📅 Book Online", url: "/Appointments" },
     }),
   },
+
+  // ── Team / Doctors ──
   {
-    keys: [
-      "bye",
-      "goodbye",
-      "see you",
-      "later",
-      "done",
-      "no thanks",
-      "that's all",
-      "nothing",
-    ],
+    keys: ["team", "doctor", "dentist", "specialist", "who are", "dr ", "physician", "sino"],
+    reply: (input) => {
+      const lower = input?.toLowerCase() || "";
+      if (KB.team.length > 0) {
+        const specialtyKeywords = ["orthodon", "implant", "surgery", "pediatric", "cosmetic",
+          "endodont", "periodon", "prostho", "oral", "whitening", "general"];
+        const askedSpecialty = specialtyKeywords.find(k => lower.includes(k));
+        if (askedSpecialty) {
+          const filtered = KB.team.filter(d => d.role.toLowerCase().includes(askedSpecialty));
+          if (filtered.length > 0) {
+            return {
+              text: `👨‍⚕️ **Specialists — ${askedSpecialty.charAt(0).toUpperCase() + askedSpecialty.slice(1)}:**\n\n${filtered.map(d => `• **${d.name}** — ${d.role}`).join("\n")}\n\nWould you like to book with one of them?`,
+              quick: ["Book appointment", "All doctors", "Our services"],
+            };
+          }
+        }
+      }
+      return {
+        text: `👨‍⚕️ **Our Dental Team:**\n\n${KB.team.map(d => `• **${d.name}** — ${d.role}`).join("\n") || "• Dr. Marcus Rivera — General & Cosmetic Dentistry\n• Dr. Leila Santos — Orthodontics & Implants"}\n\nAll our doctors are PRC-licensed and committed to gentle, patient-first care.`,
+        quick: ["Book with a doctor", "Our services", "About us"],
+      };
+    },
+  },
+
+  // ── Reviews / Rating ──
+  {
+    keys: ["rating", "review", "feedback", "testimonial", "stars", "score", "reputation", "maganda ba"],
     reply: () => ({
-      text: `Take care! 😊 See you at Samson Dental Center — **your smile is our first priority!** Don't hesitate to chat again anytime.`,
+      text: `⭐ **Patient Reviews:**\n\nWe're proud to be highly rated by our patients across Quezon City!\n\nYou can read verified patient reviews on:\n\n→ <a href="https://maps.google.com/?q=${encodeURIComponent(KB.clinic.address)}" target="_blank" style="color:#c0392b">Google Maps Reviews</a>\n\nHave feedback from a recent visit? We'd love to hear from you at **${KB.clinic.email}**. Your experience helps us improve! 😊`,
+      quick: ["Book appointment", "Contact us", "Our services"],
+    }),
+  },
+
+  // ── FAQ ──
+  {
+    keys: ["faq", "question", "ask", "common question", "frequently"],
+    reply: () => {
+      if (!KB.faqs || KB.faqs.length === 0) return { text: "I'm here to help! What would you like to know about our clinic?", quick: ["Services", "Pricing", "Location"] };
+      return {
+        text: `💡 **Frequently Asked Questions:**\n\n${KB.faqs.slice(0, 5).map(f => `• **${f.question}**\n  ${f.answer}`).join("\n\n")}`,
+        quick: ["More questions", "Book appointment", "Contact us"],
+      };
+    },
+  },
+
+  // ── Non-dental health deflection ──
+  {
+    keys: ["fever", "stomach", "headache", "sick", "medical advice", "general health"],
+    reply: (input) => {
+      const lower = input?.toLowerCase() || "";
+      if (lower.includes("tooth") || lower.includes("gum") || lower.includes("mouth") || lower.includes("jaw")) return null;
+      return {
+        text: "I'm a specialized **dental assistant**. For non-dental health concerns, please consult a general physician or visit your nearest clinic. I can help with anything related to dental care though! 😊",
+        quick: ["Dental services", "Book checkup", "Contact us"],
+      };
+    },
+  },
+
+  // ── Time selection (after availability) ──
+  {
+    keys: ["am", "pm", ":00", ":30", "o'clock"],
+    reply: (input) => ({
+      text: `✅ Great choice! **${input.toUpperCase()}** works well. To finalize your booking, please use our online portal or give us a call.\n\n📞 **${KB.clinic.phone}**`,
+      quick: ["Book online", "Call us", "Check another time"],
+      action: { label: "📅 Book Online", url: "/Appointments" },
+    }),
+  },
+
+  // ── Thank you ──
+  {
+    keys: ["thank", "thanks", "great", "awesome", "perfect", "nice", "helpful", "appreciate", "salamat"],
+    reply: () => ({
+      text: `You're very welcome! 😊 It's our pleasure to help. Is there anything else I can assist you with?\n\nFeel free to ask anytime or reach us directly at **${KB.clinic.phone}**.`,
+      quick: ["Book appointment", "Opening hours", "Goodbye"],
+    }),
+  },
+
+  // ── Goodbye ──
+  {
+    keys: ["bye", "goodbye", "see you", "later", "done", "no thanks", "that's all", "nothing else", "paalam"],
+    reply: () => ({
+      text: `Take care! 😊 See you at **${KB.clinic.name}** — **your smile is our priority!**\n\nDon't hesitate to chat again anytime. Have a wonderful day! 🦷`,
       quick: ["Start over"],
     }),
   },
 ];
 
-function getResponse(input) {
+async function getResponse(input) {
   const lower = input.toLowerCase();
+  
+  // Check FAQs first for specific matches
+  if (KB.faqs) {
+    const faqMatch = KB.faqs.find(f => lower.includes(f.question.toLowerCase()));
+    if (faqMatch) return { text: faqMatch.answer, quick: ["More questions", "Book appointment"] };
+  }
+
   for (const intent of INTENTS) {
-    if (intent.keys.some((k) => lower.includes(k))) return intent.reply();
+    if (intent.keys.some((k) => lower.includes(k))) return await intent.reply(lower);
   }
   return {
-    text: `I didn't quite catch that. Here are some things I can help with:`,
-    quick: [
-      "Opening hours",
-      "Our services",
-      "Book appointment",
-      "Location",
-      "Contact us",
-    ],
+    text: `I didn't quite catch that. I can help with hours, services, doctors, and general questions. What would you like to know?`,
+    quick: ["Opening hours", "Our services", "Book appointment", "FAQ"],
   };
 }
 
@@ -419,22 +567,7 @@ let isBusy = false;
 
 /* ── Boot ── */
 window.addEventListener("DOMContentLoaded", () => {
-  addDivider("Today");
-  appendBot(
-    `Hi there! 👋 Welcome to **Samson Dental Center**.\n\nI'm your virtual assistant — here to help with services, schedules, pricing, and anything about our clinic. What can I help you with today?`,
-    [
-      "What are your hours?",
-      "What services do you offer?",
-      "How do I book?",
-      "Do you accept walk-ins?",
-    ],
-  );
-  setQuickReplies([
-    "What insurance do you accept?",
-    "Where are you located?",
-    "Do you have promos?",
-    "How much does whitening cost?",
-  ]);
+  initChatbot();
 });
 
 /* ── Chat toggle ── */
@@ -486,18 +619,18 @@ function sendMessage(text) {
     autoResize(input);
   }
 
-  appendUser(msg);
+  appendUser(msg, true);
   setQuickReplies([]);
   hideTopics();
 
   isBusy = true;
   showTyping();
   const delay = 500 + Math.min(msg.length * 10, 900);
-  setTimeout(() => {
+  setTimeout(async () => {
     removeTyping();
     isBusy = false;
-    const resp = getResponse(msg);
-    appendBot(resp.text, resp.quick || [], resp.action);
+    const resp = await getResponse(msg);
+    appendBot(resp.text, resp.quick || [], resp.action, true);
   }, delay);
 }
 function sendQuick(q) {
@@ -505,16 +638,17 @@ function sendQuick(q) {
 }
 
 /* ── Append user bubble ── */
-function appendUser(text) {
+function appendUser(text, shouldSave = true) {
   const el = document.createElement("div");
   el.className = "msg-in flex justify-end";
   el.innerHTML = `<div class="max-w-[80%] bg-brand text-white font-body text-[0.85rem] leading-snug px-4 py-2.5 rounded-2xl rounded-br-md">${esc(text)}</div>`;
   document.getElementById("chatMessages").appendChild(el);
   scrollBot();
+  if (shouldSave) saveMessage(text, false);
 }
 
 /* ── Append bot bubble ── */
-function appendBot(text, quick = [], action = null) {
+function appendBot(text, quick = [], action = null, shouldSave = true) {
   const el = document.createElement("div");
   el.className = "msg-in flex items-start gap-2.5";
 
@@ -536,6 +670,7 @@ function appendBot(text, quick = [], action = null) {
   document.getElementById("chatMessages").appendChild(el);
   scrollBot();
   if (quick.length) setQuickReplies(quick);
+  if (shouldSave) saveMessage(text, true);
 }
 
 /* ── Typing indicator ── */
@@ -627,4 +762,62 @@ function fmt(text) {
       '<a href="$1" target="$2" style="$3">$4</a>',
     )
     .replace(/\n/g, "<br/>");
+}
+function formatTimeSimple(timeStr) {
+    if (!timeStr) return "";
+    try {
+        const [time, modifier] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':');
+        return `${hours}:${minutes} ${modifier}`;
+    } catch { return timeStr; }
+}
+
+/* ── Date Helpers for SLM ── */
+function extractDate(input) {
+    const lower = input.toLowerCase();
+    const today = new Date();
+    // Set base year to 2026 as per SLM rules
+    today.setFullYear(2026);
+
+    // 1. Check for specific months
+    const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    for (let i = 0; i < months.length; i++) {
+        if (lower.includes(months[i])) {
+            const match = lower.match(new RegExp(`${months[i]}\\s*(\\d+)`));
+            if (match) {
+                const day = parseInt(match[1]);
+                const date = new Date(2026, i, day);
+                return date.toISOString().split('T')[0];
+            }
+        }
+    }
+
+    // 2. Relative dates
+    if (lower.includes("today")) return today.toISOString().split('T')[0];
+    if (lower.includes("tomorrow")) {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        return tomorrow.toISOString().split('T')[0];
+    }
+
+    // 3. Days of week
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    for (let i = 0; i < days.length; i++) {
+        if (lower.includes(days[i])) {
+            const targetDay = i;
+            const date = new Date(today);
+            const currentDay = today.getDay();
+            let diff = targetDay - currentDay;
+            if (diff <= 0) diff += 7; // Next week
+            date.setDate(today.getDate() + diff);
+            return date.toISOString().split('T')[0];
+        }
+    }
+
+    return null;
+}
+
+function formatFriendlyDate(dateStr) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', options);
 }

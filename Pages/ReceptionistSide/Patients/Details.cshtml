@@ -454,18 +454,20 @@
 </div>
 
 
-<script>
-    function openNewMessage() {
+<script type="module">
+    import { Toast } from '../../js/ui.js';
+
+    window.openNewMessage = function() {
         const patientId = "@p?.Id";
         window.location.href = `/Receptionist/Inquiries?patientId=${patientId}`;
     }
 
-    function openNewAppointment() {
+    window.openNewAppointment = function() {
         const patientId = "@p?.Id";
         window.location.href = `/Receptionist/Appointments?patientId=${patientId}&openModal=true`;
     }
 
-    function switchTab(tabId) {
+    window.switchTab = function(tabId) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         const target = document.getElementById('content-' + tabId);
         if (target) target.classList.remove('hidden');
@@ -475,11 +477,11 @@
         if (activeBtn) activeBtn.classList.add('active');
     }
 
-    function openEditMedical() {
+    window.openEditMedical = function() {
         document.getElementById('edit-medical-modal').classList.remove('hidden');
     }
 
-    function closeEditMedical() {
+    window.closeEditMedical = function() {
         document.getElementById('edit-medical-modal').classList.add('hidden');
     }
 
@@ -500,19 +502,20 @@
                 body: JSON.stringify(data)
             });
             if (res.ok) {
-                location.reload();
+                Toast.show('Medical info updated', 'success');
+                setTimeout(() => location.reload(), 1500);
             } else {
-                alert('Failed to update medical info');
+                Toast.show('Failed to update medical info', 'danger');
             }
         } catch (err) {
             console.error(err);
-            alert('An error occurred');
+            Toast.show('An error occurred', 'danger');
         }
     });
 
     // Initialize first tab
     document.addEventListener('DOMContentLoaded', () => {
-        switchTab('timeline');
+        window.switchTab('timeline');
     });
 </script>
 

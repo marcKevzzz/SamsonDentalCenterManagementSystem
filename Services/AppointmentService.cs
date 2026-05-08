@@ -106,6 +106,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 return dtos.Select(d => new Doctor
                     {
                         Id = d.Id,
+                        ProfileId = d.ProfileId,
                         Title = d.Title,
                         Specialties = d.Specialties,
                         Bio = d.Bio,
@@ -145,18 +146,15 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
+                var dateStr = date.ToString("yyyy-MM-dd");
                 var path =
-                    $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
+                    $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadAsStringAsync();
-                var all =
-                    JsonSerializer.Deserialize<List<Appointment>>(json, _jsonOptions) ?? new();
-
-                var dateStr = date.ToString("yyyy-MM-dd");
-                return all.Where(a => a.AppointmentDate.ToString("yyyy-MM-dd") == dateStr).ToList();
+                return JsonSerializer.Deserialize<List<Appointment>>(json, _jsonOptions) ?? new();
             }
             catch (Exception ex)
             {
@@ -265,19 +263,72 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var doctors = await GetDoctorsForService(category);
             var bookedMap = new Dictionary<string, List<Appointment>>();
-            foreach (var doc in doctors)
+            var staffSchedMap = new Dictionary<string, List<AvailabilityDto>>();
+            var onLeaveProfileIds = new HashSet<string>();
+
+            if (doctors.Any())
             {
-                bookedMap[doc.Id] = await GetBookedAppointments(doc.Id, date);
+                var doctorIds = string.Join(",", doctors.Select(d => d.Id));
+                var profileIds = string.Join(",", doctors.Select(d => d.ProfileId));
+                var dateStr = date.ToString("yyyy-MM-dd");
+                var dayOfWeek = (int)date.DayOfWeek;
+
+                // 1. Fetch Appointments
+                var batchPath = $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=in.({doctorIds})&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
+                
+                // 2. Fetch Staff Availability
+                var availPath = $"/staff_availability?staff_id=in.({doctorIds})&day_of_week=eq.{dayOfWeek}&is_active=eq.true";
+
+                // 3. Fetch Staff Leaves
+                var leavePath = $"/staff_leaves?status=eq.approved&start_date=lte.{dateStr}&end_date=gte.{dateStr}";
+                if (!string.IsNullOrEmpty(profileIds))
+                {
+                    leavePath += $"&profile_id=in.({profileIds})";
+                }
+
+                try 
+                {
+                    // Appointments
+                    var apptReq = BuildRequest(HttpMethod.Get, batchPath);
+                    var apptRes = await _http.SendAsync(apptReq);
+                    if (apptRes.IsSuccessStatusCode)
+                    {
+                        var json = await apptRes.Content.ReadAsStringAsync();
+                        var allAppts = JsonSerializer.Deserialize<List<Appointment>>(json, _jsonOptions) ?? new();
+                        foreach (var doc in doctors) bookedMap[doc.Id] = allAppts.Where(a => a.DoctorId == doc.Id).ToList();
+                    }
+
+                    // Staff Availability
+                    var availReq = BuildRequest(HttpMethod.Get, availPath);
+                    var availRes = await _http.SendAsync(availReq);
+                    if (availRes.IsSuccessStatusCode)
+                    {
+                        var json = await availRes.Content.ReadAsStringAsync();
+                        var allAvail = JsonSerializer.Deserialize<List<AvailabilityDto>>(json, _jsonOptions) ?? new();
+                        foreach (var doc in doctors) staffSchedMap[doc.Id] = allAvail.Where(v => v.StaffId == doc.Id).ToList();
+                    }
+
+                    // Staff Leaves
+                    var leaveReq = BuildRequest(HttpMethod.Get, leavePath);
+                    var leaveRes = await _http.SendAsync(leaveReq);
+                    if (leaveRes.IsSuccessStatusCode)
+                    {
+                        var json = await leaveRes.Content.ReadAsStringAsync();
+                        var allLeaves = JsonSerializer.Deserialize<List<StaffLeave>>(json, _jsonOptions) ?? new();
+                        foreach (var l in allLeaves) onLeaveProfileIds.Add(l.ProfileId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[GetAvailability.Batch] {ex.Message}");
+                    foreach (var doc in doctors) { bookedMap[doc.Id] = new(); staffSchedMap[doc.Id] = new(); }
+                }
             }
 
             var result = new Dictionary<string, object>();
             var currentTime = openTime;
-
-            // Past time check for TODAY
             var nowTime = DateTime.Now.TimeOfDay;
             bool isToday = date.Date == DateTime.Today;
-
-            // SPACING: The user wants the slots to reflect duration + buffer
             int step = totalBlock;
 
             while (currentTime.Add(TimeSpan.FromMinutes(duration)) <= closeTime)
@@ -305,6 +356,26 @@ namespace SamsonDentalCenterManagementSystem.Services
                     var availableDoctorIds = new List<string>();
                     foreach (var doc in doctors)
                     {
+                        // 1. Check if on leave
+                        if (onLeaveProfileIds.Contains(doc.ProfileId)) continue;
+
+                        // 2. Check individual availability
+                        var scheds = staffSchedMap.ContainsKey(doc.Id) ? staffSchedMap[doc.Id] : new();
+                        bool worksThisTime = false;
+                        foreach (var s in scheds)
+                        {
+                            if (DateTime.TryParse(s.StartTime, out var sStart) && DateTime.TryParse(s.EndTime, out var sEnd))
+                            {
+                                if (currentTime >= sStart.TimeOfDay && slotEnd <= sEnd.TimeOfDay)
+                                {
+                                    worksThisTime = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!worksThisTime) continue;
+
+                        // 3. Check existing appointments
                         var booked = bookedMap[doc.Id];
                         bool isBusy = false;
                         foreach (var b in booked)
@@ -328,19 +399,18 @@ namespace SamsonDentalCenterManagementSystem.Services
                                 }
                             }
                         }
-
-                        if (!isBusy)
-                            availableDoctorIds.Add(doc.Id);
+                        if (!isBusy) availableDoctorIds.Add(doc.Id);
                     }
 
                     // Calculate available doctors
                     int finalCount = availableDoctorIds.Count;
-                    if (finalCount < 0) finalCount = 0;
+                    bool isWaitlistEligible = finalCount == 0 && doctors.Any();
 
                     result[slotLabel] = new
                     {
                         available = finalCount > 0,
                         doctorCount = finalCount,
+                        waitlistEligible = isWaitlistEligible,
                         time24 = currentTime.ToString(@"hh\:mm"),
                     };
                 }
@@ -410,8 +480,8 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (p.IsWaitlist)
                 return "waitlist";
 
-            // If not a guest (logged in) OR has a matched patient ID, auto-confirm to bypass email confirmation
-            if (!p.IsGuest || !string.IsNullOrEmpty(p.PatientId))
+            // Authenticated patient booking for themselves -> "confirmed"
+            if (!p.IsGuest && !p.IsForOther && !string.IsNullOrEmpty(p.PatientId))
                 return "confirmed";
 
             // Staff-created appointments (Admin/Receptionist/Walk-in) are auto-confirmed if doctor is assigned
@@ -422,6 +492,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             )
                 return "confirmed";
 
+            // All other online bookings (guests or booking for others) start as pending
             return "pending";
         }
 
@@ -431,16 +502,23 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (!string.IsNullOrEmpty(p.PatientEmail)) p.PatientEmail = p.PatientEmail.Trim().ToLower();
             if (!string.IsNullOrEmpty(p.OtherEmail)) p.OtherEmail = p.OtherEmail.Trim().ToLower();
 
+            // ── Date Parsing (Fix Timezone Shift) ────────────────────────────
+            if (!DateTime.TryParse(p.AppointmentDate, out var parsedDate))
+                 throw new Exception("Invalid appointment date.");
+            
+            // Strip time and offset to keep it on the selected day
+            var fixedDate = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Unspecified);
+
             // ── Validation ───────────────────────────────────────────────────
             if (!p.IsWaitlist)
             {
                 // 1. Blocked Dates
-                if (await _blockedDates.IsDateBlockedAsync(p.AppointmentDate))
+                if (await _blockedDates.IsDateBlockedAsync(fixedDate))
                     throw new Exception("This date is blocked by the clinic.");
 
                 // 2. Clinic Hours
                 var settings = await _clinic.GetSettingsAsync();
-                var dayName = p.AppointmentDate.DayOfWeek.ToString();
+                var dayName = fixedDate.DayOfWeek.ToString();
                 var hours = settings.ClinicalHours.FirstOrDefault(h =>
                     h.Day.Equals(dayName, StringComparison.OrdinalIgnoreCase)
                 );
@@ -471,7 +549,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 if (!string.IsNullOrEmpty(p.DoctorId))
                 {
                     // Check conflicts (double-booking)
-                    var booked = await GetBookedAppointments(p.DoctorId, p.AppointmentDate);
+                    var booked = await GetBookedAppointments(p.DoctorId, fixedDate);
 
                     // Fetch service for duration and buffer
                     var svcRes = await _supabase.From<DentalService>().Where(s => s.Id == p.ServiceId).Get();
@@ -501,13 +579,13 @@ namespace SamsonDentalCenterManagementSystem.Services
                         // 4. Patient Double-Booking & Limit
                         if (!string.IsNullOrEmpty(p.PatientId))
                         {
-                            await HasExistingBookingAsPatient(p.PatientId, p.AppointmentDate, newStart, newEnd, p.IsForOther, buffer);
+                            await HasExistingBookingAsPatient(p.PatientId, fixedDate, newStart, newEnd, p.IsForOther, buffer);
                         }
                     }
                 }
 
                     // Check doctor's scheduled availability
-                    var dow = (int)p.AppointmentDate.DayOfWeek;
+                    var dow = (int)fixedDate.DayOfWeek;
                     var availPath =
                         $"/staff_availability?staff_id=eq.{p.DoctorId}&day_of_week=eq.{dow}&is_active=eq.true";
                     var availReq = BuildRequest(HttpMethod.Get, availPath);
@@ -550,11 +628,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 emailStatus = "confirmed";
             }
-            
-
-            // FIX THE DATE BUG: Strip time and offset to keep it on the selected day
-            var fixedDate = DateTime.SpecifyKind(p.AppointmentDate.Date, DateTimeKind.Unspecified);
-
             var token = (p.IsGuest && !p.IsWaitlist) ? Guid.NewGuid().ToString("N") : null;
 
             // --- Smart Matching & Shadow Profiles ---
@@ -576,6 +649,37 @@ namespace SamsonDentalCenterManagementSystem.Services
                     p.PatientId = matchResult.Profile.Id;
                 }
             }
+            // ── PREVENT DOUBLE BOOKING ──────────────────────
+            if (!p.IsWaitlist && !string.IsNullOrEmpty(p.PatientId))
+            {
+                var query = _supabase.From<Appointment>()
+                    .Where(a => a.PatientId == p.PatientId)
+                    .Where(a => a.AppointmentDate == fixedDate)
+                    .Where(a => a.AppointmentTime == p.AppointmentTime)
+                    .Where(a => a.Status != "cancelled");
+
+                if (p.IsForOther)
+                {
+                    // If booking for someone else, also check if that specific person is already booked
+                    query = query.Where(a => a.IsForOther == true)
+                                 .Where(a => a.OtherFirstName == p.OtherFirstName)
+                                 .Where(a => a.OtherLastName == p.OtherLastName);
+                }
+                else 
+                {
+                    // Booking for self
+                    query = query.Where(a => a.IsForOther == false);
+                }
+
+                var existingRes = await query.Get();
+
+                if (existingRes.Models.Any())
+                {
+                    throw new Exception(p.IsForOther 
+                        ? $"An appointment for {p.OtherFirstName} {p.OtherLastName} is already scheduled for this time."
+                        : "You already have an appointment scheduled for this date and time.");
+                }
+            }
 
             // ── DECOUPLE DATABASE FOR UNCONFIRMED GUESTS ──────────────────────
             // Skip OTP if: 
@@ -583,7 +687,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             // 2. Waitlist
             // 3. Already confirmed
             // 4. Match found in database (Patient has an account/profile)
-            if (p.IsGuest && !p.IsWaitlist && !p.IsGuestConfirmed)
+            if (p.IsGuest && !p.IsWaitlist && !p.IsGuestConfirmed && string.IsNullOrEmpty(p.PatientId))
             {
                 var cacheToken = Guid.NewGuid().ToString("N");
                 var cacheJson = JsonSerializer.Serialize(p);
@@ -674,7 +778,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                         var svc = svcRes.Models.FirstOrDefault();
                         if (svc != null)
                         {
-                            var available = await GetAvailableDoctorsForSlot(svc.Category, p.AppointmentDate, p.AppointmentTime, svc.DurationMinutes);
+                            var available = await GetAvailableDoctorsForSlot(svc.Category, fixedDate, p.AppointmentTime, svc.DurationMinutes);
                             if (available.Any())
                             {
                                 p.DoctorId = available.First().Id;
@@ -764,12 +868,21 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 if (p.IsGuest && !p.IsGuestConfirmed)
                 {
+                    // Guest needs OTP verification first
                     await SendGuestConfirmationEmail(created);
                 }
                 else
                 {
-                    // For confirmed guests, logged-in users, or staff-created walk-ins
-                    await SendBookingConfirmationEmail(created);
+                    // For confirmed guests (post-OTP), logged-in users, or staff-created walk-ins
+                    if (created.Status == "confirmed")
+                    {
+                        await SendBookingConfirmationEmail(created);
+                    }
+                    else
+                    {
+                        // It's pending review by staff
+                        await SendBookingReceivedEmail(created);
+                    }
                 }
             }
 
@@ -832,8 +945,15 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // appt.Status stays "pending" — don't touch it here
                 await _supabase.From<Appointment>().Upsert(appt);
 
-                // Send booking confirmation email now that email is verified
-                await SendBookingConfirmationEmail(appt);
+                // Send appropriate email based on status
+                if (appt.Status == "confirmed")
+                {
+                    await SendBookingConfirmationEmail(appt);
+                }
+                else
+                {
+                    await SendBookingReceivedEmail(appt);
+                }
 
                 return appt;
             }
@@ -1488,8 +1608,15 @@ namespace SamsonDentalCenterManagementSystem.Services
                 appt.ConfirmedAt = DateTime.UtcNow;
                 await _supabase.From<Appointment>().Upsert(appt);
 
-                // Send confirmation email
-                await SendBookingConfirmationEmail(appt);
+                // Send appropriate email based on status
+                if (appt.Status == "confirmed")
+                {
+                    await SendBookingConfirmationEmail(appt);
+                }
+                else
+                {
+                    await SendBookingReceivedEmail(appt);
+                }
 
                 return appt;
             }
@@ -1528,6 +1655,36 @@ namespace SamsonDentalCenterManagementSystem.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"[SendBookingConfirmationEmail] {ex.Message}");
+            }
+        }
+
+        private async Task SendBookingReceivedEmail(Appointment appt)
+        {
+            try
+            {
+                var docName = appt.Doctor?.Profile != null
+                    ? $"{appt.Doctor.Title} {appt.Doctor.Profile.FirstName} {appt.Doctor.Profile.LastName}".Trim()
+                    : null;
+
+                await _emailService.SendEmailAsync(
+                    appt.PatientEmail,
+                    appt.PatientName,
+                    "Booking Received - Pending Confirmation",
+                    "BookingReceived",
+                    new
+                    {
+                        Name = appt.PatientName,
+                        Reference = $"APT-{(appt.Id?.Length >= 4 ? appt.Id[..4] : "0000").ToUpper()}",
+                        Service = appt.ServiceName,
+                        Doctor = docName,
+                        Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
+                        Time = appt.AppointmentTime.ToUpper()
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SendBookingReceivedEmail] {ex.Message}");
             }
         }
 
@@ -1772,7 +1929,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         public string ServiceId { get; set; } = string.Empty;
         public string ServiceName { get; set; } = string.Empty;
         public string? DoctorId { get; set; }
-        public DateTime AppointmentDate { get; set; }
+        public string AppointmentDate { get; set; } = string.Empty;
         public string AppointmentTime { get; set; } = string.Empty;
         public bool IsWaitlist { get; set; }
         public string Status { get; set; } = "pending";

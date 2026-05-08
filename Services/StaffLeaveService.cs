@@ -74,7 +74,18 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             var req = BuildRequest(HttpMethod.Post, "/staff_leaves");
             req.Headers.Add("Prefer", "return=representation");
-            req.Content = new StringContent(JsonSerializer.Serialize(leave, _jsonOptions), System.Text.Encoding.UTF8, "application/json");
+            var dbPayload = new
+            {
+                profile_id = leave.ProfileId,
+                leave_type = leave.LeaveType,
+                start_date = leave.StartDate.ToString("yyyy-MM-dd"),
+                end_date = leave.EndDate.ToString("yyyy-MM-dd"),
+                reason = leave.Reason,
+                status = leave.Status,
+                created_at = leave.CreatedAt
+            };
+
+            req.Content = new StringContent(JsonSerializer.Serialize(dbPayload, _jsonOptions), System.Text.Encoding.UTF8, "application/json");
 
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();

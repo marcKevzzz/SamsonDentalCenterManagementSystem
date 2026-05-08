@@ -1,6 +1,6 @@
 import { Toast, Modal } from "../ui.js";
 
-import { AdminStore } from "./AdminStore.js";
+import { AdminStore } from "./adminStore.js";
 const post = (url, body) =>
   fetch(url, {
     method: "POST",
@@ -114,7 +114,9 @@ function initializeWithData(data) {
   // Transform appointments to include formatted fields if missing
   ALL_APPT.forEach((a) => {
     if (!a.appointmentDateFormatted) {
-      const d = new Date(a.appointmentDate);
+      // Parse yyyy-MM-dd without UTC shift
+      const [y, m, day] = a.appointmentDate.split('T')[0].split('-').map(Number);
+      const d = new Date(y, m - 1, day);
       a.appointmentDateFormatted = d.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",

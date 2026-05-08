@@ -88,9 +88,12 @@ public class AppointmentsController : ControllerBase
         // Guard: blocked date
         if (!p.IsWaitlist)
         {
-            var isBlocked = await _blockedDates.IsDateBlockedAsync(p.AppointmentDate);
-            if (isBlocked)
-                return Conflict(new { ok = false, error = "This date has been blocked by the clinic. Please choose another date." });
+            if (DateTime.TryParse(p.AppointmentDate, out var parsedDate))
+            {
+                var isBlocked = await _blockedDates.IsDateBlockedAsync(parsedDate.Date);
+                if (isBlocked)
+                    return Conflict(new { ok = false, error = "This date has been blocked by the clinic. Please choose another date." });
+            }
         }
 
 
@@ -154,7 +157,7 @@ public class AppointmentsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetMine()
     {
-        var patientId = User.FindFirst("sub")?.Value;
+        var patientId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(patientId)) return Unauthorized();
 
         var appts = await _apptService.GetByPatient(patientId);

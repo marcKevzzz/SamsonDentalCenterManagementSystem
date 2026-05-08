@@ -128,6 +128,7 @@ export function renderStep4() {
     // Confirm button styling
     const confirmBtn = document.getElementById("confirmBtn");
     if (confirmBtn) {
+        confirmBtn.disabled = false; // Re-enable for subsequent bookings
         if (isWL) {
             confirmBtn.className = "brand-font font-bold text-[.88rem] tracking-wider uppercase bg-amber-500 text-white px-10 py-4 rounded-xl hover:bg-amber-600 transition-colors cursor-pointer";
             confirmBtn.textContent = "Join Waitlist ✓";
@@ -155,7 +156,7 @@ export async function confirmBooking() {
             patientEmail:    d.email,
             patientPhone:    d.phone,
             patientSex:      d.sex   || null,
-            patientDob:      d.dob   ? new Date(d.dob + "T12:00:00").toISOString() : null,
+            patientDob:      d.dob   || null,
             patientType:     d.patientType ?? "New Patient",
             isGuest:         !loggedIn,
             isForOther:      d.isForOther,
@@ -164,12 +165,12 @@ export async function confirmBooking() {
             otherEmail:      d.otherEmail || null,
             otherPhone:      d.otherPhone || null,
             otherSex:        d.otherSex  || null,
-            otherDob:        d.otherDob  ? new Date(d.otherDob + "T12:00:00").toISOString() : null,
+            otherDob:        d.otherDob  || null,
             serviceId:       STATE.service?.id   ?? "",
             serviceName:     STATE.service?.name ?? "",
             doctorId:        STATE.doctor?.id    ?? null,
             doctorName:      STATE.doctor?.name  ?? null,
-            appointmentDate: STATE.date ? new Date(STATE.date + "T12:00:00").toISOString() : "",
+            appointmentDate: STATE.date || "",
             appointmentTime: STATE.time ?? "",
             isWaitlist:      STATE.isWaitlist,
             notes:           d.notes || null

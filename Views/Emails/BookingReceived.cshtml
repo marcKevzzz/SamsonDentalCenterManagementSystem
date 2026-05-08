@@ -1,0 +1,45 @@
+@using System
+@{
+    Layout = "_EmailLayout.cshtml";
+}
+
+<div class="header">
+    <h1>Samson Dental</h1>
+    <p>Booking Received</p>
+</div>
+
+<div class="content">
+    <h2>Hi @Model.Name,</h2>
+    <p>We've received your appointment request. Our team will review it and send you a confirmation email once it's officially scheduled.</p>
+
+    <div class="details-box">
+        <div class="details-row">
+            <span class="details-label">Status</span>
+            <span class="details-value" style="color: #f59e0b; font-weight: bold;">Pending Confirmation</span>
+        </div>
+        <div class="details-row">
+            <span class="details-label">Reference</span>
+            <span class="details-value">@Model.Reference</span>
+        </div>
+        <div class="details-row">
+            <span class="details-label">Service</span>
+            <span class="details-value">@Model.Service</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Doctor)) {
+            <div class="details-row">
+                <span class="details-label">Doctor</span>
+                <span class="details-value">@Model.Doctor</span>
+            </div>
+        }
+        <div class="details-row">
+            <span class="details-label">Date</span>
+            <span class="details-value">@Model.Date</span>
+        </div>
+        <div class="details-row">
+            <span class="details-label">Time</span>
+            <span class="details-value">@Model.Time</span>
+        </div>
+    </div>
+    
+    <p style="font-size: 12px; color: #64748b; text-align: center;">This is not a final confirmation. We will notify you once your slot is confirmed.</p>
+</div>

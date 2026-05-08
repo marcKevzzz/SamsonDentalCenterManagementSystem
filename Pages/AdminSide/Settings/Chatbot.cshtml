@@ -1,0 +1,95 @@
+@page "/Admin/Settings/Chatbot"
+@model SamsonDentalCenterManagementSystem.Pages.AdminSide.AdminSettingsModel
+@{
+    Layout = "AdminSide/_StaffLayout";
+    ViewData["Title"] = "Chatbot Controls";
+    ViewData["Breadcrumb"] = "Settings · Chatbot";
+}
+
+<div class="h-full flex flex-col p-6 overflow-hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-brand tracking-tight font-display">Chatbot & Knowledge Base</h1>
+            <p class="text-slate-500 text-[13px] mt-1 font-medium">Configure your AI assistant and the data it uses to help patients.</p>
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="toast-msg" value="@TempData["Toast"]" />
+    <input type="hidden" id="toast-type" value="@TempData["ToastType"]" />
+
+    <form method="post" asp-route-section="Chatbot" class="flex-1 flex flex-col gap-6 overflow-hidden">
+        <input type="hidden" asp-for="Settings.Id" />
+        
+        <div class="flex-1 overflow-y-auto pr-2 space-y-8 pb-32">
+            <!-- Basic Controls -->
+            <div class="bg-white p-7 rounded-[32px] border border-slate-200 shadow-sm space-y-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-robot text-sm"></i>
+                        </div>
+                        <h3 class="text-slate-800 font-bold text-base">Assistant Identity</h3>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" asp-for="Settings.IsChatbotEnabled" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
+                        <span class="ms-3 text-[12px] font-bold text-slate-500 uppercase tracking-widest">Active</span>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Assistant Name</label>
+                        <input type="text" asp-for="Settings.ChatbotName" class="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-[13px] font-medium focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all" placeholder="e.g. SDC Assistant">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Welcome Message</label>
+                        <textarea asp-for="Settings.ChatbotWelcomeMessage" rows="4" class="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-[13px] font-medium focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 outline-none transition-all resize-none" placeholder="Greeting message..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Knowledge Base (FAQs) -->
+            <div class="bg-white p-7 rounded-[32px] border border-slate-200 shadow-sm space-y-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+                            <i class="fa-solid fa-brain text-sm"></i>
+                        </div>
+                        <h3 class="text-slate-800 font-bold text-base">Knowledge Base</h3>
+                    </div>
+                    <button type="button" onclick="addFaq()" class="px-4 py-2 bg-slate-50 text-brand text-[10px] font-bold uppercase tracking-widest rounded-xl border border-slate-100 hover:bg-brand hover:text-white transition-all">
+                        + Add Entry
+                    </button>
+                </div>
+                <p class="text-[12px] text-slate-500 px-1 italic">Provide the chatbot with custom questions and answers to better serve patients.</p>
+                
+                <input type="hidden" asp-for="Settings.FaqsJson" id="faqs-json" />
+                <div id="faqs-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[100px]">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- FAB -->
+        <div class="fixed bottom-8 right-8 flex items-center gap-4">
+            <button type="submit" class="group bg-brand text-white pl-8 pr-10 py-5 rounded-[28px] font-bold text-sm shadow-2xl shadow-brand/30 hover:shadow-brand/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <i class="fa-solid fa-check text-xs"></i>
+                </div>
+                Save Configuration
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script type="module">
+        import { ClinicSettings } from '../../../js/AdminSide/adminSettings.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            const settings = new ClinicSettings();
+            settings.init();
+        });
+    </script>
+}

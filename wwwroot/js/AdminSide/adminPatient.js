@@ -1,4 +1,4 @@
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 
 let PATIENTS = [];
 let ALL_APPT = [];
@@ -169,14 +169,23 @@ function initializeWithData(data) {
         const patientAppts = ALL_APPT.filter(a => a.patientId === p.id);
         const lastAppt = patientAppts
             .filter(a => a.status === 'arrived' || a.status === 'completed')
-            .sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate))[0];
+            .sort((a, b) => {
+                const da = a.appointmentDate.split('T')[0];
+                const db = b.appointmentDate.split('T')[0];
+                return db.localeCompare(da);
+            })[0];
 
         let docName = "No Record";
         if (lastAppt) {
             docName = lastAppt.doctorName || (lastAppt.doctor && lastAppt.doctor.profile ? `Dr. ${lastAppt.doctor.profile.lastName}` : "No Record");
         }
 
-        const dob = p.dob ? new Date(p.dob) : null;
+        const parseLocal = (s) => {
+            if (!s) return null;
+            const [y, m, d] = s.split('T')[0].split('-').map(Number);
+            return new Date(y, m - 1, d);
+        };
+        const dob = parseLocal(p.dob);
         const age = dob ? (new Date().getFullYear() - dob.getFullYear()) : 0;
 
         const parts = [p.firstName, p.lastName].filter(Boolean);
@@ -193,7 +202,7 @@ function initializeWithData(data) {
             dob: p.dob,
             age: age,
             initials: initials,
-            lastVisit: lastAppt ? new Date(lastAppt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "--",
+            lastVisit: lastAppt ? parseLocal(lastAppt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "--",
             assignedDoctor: docName,
             status: p.isActive ? "Active" : "Inactive",
             isActive: p.isActive,

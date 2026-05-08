@@ -87,9 +87,17 @@
               <div class="text-[9px] font-medium text-slate-400">${date}</div>
             </div>
           </div>
-          <div class="flex items-center justify-between mt-2">
-            <div class="text-[10px] font-medium text-brand/40 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
-              <i class="fa-solid fa-network-wired mr-1 opacity-50"></i>${log.ipAddress || "Internal"}
+          <div class="flex flex-wrap items-center justify-between mt-2 gap-2">
+            <div class="flex items-center gap-2">
+                <div class="text-[10px] font-medium text-brand/40 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100 flex items-center gap-1.5">
+                  <i class="fa-solid fa-network-wired opacity-50"></i>
+                  <span>${log.ipAddress || "Internal"}</span>
+                </div>
+                ${log.link ? `
+                <div class="text-[10px] font-bold text-primary/60 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10 flex items-center gap-1.5 max-w-[200px] truncate" title="${log.link}">
+                  <i class="fa-solid fa-link text-[8px]"></i>
+                  <span class="truncate">${log.link.replace('/Admin/', '/')}</span>
+                </div>` : ""}
             </div>
             ${log.link ? `<span class="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">View details <i class="fa-solid fa-arrow-right ml-1"></i></span>` : ""}
           </div>

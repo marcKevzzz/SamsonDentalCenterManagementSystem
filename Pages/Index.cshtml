@@ -194,16 +194,42 @@ ViewData["Title"] = "Home page";
         </h2>
         
         <div class="absolute inset-0 pointer-events-none overflow-hidden">
-             <!-- Scattered Images -->
-             <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" class="gallery-item absolute w-[clamp(10rem,35vw,24rem)] h-[clamp(14rem,45vw,30rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 1%; left: 35%;" />
-             <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-item absolute w-[clamp(12rem,38vw,26rem)] h-[clamp(10rem,30vw,22rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 20%; right: 10%;" />
-             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-item absolute w-[clamp(8rem,30vw,22rem)] h-[clamp(12rem,40vw,28rem)] object-cover rounded-xl shadow-2xl opacity-0" style="bottom: 5%; left: 80%;" />
-             <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=800&q=80" class="gallery-item absolute w-[clamp(12rem,42vw,30rem)] h-[clamp(10rem,32vw,24rem)] object-cover rounded-xl shadow-2xl opacity-0" style="bottom: 10%; right: 15%;" />
-             <img src="https://images.unsplash.com/photo-1445527815219-ecbfec67492e?w=800&q=80" class="gallery-item absolute w-[clamp(8rem,30vw,22rem)] h-[clamp(12rem,40vw,28rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 3%; left: 5%;" />
-             <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80" class="gallery-item absolute w-[clamp(10rem,35vw,24rem)] h-[clamp(10rem,30vw,22rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 40%; right: 5%;" />
-             <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-item absolute w-[clamp(12rem,38vw,26rem)] h-[clamp(10rem,30vw,22rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 60%; right: 10%;" />
-             <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-item absolute w-[clamp(8rem,30vw,22rem)] h-[clamp(12rem,40vw,28rem)] object-cover rounded-xl shadow-2xl opacity-0" style="bottom: 15%; left: 20%;" />
-             <img src="https://images.unsplash.com/photo-1445527815219-ecbfec67492e?w=800&q=80" class="gallery-item absolute w-[clamp(8rem,30vw,22rem)] h-[clamp(12rem,40vw,28rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 45%; left: 5%;" />
+             <!-- Scattered Images (Dynamic) -->
+             @if (Model.ClinicSettings.ClinicPhotos != null && Model.ClinicSettings.ClinicPhotos.Any())
+             {
+                var positions = new[] { 
+                    new { t = "5%", l = "35%", w = "clamp(5rem,15vw,19rem)", h = "clamp(7rem,22vw,15rem)" },
+                    new { t = "15%", l = "70%", w = "clamp(6rem,16vw,16rem)", h = "clamp(5rem,14vw,13rem)" },
+                    new { t = "60%", l = "75%", w = "clamp(5rem,14vw,15rem)", h = "clamp(7rem,20vw,15rem)" },
+                    new { t = "75%", l = "50%", w = "clamp(7rem,18vw,18rem)", h = "clamp(5rem,14vw,16rem)" },
+                    new { t = "8%", l = "8%", w = "clamp(5rem,14vw,20rem)", h = "clamp(7rem,18vw,15rem)" },
+                    new { t = "40%", l = "82%", w = "clamp(5rem,15vw,19rem)", h = "clamp(5rem,14vw,15rem)" },
+                    new { t = "65%", l = "12%", w = "clamp(6rem,16vw,17rem)", h = "clamp(5rem,14vw,14rem)" },
+                    new { t = "82%", l = "25%", w = "clamp(5rem,14vw,15rem)", h = "clamp(7rem,18vw,16rem)" },
+                    new { t = "42%", l = "3%", w = "clamp(5rem,14vw,16rem)", h = "clamp(7rem,18vw,17rem)" },
+                    new { t = "15%", l = "55%", w = "clamp(5rem,14vw,16rem)", h = "clamp(6rem,16vw,14rem)" },
+                    new { t = "55%", l = "35%", w = "clamp(6rem,18vw,19rem)", h = "clamp(5rem,14vw,14rem)" },
+                    new { t = "30%", l = "18%", w = "clamp(5rem,15vw,17rem)", h = "clamp(6rem,16vw,12rem)" }
+                };
+
+                for (int i = 0; i < Model.ClinicSettings.ClinicPhotos.Count; i++)
+                {
+                    var pos = positions[i % positions.Length];
+                    // Add index-based offsets to prevent perfect stacking for collections > positions.Length
+                    var offsetT = (i / positions.Length) * 3;
+                    var offsetL = (i / positions.Length) * -3;
+                    <img src="@Model.ClinicSettings.ClinicPhotos[i]" 
+                         class="gallery-item absolute object-cover rounded-xl shadow-2xl opacity-0" 
+                         style="top: calc(@pos.t + @(offsetT)%); left: calc(@pos.l + @(offsetL)%); width: @pos.w; height: @pos.h;" />
+                }
+             }
+             else
+             {
+                 <!-- Fallback placeholders if empty -->
+                 <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80" class="gallery-item absolute w-[clamp(10rem,35vw,24rem)] h-[clamp(14rem,45vw,30rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 1%; left: 35%;" />
+                 <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" class="gallery-item absolute w-[clamp(12rem,38vw,26rem)] h-[clamp(10rem,30vw,22rem)] object-cover rounded-xl shadow-2xl opacity-0" style="top: 20%; right: 10%;" />
+                 <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80" class="gallery-item absolute w-[clamp(8rem,30vw,22rem)] h-[clamp(12rem,40vw,28rem)] object-cover rounded-xl shadow-2xl opacity-0" style="bottom: 5%; left: 80%;" />
+             }
         </div>
     </div>
 </section>

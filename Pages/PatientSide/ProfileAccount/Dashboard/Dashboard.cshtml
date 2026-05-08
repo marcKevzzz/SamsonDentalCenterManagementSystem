@@ -68,7 +68,7 @@ ViewData["Title"] = "Dashboard";
   </div>
 
   <!-- Stat cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 fade-up">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 fade-up">
     <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb]">
       <div class="flex items-start justify-between mb-3">
         <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -109,24 +109,6 @@ ViewData["Title"] = "Dashboard";
       <div class="font-body text-[0.73rem] text-muted mt-1.5">
         Completed
       </div>
-    </div>
-
-    <div class="stat-card bg-white rounded-2xl p-5 border border-[#e5e7eb] group hover:border-primary/30 transition-all">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center">
-          <i class="fa-solid fa-tooth text-primary"></i>
-        </div>
-        <div class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">Good</div>
-      </div>
-      <div class="flex items-end gap-1">
-        <div class="brand-font font-bold text-brand text-[1.8rem] leading-none">
-          0
-        </div>
-        <div class="text-[11px] font-bold text-muted mb-0.5">/ 100</div>
-      </div>
-
-  
-      <div class="font-body text-[0.73rem] text-muted mt-1.5">Oral Health Score</div>
     </div>
   </div>
 
@@ -244,7 +226,7 @@ ViewData["Title"] = "Dashboard";
           <div class="font-body text-[0.72rem] text-muted">Settings</div>
         </div>
       </a>
-      <a href="/Profile/Contact"
+      <a href="/Contacts"
         class="action-card bg-white rounded-2xl p-4 border border-[#e5e7eb] no-underline flex flex-col items-start gap-3 transition-all hover:border-primary/30 hover:shadow-sm">
         <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
            <i class="fa-solid fa-headset text-blue-600 text-sm"></i>
@@ -259,98 +241,9 @@ ViewData["Title"] = "Dashboard";
     </div>
   </div>
 
-  <!-- Oral health + Activity -->
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 fade-up">
-    <!-- Oral health -->
-    <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-[#e5e7eb]">
-      <div
-        class="flex items-center gap-2 font-body text-[0.67rem] font-medium tracking-[0.15em] uppercase text-muted mb-5">
-        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Oral
-        Health Summary
-      </div>
-
-      <!-- Score ring -->
-      <div class="flex items-center gap-5 mb-6">
-        <div class="relative shrink-0">
-          <svg width="80" height="80" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="#e5e7eb" stroke-width="7" />
-            <circle id="scoreRing" cx="40" cy="40" r="34" fill="none" stroke="#c0392b" stroke-width="7"
-              stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="
-                transform: rotate(-90deg);
-                transform-origin: center;
-                transition: stroke-dashoffset 1.2s ease 0.3s;
-              " />
-          </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span class="brand-font font-bold text-brand text-[1.1rem] leading-none">85</span>
-            <span class="font-body text-[0.58rem] text-muted mt-0.5">/ 100</span>
-          </div>
-        </div>
-        <div>
-          <div class="brand-font font-bold text-brand text-[1rem] mb-0.5">
-            Good
-          </div>
-          <div class="font-body text-[0.78rem] text-muted leading-relaxed">
-            Your oral health is on track. Keep up with regular cleanings.
-          </div>
-        </div>
-      </div>
-
-      <!-- Metrics -->
-      <div class="space-y-3.5">
-        <div>
-          <div class="flex justify-between mb-1.5">
-            <span class="font-body text-[0.78rem] text-brand">Gum Health</span>
-            <span class="font-body text-[0.75rem] font-medium text-green-600">Healthy</span>
-          </div>
-          <div class="prog-bar">
-            <div class="prog-fill bg-green-500" data-width="90%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between mb-1.5">
-            <span class="font-body text-[0.78rem] text-brand">Cavity Risk</span>
-            <span class="font-body text-[0.75rem] font-medium text-green-600">Low</span>
-          </div>
-          <div class="prog-bar">
-            <div class="prog-fill bg-green-400" data-width="20%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between mb-1.5">
-            <span class="font-body text-[0.78rem] text-brand">Enamel Strength</span>
-            <span class="font-body text-[0.75rem] font-medium text-[#b45309]">Fair</span>
-          </div>
-          <div class="prog-bar">
-            <div class="prog-fill bg-[#f59e0b]" data-width="62%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between mb-1.5">
-            <span class="font-body text-[0.78rem] text-brand">Plaque Control</span>
-            <span class="font-body text-[0.75rem] font-medium text-blue-600">Good</span>
-          </div>
-          <div class="prog-bar">
-            <div class="prog-fill bg-blue-500" data-width="78%"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-5 pt-4 border-t border-[#e5e7eb]">
-        <div class="font-body text-[0.68rem] font-medium tracking-[0.1em] uppercase text-muted mb-2">
-          Last assessed by
-        </div>
-        <div class="flex items-center gap-2.5">
-          <img src="https://randomuser.me/api/portraits/men/46.jpg"
-            class="w-7 h-7 rounded-full object-cover border border-[#e5e7eb]" alt="" />
-          <span class="font-body text-[0.8rem] text-brand">Dr. Marcus Rivera
-            <span class="text-muted font-normal">· Jan 10, 2026</span></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Activity timeline -->
-    <div class="lg:col-span-3 bg-white rounded-2xl p-6 border border-[#e5e7eb]">
+  <!-- Activity timeline -->
+  <div class="fade-up">
+    <div class="bg-white rounded-2xl p-6 border border-[#e5e7eb]">
       <div class="flex items-center justify-between mb-5">
         <div
           class="flex items-center gap-2 font-body text-[0.67rem] font-medium tracking-[0.15em] uppercase text-muted">

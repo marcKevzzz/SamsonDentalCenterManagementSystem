@@ -465,8 +465,10 @@
     </div>
 </div>
 
-<script>
-    function saveNotes() {
+<script type="module">
+    import { Toast } from '../../js/ui.js';
+
+    window.saveNotes = function() {
         const notes = document.querySelector('textarea').value;
         const patientId = "@p?.Id";
         
@@ -481,6 +483,7 @@
             btn.innerText = "Saved!";
             btn.classList.replace('bg-primary/10', 'bg-emerald-500');
             btn.classList.replace('text-primary', 'text-white');
+            Toast.show('Notes saved successfully', 'success');
             
             setTimeout(() => {
                 btn.innerText = originalText;
@@ -491,11 +494,12 @@
         }, 1000);
     }
 
-    function openNewAppointment() {
+    window.openNewAppointment = function() {
         const patientId = "@p?.Id";
         window.location.href = `/Doctor/Appointments?patientId=${patientId}&openModal=true`;
     }
-    async function saveEvaluation() {
+    
+    window.saveEvaluation = async function() {
         const btn = event.target;
         const originalText = btn.innerText;
         
@@ -523,6 +527,7 @@
                 btn.innerText = "Saved!";
                 btn.classList.replace('bg-primary/10', 'bg-emerald-500');
                 btn.classList.replace('text-primary', 'text-white');
+                Toast.show('Evaluation saved', 'success');
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.classList.replace('bg-emerald-500', 'bg-primary/10');
@@ -530,20 +535,18 @@
                     btn.disabled = false;
                 }, 2000);
             } else {
-                alert("Failed to save: " + result.error);
+                Toast.show("Failed to save: " + result.error, "danger");
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         } catch (err) {
-            alert("Network error.");
+            Toast.show("Network error.", "danger");
             btn.innerText = originalText;
             btn.disabled = false;
         }
     }
 
-    // Pre-fill evaluation if exists
-    
-    function switchTab(tabId) {
+    window.switchTab = function(tabId) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         const target = document.getElementById('content-' + tabId);
         if (target) target.classList.remove('hidden');
@@ -554,7 +557,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        switchTab('@(Model.ClinicalTimeline.Any() ? "timeline" : "appointments")');
+        window.switchTab('@(Model.ClinicalTimeline.Any() ? "timeline" : "appointments")');
     });
 
 </script>

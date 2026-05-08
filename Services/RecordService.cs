@@ -57,10 +57,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             if (updates == null || !updates.Any()) return;
 
-            foreach (var status in updates)
-            {
-                await _supabase.From<PatientToothStatus>().Upsert(status);
-            }
+            // Clear IDs to let the database unique constraint (patient_id, tooth_number) handle the UPSERT
+            foreach(var u in updates) u.Id = null; 
+
+            await _supabase.From<PatientToothStatus>().Upsert(updates);
 
             var patientId = updates.First().PatientId;
             await _logs.LogActionAsync(actorId, "updated tooth chart", $"Patient: {patientId}, {updates.Count} teeth updated", "Clinical", "/Admin/Patients/Profile?id=" + patientId);

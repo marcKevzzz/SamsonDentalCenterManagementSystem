@@ -101,8 +101,8 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value;
-            var role = User.FindFirst("role")?.Value?.ToLower();
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst("role")?.Value?.ToLower() ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
 
             List<Appointment> data;
             if (role == "doctor")
@@ -275,6 +275,15 @@ public class AdminDataController : ControllerBase
                             totalPrice = item.TotalPrice,
                         })
                         .ToList(),
+                    payments = i.Payments?.Select(p => new
+                    {
+                        id = p.Id,
+                        amount = p.Amount,
+                        method = p.PaymentMethod,
+                        reference = p.ReferenceNumber,
+                        notes = p.Notes,
+                        createdAt = p.CreatedAt
+                    }).ToList()
                 })
                 .ToList();
             return Ok(new { ok = true, data = dtos });
@@ -325,6 +334,15 @@ public class AdminDataController : ControllerBase
                         unitPrice = item.UnitPrice,
                         quantity = item.Quantity,
                         totalPrice = item.TotalPrice,
+                    }).ToList(),
+                    payments = invoice.Payments?.Select(p => new
+                    {
+                        id = p.Id,
+                        amount = p.Amount,
+                        method = p.PaymentMethod,
+                        reference = p.ReferenceNumber,
+                        notes = p.Notes,
+                        createdAt = p.CreatedAt
                     }).ToList()
                 }
             });
@@ -376,7 +394,10 @@ public class AdminDataController : ControllerBase
         {
             string id = body.GetProperty("id").GetString() ?? "";
             string status = body.GetProperty("status").GetString() ?? "";
-            string adminId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+            string adminId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+
+            if (string.IsNullOrEmpty(adminId))
+                return Unauthorized(new { ok = false, error = "Admin ID not found in claims." });
 
             await _leaveService.UpdateStatusAsync(id, status, adminId);
             return Ok(new { ok = true });
@@ -395,8 +416,8 @@ public class AdminDataController : ControllerBase
             var data = await _inquiryService.GetAllInquiriesAsync();
 
             // Visibility Filtering: Transform to a "Chatting System"
-            var currentUserId = User.FindFirst("sub")?.Value;
-            var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
+            var currentUserId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var currentUserRole = User.FindFirst("role")?.Value?.ToLower() ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
 
             // Enhanced Filtering Logic
             if (!string.IsNullOrEmpty(currentUserId))
@@ -570,7 +591,7 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var adminId = User.FindFirst("sub")?.Value;
+            var adminId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             await _recordService.UpsertMedicalInfoAsync(payload, adminId);
             return Ok(new { ok = true });
         }
@@ -760,8 +781,8 @@ public class AdminDataController : ControllerBase
             var periodAppts = appointments.Where(a => a.AppointmentDate.Date >= startDate.Date && a.AppointmentDate.Date <= endDate.Date).ToList();
 
             // Scope to doctor if the user is a doctor
-            var currentUserId = User.FindFirst("sub")?.Value;
-            var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
+            var currentUserId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var currentUserRole = User.FindFirst("role")?.Value?.ToLower() ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
             
             if (currentUserRole == "doctor" && !string.IsNullOrEmpty(currentUserId))
             {
@@ -977,7 +998,7 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var profileId = User.FindFirst("sub")?.Value;
+            var profileId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(profileId))
                 return Unauthorized();
 
@@ -1030,7 +1051,7 @@ public class AdminDataController : ControllerBase
             await _profileService.MergeProfile(req.SourceId, req.TargetId);
             
             // Log this action
-            var adminId = User.FindFirst("sub")?.Value;
+            var adminId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(adminId))
             {
                 await _activityLogService.LogActionAsync(adminId, "Merged Patient Profiles", $"Merged profile {req.SourceId} into {req.TargetId}", "Admin", "/Admin/Patients");
@@ -1100,6 +1121,27 @@ public class AdminDataController : ControllerBase
         try
         {
             var leaves = await _leaveService.GetAllLeavesAsync();
+            var appointments = await _appointmentService.GetAllAsync();
+            var activeAppointments = appointments.Where(a => a.Status.ToLower() != "cancelled" && a.Status.ToLower() != "rejected").ToList();
+            
+            // Map ProfileId -> DoctorId for conflict checking
+            var doctors = await _doctorService.GetAllWithProfilesAsync();
+            var profileToDoctorMap = doctors.ToDictionary(d => d.ProfileId ?? "", d => d.Id);
+
+            foreach (var leave in leaves)
+            {
+                if (leave.Status.ToLower() != "pending") continue;
+
+                if (profileToDoctorMap.TryGetValue(leave.ProfileId, out var doctorId))
+                {
+                    leave.ConflictCount = activeAppointments.Count(a => 
+                        a.DoctorId == doctorId && 
+                        a.AppointmentDate.Date >= leave.StartDate.Date && 
+                        a.AppointmentDate.Date <= leave.EndDate.Date
+                    );
+                }
+            }
+
             return Ok(new { ok = true, data = leaves });
         }
         catch (Exception ex)
@@ -1113,7 +1155,7 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var adminId = User.FindFirst("sub")?.Value;
+            var adminId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(adminId)) return Unauthorized();
 
             await _leaveService.UpdateStatusAsync(id, "approved", adminId);
@@ -1130,7 +1172,7 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var adminId = User.FindFirst("sub")?.Value;
+            var adminId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(adminId)) return Unauthorized();
 
             await _leaveService.UpdateStatusAsync(id, "rejected", adminId);
@@ -1147,7 +1189,7 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var adminId = User.FindFirst("sub")?.Value;
+            var adminId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             await _leaveService.UpdateStatusAsync(payload.Id, payload.Status, adminId);
             return Ok(new { ok = true });
         }
@@ -1194,12 +1236,15 @@ public class AdminDataController : ControllerBase
 
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            // Fallback role lookup
-            if (string.IsNullOrEmpty(role))
+            // Fallback role lookup (if role is null, empty or generic 'authenticated')
+            if (string.IsNullOrEmpty(role) || role == "authenticated")
             {
                 var profile = await _profileService.GetProfileById(userId);
                 role = profile?.Role?.ToLower() ?? "admin";
+                _logger.LogInformation("[DEBUG] Fallback role lookup for {UserId}: {Role}", userId, role);
             }
+
+            _logger.LogInformation("[DEBUG] Final role for availability check: {Role}", role);
 
             if (role == "doctor")
             {

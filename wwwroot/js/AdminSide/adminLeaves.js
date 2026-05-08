@@ -44,21 +44,21 @@ function renderLeaves() {
             leave.status === 'rejected' ? 'bg-rose-100 text-rose-700' :
             'bg-amber-100 text-amber-700';
 
-        const startDate = new Date(leave.startDate).toLocaleDateString();
-        const endDate = new Date(leave.endDate).toLocaleDateString();
+        const startDate = new Date(leave.start_date).toLocaleDateString();
+        const endDate = new Date(leave.end_date).toLocaleDateString();
 
         return `
             <tr class="hover:bg-slate-50/50 transition-colors">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-brand-50 text-brand flex items-center justify-center font-bold text-[11px]">
-                            ${leave.staffName ? leave.staffName[0] : 'S'}
+                            ${leave.staff_name ? leave.staff_name[0] : 'S'}
                         </div>
-                        <span class="text-[13px] font-bold text-brand">${leave.staffName || 'Unknown Staff'}</span>
+                        <span class="text-[13px] font-bold text-brand">${leave.staff_name || 'Unknown Staff'}</span>
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <span class="text-[12px] font-medium text-slate-600">${leave.leaveType}</span>
+                    <span class="text-[12px] font-medium text-slate-600">${leave.leave_type}</span>
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex flex-col">
@@ -73,6 +73,12 @@ function renderLeaves() {
                     <span class="px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${statusClass}">
                         ${leave.status}
                     </span>
+                    ${leave.status === 'pending' && leave.conflict_count > 0 ? `
+                        <div class="mt-2 flex items-center gap-1.5 text-rose-500 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 animate-pulse">
+                            <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                            <span class="text-[9px] font-bold uppercase tracking-tighter">${leave.conflict_count} Conflicts</span>
+                        </div>
+                    ` : ''}
                 </td>
                 <td class="px-6 py-4 text-right">
                     ${leave.status === 'pending' ? `
@@ -94,28 +100,45 @@ function renderLeaves() {
 }
 
 window.updateLeaveStatus = async function(id, status) {
+    const leave = ALL_LEAVES.find(l => l.id === id);
     const action = status === 'approved' ? 'approve' : 'reject';
-    if (!confirm(`Are you sure you want to ${action} this leave request?`)) return;
+    const type = status === 'approved' ? 'primary' : 'danger';
+    
+    let message = `Are you sure you want to ${action} this leave request?`;
+    let title = `${status === 'approved' ? 'Approve' : 'Reject'} Leave Request?`;
 
-    try {
-        const res = await fetch('/api/admin/data/staff-leaves/status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, status })
-        });
-
-        if (res.ok) {
-            Toast.show(`Leave request ${status} successfully`, "success");
-            fetchLeaves();
-            // Trigger badge update
-            window.dispatchEvent(new CustomEvent('admin:leaves:updated'));
-        } else {
-            throw new Error("Failed to update status");
-        }
-    } catch (err) {
-        console.error(err);
-        Toast.show("Failed to process request", "error");
+    if (status === 'approved' && leave && leave.conflict_count > 0) {
+        message = `This staff member has **${leave.conflict_count} scheduled appointment(s)** during this leave period. Are you sure you want to approve this?`;
+        title = "⚠️ Appointment Conflict";
     }
+
+    Modal.open({
+        title: title,
+        message: message,
+        type: type,
+        confirmText: `Yes, ${action}`,
+        onConfirm: async () => {
+            try {
+                const res = await fetch('/api/admin/data/staff-leaves/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, status })
+                });
+
+                if (res.ok) {
+                    Toast.show(`Leave request ${status} successfully`, "success");
+                    fetchLeaves();
+                    // Trigger badge update
+                    window.dispatchEvent(new CustomEvent('admin:leaves:updated'));
+                } else {
+                    throw new Error("Failed to update status");
+                }
+            } catch (err) {
+                console.error(err);
+                Toast.show("Failed to process request", "error");
+            }
+        }
+    });
 }
 
 window.filterLeaves = function(filter) {

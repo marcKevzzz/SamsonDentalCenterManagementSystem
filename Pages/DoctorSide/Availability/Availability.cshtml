@@ -1,5 +1,6 @@
 @page "/Doctor/Availability"
 @model SamsonDentalCenterManagementSystem.Helpers.AdminPageModel
+@Html.AntiForgeryToken()
 @{
     Layout = "AdminSide/_StaffLayout";
     ViewData["Title"] = "My Schedule";
@@ -112,7 +113,8 @@
 
 @section Scripts {
     <script type="module">
-        import { AdminStore } from '../../js/AdminSide/AdminStore.js';
+        import { AdminStore } from '../../js/AdminSide/adminStore.js';
+        import { Toast } from '../../js/ui.js';
 
         const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         let initialSlots = [];
@@ -127,6 +129,7 @@
             try {
                 const res = await fetch('/api/admin/data/my-availability');
                 const json = await res.json();
+                console.log('[DEBUG] Availability Data:', json);
                 const data = json.data || [];
                 initialSlots = JSON.parse(JSON.stringify(data));
                 renderAvailability(data);
@@ -200,12 +203,12 @@
                     return `
                         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[13px] font-bold text-brand">${l.leaveType}</span>
+                                <span class="text-[13px] font-bold text-brand">${l.leave_type}</span>
                                 <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${statusClass}">${l.status}</span>
                             </div>
                             <div class="flex items-center gap-2 text-[11px] text-brand/40">
                                 <i class="fa-regular fa-calendar"></i>
-                                <span>\${new Date(l.startDate).toLocaleDateString()} - \${new Date(l.endDate).toLocaleDateString()}</span>
+                                <span>${new Date(l.start_date).toLocaleDateString()} - ${new Date(l.end_date).toLocaleDateString()}</span>
                             </div>
                         </div>
                     `;
@@ -214,14 +217,24 @@
         }
 
         window.submitLeave = async function() {
+            const startInput = document.getElementById('leave-start');
+            const endInput = document.getElementById('leave-end');
+            const typeInput = document.getElementById('leave-type');
+            const reasonInput = document.getElementById('leave-reason');
+
+            if (!startInput || !endInput) {
+                console.error('Leave form inputs not found');
+                return;
+            }
+
             const payload = {
-                startDate: document.getElementById('leave-start').value,
-                endDate: document.getElementById('leave-end').value,
-                leaveType: document.getElementById('leave-type').value,
-                reason: document.getElementById('leave-reason').value
+                start_date: startInput.value,
+                end_date: endInput.value,
+                leave_type: typeInput?.value || 'Personal',
+                reason: reasonInput?.value || ''
             };
 
-            if (!payload.startDate || !payload.endDate) return alert('Dates required');
+            if (!payload.start_date || !payload.end_date) return Toast.show('Dates required', 'warning');
 
             const res = await fetch('/api/staff/leave/apply', {
                 method: 'POST',
@@ -235,8 +248,9 @@
             if (res.ok) {
                 closeLeaveModal();
                 loadLeaves();
+                Toast.show('Leave request submitted', 'success');
             } else {
-                alert('Failed to submit');
+                Toast.show('Failed to submit request', 'danger');
             }
         };
     </script>

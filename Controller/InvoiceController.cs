@@ -94,6 +94,15 @@ public class InvoiceController : ControllerBase
         [JsonPropertyName("xrayData")]
         public string? XrayData { get; set; }
 
+        [JsonPropertyName("xrayUrl")]
+        public string? XrayUrl { get; set; }
+
+        [JsonPropertyName("xrayType")]
+        public string? XrayType { get; set; }
+
+        [JsonPropertyName("xrayNotes")]
+        public string? XrayNotes { get; set; }
+
         [JsonPropertyName("status")]
         public string Status { get; set; } = "completed";
     }
@@ -190,6 +199,9 @@ public class InvoiceController : ControllerBase
                         ToothNumbers = t.ToothNumbers,
                         ToothData = t.ToothData ?? req.ToothData,
                         XrayData = t.XrayData,
+                        XrayUrl = t.XrayUrl,
+                        XrayType = t.XrayType,
+                        XrayNotes = t.XrayNotes,
                         ProcedureDetails = t.Procedure,
                         Diagnosis = t.Diagnosis,
                         Status = t.Status,
@@ -300,11 +312,7 @@ public class InvoiceController : ControllerBase
                 return BadRequest(new { ok = false, error = $"{req.PaymentMethod} does not allow partial payments. Please pay the full amount of {invoice.FinalAmount:C}." });
             }
 
-            if (req.Amount > invoice.FinalAmount)
-            {
-                return BadRequest(new { ok = false, error = $"Payment amount {req.Amount:C} exceeds the final amount {invoice.FinalAmount:C}." });
-            }
-
+            // 3. Record Payment
             var payment = new Payment
             {
                 Id = Guid.NewGuid().ToString(),

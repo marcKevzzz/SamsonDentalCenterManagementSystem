@@ -139,12 +139,12 @@
 <div id="receipt-modal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeReceiptModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto transform transition-all duration-500 overflow-hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col pointer-events-auto transform transition-all duration-500 overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <div>
-                    <h3 class="text-xl font-bold text-brand font-display">Invoice Receipt</h3>
-                    <p class="text-[11px] text-brand/40 font-bold uppercase tracking-widest mt-1">Digital Preview & Export</p>
+                    <h3 class="text-lg font-bold text-brand font-display">Invoice Receipt</h3>
+                    <p class="text-[10px] text-brand/40 font-bold uppercase tracking-widest mt-1">Digital Preview & Export</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="exportReceipt('pdf')" class="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-[12px] font-bold hover:opacity-90 transition-all shadow-lg shadow-brand/20">
@@ -161,9 +161,9 @@
             </div>
 
             <!-- Receipt Content (Scrollable) -->
-            <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
                 <!-- Actual Receipt Template (This is what will be captured) -->
-                <div id="receipt-capture" class="bg-white p-12 shadow-sm rounded-2xl mx-auto max-w-[500px] border border-slate-100 relative overflow-hidden">
+                <div id="receipt-capture" class="bg-white p-8 shadow-sm rounded-2xl mx-auto max-w-[460px] border border-slate-100 relative overflow-hidden">
                     <!-- Premium Background Accent -->
                     <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
                     
@@ -220,6 +220,12 @@
                         </table>
                     </div>
 
+                    <!-- Notes -->
+                    <div id="receipt-notes-container" class="mb-8 hidden">
+                        <p class="text-[9px] font-bold text-brand/30 uppercase tracking-widest mb-2">Treatment Notes</p>
+                        <p id="receipt-notes" class="text-[10px] text-brand/60 italic leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100"></p>
+                    </div>
+
                     <!-- Summary -->
                     <div class="bg-slate-50/50 rounded-2xl p-6 space-y-3">
                         <div class="flex items-center justify-between text-[11px]">
@@ -242,6 +248,59 @@
                         <p class="text-[8px] text-brand/20 uppercase tracking-[0.2em] mt-4">This is a system-generated receipt</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- PAYMENT MODAL                                                            -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div id="payment-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closePaymentModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col pointer-events-auto transform transition-all duration-300">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-base font-bold text-brand font-display">Record Payment</h3>
+                <button onclick="closePaymentModal()" class="text-slate-300 hover:text-slate-600 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="pay-invoice-id" />
+                
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Payment Amount</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₱</span>
+                        <input type="number" id="pay-amount" step="0.01" class="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-primary outline-none font-bold text-brand text-sm" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Payment Method</label>
+                    <select id="pay-method" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-primary outline-none font-medium text-brand text-sm">
+                        <option value="Cash">Cash</option>
+                        <option value="GCash">GCash</option>
+                        <option value="Maya">Maya</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Reference Number</label>
+                    <input type="text" id="pay-reference" placeholder="Auto-generated" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-primary outline-none text-[12px] font-medium text-slate-500" readonly />
+                </div>
+
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Notes</label>
+                    <textarea id="pay-notes" rows="2" placeholder="Internal payment notes..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-primary outline-none text-[12px] font-medium resize-none"></textarea>
+                </div>
+            </div>
+            <div class="p-5 pt-0">
+                <button onclick="submitPayment()" id="pay-submit-btn" class="w-full py-3 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200 active:scale-95 text-sm">
+                    Confirm Payment ✓
+                </button>
             </div>
         </div>
     </div>

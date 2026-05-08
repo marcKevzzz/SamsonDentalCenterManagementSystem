@@ -1,4 +1,4 @@
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 
 let statusChartInstance = null;
 

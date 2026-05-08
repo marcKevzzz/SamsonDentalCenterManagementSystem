@@ -63,6 +63,10 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("invoice_items")]
         [JsonProperty("invoice_items")]
         public List<InvoiceItem>? Items { get; set; }
+        
+        [JsonPropertyName("payments")]
+        [JsonProperty("payments")]
+        public List<Payment>? Payments { get; set; }
     }
 
     [Table("invoice_items")]

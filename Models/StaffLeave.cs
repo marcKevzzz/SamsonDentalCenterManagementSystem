@@ -34,5 +34,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         // Joined Data
         [JsonPropertyName("staff_name")]
         public string? StaffName { get; set; }
+
+        [JsonPropertyName("conflict_count")]
+        public int ConflictCount { get; set; }
     }
 }

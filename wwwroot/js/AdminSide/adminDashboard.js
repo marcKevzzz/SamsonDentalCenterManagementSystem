@@ -1,4 +1,4 @@
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 
 /**
  * Samson Dental Center - Admin Dashboard Module
@@ -97,7 +97,11 @@ function hydrateDashboard(data) {
     if (apptsBody) {
         const upcoming = (data.appointments || [])
             .filter(a => a.status === 'confirmed' || a.status === 'pending')
-            .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate))
+            .sort((a, b) => {
+                const da = a.appointmentDate.split('T')[0];
+                const db = b.appointmentDate.split('T')[0];
+                return da.localeCompare(db);
+            })
             .slice(0, 5);
 
         if (upcoming.length === 0) {
@@ -190,8 +194,12 @@ function hydrateDashboard(data) {
             leavesBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 text-[13px]">No pending leave requests.</td></tr>`;
         } else {
             leavesBody.innerHTML = pendingLeaves.map(leave => {
-                const sDate = new Date(leave.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const eDate = new Date(leave.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const parseLocal = (s) => {
+                    const [y, m, d] = s.split('T')[0].split('-').map(Number);
+                    return new Date(y, m - 1, d);
+                };
+                const sDate = parseLocal(leave.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const eDate = parseLocal(leave.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">

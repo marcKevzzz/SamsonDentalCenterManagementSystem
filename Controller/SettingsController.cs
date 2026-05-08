@@ -23,7 +23,7 @@ public class SettingsController : ControllerBase
     [HttpPost("upload-avatar")]
     public async Task<IActionResult> UploadAvatar(IFormFile file)
     {
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { ok = false, error = "Not authenticated." });
 
@@ -61,7 +61,7 @@ public class SettingsController : ControllerBase
     [HttpDelete("remove-avatar")]
     public async Task<IActionResult> RemoveAvatar()
     {
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { ok = false, error = "Not authenticated." });
 
@@ -80,7 +80,7 @@ public class SettingsController : ControllerBase
     [HttpPut("update-profile")]
     public async Task<IActionResult> SavePersonal([FromBody] UserPayload p)
     {
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { ok = false, error = "Not authenticated." });
 
@@ -105,7 +105,7 @@ public class SettingsController : ControllerBase
     [HttpPut("update-password")]
     public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest req)
     {
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { ok = false, error = "Not authenticated." });
 
@@ -120,7 +120,7 @@ public class SettingsController : ControllerBase
         try
         {
             // 1. Verify Current Password
-            var email = User.FindFirst("email")?.Value;
+            var email = User.FindFirst("email")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(email))
                 return Unauthorized(new { ok = false, error = "User email not found." });
 
@@ -157,7 +157,7 @@ public class SettingsController : ControllerBase
     [HttpPost("deactivate")]
     public async Task<IActionResult> Deactivate()
     {
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { ok = false, error = "Not authenticated." });
 

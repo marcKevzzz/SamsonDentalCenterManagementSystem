@@ -34,7 +34,7 @@
   <script src="~/js/config.js" asp-append-version="true"></script>
   <!-- Auth guard: intercepts 401 expired responses across all fetch() calls -->
   <script src="~/js/auth-guard.js" asp-append-version="true"></script>
-  <script type="module" src="~/js/AdminSide/AdminStore.js" asp-append-version="true"></script>
+  <script type="module" src="~/js/AdminSide/adminStore.js" asp-append-version="true"></script>
   <script type="module" src="~/js/AdminSide/site.js" asp-append-version="true" defer></script>
   <script src="~/js/AdminSide/adminNotifications.js" asp-append-version="true" defer></script>
 </head>
@@ -298,6 +298,7 @@
             <span id="notif-reviews-count" class="sidebar-text ml-auto text-[11px] hidden unread-dot"></span>
           </a>
 
+
           <!-- Settings Dropdown -->
           <div class="relative px-2">
             <button class="nav-item group w-full flex items-center gap-4 px-4 py-2.5 rounded-xl cursor-pointer text-white text-[13px] font-medium "
@@ -316,7 +317,7 @@
             <div id="settings-dropdown" class="hidden pl-10 pr-2 py-1 space-y-1 overflow-hidden transition-all duration-300">
               <a href="/Admin/Settings/Identity" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Identity</a>
               <a href="/Admin/Settings/Availability" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Availability</a>
-              <a href="/Admin/Settings/FAQs" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">FAQs</a>
+              <a href="/Admin/Settings/Chatbot" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Chatbot</a>
               <a href="/Admin/Settings/Photos" class="block px-4 py-2 rounded-lg text-[11.5px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors">Photos</a>
             </div>
 

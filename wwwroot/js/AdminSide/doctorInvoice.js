@@ -1,5 +1,5 @@
 
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 
 let addedItems = [];
 let ARRIVED_APPTS = [];
@@ -176,7 +176,10 @@ function hydrateUI() {
     if (patientSelect) {
         patientSelect.innerHTML = '<option value="">Select arrived patient…</option>' + ARRIVED_APPTS.map(appt => {
             const svc = SERVICES.find(s => s.id === appt.serviceId);
-            return `<option value="${appt.id}" data-name="${appt.patientName}" data-patientid="${appt.patientId}" data-doctorid="${appt.doctorId}" data-service="${appt.serviceName}" data-serviceid="${appt.serviceId}" data-price="${svc?.price || 0}">${appt.patientName} — ${appt.serviceName} (${new Date(appt.appointmentDate).toLocaleDateString('en-PH', { month: 'short', day: '2-digit' })})</option>`;
+            const [y, m, d] = appt.appointmentDate.split('T')[0].split('-').map(Number);
+            const dObj = new Date(y, m - 1, d);
+            const dStr = dObj.toLocaleDateString('en-PH', { month: 'short', day: '2-digit' });
+            return `<option value="${appt.id}" data-name="${appt.patientName}" data-patientid="${appt.patientId}" data-doctorid="${appt.doctorId}" data-service="${appt.serviceName}" data-serviceid="${appt.serviceId}" data-price="${svc?.price || 0}">${appt.patientName} — ${appt.serviceName} (${dStr})</option>`;
         }).join('');
 
         // Re-apply pre-select if pending
@@ -338,10 +341,10 @@ async function checkMedicalInfo(patientId) {
     if (!medContainer) return;
 
     const info = result.data;
-    // Show form if record doesn't exist OR if critical fields are missing
-    const isIncomplete = !result.exists || !info || !info.bloodType || !info.height || !info.weight;
+    // Show form only if record doesn't exist at all
+    const isMissing = !result.exists;
 
-    if (isIncomplete) {
+    if (isMissing) {
         const allergies = info?.allergiesJson ? JSON.parse(info.allergiesJson).join(', ') : '';
         
         medContainer.innerHTML = `
@@ -647,28 +650,28 @@ window.submitInvoice = async function() {
     const treatmentBlocks = document.querySelectorAll('#treatment-body .treatment-block');
     const treatments = Array.from(treatmentBlocks).map(block => {
         const isXRay = block.querySelector('.inv-treat-is-xray').value === "true";
-        let toothData = {};
-        let xrayData = {};
-
         if (isXRay) {
-            xrayData = {
-                type: block.querySelector('.inv-treat-xray-type')?.value,
-                notes: block.querySelector('.inv-treat-xray-notes')?.value
+            const xrayType = block.querySelector('.inv-treat-xray-type')?.value;
+            const xrayNotes = block.querySelector('.inv-treat-xray-notes')?.value;
+            const xrayFile = block.querySelector('.inv-treat-xray-file')?.files[0];
+
+            return {
+                serviceId: block.querySelector('.inv-treat-svc-id').value,
+                serviceName: block.querySelector('.inv-treat-svc-name').value,
+                xrayType: xrayType,
+                xrayNotes: xrayNotes,
+                xrayFile: xrayFile, // Temporary for processing
+                procedure: block.querySelector('.inv-treat-proc').value,
+                status: block.querySelector('.inv-treat-status').value
             };
         } else {
-            try {
-                toothData = JSON.parse(block.querySelector('.inv-treat-tooth-data')?.value || '{}');
-            } catch(e){}
+            return {
+                serviceId: block.querySelector('.inv-treat-svc-id').value,
+                serviceName: block.querySelector('.inv-treat-svc-name').value,
+                procedure: block.querySelector('.inv-treat-proc').value,
+                status: block.querySelector('.inv-treat-status').value
+            };
         }
-
-        return {
-            serviceId: block.querySelector('.inv-treat-svc-id').value,
-            serviceName: block.querySelector('.inv-treat-svc-name').value,
-            toothData: JSON.stringify(toothData),
-            xrayData: JSON.stringify(xrayData),
-            procedure: block.querySelector('.inv-treat-proc').value,
-            status: block.querySelector('.inv-treat-status').value
-        };
     });
 
     const payload = {
@@ -691,7 +694,22 @@ window.submitInvoice = async function() {
     submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving…';
 
     try {
-        // 1. If medical info was missing and filled out, save it first
+        // 1. Upload X-Ray Files if any
+        for (let treat of treatments) {
+            if (treat.xrayFile) {
+                try {
+                    const url = await uploadXRayFile(treat.xrayFile, patientId);
+                    treat.xrayUrl = url;
+                } catch (err) {
+                    console.error("X-Ray upload failed:", err);
+                    showToast("X-Ray upload failed, but treatment will still save.", "warning");
+                }
+            }
+            // Clean up temporary file reference before sending to API
+            delete treat.xrayFile;
+        }
+
+        // 2. If medical info was missing and filled out, save it first
         if (window.HAS_MEDICAL_INFO === false) {
             const hEl = document.getElementById('med-height');
             const wEl = document.getElementById('med-weight');
@@ -834,14 +852,20 @@ window.openViewTreatmentModal = function(treatmentId) {
                 ${treat.procedureDetails || "No specific procedure details recorded."}
             </div>
 
-            ${treat.xrayData ? `
+            ${(treat.xrayUrl || treat.xrayData) ? `
             <div class="mt-4">
-                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Radiograph / X-Ray</label>
+                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Radiograph / X-Ray ${treat.xrayType ? `(${treat.xrayType})` : ''}</label>
                 <div class="rounded-2xl border border-slate-200 overflow-hidden bg-black flex items-center justify-center aspect-video">
-                    <img src="${treat.xrayData}" class="max-w-full max-h-full object-contain" alt="Treatment X-Ray" />
+                    <img src="${treat.xrayUrl || treat.xrayData}" class="max-w-full max-h-full object-contain" alt="Treatment X-Ray" />
                 </div>
+                ${treat.xrayNotes ? `
+                <div class="mt-3 p-3 bg-white/50 rounded-xl border border-slate-100/50 italic text-[11px] text-brand/60">
+                    <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Radiographic Findings</label>
+                    ${treat.xrayNotes}
+                </div>
+                ` : ''}
                 <div class="mt-2 text-center">
-                    <a href="${treat.xrayData}" download="XRay_${treat.id.slice(0,8)}.png" class="text-[10px] font-bold text-primary hover:underline">
+                    <a href="${treat.xrayUrl || treat.xrayData}" download="XRay_${treat.id.slice(0,8)}.png" class="text-[10px] font-bold text-primary hover:underline">
                         <i class="fa-solid fa-download mr-1"></i> Download Original
                     </a>
                 </div>
@@ -944,3 +968,23 @@ window.exportReceipt = async function(format) {
         link.click();
     }
 };
+async function uploadXRayFile(file, patientId) {
+    // 1. Get Supabase Config from a hidden element or use global config if available
+    // We assume the page has access to supabaseUrl and serviceRoleKey or uses a server-side proxy
+    // But since this is frontend, we should use a signed upload or a simple proxy endpoint.
+    // For now, let's use a dedicated upload endpoint to keep it secure.
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('patientId', patientId);
+    formData.append('bucket', 'treatment-xrays');
+
+    const res = await fetch('/api/public/chatbot/upload-clinic-photo', { // Re-using existing upload logic if compatible
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await res.json();
+    if (result.ok) return result.url;
+    throw new Error(result.error || "Upload failed");
+}

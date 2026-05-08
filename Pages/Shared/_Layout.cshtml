@@ -83,7 +83,10 @@
   <partial name="../PatientSide/Components/Footer" />
 
   <!-- Chat Bubble -->
-  <partial name="../PatientSide/Components/Chatbot" />
+  @if (settings.IsChatbotEnabled)
+  {
+    <partial name="../PatientSide/Components/Chatbot" />
+  }
 
   <!-- Toast Container -->
   <div id="toast-container" class="fixed top-5 right-5 space-y-1 z-[11000]"></div>
@@ -95,7 +98,10 @@
   <script src="~/lib/jquery/dist/jquery.min.js"></script>
   <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
   <script type="module" src="~/js/site.js" asp-append-version="true"></script>
-  <script src="~/js/PatientSide/chatbot.js" asp-append-version="true"></script>
+  @if (settings.IsChatbotEnabled)
+  {
+    <script src="~/js/PatientSide/chatbot.js" asp-append-version="true"></script>
+  }
 
   <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
 

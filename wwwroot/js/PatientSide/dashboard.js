@@ -36,7 +36,11 @@ setTimeout(() => {
     el.style.width = el.dataset.width;
   });
   const ring = document.getElementById("scoreRing");
-  if (ring) ring.style.strokeDashoffset = "33"; /* 220 * (1 - 0.85) = 33 */
+  if (ring) {
+    const score = parseInt(ring.dataset.score || "0");
+    const offset = 220 * (1 - score / 100);
+    ring.style.strokeDashoffset = offset.toString();
+  }
 }, 400);
 
 const getDirectionsBtn = document.getElementById("getDirections");

@@ -1,4 +1,4 @@
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 
 let ALL_INVOICES = [];
 
@@ -33,6 +33,10 @@ function renderTable() {
         const statusClass = getStatusClass(inv.status);
         const services = inv.items?.map(i => i.description).join(', ') || 'N/A';
         
+        // Sum actual payments
+        const paidAmount = inv.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+        const isPending = inv.status === 'pending';
+
         return `
             <tr class="hover:bg-slate-50 transition-colors group">
                 <td class="px-4 py-3">
@@ -58,8 +62,8 @@ function renderTable() {
                 <td class="px-4 py-3 text-right">
                     <p class="text-[12px] font-bold text-brand">₱${inv.finalAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
                 </td>
-                <td class="px-4 py-3 text-right text-[12px] text-emerald-600 font-bold">
-                    ₱${inv.finalAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                <td class="px-4 py-3 text-right text-[12px] ${paidAmount > 0 ? 'text-emerald-600' : 'text-slate-300'} font-bold">
+                    ₱${paidAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                 </td>
                 <td class="px-4 py-3">
                     <span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-500">Cash</span>
@@ -71,9 +75,16 @@ function renderTable() {
                     <p class="text-[11px] text-slate-500">${date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}</p>
                 </td>
                 <td class="px-4 py-3 text-right">
-                    <button onclick="window.viewInvoice('${inv.id}')" class="w-8 h-8 rounded-lg border border-primary/10 text-primary hover:bg-primary/5 transition-all">
-                        <i class="fa-solid fa-receipt text-xs"></i>
-                    </button>
+                    <div class="flex items-center justify-end gap-2">
+                        ${isPending ? `
+                            <button onclick="window.openPaymentModal('${inv.id}', ${inv.finalAmount})" class="h-8 px-3 rounded-lg bg-emerald-500 text-white text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm">
+                                Confirm 
+                            </button>
+                        ` : ''}
+                        <button onclick="window.viewInvoice('${inv.id}')" class="w-8 h-8 rounded-lg border border-primary/10 text-primary hover:bg-primary/5 transition-all" title="View Receipt">
+                            <i class="fa-solid fa-receipt text-xs"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -164,6 +175,17 @@ window.viewInvoice = async function(id) {
             document.getElementById('receipt-subtotal').innerText = "₱" + parseFloat(inv.totalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
             document.getElementById('receipt-discount').innerText = "-₱" + parseFloat(inv.discountAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
             document.getElementById('receipt-total').innerText = "₱" + parseFloat(inv.finalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+
+            const notesContainer = document.getElementById('receipt-notes-container');
+            const notesEl = document.getElementById('receipt-notes');
+            if (notesContainer && notesEl) {
+                if (inv.notes && inv.notes.trim()) {
+                    notesEl.innerText = inv.notes;
+                    notesContainer.classList.remove('hidden');
+                } else {
+                    notesContainer.classList.add('hidden');
+                }
+            }
         }
     } catch (err) {
         console.error('[ViewInvoice Error]', err);
@@ -172,6 +194,75 @@ window.viewInvoice = async function(id) {
 
 window.closeReceiptModal = function() {
     document.getElementById('receipt-modal').classList.add('hidden');
+};
+
+window.openPaymentModal = function(id, amount) {
+    const modal = document.getElementById('payment-modal');
+    if (!modal) return;
+    
+    // Generate a reference number: SAM-YYYYMMDD-XXXX
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const autoRef = `SAM-${dateStr}-${rand}`;
+
+    document.getElementById('pay-invoice-id').value = id;
+    document.getElementById('pay-amount').value = amount;
+    document.getElementById('pay-reference').value = autoRef;
+    document.getElementById('pay-method').selectedIndex = 0;
+    document.getElementById('pay-notes').value = "";
+    
+    modal.classList.remove('hidden');
+};
+
+window.closePaymentModal = function() {
+    document.getElementById('payment-modal')?.classList.add('hidden');
+};
+
+window.submitPayment = async function() {
+    const id = document.getElementById('pay-invoice-id').value;
+    const amount = parseFloat(document.getElementById('pay-amount').value);
+    const method = document.getElementById('pay-method').value;
+    const ref = document.getElementById('pay-reference').value;
+    const notes = document.getElementById('pay-notes').value;
+    const btn = document.getElementById('pay-submit-btn');
+
+    if (isNaN(amount) || amount <= 0) {
+        window.Toast?.show("Please enter a valid amount.", "warning");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing…';
+
+    try {
+        const res = await fetch('/api/invoice/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                invoiceId: id,
+                amount: amount,
+                paymentMethod: method,
+                referenceNumber: ref,
+                notes: notes
+            })
+        });
+        
+        const result = await res.json();
+        if (result.ok) {
+            window.Toast?.show("Payment recorded successfully!", "success");
+            window.closePaymentModal();
+            await refreshData(true); // force refresh from server
+        } else {
+            window.Toast?.show(result.error || "Payment failed.", "danger");
+        }
+    } catch (err) {
+        console.error('[SubmitPayment Error]', err);
+        window.Toast?.show("Network error occurred.", "danger");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Confirm ✓';
+    }
 };
 
 window.exportReceipt = async function(format) {

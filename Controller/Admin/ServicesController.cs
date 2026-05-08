@@ -176,6 +176,8 @@ public async Task<IActionResult> UploadServiceHero(IFormFile file, [FromQuery] s
             duration = s.Duration,
             recovery = s.Recovery,
             price = s.Price,
+            durationMinutes = s.DurationMinutes,
+            needsXray = s.NeedsXray,
             benefits = s.Benefits,
             steps = s.Steps,
             faqs = s.Faqs,

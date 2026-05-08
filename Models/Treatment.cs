@@ -27,6 +27,15 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("xray_data")]
         public string? XrayData { get; set; }
 
+        [Column("xray_url")]
+        public string? XrayUrl { get; set; }
+
+        [Column("xray_type")]
+        public string? XrayType { get; set; }
+
+        [Column("xray_notes")]
+        public string? XrayNotes { get; set; }
+
 
 
         [Column("procedure_details")]

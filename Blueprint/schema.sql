@@ -78,8 +78,29 @@ CREATE TABLE public.clinic_settings (
   facebook_url text,
   instagram_url text,
   logo_url text,
+  is_chatbot_enabled boolean DEFAULT true,
+  chatbot_name text DEFAULT 'SDC Assistant'::text,
+  chatbot_welcome_message text DEFAULT 'Hi there! 👋 Welcome to **Samson Dental Center**.\n\nI''m your virtual assistant — here to help with services, schedules, pricing, and anything about our clinic. What can I help you with today?'::text,
+  ceo_name text DEFAULT 'Dr. Marcus Rivera'::text,
+  admin_name text DEFAULT 'Samson Admin'::text,
+  system_integrity_info text DEFAULT 'Our system employs end-to-end encryption for patient data, HIPAA-compliant storage via Supabase, and real-time audit logging to ensure maximum security and privacy.'::text,
   CONSTRAINT clinic_settings_pkey PRIMARY KEY (id)
 );
+
+CREATE TABLE public.chatbot_conversations (
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    session_id uuid NOT NULL,
+    user_id uuid,
+    message text NOT NULL,
+    is_bot boolean NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT chatbot_conversations_pkey PRIMARY KEY (id),
+    CONSTRAINT chatbot_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
+
+ALTER TABLE public.chatbot_conversations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public insert to chatbot_conversations" ON public.chatbot_conversations FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Allow public select from chatbot_conversations" ON public.chatbot_conversations FOR SELECT TO anon, authenticated USING (true);
 CREATE TABLE public.dental_services (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE,

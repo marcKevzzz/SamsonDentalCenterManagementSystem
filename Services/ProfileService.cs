@@ -60,7 +60,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                     profile.DateOfBirth = profile.DateOfBirth.Value.Date;
                 }
 
-                profile.Email = email ?? "";
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    profile.Email = email;
+                }
                 return profile;
             }
             catch (Exception ex)
@@ -97,38 +100,34 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 await _supabase.InitializeAsync();
 
-                // Fetch all profiles that could potentially match
-                var response = await _supabase
+                // 1. Strong Match: Exact Email
+                var emailRes = await _supabase
                     .From<Profile>()
-                    .Where(x => x.Role == "patient")
+                    .Where(x => x.Email == email && x.Role == "patient")
+                    .Limit(1)
                     .Get();
 
-                var profiles = response.Models;
-
-                // 1. Strong Match: Exact Email
-                var emailMatch = profiles.FirstOrDefault(p =>
-                    !string.IsNullOrEmpty(p.Email)
-                    && p.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
-                );
-                if (emailMatch != null)
-                    return (emailMatch, false);
+                if (emailRes.Models.Any())
+                    return (emailRes.Models.First(), false);
 
                 // 2. Strong Match: Exact Name AND Exact Phone
-                var namePhoneMatch = profiles.FirstOrDefault(p =>
-                    p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)
-                    && p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase)
-                    && !string.IsNullOrEmpty(p.PhoneNumber)
-                    && p.PhoneNumber == phone
-                );
-                if (namePhoneMatch != null)
-                    return (namePhoneMatch, false);
+                var namePhoneRes = await _supabase
+                    .From<Profile>()
+                    .Where(x => x.FirstName == firstName && x.LastName == lastName && x.PhoneNumber == phone && x.Role == "patient")
+                    .Limit(1)
+                    .Get();
 
-                // 3. Partial Match: Exact Name but different email/phone
-                var nameMatch = profiles.FirstOrDefault(p =>
-                    p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)
-                    && p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase)
-                );
-                if (nameMatch != null)
+                if (namePhoneRes.Models.Any())
+                    return (namePhoneRes.Models.First(), false);
+
+                // 3. Partial Match: Exact Name but different email/phone (Requires Review)
+                var nameRes = await _supabase
+                    .From<Profile>()
+                    .Where(x => x.FirstName == firstName && x.LastName == lastName && x.Role == "patient")
+                    .Limit(1)
+                    .Get();
+
+                if (nameRes.Models.Any())
                     return (null, true);
 
                 // 4. No match

@@ -31,12 +31,13 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
         {
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return new JsonResult(new { ok = false, error = "Invalid model state" });
                 return Page();
             }
 
             try
             {
-                // Fetch existing to avoid overwriting unrelated fields with nulls
                 var existing = await _clinicService.GetSettingsAsync();
 
                 if (section == "Identity")
@@ -58,8 +59,11 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
                     existing.ManualStatus = Settings.ManualStatus;
                     existing.ClinicalHoursJson = Settings.ClinicalHoursJson;
                 }
-                else if (section == "FAQs")
+                else if (section == "Chatbot")
                 {
+                    existing.IsChatbotEnabled = Settings.IsChatbotEnabled;
+                    existing.ChatbotName = Settings.ChatbotName;
+                    existing.ChatbotWelcomeMessage = Settings.ChatbotWelcomeMessage;
                     existing.FaqsJson = Settings.FaqsJson;
                 }
                 else if (section == "Photos")
@@ -68,27 +72,44 @@ namespace SamsonDentalCenterManagementSystem.Pages.AdminSide
                 }
 
                 await _clinicService.UpdateSettingsAsync(existing);
+                
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return new JsonResult(new { ok = true, message = $"{section} updated successfully!" });
+
                 TempData["Toast"] = $"{section} updated successfully!";
                 TempData["ToastType"] = "success";
             }
             catch (Exception ex)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return new JsonResult(new { ok = false, error = ex.Message });
+
                 TempData["Toast"] = ex.Message;
                 TempData["ToastType"] = "danger";
             }
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostUploadPhotoAsync(IFormFile file)
+        public async Task<IActionResult> OnPostUploadPhotoAsync(List<IFormFile> files)
         {
-            if (file == null || file.Length == 0) return new JsonResult(new { ok = false, error = "No file selected" });
+            if (files == null || files.Count == 0) return new JsonResult(new { ok = false, error = "No files selected" });
 
             try
             {
-                using var ms = new MemoryStream();
-                await file.CopyToAsync(ms);
-                var url = await _clinicService.UploadPhotoAsync(file.FileName, ms.ToArray(), file.ContentType);
-                return new JsonResult(new { ok = true, url });
+                var urls = new List<string>();
+                foreach (var file in files)
+                {
+                    if (file.Length == 0) continue;
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+                    var url = await _clinicService.UploadPhotoAsync(file.FileName, ms.ToArray(), file.ContentType);
+                    urls.Add(url);
+                }
+                return new JsonResult(new { 
+                    ok = true, 
+                    urls = urls, 
+                    url = urls.FirstOrDefault() 
+                });
             }
             catch (Exception ex)
             {

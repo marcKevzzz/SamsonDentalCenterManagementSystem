@@ -11,21 +11,27 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Column("invoice_id")]
+        [JsonPropertyName("invoice_id")]
         public string InvoiceId { get; set; } = string.Empty;
 
         [Column("amount")]
+        [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
 
         [Column("payment_method")]
+        [JsonPropertyName("payment_method")]
         public string PaymentMethod { get; set; } = "Cash";
 
         [Column("reference_number")]
+        [JsonPropertyName("reference_number")]
         public string? ReferenceNumber { get; set; }
 
         [Column("notes")]
+        [JsonPropertyName("notes")]
         public string? Notes { get; set; }
 
         [Column("created_at")]
+        [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

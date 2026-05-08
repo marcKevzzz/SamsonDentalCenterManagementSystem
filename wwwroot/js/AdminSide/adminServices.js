@@ -1,6 +1,6 @@
 import { Toast, Modal } from "../ui.js";
 
-import { AdminStore } from './AdminStore.js';
+import { AdminStore } from './adminStore.js';
 
 let ALL_SVCS = [];
 let filtered = [];
@@ -170,8 +170,9 @@ function cardHTML(s) {
     <!-- Hero Image (Matching Patient Side) -->
     <div class="h-40 bg-slate-50 overflow-hidden relative">
       <img src="${s.hero || '/img/placeholder-service.jpg'}" alt="${s.name}" class="w-full h-full object-cover" />
-      <div class="absolute top-3 right-3">
+      <div class="absolute top-3 right-3 flex flex-col items-end gap-2">
         ${statusBadge}
+        ${s.needsXray ? `<span class="px-2 py-0.5 rounded-md bg-red-50 text-red-600 border border-red-100 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-x-ray"></i> X-Ray</span>` : ''}
       </div>
     </div>
 
@@ -189,7 +190,7 @@ function cardHTML(s) {
 
       <div class="flex items-center justify-between pt-3 border-t border-slate-100">
         <span class="text-[11px] text-slate-400 flex items-center gap-1.5">
-          <i class="fa-regular fa-clock"></i> ${s.duration || '—'}
+          <i class="fa-regular fa-clock"></i> ${s.durationMinutes ? `${s.durationMinutes} min` : (s.duration || '—')}
         </span>
         <div class="flex items-center gap-2">
           <button data-edit="${s.id}" 

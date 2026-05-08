@@ -146,6 +146,10 @@ public class DentalServiceService
             s.Recovery = p.Recovery;
         if (p.IsActive.HasValue)
             s.IsActive = p.IsActive.Value;
+        if (p.DurationMinutes.HasValue)
+            s.DurationMinutes = p.DurationMinutes.Value;
+        if (p.NeedsXray.HasValue)
+            s.NeedsXray = p.NeedsXray.Value;
 
         // Serialize to JSON string for storage
         s.BenefitsRaw = JsonSerializer.Serialize(p.Benefits ?? new());
@@ -170,6 +174,8 @@ public class ServicePayload
     public string? Recovery { get; set; }
     public string? Price { get; set; }
     public bool? IsActive { get; set; }
+    public int? DurationMinutes { get; set; }
+    public bool? NeedsXray { get; set; }
 
     public List<string> Benefits { get; set; } = new();
     public List<string> Steps { get; set; } = new();
