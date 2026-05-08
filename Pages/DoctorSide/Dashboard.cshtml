@@ -9,11 +9,11 @@
     <!-- Welcome Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h2 class="font-display text-2xl font-bold text-brand-900 tracking-tight">Welcome back, Dr. @Model.DoctorName</h2>
-            <p class="text-[13px] text-brand-500 mt-1">Here is what's happening in your clinic today.</p>
+            <h2 class="font-display text-2xl font-bold text-brand tracking-tight">Welcome back, Dr. @Model.DoctorName</h2>
+            <p class="text-[13px] text-brand/50 mt-1">Here is what's happening in your clinic today.</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="/Doctor/Appointments" class="bg-white border border-slate-200 text-brand-900 text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">View Schedule</a>
+            <a href="/Doctor/Appointments" class="bg-white border border-slate-200 text-brand text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">View Schedule</a>
             <a href="/Doctor/Patients" class="bg-primary text-white text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-sm">My Patients</a>
         </div>
     </div>
@@ -29,7 +29,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-primary uppercase tracking-wider">Today</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight">@Model.TodayAppointments</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Today's Appointments</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Today's Appointments</div>
             <div class="mt-3 flex items-center gap-1.5 text-[11px] text-emerald-600 font-bold bg-emerald-50 w-fit px-2 py-0.5 rounded-lg">
                 <i class="fa-solid fa-arrow-trend-up"></i>
                 <span>Manage now</span>
@@ -45,8 +45,8 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 uppercase tracking-wider">Patients</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight">@Model.TotalPatients</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Total Patients Seen</div>
-            <div class="mt-3 flex items-center gap-1.5 text-[11px] text-brand-400 font-bold bg-slate-50 w-fit px-2 py-0.5 rounded-lg">
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Total Patients Seen</div>
+            <div class="mt-3 flex items-center gap-1.5 text-[11px] text-brand/40 font-bold bg-slate-50 w-fit px-2 py-0.5 rounded-lg">
                 <i class="fa-solid fa-circle-info"></i>
                 <span>Historical count</span>
             </div>
@@ -61,7 +61,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 uppercase tracking-wider">Month</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight">@Model.MonthlyTreatments</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Monthly Treatments</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Monthly Treatments</div>
             <div class="mt-3 flex items-center gap-1.5 text-[11px] text-violet-600 font-bold bg-violet-50 w-fit px-2 py-0.5 rounded-lg">
                 <i class="fa-solid fa-chart-line"></i>
                 <span>Active performance</span>
@@ -77,7 +77,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 uppercase tracking-wider">Leaves</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight">@Model.MyLeaves.Count(l => l.Status == "approved")</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Approved Leaves</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Approved Leaves</div>
             <div class="mt-3 flex items-center gap-1.5 text-[11px] text-orange-600 font-bold bg-orange-50 w-fit px-2 py-0.5 rounded-lg">
                 <i class="fa-solid fa-plus"></i>
                 <a href="/Doctor/Availability">Request New</a>
@@ -91,7 +91,7 @@
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-display font-bold text-brand tracking-tight">Today's Schedule</h3>
-                    <p class="text-[11px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Confirmed Appointments</p>
+                    <p class="text-[11px] text-brand/40 mt-0.5 uppercase tracking-widest font-bold">Confirmed Appointments</p>
                 </div>
                 <a href="/Doctor/Appointments" class="text-[11px] font-bold text-primary hover:underline">View All</a>
             </div>
@@ -125,9 +125,9 @@
                                             <span class="text-[13px] font-bold text-brand group-hover:text-primary transition-colors">@appt.PatientName</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-[12.5px] font-medium text-brand-500">@appt.Service?.Name</td>
+                                    <td class="px-6 py-4 text-[12.5px] font-medium text-brand/50">@appt.Service?.Name</td>
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-1 rounded-lg bg-slate-50 text-brand-900 text-[11px] font-bold border border-slate-200">@appt.AppointmentTime</span>
+                                        <span class="px-2 py-1 rounded-lg bg-slate-50 text-brand text-[11px] font-bold border border-slate-200">@appt.AppointmentTime</span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         @{
@@ -149,40 +149,43 @@
             </div>
         </div>
 
-        <!-- Recent Activity / Leaves -->
+        <!-- Recent Invoices -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                    <h3 class="font-display font-bold text-brand tracking-tight">Recent Activity</h3>
-                    <p class="text-[11px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Updates & Requests</p>
+                    <h3 class="font-display font-bold text-brand tracking-tight">Recent Invoices</h3>
+                    <p class="text-[11px] text-brand/40 mt-0.5 uppercase tracking-widest font-bold">Treatments & Billing</p>
                 </div>
             </div>
             <div class="p-4 space-y-4 overflow-y-auto max-h-[500px]">
-                @if (!Model.MyLeaves.Any())
+                @if (!Model.RecentInvoices.Any())
                 {
-                    <div class="py-12 text-center text-slate-400 text-[13px] italic">No recent leave activity.</div>
+                    <div class="py-12 text-center text-slate-400 text-[13px] italic">No recent treatment invoices.</div>
                 }
                 else
                 {
-                    @foreach (var leave in Model.MyLeaves.OrderByDescending(l => l.CreatedAt).Take(6))
+                    @foreach (var inv in Model.RecentInvoices.OrderByDescending(i => i.CreatedAt).Take(6))
                     {
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
-                            <div class="w-9 h-9 rounded-xl @(leave.Status == "approved" ? "bg-emerald-50 text-emerald-600" : leave.Status == "rejected" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600") flex items-center justify-center shrink-0">
-                                <i class="fa-solid @(leave.Status == "approved" ? "fa-circle-check" : "fa-clock-rotate-left") text-[13px]"></i>
+                        <a href="/Doctor/Treatments" class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group">
+                            <div class="w-9 h-9 rounded-xl @(inv.Status == "paid" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600") flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-file-invoice-dollar text-[13px]"></i>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex justify-between items-start gap-2">
-                                    <span class="text-[12.5px] font-bold text-brand truncate">@leave.LeaveType</span>
-                                    <span class="text-[10px] text-slate-400 font-medium">@leave.CreatedAt.ToString("MMM dd")</span>
+                                    <span class="text-[12.5px] font-bold text-brand truncate">@(inv.Patient?.FullName ?? "Unknown Patient")</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">@inv.CreatedAt.ToString("MMM dd")</span>
                                 </div>
-                                <p class="text-[11.5px] text-brand-500 line-clamp-1 mt-0.5">Status: <span class="font-bold uppercase text-[10px] @(leave.Status == "approved" ? "text-emerald-600" : "text-amber-600")">@leave.Status</span></p>
+                                <div class="flex items-center justify-between mt-0.5">
+                                    <p class="text-[11.5px] text-brand/50">₱@inv.FinalAmount.ToString("N2")</p>
+                                    <span class="text-[9px] font-bold uppercase @(inv.Status == "paid" ? "text-emerald-600" : "text-amber-600")">@inv.Status</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     }
                 }
             </div>
             <div class="mt-auto p-4 border-t border-slate-100">
-                <a href="/Doctor/Availability" class="block text-center py-2 rounded-xl bg-slate-50 text-brand-500 text-[12px] font-bold hover:bg-slate-100 transition-colors">Manage All Requests</a>
+                <a href="/Doctor/Treatments" class="block text-center py-2 rounded-xl bg-slate-50 text-brand/50 text-[12px] font-bold hover:bg-slate-100 transition-colors">View All Treatments</a>
             </div>
         </div>
 
@@ -190,10 +193,10 @@
         <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-brand/5">
                 <div>
-                    <h3 class="font-display font-bold text-brand-900">Unread Inquiries</h3>
-                    <p class="text-[10px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Latest Messages</p>
+                    <h3 class="font-display font-bold text-brand">Unread Inquiries</h3>
+                    <p class="text-[10px] text-brand/40 mt-0.5 uppercase tracking-widest font-bold">Latest Messages</p>
                 </div>
-                <a href="/Doctor/Inquiries" class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-400 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
+                <a href="/Doctor/Inquiries" class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand/40 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
                     <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                 </a>
             </div>

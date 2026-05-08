@@ -164,6 +164,18 @@ public class InvoiceController : ControllerBase
 
             var created = await _invoiceService.CreateInvoiceAsync(invoice, invoiceItems);
 
+            // 1.5 Ensure patient clinical records exist
+            var actorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value ?? "system";
+            try
+            {
+                await _recordService.InitializePatientRecords(req.PatientId, actorId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[InvoiceController] Failed to initialize medical records: {ex.Message}");
+                // Non-critical, continue
+            }
+
             // Save treatments — wrapped separately so invoice is NOT rolled back on treatment failure
             string? treatmentWarning = null;
             if (req.Treatments?.Count > 0)

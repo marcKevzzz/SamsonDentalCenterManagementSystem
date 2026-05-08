@@ -81,6 +81,10 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("appointment_time")]
         public string AppointmentTime { get; set; } = string.Empty;
 
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public TimeSpan AppointmentTimeAsTimeSpan => DateTime.TryParse(AppointmentTime, out var dt) ? dt.TimeOfDay : TimeSpan.Zero;
+
         [Column("duration_minutes")]
         public int DurationMinutes { get; set; } = 60;
 

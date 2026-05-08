@@ -5,239 +5,167 @@
     ViewData["Title"] = "My Patients";
 }
 
-<div id="page-patients" class="page p-4 md:p-6">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div>
-            <h2 class="font-display text-xl font-bold text-brand-900">My Patients</h2>
-            <p class="text-[12px] text-brand-500 mt-0.5">Patients you have treated or have upcoming appointments with.</p>
-        </div>
-        <button onclick="openAddPatientModal()"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25 hover:shadow-primary/40 transition-shadow">
-            <i class="fa-solid fa-plus text-[11px]"></i>
-            Add Patient
-        </button>
+@section Scripts {
+    <script type="module" src="~/js/AdminSide/adminPatient.js" asp-append-version="true"></script>
+}
+
+<div class="page p-4 md:p-6 bg-slate-50 min-h-screen">
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="text-xl font-bold text-brand tracking-tight">Patient Directory</h2>
+      <p class="text-[11px] text-brand/40 mt-0.5 uppercase font-bold tracking-widest">Manage your assigned patients and clinical records</p>
+    </div>
+    <div class="flex items-center gap-2">
+       <button id="addPatientBtn" class="px-4 py-2 bg-primary text-white rounded-xl text-[12px] font-bold shadow-md hover:shadow-lg hover:scale-[1.01] transition-all flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-[10px]"></i>
+          Add Patient
+       </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm mb-6">
+    <div class="flex flex-wrap items-center gap-4">
+      <div class="relative flex-1 min-w-[240px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 translate-half text-slate-400 text-[12px]"></i>
+        <input id="patient-search" oninput="filterPatients()" placeholder="Search by name or ID..."
+          class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all" />
+      </div>
+      <select id="patient-status" onchange="filterPatients()"
+        class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary/50 font-medium">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Patients Table -->
+  <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50/80 border-b border-slate-100">
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest">Patient Details</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest">Contacts</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest">Age / Gender</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest">Last Visit</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest">Assigned Doctor</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest">Account Status</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-brand/40 uppercase tracking-widest text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="patients-body">
+          <tr>
+            <td colspan="6" class="px-4 py-20 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <span class="text-[12px] font-medium text-slate-400">Loading patients...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden shadow-sm">
-        <div class="flex flex-wrap items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50/30">
-            <div class="relative flex-1 min-w-[200px] max-w-[320px]">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[12px]"></i>
-                <input id="patient-search" placeholder="Search by name or email..." oninput="filterPatientsLocal()"
-                    class="w-full pl-10 pr-4 py-2.5 text-[13px] bg-white border border-slate-200 rounded-2xl outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all" />
+    <!-- Pagination -->
+    <div id="patients-pagination" class="hidden items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+      <div id="patients-info" class="text-[11.5px] font-medium text-brand/50"></div>
+      <div id="patients-btns" class="flex items-center gap-1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Patient Modal -->
+<div id="userModal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-sm"></div>
+    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden relative animate-in fade-in zoom-in duration-300">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+                <h3 id="modalTitle" class="text-lg font-bold text-brand font-display">Add New Patient</h3>
+                <p class="text-[10px] text-brand/40 font-bold uppercase tracking-widest mt-0.5">Enter basic information to create a record</p>
             </div>
-            <div class="flex items-center gap-2 text-[11px] font-bold text-brand-400 uppercase tracking-widest ml-auto">
-                <i class="fa-solid fa-circle text-[6px] text-emerald-500"></i>
-                <span id="patient-count">@Model.Patients.Count Patients</span>
-            </div>
+            <button onclick="closeUserModal()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition-colors">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
         </div>
 
-        <div class="overflow-x-auto">
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-[700px]">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Patient</th>
-                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Age / Gender</th>
-                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Contact</th>
-                            <th class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Account Status</th>
-                            <th class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50" id="patients-body">
-                        @if (!Model.Patients.Any())
-                        {
-                            <tr>
-                                <td colspan="5" class="px-4 py-16 text-center">
-                                    <div class="flex flex-col items-center justify-center gap-2">
-                                        <span class="text-[13px] font-medium text-brand-600">No patients found assigned to you.</span>
-                                        <span class="text-[11px] text-brand-400">Try adjusting your search or filters.</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        else
-                        {
-                            foreach (var patient in Model.Patients)
-                            {
-                                var isGuest = patient.Id.StartsWith("guest_");
-                                var initials = $"{( (patient.FirstName ?? "").Length > 0 ? patient.FirstName[0] : 'P')}{( (patient.LastName ?? "").Length > 0 ? patient.LastName[0] : ' ')}".Trim();
-                                var ageStr = patient.DateOfBirth.HasValue ? (DateTime.Today.Year - patient.DateOfBirth.Value.Year).ToString() : "N/A";
-                                var statusText = patient.IsActive ? "Active" : "Inactive";
-                                var statusColor = patient.IsActive ? "bg-emerald-50 text-emerald-600 ring-emerald-600/20" : "bg-rose-50 text-rose-600 ring-rose-600/20";
-                                
-                                <tr class="patient-row group hover:bg-slate-50/80 border-b border-slate-100 transition-colors last:border-0 cursor-pointer" onclick="window.location.href='/Doctor/Patients/Details?id=@patient.Id'" data-search="@((patient.FirstName ?? "").ToLower()) @((patient.LastName ?? "").ToLower()) @((patient.Email ?? "").ToLower())">
-                                    <td class="px-4 py-3.5">
-                                        <div class="flex items-center gap-3">
-                                            @if (!string.IsNullOrEmpty(patient.AvatarUrl))
-                                            {
-                                                <img src="@patient.AvatarUrl" class="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-slate-200" />
-                                            }
-                                            else
-                                            {
-                                                <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-bold font-display shadow-sm uppercase">
-                                                    @initials
-                                                </div>
-                                            }
-                                            <div>
-                                                <a href="/Doctor/Patients/Details?id=@patient.Id" class="text-[13.5px] font-medium text-brand-900 hover:text-primary transition-colors block leading-tight">
-                                                    @patient.FirstName @patient.LastName
-                                                </a>
-                                                <span class="text-[10px] font-mono text-brand-400 uppercase tracking-tight">#P-@((patient.Id ?? "00000").Substring(0, Math.Min(5, patient.Id?.Length ?? 0)))</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3.5">
-                                        <div class="flex flex-col">
-                                            <span class="text-[12.5px] text-brand-600 font-medium">@ageStr yrs</span>
-                                            <span class="text-[10.5px] text-brand-400 capitalize">@(patient.Sex ?? "Not Set")</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3.5 text-[12.5px] text-brand-500 font-medium">
-                                        @(string.IsNullOrEmpty(patient.PhoneNumber) ? "No Phone" : patient.PhoneNumber)
-                                    </td>
-                                    <td class="px-4 py-3.5">
-                                        <span class="inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full @statusColor ring-1 ring-inset uppercase tracking-wide">
-                                            @statusText
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3.5 text-right">
-                                        <a href="/Doctor/Patients/Details?id=@patient.Id" class="inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-bold text-primary hover:bg-primary/5 rounded-md transition-all">
-                                            View Profile
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+        <form id="patientForm" class="p-8 space-y-6" onsubmit="event.preventDefault(); saveUser();">
+            <input type="hidden" id="modalUserId" />
+            
+            <div class="flex flex-col items-center mb-4">
+                <div class="relative group">
+                    <img id="avatarPreview" src="/images/default-avatar.png" class="w-24 h-24 rounded-3xl object-cover ring-4 ring-slate-50 shadow-xl" />
+                    <label class="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-all border-4 border-white">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                        <input type="file" id="mAvatar" class="hidden" accept="image/*" onchange="previewAvatar(this)" />
+                    </label>
+                </div>
             </div>
-        </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">First Name</label>
+                    <input id="mFirstName" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Last Name</label>
+                    <input id="mLastName" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Email Address</label>
+                    <input id="mEmail" type="email" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Phone Number</label>
+                    <input id="mPhone" placeholder="09XXXXXXXXX" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Date of Birth</label>
+                    <input id="mDob" type="date" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Gender</label>
+                    <select id="mSex" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner font-medium">
+                        <option value="">Select...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2 flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Address</label>
+                    <textarea id="mAddress" rows="2" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-primary transition-all shadow-inner resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5 hidden">
+                    <label class="text-[10px] font-bold text-brand/40 uppercase ml-1">Role</label>
+                    <input id="mRole" value="patient" readonly />
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 pt-4">
+                <button type="button" onclick="closeUserModal()" class="flex-1 px-6 py-3 rounded-2xl bg-slate-100 text-slate-600 text-[12px] font-bold hover:bg-slate-200 transition-all">Cancel</button>
+                <button id="modalSaveBtn" type="submit" class="flex-1 px-6 py-3 rounded-2xl bg-primary text-white text-[12px] font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">Save Patient</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<partial name="~/Pages/AdminSide/Components/UserModal.cshtml" />
-
-@section Scripts {
-<script src="~/js/ui.js" type="module"></script>
-<script type="module">
-    import { Toast } from "/js/ui.js";
-
-    window.openAddPatientModal = () => {
-        const modal = document.getElementById('userModal');
-        const roleSel = document.getElementById('mRole');
-        if (roleSel) {
-            roleSel.value = 'patient';
-            roleSel.parentElement.classList.add('hidden'); // Hide role selection for doctors
+<script>
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
         }
-        
-        document.getElementById('modalTitle').textContent = 'Add New Patient';
-        document.getElementById('modalUserId').value = '';
-        
-        // Clear inputs
-        document.querySelectorAll('.modal-input').forEach(i => i.value = '');
-        
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        
-        gsap.fromTo(modal.querySelector('.bg-white'), 
-            { scale: 0.9, opacity: 0, y: 20 },
-            { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
-        );
-    };
-
-    window.closeUserModal = () => {
-        const modal = document.getElementById('userModal');
-        gsap.to(modal.querySelector('.bg-white'), {
-            scale: 0.95, opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
-            onComplete: () => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        });
-    };
-
-    window.saveUser = async () => {
-        const btn = document.getElementById('modalSaveBtn');
-        const err = document.getElementById('modalError');
-        
-        const payload = {
-            firstName: document.getElementById('mFirstName').value.trim(),
-            lastName: document.getElementById('mLastName').value.trim(),
-            email: document.getElementById('mEmail').value.trim(),
-            phoneNumber: document.getElementById('mPhone').value.trim(),
-            dateOfBirth: document.getElementById('mDob').value,
-            sex: document.getElementById('mSex').value,
-            role: 'patient'
-        };
-
-        if (!payload.firstName || !payload.lastName || !payload.email) {
-            err.textContent = "Please fill in all required fields.";
-            err.classList.remove('hidden');
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...';
-
-        try {
-            const res = await fetch('/api/admin/data/patients', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-                if (data.ok) {
-                Toast.show("Patient created successfully!", "success");
-                closeUserModal();
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                throw new Error(data.error || "Failed to save patient.");
-            }
-        } catch (e) {
-            err.textContent = e.message;
-            err.classList.remove('hidden');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Save';
-        }
-    };
-
-    window.filterPatientsLocal = () => {
-        const q = document.getElementById('patient-search').value.toLowerCase().trim();
-        const rows = document.querySelectorAll('.patient-row');
-        let found = 0;
-
-        rows.forEach(row => {
-            const text = row.dataset.search;
-            if (!q || text.includes(q)) {
-                row.classList.remove('hidden');
-                found++;
-            } else {
-                row.classList.add('hidden');
-            }
-        });
-
-        document.getElementById('patient-count').textContent = `${found} Patients`;
-
-        let noResults = document.getElementById('no-results-row');
-        if (found === 0 && q) {
-            if (!noResults) {
-                const tbody = document.getElementById('patients-body');
-                noResults = document.createElement('tr');
-                noResults.id = 'no-results-row';
-                noResults.innerHTML = `<td colspan="5" class="px-6 py-20 text-center">
-                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-300">
-                        <i class="fa-solid fa-magnifying-glass text-2xl"></i>
-                    </div>
-                    <p class="text-[13px] text-brand-400 font-medium">No results matching "${q}"</p>
-                </td>`;
-                tbody.appendChild(noResults);
-            }
-        } else if (noResults) {
-            noResults.remove();
-        }
-    };
+    }
 </script>
-}
 
+<style>
+    .font-display { font-family: 'Syne', sans-serif; }
+    .animate-spin { animation: spin 1s linear infinite; }
+    @@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>

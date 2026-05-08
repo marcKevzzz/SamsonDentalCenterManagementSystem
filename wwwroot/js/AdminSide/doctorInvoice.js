@@ -81,7 +81,7 @@ function hydrateUI() {
                 <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
                     <i class="fa-solid fa-chair text-slate-200 text-2xl"></i>
                 </div>
-                <p class="text-[13px] text-brand-400 font-medium">No arrived patients at the moment.</p>
+                <p class="text-[13px] text-brand/40 font-medium">No arrived patients at the moment.</p>
             </div>`;
     } else {
         cardContainer.innerHTML = ARRIVED_APPTS.map(appt => `
@@ -103,13 +103,13 @@ function hydrateUI() {
                         }
                     </div>
                     <div>
-                        <h4 class="text-[15px] font-bold text-brand-900">${appt.patientName}</h4>
-                        <p class="text-[11px] text-brand-400 font-medium">${appt.serviceName}</p>
+                        <h4 class="text-[15px] font-bold text-brand">${appt.patientName}</h4>
+                        <p class="text-[11px] text-brand/40 font-medium">${appt.serviceName}</p>
                     </div>
                 </div>
                 <div class="space-y-3 mb-5">
-                    <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-clock opacity-40 w-4"></i>Scheduled: ${appt.appointmentTime}</div>
-                    <div class="flex items-center gap-2 text-[12px] text-brand-600"><i class="fa-solid fa-file-invoice opacity-40 w-4"></i>Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span></div>
+                    <div class="flex items-center gap-2 text-[12px] text-brand/60"><i class="fa-solid fa-clock opacity-40 w-4"></i>Scheduled: ${appt.appointmentTime}</div>
+                    <div class="flex items-center gap-2 text-[12px] text-brand/60"><i class="fa-solid fa-file-invoice opacity-40 w-4"></i>Status: <span class="font-bold text-amber-600 uppercase text-[10px]">Ready for Treatment</span></div>
                 </div>
                 <button class="w-full py-3 bg-brand text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">Record Treatment</button>
             </div>`).join('');
@@ -121,7 +121,7 @@ function hydrateUI() {
     if (loadingInvoices) loadingInvoices.closest('tr')?.remove();
 
     if (RECENT_TREATMENTS.length === 0) {
-        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-tooth text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand-400 font-medium">No treatment records found yet.</p></td></tr>`;
+        invoiceTbody.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center"><div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100"><i class="fa-solid fa-tooth text-slate-200 text-2xl"></i></div><p class="text-[13px] text-brand/40 font-medium">No treatment records found yet.</p></td></tr>`;
     } else {
         invoiceTbody.innerHTML = RECENT_TREATMENTS.map(treat => {
             const date = new Date(treat.createdAt);
@@ -129,8 +129,8 @@ function hydrateUI() {
             return `
                 <tr class="hover:bg-slate-50/50 transition-colors group">
                     <td class="px-6 py-4">
-                        <div class="text-[13px] font-bold text-brand-900">${date.toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric' })}</div>
-                        <div class="text-[10px] text-brand-400">${date.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div class="text-[13px] font-bold text-brand">${date.toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric' })}</div>
+                        <div class="text-[10px] text-brand/40">${date.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
@@ -148,23 +148,23 @@ function hydrateUI() {
                                 }
                             </div>
                             <div>
-                                <div class="text-[13px] font-bold text-brand-900">${treat.patientName || 'Unknown Patient'}</div>
-                                <div class="text-[10px] text-brand-400">#${treat.id.slice(0, 8)}</div>
+                                <div class="text-[13px] font-bold text-brand">${treat.patientName || 'Unknown Patient'}</div>
+                                <div class="text-[10px] text-brand/40">#${treat.id.slice(0, 8)}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand-600 font-medium">${treat.serviceName}</span>
+                        <span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] text-brand/60 font-medium">${treat.serviceName}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <div class="text-[13px] font-bold text-brand-900">₱${treat.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        <div class="text-[13px] font-bold text-brand">₱${treat.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 ${statusClass} border rounded-full text-[10px] font-bold uppercase tracking-wider">${treat.status}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <button onclick="openViewTreatmentModal('${treat.id}')" title="View Treatment Notes" class="w-8 h-8 rounded-lg border border-slate-100 text-brand-400 hover:text-brand-900 hover:border-brand-200 transition-all"><i class="fa-solid fa-notes-medical text-xs"></i></button>
+                            <button onclick="openViewTreatmentModal('${treat.id}')" title="View Treatment Notes" class="w-8 h-8 rounded-lg border border-slate-100 text-brand/40 hover:text-brand hover:border-brand/20 transition-all"><i class="fa-solid fa-notes-medical text-xs"></i></button>
                         </div>
                     </td>
                 </tr>`;
@@ -337,7 +337,13 @@ async function checkMedicalInfo(patientId) {
     const medContainer = document.getElementById('medical-info-check-container');
     if (!medContainer) return;
 
-    if (!result.exists) {
+    const info = result.data;
+    // Show form if record doesn't exist OR if critical fields are missing
+    const isIncomplete = !result.exists || !info || !info.bloodType || !info.height || !info.weight;
+
+    if (isIncomplete) {
+        const allergies = info?.allergiesJson ? JSON.parse(info.allergiesJson).join(', ') : '';
+        
         medContainer.innerHTML = `
             <div class="p-5 bg-rose-50 border-2 border-rose-100 rounded-2xl mb-6">
                 <div class="flex items-center gap-3 mb-4">
@@ -345,8 +351,8 @@ async function checkMedicalInfo(patientId) {
                         <i class="fa-solid fa-file-medical text-lg"></i>
                     </div>
                     <div>
-                        <h6 class="text-[14px] font-bold text-brand-900 leading-tight">Missing Medical Information</h6>
-                        <p class="text-[11px] text-brand-400">Please complete the patient's medical profile before submitting treatments.</p>
+                        <h6 class="text-[14px] font-bold text-brand leading-tight">${result.exists ? 'Incomplete' : 'Missing'} Medical Information</h6>
+                        <p class="text-[11px] text-brand/40">Please complete the patient's medical profile before submitting treatments.</p>
                     </div>
                 </div>
                 
@@ -355,35 +361,35 @@ async function checkMedicalInfo(patientId) {
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Blood Type</label>
                         <select id="med-blood" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white">
                             <option value="">Unknown</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
+                            <option value="A+" ${info?.bloodType === 'A+' ? 'selected' : ''}>A+</option>
+                            <option value="A-" ${info?.bloodType === 'A-' ? 'selected' : ''}>A-</option>
+                            <option value="B+" ${info?.bloodType === 'B+' ? 'selected' : ''}>B+</option>
+                            <option value="B-" ${info?.bloodType === 'B-' ? 'selected' : ''}>B-</option>
+                            <option value="O+" ${info?.bloodType === 'O+' ? 'selected' : ''}>O+</option>
+                            <option value="O-" ${info?.bloodType === 'O-' ? 'selected' : ''}>O-</option>
+                            <option value="AB+" ${info?.bloodType === 'AB+' ? 'selected' : ''}>AB+</option>
+                            <option value="AB-" ${info?.bloodType === 'AB-' ? 'selected' : ''}>AB-</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-2 pt-4">
-                        <input type="checkbox" id="med-smoker" class="w-4 h-4 rounded border-slate-300 text-primary" />
-                        <label for="med-smoker" class="text-[12px] font-bold text-brand-600">Is Smoker?</label>
+                        <input type="checkbox" id="med-smoker" class="w-4 h-4 rounded border-slate-300 text-primary" ${info?.isSmoker ? 'checked' : ''} />
+                        <label for="med-smoker" class="text-[12px] font-bold text-brand/60">Is Smoker?</label>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Height (cm)</label>
-                        <input type="number" id="med-height" step="0.1" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white" placeholder="0.0" />
+                        <input type="number" id="med-height" step="0.1" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white" placeholder="0.0" value="${info?.height || ''}" />
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Weight (kg)</label>
-                        <input type="number" id="med-weight" step="0.1" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white" placeholder="0.0" />
+                        <input type="number" id="med-weight" step="0.1" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none bg-white" placeholder="0.0" value="${info?.weight || ''}" />
                     </div>
                 </div>
                 <div class="mt-4">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Known Allergies</label>
-                    <textarea id="med-allergies" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none resize-none bg-white" rows="2" placeholder="List any drug or food allergies..."></textarea>
+                    <textarea id="med-allergies" class="w-full text-[12px] px-3 py-2.5 rounded-xl border border-slate-200 outline-none resize-none bg-white" rows="2" placeholder="List any drug or food allergies...">${allergies}</textarea>
                 </div>
             </div>
         `;
@@ -500,11 +506,11 @@ function renderTreatmentForms() {
     };
 
     const odontogramUI = `
-        <div class="bg-white rounded-2xl p-5 border border-brand-100 shadow-sm mb-6">
+        <div class="bg-white rounded-2xl p-5 border border-brand/10 shadow-sm mb-6">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h6 class="text-[12px] font-bold text-brand uppercase tracking-wider">Patient Odontogram</h6>
-                    <p class="text-[9px] text-brand-400 font-medium">Global tooth status for this session</p>
+                    <p class="text-[9px] text-brand/40 font-medium">Global tooth status for this session</p>
                 </div>
                 <span class="text-[9px] font-bold text-slate-400">Click tooth to cycle status</span>
             </div>
@@ -539,7 +545,7 @@ function renderTreatmentForms() {
 
         if (isXRay) {
             extraUI = `
-                <div class="mt-4 p-4 border border-brand-100 bg-white rounded-xl">
+                <div class="mt-4 p-4 border border-brand/10 bg-white rounded-xl">
                     <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider mb-3">X-Ray Details</h6>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -819,11 +825,11 @@ window.openViewTreatmentModal = function(treatmentId) {
             ${treat.diagnosis ? `
             <div class="bg-white/50 p-3 rounded-xl border border-slate-100/50">
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Diagnosis</label>
-                <p class="text-[12px] text-brand-600 italic">${treat.diagnosis}</p>
+                <p class="text-[12px] text-brand/60 italic">${treat.diagnosis}</p>
             </div>
             ` : ''}
 
-            <div class="text-[12px] text-brand-600 bg-white/50 p-3 rounded-xl border border-slate-100/50 italic">
+            <div class="text-[12px] text-brand/60 bg-white/50 p-3 rounded-xl border border-slate-100/50 italic">
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Procedure Details</label>
                 ${treat.procedureDetails || "No specific procedure details recorded."}
             </div>

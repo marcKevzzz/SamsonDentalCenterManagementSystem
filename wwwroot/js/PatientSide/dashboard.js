@@ -1,4 +1,5 @@
 import { Toast, Modal } from "../ui.js";
+import { PatientStore } from "./PatientStore.js";
 
 document.querySelectorAll(".fade-up").forEach((el, i) => {
   setTimeout(() => el.classList.add("animate"), i * 100);
@@ -68,16 +69,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!banner || !btnClaim) return;
 
   try {
-    // Check for shadow profiles
-    const res = await fetch("/api/patient/data/check-shadow", {
-      method: "GET"
-    });
+    // Check for shadow profiles (cached)
+    const data = await PatientStore.fetch("shadow_check", "/api/patient/data/check-shadow");
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.ok && data.hasShadowProfiles) {
-        banner.classList.remove("hidden");
-      }
+    if (data && data.ok && data.hasShadowProfiles) {
+      banner.classList.remove("hidden");
     }
   } catch (err) {
     console.error("Error checking shadow profiles:", err);
@@ -98,6 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok && data.ok) {
         Toast.show("Records successfully claimed!", "success");
         banner.classList.add("hidden");
+        PatientStore.invalidate("shadow_check");
         // Reload page to show the new appointments
         setTimeout(() => window.location.reload(), 1500);
       } else {

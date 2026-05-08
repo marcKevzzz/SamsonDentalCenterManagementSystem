@@ -59,25 +59,21 @@ public class SettingsController : ControllerBase
     }
 
     [HttpDelete("remove-avatar")]
-    public Task<IActionResult> RemoveAvatar()
+    public async Task<IActionResult> RemoveAvatar()
     {
         var userId = User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
-            return Task.FromResult<IActionResult>(
-                Unauthorized(new { ok = false, error = "Not authenticated." })
-            );
+            return Unauthorized(new { ok = false, error = "Not authenticated." });
 
         try
         {
-            _profileService.RemoveAvatar(userId);
-            return Task.FromResult<IActionResult>(Ok(new { ok = true }));
+            await _profileService.RemoveAvatar(userId);
+            return Ok(new { ok = true });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[RemoveAvatar] Error: {ex.Message}");
-            return Task.FromResult<IActionResult>(
-                StatusCode(500, new { ok = false, error = ex.Message })
-            );
+            return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
 

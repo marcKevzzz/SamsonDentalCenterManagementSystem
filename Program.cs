@@ -15,6 +15,7 @@ using SamsonDentalCenterManagementSystem.Hubs;
 using SamsonDentalCenterManagementSystem.Services;
 using Supabase;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using FluentEmail.Core;
 using System.Net.Mail;
 
@@ -107,7 +108,8 @@ builder.Services.AddScoped<ProfileService>(provider => new ProfileService(
 
 builder.Services.AddScoped<DentalServiceService>(provider => new DentalServiceService(
     serviceClient,
-    provider.GetRequiredService<ActivityLogService>()
+    provider.GetRequiredService<ActivityLogService>(),
+    provider.GetRequiredService<IMemoryCache>()
 ));
 
 // ── Setup IHttpClientFactory to prevent socket exhaustion ─────────────────────
@@ -144,7 +146,8 @@ builder.Services.AddSingleton<DoctorService>(provider =>
     return new DoctorService(
         httpFactory.CreateClient("SupabaseClient"),
         supabaseUrl,
-        supabaseServiceKey
+        supabaseServiceKey,
+        provider.GetRequiredService<IMemoryCache>()
     );
 });
 
@@ -213,13 +216,14 @@ builder.Services.AddScoped<ReviewService>(provider =>
         supabaseUrl,
         supabaseServiceKey,
         apifyKey,
-        provider.GetRequiredService<ActivityLogService>()
+        provider.GetRequiredService<ActivityLogService>(),
+        provider.GetRequiredService<IMemoryCache>()
     );
 });
 
 builder.Services.AddScoped<ClinicService>(provider =>
 {
-    return new ClinicService(serviceClient, provider.GetRequiredService<ActivityLogService>());
+    return new ClinicService(serviceClient, provider.GetRequiredService<ActivityLogService>(), provider.GetRequiredService<IMemoryCache>());
 });
 
 builder.Services.AddScoped<BlockedDateService>(_ => new BlockedDateService(serviceClient));
@@ -334,6 +338,7 @@ builder
         };
     });
 
+builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache(); // required
 builder.Services.AddSession(options =>
 {

@@ -11,11 +11,11 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="font-display font-bold text-brand text-[15px] uppercase tracking-wider">Staff Discussion</h3>
-                    <p class="text-[9px] text-brand-400 font-bold uppercase tracking-widest">Internal Messages</p>
+                    <p class="text-[9px] text-brand/40 font-bold uppercase tracking-widest">Internal Messages</p>
                 </div>
             </div>
             <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 y-1/2 text-slate-400 text-[10px]"></i>
                 <input type="text" id="inquiry-search" placeholder="Search conversations..." 
                        class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] outline-none focus:border-primary transition-all shadow-sm">
             </div>
@@ -23,7 +23,7 @@
         <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="inquiry-list">
             <div class="p-8 text-center" id="inquiries-loading">
                 <i class="fa-solid fa-circle-notch fa-spin text-primary text-3xl mb-3 block"></i>
-                <p class="text-[12px] text-brand-400 font-medium">Loading inquiries...</p>
+                <p class="text-[12px] text-brand/40 font-medium">Loading inquiries...</p>
             </div>
         </div>
         <div class="absolute bottom-2 right-2 z-[400]">
@@ -44,7 +44,7 @@
                 <i class="fa-solid fa-comments text-slate-200 text-3xl"></i>
             </div>
             <h4 class="text-brand font-bold">Select an inquiry</h4>
-            <p class="text-[12px] text-brand-400 mt-1">Select a message from the list to start chatting</p>
+            <p class="text-[12px] text-brand/40 mt-1">Select a message from the list to start chatting</p>
         </div>
 
         <div class="flex-1 flex overflow-hidden">
@@ -56,7 +56,7 @@
                         <button onclick="backToList()" class="md:hidden w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-brand hover:text-white transition-all cursor-pointer">
                             <i class="fa-solid fa-arrow-left text-xs"></i>
                         </button>
-                        <div id="chat-avatar" class="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center font-bold text-sm">P</div>
+                        <div id="chat-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">P</div>
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 id="chat-patient-name" class="font-bold text-brand text-[15px]">Select Patient</h3>
@@ -64,16 +64,16 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <p id="chat-subject" class="text-[11px] text-brand-400 font-medium truncate max-w-[150px] md:max-w-none">No subject selected</p>
+                                <p id="chat-subject" class="text-[11px] text-brand/40 font-medium truncate max-w-[150px] md:max-w-none">No subject selected</p>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <div id="assign-doctor-container" class="hidden relative">
-                            <select id="assign-doctor-select" onchange="assignDoctor(this.value)" class="appearance-none pl-4 pr-8 py-2 bg-slate-50 text-brand-600 border border-slate-200 rounded-xl text-[11px] font-bold outline-none hover:bg-slate-100 transition-all cursor-pointer">
+                            <select id="assign-doctor-select" onchange="assignDoctor(this.value)" class="appearance-none pl-4 pr-8 py-2 bg-slate-50 text-brand/60 border border-slate-200 rounded-xl text-[11px] font-bold outline-none hover:bg-slate-100 transition-all cursor-pointer">
                                 <option value="">Assign to Doctor...</option>
                             </select>
-                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 translate-half text-[10px] text-slate-400 pointer-events-none"></i>
                         </div>
                         <button onclick="markAsResolved()" id="resolve-btn" class="hidden px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[11px] font-bold hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-2">
                             <i class="fa-solid fa-check-circle"></i> Mark as Resolved
@@ -88,10 +88,10 @@
 
                 <!-- Predefined Answers Row -->
                 <div id="predefined-replies" class="px-4 py-2 border-t border-slate-100 bg-white flex-wrap whitespace-nowrap scrollbar-hide flex gap-2">
-                    <button onclick="usePredefined('schedule')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">📅 Reschedule</button>
-                    <button onclick="usePredefined('billing')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">💰 Billing Info</button>
-                    <button onclick="usePredefined('followup')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">✅ Follow-up</button>
-                    <button onclick="usePredefined('thankyou')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand-600 transition-all shrink-0">🙏 Thank You</button>
+                    <button onclick="usePredefined('schedule')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand/60 transition-all shrink-0">📅 Reschedule</button>
+                    <button onclick="usePredefined('billing')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand/60 transition-all shrink-0">💰 Billing Info</button>
+                    <button onclick="usePredefined('followup')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand/60 transition-all shrink-0">✅ Follow-up</button>
+                    <button onclick="usePredefined('thankyou')" class="px-3 py-1.5 bg-slate-50 hover:bg-brand hover:text-white border border-slate-200 rounded-full text-[10px] font-bold text-brand/60 transition-all shrink-0">🙏 Thank You</button>
                 </div>
 
                 <!-- Input Area -->
@@ -133,26 +133,26 @@
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
             <div class="p-6 border-b border-slate-100 bg-slate-50">
-                <h3 class="text-lg font-bold text-brand-900">New Staff Message</h3>
-                <p class="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Initiate a private discussion with a colleague</p>
+                <h3 class="text-lg font-bold text-brand">New Staff Message</h3>
+                <p class="text-[10px] font-bold text-brand/40 uppercase tracking-widest">Initiate a private discussion with a colleague</p>
             </div>
             <form id="new-inquiry-form" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Select Staff Member</label>
+                    <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Select Staff Member</label>
                     <select id="new-inquiry-patient" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none" required>
                         <option value="">Loading staff...</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Subject</label>
+                    <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Subject</label>
                     <input type="text" id="new-inquiry-subject" placeholder="e.g., Follow-up on Appointment" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none" required />
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Initial Message</label>
+                    <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Initial Message</label>
                     <textarea id="new-inquiry-message" rows="4" placeholder="Type your message..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none resize-none" required></textarea>
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeNewInquiryModal()" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-brand-600 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
+                    <button type="button" onclick="closeNewInquiryModal()" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-brand/60 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
                     <button type="submit" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-white bg-primary shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">Create Thread</button>
                 </div>
             </form>

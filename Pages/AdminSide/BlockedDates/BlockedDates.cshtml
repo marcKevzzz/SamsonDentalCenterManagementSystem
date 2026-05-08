@@ -11,7 +11,7 @@ Layout = "AdminSide/_StaffLayout";
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
       <h2 class="font-display text-xl font-bold text-brand">Blocked Dates</h2>
-      <p class="text-[12px] text-brand-400 mt-0.5">Manage clinic closures and date restrictions</p>
+      <p class="text-[12px] text-brand/40 mt-0.5">Manage clinic closures and date restrictions</p>
     </div>
     <button onclick="openAddBlockModal()"
       class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-red-500 shadow-md shadow-red-500/25 hover:bg-red-600 transition-colors">
@@ -29,7 +29,7 @@ Layout = "AdminSide/_StaffLayout";
         </div>
         <div class="font-display text-2xl font-bold text-brand" id="stat-total-blocked">-</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Total Blocked</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Total Blocked</div>
     </div>
     <div class="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
       <div class="flex items-center justify-between mb-2">
@@ -38,7 +38,7 @@ Layout = "AdminSide/_StaffLayout";
         </div>
         <div class="font-display text-2xl font-bold text-brand" id="stat-upcoming-blocked">-</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Upcoming</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Upcoming</div>
     </div>
     <div class="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
       <div class="flex items-center justify-between mb-2">
@@ -47,22 +47,22 @@ Layout = "AdminSide/_StaffLayout";
         </div>
         <div class="font-display text-2xl font-bold text-brand" id="stat-past-blocked">-</div>
       </div>
-      <div class="text-[10px] font-bold uppercase tracking-widest text-brand-400">Past</div>
+      <div class="text-[10px] font-bold uppercase tracking-widest text-brand/40">Past</div>
     </div>
   </div>
 
   <!-- Blocked Dates Grid -->
   <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-brand-400">All Blocked Dates</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-brand/40">All Blocked Dates</span>
       <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-brand-300 text-[10px]"></i>
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 translate-half text-brand/30 text-[10px]"></i>
         <input id="blocked-search" type="text" placeholder="Search by reason…" oninput="filterBlocked()"
           class="text-[11px] pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white w-48" />
       </div>
     </div>
     <div id="blocked-grid" class="divide-y divide-slate-50">
-      <div class="px-4 py-10 text-center text-[12px] text-brand-400">
+      <div class="px-4 py-10 text-center text-[12px] text-brand/40">
         <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading blocked dates…
       </div>
     </div>
@@ -83,7 +83,7 @@ Layout = "AdminSide/_StaffLayout";
           </div>
           <div>
             <h3 class="font-display font-bold text-[17px] text-brand">Block a Date</h3>
-            <p class="text-[11px] text-brand-400 font-bold uppercase tracking-wider mt-0.5">Prevent new bookings</p>
+            <p class="text-[11px] text-brand/40 font-bold uppercase tracking-wider mt-0.5">Prevent new bookings</p>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@ Layout = "AdminSide/_StaffLayout";
             class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all outline-none" />
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Reason <span class="text-brand-400 font-normal">(optional)</span></label>
+          <label class="block text-[11px] font-bold text-brand mb-2 ml-1">Reason <span class="text-brand/40 font-normal">(optional)</span></label>
           <input id="add-block-reason" type="text" placeholder="e.g. Clinic holiday, Staff training…"
             class="w-full text-[13px] px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all outline-none" />
         </div>
@@ -134,7 +134,7 @@ Layout = "AdminSide/_StaffLayout";
       </div>
 
       <div class="p-6">
-        <p class="text-[12px] text-brand-600 mb-3">The following appointments are still active on this date. They will <strong>not</strong> be automatically cancelled — please handle them manually.</p>
+        <p class="text-[12px] text-brand/60 mb-3">The following appointments are still active on this date. They will <strong>not</strong> be automatically cancelled — please handle them manually.</p>
         <div id="bd-conflict-list" class="space-y-2 max-h-56 overflow-y-auto"></div>
       </div>
 

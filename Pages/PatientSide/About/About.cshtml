@@ -152,19 +152,19 @@ ViewData["Title"] = "About page";
                      style="width: 300px; height: 400px;">
 
                     <!-- Dot on the centre line -->
-                    <div class="connector-dot absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                    <div class="connector-dot absolute left-1/2 top-1/2 x-1/2 translate-half
                                 w-3.5 h-3.5 rounded-full bg-white border-[3px] border-primary shadow-md z-20"
                          style="opacity: 0; transform: translate(-50%, -50%) scale(0); transition: opacity .3s, transform .3s;">
                     </div>
 
                     <!-- Card — alternates above / below -->
-                    <div class="milestone-card absolute left-1/2 -translate-x-1/2 z-10"
+                    <div class="milestone-card absolute left-1/2 x-1/2 z-10"
                          style="@(isTop ? "bottom: calc(50% + 28px);" : "top: calc(50% + 28px);")
                                 opacity: 0;
                                 transform: translateY(@(isTop ? "12px" : "-12px"));
                                 transition: opacity .4s ease, transform .4s ease;">
                         <div class="bg-white rounded-3xl shadow-xl border border-slate-100 hover:shadow-2xl
-                                    transition-all duration-300 hover:-translate-y-1"
+                                    transition-all duration-300 hover:y-1"
                              style="width: 240px; padding: 1.5rem;">
                             <span class="brand-font font-black text-primary uppercase tracking-widest mb-2 block"
                                   style="font-size: 0.7rem;">@m.Year</span>
@@ -250,7 +250,7 @@ ViewData["Title"] = "About page";
                 @foreach (var doc in Model.Doctors) {
                     <div class="doctor-card shrink-0 w-[280px] lg:w-[340px]">
                         <div class="group bg-white/[0.04] border border-white/[0.08] rounded-[32px] overflow-hidden
-                                    hover:border-white/20 hover:-translate-y-2 transition-all duration-500 h-full flex flex-col">
+                                    hover:border-white/20 hover:y-2 transition-all duration-500 h-full flex flex-col">
                             <div class="relative h-[340px] overflow-hidden">
                                 <img src="@(string.IsNullOrEmpty(doc.Profile?.AvatarUrl) ? "https://ui-avatars.com/api/?name=" + doc.Profile?.FirstName + "+" + doc.Profile?.LastName + "&size=400&background=2d3a6e&color=fff" : doc.Profile.AvatarUrl)" 
                                      class="w-full h-full object-cover grayscale-[40%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
@@ -303,7 +303,7 @@ ViewData["Title"] = "About page";
      FACILITIES & OFFERS (State of the Art)
 ═══════════════════════════════════ -->
 <section class="facilities-section bg-white py-32 relative overflow-hidden">
-  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full translate-half translate-x-1/3"></div>
   <div class="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-blue-500/5 blur-[100px] rounded-full"></div>
   
   <div class="max-w mx-auto px-8 lg:px-12 relative z-10">

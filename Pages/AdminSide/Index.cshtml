@@ -11,7 +11,7 @@ Layout = "AdminSide/_StaffLayout";
         <div>
             <h2 class="font-display text-[clamp(17px,3vw,22px)] font-bold text-brand">Good morning, @Model.CurrentUserName 👋
             </h2>
-            <p class="text-[12px] text-brand-500 mt-0.5">Here's what's happening at your clinic today.</p>
+            <p class="text-[12px] text-brand/50 mt-0.5">Here's what's happening at your clinic today.</p>
         </div>
         <!-- <button
             class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow whitespace-nowrap">
@@ -40,7 +40,7 @@ Layout = "AdminSide/_StaffLayout";
                 <span class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-blue-50 text-primary">+12%</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand" id="stat-total-patients">...</div>
-            <div class="text-[12px] text-brand-500 mt-0.5">Total Patients</div>
+            <div class="text-[12px] text-brand/50 mt-0.5">Total Patients</div>
             <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-patients-trend">Loading...</div>
         </div>
         <div
@@ -58,7 +58,7 @@ Layout = "AdminSide/_StaffLayout";
                     class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">Active</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand" id="stat-active-doctors">...</div>
-            <div class="text-[12px] text-brand-500 mt-0.5">Doctors on Staff</div>
+            <div class="text-[12px] text-brand/50 mt-0.5">Doctors on Staff</div>
             <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-doctors-trend">Loading...</div>
         </div>
         <div
@@ -75,7 +75,7 @@ Layout = "AdminSide/_StaffLayout";
                 <span class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-red-50 text-red-700">Today</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand" id="stat-today-appts">...</div>
-            <div class="text-[12px] text-brand-500 mt-0.5">Appointments Today</div>
+            <div class="text-[12px] text-brand/50 mt-0.5">Appointments Today</div>
             <div class="text-[11px] text-red-500 mt-1.5" id="stat-appts-trend">Loading...</div>
         </div>
         <div
@@ -90,7 +90,7 @@ Layout = "AdminSide/_StaffLayout";
                 <span class="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700">+8%</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand" id="stat-monthly-revenue">₱0</div>
-            <div class="text-[12px] text-brand-500 mt-0.5">This Month Revenue</div>
+            <div class="text-[12px] text-brand/50 mt-0.5">This Month Revenue</div>
             <div class="text-[11px] text-emerald-600 mt-1.5" id="stat-revenue-trend">Loading...</div>
         </div>
     </div>
@@ -102,12 +102,12 @@ Layout = "AdminSide/_StaffLayout";
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                     <h3 class="font-display text-[13.5px] font-bold text-brand">Patient Visits</h3>
-                    <p class="text-[10.5px] text-brand-500 mt-0.5">Weekly overview — @DateTime.Now.ToString("MMMM yyyy")</p>
+                    <p class="text-[10.5px] text-brand/50 mt-0.5">Weekly overview — @DateTime.Now.ToString("MMMM yyyy")</p>
                 </div>
                 <div class="flex gap-1.5">
                     <button id="btn-visits-week" class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white">Week</button>
                     <button id="btn-visits-month"
-                        class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors">Month</button>
+                        class="px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand/50 hover:bg-slate-200 transition-colors">Month</button>
                 </div>
             </div>
             <div class="h-48 w-full mt-4">
@@ -118,7 +118,7 @@ Layout = "AdminSide/_StaffLayout";
         <!-- Donut (1/3) -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200">
             <h3 class="font-display text-[13.5px] font-bold text-brand">Department Load</h3>
-            <p class="text-[10.5px] text-brand-500 mt-0.5 mb-3">Active cases by unit</p>
+            <p class="text-[10.5px] text-brand/50 mt-0.5 mb-3">Active cases by unit</p>
             <div class="h-48 w-full flex justify-center mt-4">
                 <canvas id="departmentChart"></canvas>
             </div>

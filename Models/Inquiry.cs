@@ -59,6 +59,14 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("assigned_doctor_id")]
         public string? AssignedDoctorId { get; set; }
 
+        [Column("sender_id")]
+        [JsonPropertyName("sender_id")]
+        public string? SenderId { get; set; }
+
+        [Reference(typeof(Profile), foreignKey: "sender_id")]
+        [JsonPropertyName("sender")]
+        public Profile? Sender { get; set; }
+
         [Reference(typeof(Profile), foreignKey: "assigned_doctor_id")]
         [JsonPropertyName("assigned_doctor")]
         public Profile? AssignedDoctor { get; set; }

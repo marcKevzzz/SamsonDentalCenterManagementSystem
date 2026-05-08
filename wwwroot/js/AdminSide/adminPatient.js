@@ -197,7 +197,9 @@ function initializeWithData(data) {
             assignedDoctor: docName,
             status: p.isActive ? "Active" : "Inactive",
             isActive: p.isActive,
-            reactivationRequested: p.reactivationRequested
+            reactivationRequested: p.reactivationRequested,
+            email: p.email,
+            phone: p.phone
         };
     });
 
@@ -295,10 +297,10 @@ function renderTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="px-4 py-16 text-center">
+                    <td colspan="7" class="px-4 py-16 text-center">
                         <div class="flex flex-col items-center justify-center gap-2">
-                            <span class="text-[13px] font-medium text-brand-600">No patients found</span>
-                            <span class="text-[11px] text-brand-400">Try adjusting your search or filters.</span>
+                            <span class="text-[13px] font-medium text-brand/60">No patients found</span>
+                            <span class="text-[11px] text-brand/40">Try adjusting your search or filters.</span>
                         </div>
                     </td>
                 </tr>`;
@@ -325,24 +327,30 @@ function renderTable() {
                             : `<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-bold font-display shadow-sm">${p.initials}</div>`
                         }
                         <div>
-                            <a href="${basePath}/Patients/Details?id=${p.id || ''}" class="text-[13.5px] font-semibold text-brand-900 hover:text-primary transition-colors block leading-tight">
+                            <a href="${basePath}/Patients/Details?id=${p.id || ''}" class="text-[13.5px] font-semibold text-brand hover:text-primary transition-colors block leading-tight">
                                 ${p.firstName} ${p.lastName}
                             </a>
-                            <span class="text-[10px] font-mono text-brand-400 uppercase tracking-tight">#P-${(p.id || "00000").slice(0, 5)}</span>
+                            <span class="text-[10px] font-mono text-brand/40 uppercase tracking-tight">#P-${(p.id || "00000").slice(0, 5)}</span>
                         </div>
                     </div>
                 </td>
                 <td class="px-4 py-3.5">
                     <div class="flex flex-col">
-                        <span class="text-[12.5px] text-brand-600 font-medium">${p.age || "N/A"} yrs</span>
-                        <span class="text-[10.5px] text-brand-400 capitalize">${p.sex || "Not Specified"}</span>
+                        <span class="text-[12.5px] text-brand/70 font-medium">${p.email || "N/A"}</span>
+                        <span class="text-[10.5px] text-brand/40 font-mono tracking-tighter">${p.phone || "No Phone"}</span>
                     </div>
                 </td>
-                <td class="px-4 py-3.5 text-[12.5px] text-brand-500 font-medium whitespace-nowrap">${p.lastVisit}</td>
-                <td class="px-4 py-3.5 text-[12.5px] text-brand-500 font-medium">
+                <td class="px-4 py-3.5">
+                    <div class="flex flex-col">
+                        <span class="text-[12.5px] text-brand/60 font-medium">${p.age || "N/A"} yrs</span>
+                        <span class="text-[10.5px] text-brand/40 capitalize">${p.sex || "Not Specified"}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3.5 text-[12.5px] text-brand/50 font-medium whitespace-nowrap">${p.lastVisit}</td>
+                <td class="px-4 py-3.5 text-[12.5px] text-brand/50 font-medium">
                     <div class="flex items-center gap-1.5">
                     <div class="w-1.5 h-1.5 rounded-full ${p.assignedDoctor !== "No Record" ? "bg-blue-400" : "bg-slate-300"}"></div>
-                    <span class="text-[12.5px] font-medium text-brand-600">${p.assignedDoctor}</span>
+                    <span class="text-[12.5px] font-medium text-brand/60">${p.assignedDoctor}</span>
                     </div>
                 </td>
                 <td class="px-4 py-3.5">
@@ -363,11 +371,12 @@ function renderTable() {
                            class="inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-bold text-primary hover:bg-primary/5 rounded-md transition-all">
                            View Profile
                         </a>
+                        ${role === 'doctor' ? '' : `
                         <div class="relative action-dropdown">
-                            <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
+                            <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand/40 transition-colors">
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
-                            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
+                            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-[60] overflow-hidden">
                                 <div class="py-1">
                                     <button data-resend="${p.id}" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
                                         <i class="fa-solid fa-paper-plane w-4"></i> Resend Invite
@@ -377,7 +386,7 @@ function renderTable() {
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div>`}
                     </div>
                 </td>
             </tr>`,
@@ -403,7 +412,7 @@ function renderPagination(totalPages, start) {
 
     let btns = `
                 <button onclick="setPage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""} 
-                    class="p-1.5 rounded-md border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                    class="p-1.5 rounded-md border border-slate-200 text-brand/50 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>`;
 
@@ -414,14 +423,14 @@ function renderPagination(totalPages, start) {
       }
       btns += `
                     <button onclick="setPage(${i})" 
-                        class="min-w-[32px] h-8 text-[11px] font-bold rounded-md transition-all ${i === currentPage ? "bg-primary text-white shadow-sm" : "border border-slate-200 text-brand-500 hover:bg-slate-50"}">
+                        class="min-w-[32px] h-8 text-[11px] font-bold rounded-md transition-all ${i === currentPage ? "bg-primary text-white shadow-sm" : "border border-slate-200 text-brand/50 hover:bg-slate-50"}">
                         ${i}
                     </button>`;
     }
 
     btns += `
                 <button onclick="setPage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""} 
-                    class="p-1.5 rounded-md border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                    class="p-1.5 rounded-md border border-slate-200 text-brand/50 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>`;
 

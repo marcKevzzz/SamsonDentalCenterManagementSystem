@@ -54,6 +54,8 @@ public class SignupModel : PageModel
             missingFields.Add("Password");
         if (Input.DateOfBirth == null)
             missingFields.Add("Date of Birth");
+        else if (Input.DateOfBirth > DateTime.Today.AddMonths(-6))
+            return Fail("Patient must be at least 6 months old.");
 
         if (string.IsNullOrWhiteSpace(Input.PhoneNumber))
             missingFields.Add("Phone Number");

@@ -226,7 +226,7 @@ function initGalleryPin() {
       start: "top top",
       // On mobile, we reduce the scroll distance or disable pinning if preferred
       // but let's just make it shorter for now.
-      end: isMobile ? "+=300%" : "+=800%",
+      end: "+=800%",
       pin: true, // Only pin on desktop to avoid weird mobile scroll behavior
       scrub: 1.5,
       anticipatePin: 1,
@@ -291,14 +291,14 @@ function initReviewsPin() {
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      end: isMobile ? "+=150%" : "+=500%",
+      end: isMobile ? "+=850%" : "+=500%",
       pin: true,
       scrub: 1,
     },
   });
 
-  tl.to(track1, { x: isMobile ? "-300%" : "-50%", duration: isMobile ? 5 : 3, ease: "none" }, 0);
-  tl.to(track2, { x: isMobile ? "0%" : "50%", duration: isMobile ? 5 : 3, ease: "none" }, 0);
+  tl.to(track1, { x: isMobile ? "-350%" : "-50%", duration: isMobile ? 6 : 3, ease: "none" }, 0);
+  tl.to(track2, { x: isMobile ? "0%" : "50%", duration: isMobile ? 6 : 3, ease: "none" }, 0);
 
   // Scale cards on active
   gsap.utils.toArray(".review-card").forEach((card) => {

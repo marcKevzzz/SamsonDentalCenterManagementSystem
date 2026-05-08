@@ -1,4 +1,37 @@
+- **Date**: 2026-05-08 (Inquiry UI Logic & Compilation Fixes)
+- **Inquiry Portal UX Refinement**:
+  - **Dynamic Profile Resolution**: Implemented "Other Party" logic in `adminInquiries.js` to ensure staff members see the recipient's profile (sender vs receiver) in the sidebar and header.
+  - **Data Hydration**: Updated `InquiryService.cs` and `Inquiry.cs` to explicitly fetch and model the `Sender` profile reference via Supabase joins.
+  - **API Projection**: Enhanced `AdminDataController.cs` to project both `patient` and `sender` profiles in inquiry DTOs, enabling correct frontend profile swapping.
+- **Stability & Compilation**:
+  - **Duplicate Method Conflict**: Resolved a compilation error in `AdminDataController.cs` caused by duplicate `UpdateLeaveStatus` method names. Renamed the legacy endpoint to `UpdateLeaveStatusLegacy`.
+  - **Build Verification**: Verified clean compilation (ignoring active file locks) and restored SignalR reactivity for staff discussions.
+- **Date**: 2026-05-08 (Portal Parity & Availability Integration)
+- **Inquiry Portal Standardization**:
+  - **Full Functional Parity**: Synchronized `Inquiries.cshtml` and `adminInquiries.js` across Admin, Doctor, and Receptionist portals.
+  - **Staff Thread Adjustments**: Modified `adminInquiries.js` to keep the patient sidebar visible for staff-to-staff threads.
+  - **Role-Based Labels**: Implemented dynamic labels in the inquiry sidebar: "Patient ID" is replaced with "Role" when viewing a staff member.
+  - **Clinical Privacy**: Conditionally hid the "View Full Medical Record" button for staff threads to maintain data privacy.
+  - **API Projection**: Updated `AdminDataController.cs` to include the `role` field in projected patient objects for inquiry sidebars.
+- **Staff Availability Integration**:
+  - **Data Seeding**: Created `20260508_SeedStaffAvailability.sql` to populate the `staff_availability` table with verified schedules for doctors.
+  - **Dynamic Schedule Rendering**: Verified that the `/api/admin/data/my-availability` endpoint correctly serves the seeded data to the "My Schedule" grid across staff portals.
+- **Codebase Cleanup**:
+  - Resolved duplicated HTML tags and script references in `Inquiries.cshtml` for the Admin and Doctor portals.
+  - Standardized script inclusions to use the centralized `adminInquiries.js` for all staff roles.
+
+- **Date**: 2026-05-08 (Database Security & Performance Optimization)
+- **Security Hardening**:
+  - **Function Isolation**: Pin critical functions (`handle_new_user`, `update_updated_at`, etc.) to the `public` search path to prevent search_path hijacking.
+  - **Trigger Security**: Revoked `EXECUTE` permissions from `anon` and `authenticated` roles on internal trigger functions like `handle_new_user`.
+  - **RLS Hardening**: Restricted overly permissive "Service Role" and "Admin Update" policies to their respective roles using explicit identity checks.
+- **Performance Optimization**:
+  - **RLS Initialization Plan**: Wrapped `auth.uid()` and `auth.role()` calls in `(SELECT ...)` subqueries across all major tables (`profiles`, `appointments`, `payments`, `reviews`) to enable Postgres execution plan caching.
+  - **New Indexes**: Added B-tree indexes to `created_at` and `staff_type` columns across 6 high-traffic tables to optimize sorting and filtering performance.
+- **Storage Security**: Tightened `clinic-photos` bucket security by removing unnecessary `SELECT` listing policies while maintaining public access for object URLs.
+
 - **Date**: 2026-05-04 (Appointment Refactor: Split Patient Names)
+
 - **Database & Model Refactoring**:
   - **Split Patient Name**: Successfully refactored the monolithic `patient_name` field into `patient_first_name` and `patient_last_name` across the entire stack.
   - **Migration**: Created `20260504_SplitAppointmentPatientName.sql` to safely migrate data and update the `appointments` table schema.

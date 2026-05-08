@@ -34,7 +34,7 @@ function initDashboardEvents() {
     if (btnWeek && btnMonth) {
         btnWeek.addEventListener('click', () => {
             btnWeek.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white";
-            btnMonth.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors";
+            btnMonth.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand/50 hover:bg-slate-200 transition-colors";
             if (DASHBOARD_DATA?.stats?.weeklyVisits) {
                 initVisitsChart(DASHBOARD_DATA.stats.weeklyVisits);
             }
@@ -42,7 +42,7 @@ function initDashboardEvents() {
 
         btnMonth.addEventListener('click', () => {
             btnMonth.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-primary text-white";
-            btnWeek.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand-500 hover:bg-slate-200 transition-colors";
+            btnWeek.className = "px-3 py-1 text-[10.5px] font-medium rounded-lg bg-slate-100 text-brand/50 hover:bg-slate-200 transition-colors";
             if (DASHBOARD_DATA?.stats?.monthlyVisits) {
                 initVisitsChart(DASHBOARD_DATA.stats.monthlyVisits);
             }
@@ -130,7 +130,7 @@ function hydrateDashboard(data) {
                             </div>
                         </td>
                         <td class="px-4 py-3 text-[12.5px] font-medium">${appt.serviceName}</td>
-                        <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap font-medium">${appt.appointmentTime}</td>
+                        <td class="px-4 py-3 text-[12px] text-brand/50 whitespace-nowrap font-medium">${appt.appointmentTime}</td>
                         <td class="px-4 py-3">
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusClass} uppercase tracking-wider">
                                 ${appt.status}
@@ -167,10 +167,10 @@ function hydrateDashboard(data) {
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex justify-between items-start gap-2">
-                            <span class="text-[11.5px] font-bold text-brand-900 truncate">${log.userName}</span>
+                            <span class="text-[11.5px] font-bold text-brand truncate">${log.userName}</span>
                             <span class="text-[9px] text-slate-400 font-medium whitespace-nowrap">${timeAgo(log.createdAt)}</span>
                         </div>
-                        <p class="text-[10.5px] text-brand-500 leading-snug">${log.action}: <span class="text-brand-400 font-medium">${log.details}</span></p>
+                        <p class="text-[10.5px] text-brand/50 leading-snug">${log.action}: <span class="text-brand/40 font-medium">${log.details}</span></p>
                     </div>
                 </div>`;
             }).join('');
@@ -193,9 +193,9 @@ function hydrateDashboard(data) {
                 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-[12.5px] font-bold text-brand-900">${leave.staff_name || 'Staff'}</td>
-                        <td class="px-4 py-3 text-[12px] font-medium text-brand-500">${leave.leave_type}</td>
-                        <td class="px-4 py-3 text-[12px] text-brand-500 whitespace-nowrap">${sDate} - ${eDate}</td>
+                        <td class="px-4 py-3 text-[12.5px] font-bold text-brand">${leave.staff_name || 'Staff'}</td>
+                        <td class="px-4 py-3 text-[12px] font-medium text-brand/50">${leave.leave_type}</td>
+                        <td class="px-4 py-3 text-[12px] text-brand/50 whitespace-nowrap">${sDate} - ${eDate}</td>
                         <td class="px-4 py-3 text-[11px] text-slate-500 truncate max-w-[150px]" title="${leave.reason || ''}">${leave.reason || '-'}</td>
                         <td class="px-4 py-3 text-center">
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-orange-50 text-orange-600 border-orange-100 uppercase tracking-wider">
@@ -237,7 +237,7 @@ function hydrateDashboard(data) {
                             <span class="text-[12.5px] font-bold text-brand truncate">${inq.fullName}</span>
                             <span class="text-[9px] text-slate-400 font-medium whitespace-nowrap">${timeAgo(inq.createdAt)}</span>
                         </div>
-                        <p class="text-[11px] text-brand-500 line-clamp-1 mt-0.5">${inq.message}</p>
+                        <p class="text-[11px] text-brand/50 line-clamp-1 mt-0.5">${inq.message}</p>
                     </div>
                 </a>
             `).join('');

@@ -197,8 +197,8 @@ export async function confirmBooking() {
             return;
         }
 
-        // Success — go to step 5
-        if (loggedIn || STATE.isWaitlist) {
+        // Success — decide where to go
+        if (!result.needsConfirmation) {
             STATE.ref  = result.refNumber ?? "";
             STATE.step = 5;
             showPanel(5, "forward");

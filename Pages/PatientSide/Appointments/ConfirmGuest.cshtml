@@ -5,63 +5,107 @@
     ViewData["HideNav"] = true;
 }
 
-<div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-    <div class="max-w-md w-full">
-        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-brand transition-colors mb-6 font-body text-sm no-underline">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<div class="min-h-screen bg-white lg:bg-[#FAFAFA] flex items-center justify-center p-4">
+    <div class="max-w-[440px] w-full">
+        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-brand transition-colors mb-8 font-body text-sm no-underline group">
+            <svg class="transition-transform group-hover:x-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6" />
             </svg>
             Cancel and Return Home
         </a>
         
-        <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-brand/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-calendar-check text-brand text-2xl"></i>
-            </div>
-            <h1 class="brand-font text-2xl font-bold text-slate-900">Confirm Appointment</h1>
-            <p class="text-slate-500 text-sm mt-2">
-                We've sent a verification code to <br>
-                <span class="font-semibold text-slate-700">@Model.Email</span>
-            </p>
-        </div>
-
-        <form method="post" class="space-y-6">
-            <input type="hidden" asp-for="Email" />
-            <input type="hidden" asp-for="Token" />
-
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 text-center">Enter 6-Digit Code</label>
-                <div class="flex justify-center gap-2" id="otp-inputs">
-                    @for (int i = 0; i < 6; i++)
-                    {
-                        <input type="text" maxlength="1" 
-                               class="w-12 h-14 text-center text-xl font-bold border-2 border-slate-200 rounded-xl focus:border-brand focus:ring-0 transition-all outline-none"
-                               oninput="updateFullCode()"
-                               onkeyup="moveNext(this, @i)" onkeydown="moveBack(event, this, @i)" />
-                    }
+        <div class="bg-white lg:rounded-[2rem] lg:shadow-[0_24px_80px_rgba(0,0,0,0.06)] p-8 lg:p-12 border-0 lg:border border-slate-200/60">
+            <div class="text-center mb-10">
+                <div class="w-16 h-16 bg-brand/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-calendar-check text-brand text-2xl"></i>
                 </div>
-                <input type="hidden" asp-for="Code" id="full-code" />
+                <h1 class="brand-font text-3xl font-bold text-slate-900 tracking-tight">Confirm</h1>
+                <p class="text-slate-500 text-[15px] mt-3 leading-relaxed">
+                    Enter the 6-digit code we sent to <br>
+                    <span class="font-medium text-slate-900">@Model.Email</span>
+                </p>
             </div>
 
-            @if (TempData["Error"] != null)
-            {
-                <div class="bg-red-50 text-red-600 text-xs p-3 rounded-xl flex items-center gap-2">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    @TempData["Error"]
-                </div>
-            }
+            <form method="post" class="space-y-8">
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="Token" />
 
-            <button type="submit" class="w-full bg-brand text-white font-bold py-4 rounded-xl hover:bg-primary transition-all shadow-lg shadow-brand/20">
-                Confirm Appointment ✓
-            </button>
-        </form>
+                <div class="space-y-4">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center">Security Code</label>
+                    <div class="flex justify-between gap-2" id="otp-inputs">
+                        @for (int i = 0; i < 6; i++)
+                        {
+                            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                                   class="w-full h-14 sm:h-16 text-center text-2xl font-bold border-2 border-slate-100 bg-slate-50/50 rounded-xl focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all duration-200 outline-none"
+                                   oninput="moveNext(this, @i)" onkeydown="moveBack(event, this, @i)" />
+                        }
+                    </div>
+                    <input type="hidden" asp-for="Code" id="full-code" />
+                </div>
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="bg-red-50 text-red-600 text-sm p-4 rounded-xl flex items-center gap-3 border border-red-100 animate-shake">
+                        <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+                        <p>@TempData["Error"]</p>
+                    </div>
+                }
+
+                <button type="submit" class="w-full bg-brand text-white font-bold py-4 rounded-xl hover:bg-primary transition-all duration-300 shadow-lg shadow-brand/20 active:scale-[0.98]">
+                    Confirm Appointment ✓
+                </button>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputs = document.querySelectorAll('#otp-inputs input');
+        
+        // Handle Paste
+        inputs.forEach((input, index) => {
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').trim();
+                if (!/^\d+$/.test(pasteData)) return; // Only numbers
+                
+                const digits = pasteData.split('').slice(0, 6);
+                digits.forEach((digit, i) => {
+                    if (inputs[i]) {
+                        inputs[i].value = digit;
+                    }
+                });
+                
+                // Focus the last input or the one after the pasted digits
+                const nextFocus = Math.min(digits.length, 5);
+                inputs[nextFocus].focus();
+                updateFullCode();
+            });
+
+            // Handle multi-character input (for mobile browsers that don't trigger 'paste' correctly)
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value.length > 1) {
+                    const digits = value.replace(/\D/g, '').split('').slice(0, 6);
+                    digits.forEach((digit, i) => {
+                        const idx = index + i;
+                        if (inputs[idx]) {
+                            inputs[idx].value = digit;
+                        }
+                    });
+                    const nextFocus = Math.min(index + digits.length, 5);
+                    inputs[nextFocus].focus();
+                }
+                updateFullCode();
+            });
+        });
+    });
+
     function moveNext(el, index) {
+        // Ensure only numbers
+        el.value = el.value.replace(/[^0-9]/g, '');
+
         if (el.value.length === 1 && index < 5) {
             el.parentElement.children[index + 1].focus();
         }

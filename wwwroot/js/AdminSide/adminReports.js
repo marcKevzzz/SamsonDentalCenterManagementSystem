@@ -150,11 +150,11 @@ function renderHeatmap(heatmap) {
         html += `
         <div>
             <div class="flex justify-between text-[11px] mb-1">
-                <span class="text-brand-500 truncate pr-2">${location}</span>
+                <span class="text-brand/50 truncate pr-2">${location}</span>
                 <span class="font-bold text-brand">${count}</span>
             </div>
             <div class="h-1.5 rounded-full bg-slate-100">
-                <div class="h-1.5 rounded-full bg-brand-500 opacity-70" style="width: ${pct}%"></div>
+                <div class="h-1.5 rounded-full bg-brand/50 opacity-70" style="width: ${pct}%"></div>
             </div>
         </div>`;
     }
@@ -175,7 +175,7 @@ function renderProviderTable(providers) {
             <td class="px-4 py-3">
                 <div class="font-bold text-[12px] text-brand">${p.doctorName}</div>
             </td>
-            <td class="px-4 py-3 text-[12px] text-brand-500 font-medium">${p.totalHoursBooked} hrs</td>
+            <td class="px-4 py-3 text-[12px] text-brand/50 font-medium">${p.totalHoursBooked} hrs</td>
             <td class="px-4 py-3">
                 <span class="inline-block px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-bold">
                     ${p.avgApptsPerDay} / day

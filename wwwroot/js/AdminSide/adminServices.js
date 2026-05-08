@@ -181,11 +181,11 @@ function cardHTML(s) {
         <div class="flex items-center gap-2">
           <span class="px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold border border-slate-100">${s.category}</span>
         </div>
-        <span class="text-[12px] font-bold text-brand-900">₱${Number(s.price).toLocaleString()}</span>
+        <span class="text-[12px] font-bold text-brand">₱${Number(s.price).toLocaleString()}</span>
       </div>
 
-      <h4 class="text-[14px] font-bold text-brand-900 mb-1 truncate">${s.name}</h4>
-      <p class="text-[11.5px] text-brand-400 line-clamp-2 leading-relaxed mb-4 flex-1">${s.tagline}</p>
+      <h4 class="text-[14px] font-bold text-brand mb-1 truncate">${s.name}</h4>
+      <p class="text-[11.5px] text-brand/40 line-clamp-2 leading-relaxed mb-4 flex-1">${s.tagline}</p>
 
       <div class="flex items-center justify-between pt-3 border-t border-slate-100">
         <span class="text-[11px] text-slate-400 flex items-center gap-1.5">

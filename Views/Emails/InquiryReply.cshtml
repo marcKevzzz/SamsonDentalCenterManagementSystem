@@ -1,43 +1,24 @@
 @using System
 @{
-    Layout = null;
+    Layout = "_EmailLayout";
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: sans-serif; line-height: 1.6; color: #333; background-color: #f8fafc; margin: 0; padding: 20px; }
-        .container { max-width: 520px; margin: 0 auto; background-color: #fff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; }
-        .header { background-color: #3b82f6; padding: 28px 32px; color: #fff; }
-        .content { padding: 28px 32px; }
-        .message-box { background-color: #f1f5f9; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; border-left: 4px solid #3b82f6; }
-        .footer { border-top: 1px solid #e2e8f0; padding: 16px 32px; background-color: #f8fafc; text-align: center; font-size: 11px; color: #94a3b8; }
-        .button { display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1 style="margin:0; font-size: 20px;">Samson Dental Center</h1>
-            <p style="margin:4px 0 0; color:#bfdbfe; font-size: 13px;">New Reply to Your Inquiry</p>
-        </div>
-        <div class="content">
-            <p>Hi <strong>@Model.Name</strong>,</p>
-            <p>Our staff has replied to your inquiry regarding <strong>"@Model.Subject"</strong>:</p>
 
-            <div class="message-box">
-                <p style="margin: 0; font-size: 13px; font-style: italic;">"@Model.Message"</p>
-            </div>
-            
-            <p style="margin-bottom: 24px;">You can view the full conversation and reply back by clicking the button below:</p>
-            
-            <div style="text-align: center;">
-                <a href="@Model.Link" class="button">View Conversation</a>
-            </div>
-        </div>
-        <div class="footer">
-            &copy; @DateTime.Now.Year Samson Dental Center. All rights reserved.
-        </div>
+<div class="header blue">
+    <h1>Samson Dental</h1>
+    <p>New Reply to Your Inquiry</p>
+</div>
+
+<div class="content">
+    <h2>Hi @Model.Name,</h2>
+    <p>Our staff has replied to your inquiry regarding <strong>"@Model.Subject"</strong>:</p>
+
+    <div class="details-box" style="border-left: 4px solid #2563eb;">
+        <p style="margin: 0; font-size: 13px; font-style: italic; color: #0f172a;">"@Model.Message"</p>
     </div>
-</body>
-</html>
+    
+    <p>You can view the full conversation and reply back by clicking the button below:</p>
+    
+    <div style="text-align: center; margin-top: 24px;">
+        <a href="@Model.Link" class="button" style="background-color: #2563eb;">View Conversation</a>
+    </div>
+</div>

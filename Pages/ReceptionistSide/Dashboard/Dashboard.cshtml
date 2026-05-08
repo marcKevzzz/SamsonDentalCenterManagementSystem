@@ -9,11 +9,11 @@
     <!-- Welcome Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h2 class="font-display text-2xl font-bold text-brand-900 tracking-tight">Welcome back, @ViewData["UserName"]</h2>
-            <p class="text-[13px] text-brand-500 mt-1">Manage clinic flow and patient appointments with ease.</p>
+            <h2 class="font-display text-2xl font-bold text-brand tracking-tight">Welcome back, @ViewData["UserName"]</h2>
+            <p class="text-[13px] text-brand/50 mt-1">Manage clinic flow and patient appointments with ease.</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="/Receptionist/Appointments" class="bg-white border border-slate-200 text-brand-900 text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">View Calendar</a>
+            <a href="/Receptionist/Appointments" class="bg-white border border-slate-200 text-brand text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-slate-50 transition-all shadow-sm">View Calendar</a>
             <a href="/Receptionist/Patients" class="bg-primary text-white text-[12.5px] font-bold px-4 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-sm">Patient Directory</a>
         </div>
     </div>
@@ -28,7 +28,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-primary uppercase tracking-wider">Patients</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-total-patients">@Model.TotalPatients</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Total Patients</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Total Patients</div>
             <div class="text-[11px] text-emerald-600 mt-2 font-bold" id="stat-patients-trend">Registered in system</div>
         </div>
         
@@ -40,7 +40,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 uppercase tracking-wider">Active</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-active-doctors">@Model.ActiveDoctorsCount</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Doctors Available</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Doctors Available</div>
             <div class="text-[11px] text-emerald-600 mt-2 font-bold" id="stat-doctors-trend">On duty today</div>
         </div>
 
@@ -52,7 +52,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-600 uppercase tracking-wider">Arrived</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-today-appts">@Model.ArrivedTodayCount</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Patients Arrived</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Patients Arrived</div>
             <div class="text-[11px] text-red-500 mt-2 font-bold" id="stat-appts-trend">Today's visits</div>
         </div>
 
@@ -64,7 +64,7 @@
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 uppercase tracking-wider">Month</span>
             </div>
             <div class="font-display text-3xl font-bold text-brand tracking-tight" id="stat-monthly-revenue">₱@Model.MonthlyRevenue.ToString("N0")</div>
-            <div class="text-[13px] font-medium text-brand-500 mt-1">Monthly Billing</div>
+            <div class="text-[13px] font-medium text-brand/50 mt-1">Monthly Billing</div>
             <div class="text-[11px] text-emerald-600 mt-2 font-bold" id="stat-revenue-trend">Real-time stats</div>
         </div>
     </div>
@@ -75,10 +75,10 @@
             <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden shadow-sm flex flex-col">
                 <div class="px-6 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
                     <div>
-                        <h3 class="font-display font-bold text-brand-900 text-lg tracking-tight">Incoming Schedule</h3>
-                        <p class="text-[12px] text-brand-400 mt-0.5">Today's confirmed appointments at a glance.</p>
+                        <h3 class="font-display font-bold text-brand text-lg tracking-tight">Incoming Schedule</h3>
+                        <p class="text-[12px] text-brand/40 mt-0.5">Today's confirmed appointments at a glance.</p>
                     </div>
-                    <a href="/Receptionist/Appointments" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-brand-600 hover:bg-slate-50 transition-all uppercase tracking-wider">View Calendar</a>
+                    <a href="/Receptionist/Appointments" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-brand/60 hover:bg-slate-50 transition-all uppercase tracking-wider">View Calendar</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -103,8 +103,8 @@
                 <div class="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-8">
                         <div>
-                            <h3 class="font-display font-bold text-brand-900 text-lg tracking-tight">Weekly Visits</h3>
-                            <p class="text-[12px] text-brand-400">Patient traffic trend analysis</p>
+                            <h3 class="font-display font-bold text-brand text-lg tracking-tight">Weekly Visits</h3>
+                            <p class="text-[12px] text-brand/40">Patient traffic trend analysis</p>
                         </div>
                     </div>
                     <div class="h-64">
@@ -112,8 +112,8 @@
                     </div>
                 </div>
                 <div class="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm">
-                    <h3 class="font-display font-bold text-brand-900 text-lg tracking-tight mb-1">Department Load</h3>
-                    <p class="text-[12px] text-brand-400 mb-8">Service distribution across specialties</p>
+                    <h3 class="font-display font-bold text-brand text-lg tracking-tight mb-1">Department Load</h3>
+                    <p class="text-[12px] text-brand/40 mb-8">Service distribution across specialties</p>
                     <div class="h-64 flex justify-center">
                         <canvas id="departmentChart"></canvas>
                     </div>
@@ -127,10 +127,10 @@
             <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-brand/5">
                     <div>
-                        <h3 class="font-display font-bold text-brand-900">Unread Inquiries</h3>
-                        <p class="text-[10px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Latest Messages</p>
+                        <h3 class="font-display font-bold text-brand">Unread Inquiries</h3>
+                        <p class="text-[10px] text-brand/40 mt-0.5 uppercase tracking-widest font-bold">Latest Messages</p>
                     </div>
-                    <a href="/Receptionist/Inquiries" class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-400 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
+                    <a href="/Receptionist/Inquiries" class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand/40 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                     </a>
                 </div>
@@ -144,8 +144,8 @@
             <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h3 class="font-display font-bold text-brand-900">Clinic Pulse</h3>
-                        <p class="text-[10px] text-brand-400 mt-0.5 uppercase tracking-widest font-bold">Recent Updates</p>
+                        <h3 class="font-display font-bold text-brand">Clinic Pulse</h3>
+                        <p class="text-[10px] text-brand/40 mt-0.5 uppercase tracking-widest font-bold">Recent Updates</p>
                     </div>
                 </div>
                 <div id="dashboard-activity-body" class="p-2 space-y-2 overflow-y-auto max-h-[400px]">
@@ -189,16 +189,16 @@
 
 <!-- Leave Modal (Reuse existing logic) -->
 <div id="leave-modal" class="fixed inset-0 z-[1000] hidden">
-    <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-md" onclick="closeLeaveModal()"></div>
+    <div class="absolute inset-0 bg-brand/40 backdrop-blur-md" onclick="closeLeaveModal()"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto flex flex-col overflow-hidden">
-            <div class="p-6 bg-brand-900 text-white">
+            <div class="p-6 bg-brand text-white">
                 <h3 class="font-display font-bold text-xl">Apply for Leave</h3>
                 <p class="text-white/50 text-[11px] font-bold uppercase tracking-wider">Submit request for approval</p>
             </div>
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Leave Type</label>
+                    <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Leave Type</label>
                     <select id="leave-type" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-primary/20">
                         <option value="Sick Leave">Sick Leave</option>
                         <option value="Vacation">Vacation</option>
@@ -208,21 +208,21 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Start Date</label>
+                        <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Start Date</label>
                         <input id="leave-start" type="date" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none" />
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">End Date</label>
+                        <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">End Date</label>
                         <input id="leave-end" type="date" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none" />
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-brand-500 mb-1.5 ml-1">Reason</label>
+                    <label class="block text-[11px] font-bold text-brand/50 mb-1.5 ml-1">Reason</label>
                     <textarea id="leave-reason" rows="3" class="w-full text-[13px] px-4 py-3 rounded-2xl border border-slate-100 bg-slate-50 outline-none resize-none" placeholder="Provide a brief reason..."></textarea>
                 </div>
             </div>
             <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t">
-                <button onclick="closeLeaveModal()" class="text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">Cancel</button>
+                <button onclick="closeLeaveModal()" class="text-[12px] font-bold text-brand/50 hover:text-brand transition-colors">Cancel</button>
                 <button onclick="submitLeave()" class="px-6 py-2.5 bg-primary text-white text-[12px] font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all">Submit Request</button>
             </div>
         </div>

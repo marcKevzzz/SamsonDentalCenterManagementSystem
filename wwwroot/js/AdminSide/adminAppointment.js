@@ -163,7 +163,7 @@ function hydrateDropdowns() {
         const name = profile
           ? `${displayTitle} ${profile.first_name || profile.firstName} ${profile.last_name || profile.lastName}`
           : "Unknown";
-        const specs = d.specialties ? d.specialties.join(",") : "";
+        const specs = d.specialties ? (Array.isArray(d.specialties) ? d.specialties.join(",") : d.specialties) : "";
         return `<option value="${d.id}" data-name="${name}" data-specialties="${specs}">${name}</option>`;
       }).join("");
     el.value = val;
@@ -177,7 +177,7 @@ function renderTable() {
   if (!tbody) return;
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">No appointments found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand/40">No appointments found.</td></tr>`;
     if (pagBar) pagBar.classList.add("hidden");
     return;
   }
@@ -243,6 +243,24 @@ function rowHTML(appt) {
   const status = (appt.status || "").toLowerCase();
   const idStr = `"${appt.id}"`;
 
+  let priorityBadge = "";
+  if (appt.isQueueLeader) {
+    priorityBadge = `
+      <div class="mt-1.5 flex items-center justify-center gap-1">
+        <span class="inline-flex items-center px-1.5 py-[2px] rounded text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200 tracking-tighter shadow-sm shadow-amber-900/5">
+          <svg class="w-2 h-2 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+          Priority #1
+        </span>
+      </div>`;
+  } else if (appt.hasQueueCompetition && status === "pending") {
+    priorityBadge = `
+      <div class="mt-1.5 flex items-center justify-center gap-1">
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+          Queue #${appt.queuePosition}
+        </span>
+      </div>`;
+  }
+
   let workflowBtn = "";
   if (appt.status === "pending") {
     workflowBtn = `<button onclick='confirmAppt(${idStr})' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>`;
@@ -267,40 +285,42 @@ function rowHTML(appt) {
   return `
     <tr class="group hover:bg-slate-50/80 transition-colors">
       <td class="px-4 py-4">
-        <span class="text-[10px] font-bold text-brand-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">${shortId}</span>
+        <span class="text-[10px] font-bold text-brand/40 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">${shortId}</span>
       </td>
       <td class="px-4 py-4">
         <div class="flex items-center gap-3">
           ${avatarHtml}
           <div>
-            <div class="text-[13px] font-bold text-brand-900 leading-none mb-1">${appt.patientName}</div>
-            <div class="text-[10.5px] text-brand-400">${appt.patientEmail}</div>
+            <div class="text-[13px] font-bold text-brand leading-none mb-1">${appt.patientName}</div>
+            <div class="text-[10.5px] text-brand/40">${appt.patientEmail}</div>
           </div>
         </div>
       </td>
       <td class="px-4 py-4">
-        <div class="text-[12.5px] font-medium text-brand-800">${appt.serviceName}</div>
+        <div class="text-[12.5px] font-medium text-brand/80">${appt.serviceName}</div>
       </td>
       <td class="px-4 py-4">
         ${renderSourceBadge(appt.source)}
       </td>
       <td class="px-4 py-4">
-        <div class="text-[12.5px] font-bold text-brand-900">${appt.appointmentDateFormatted}</div>
-        <div class="text-[11px] text-brand-400">${appt.appointmentTime}</div>
+        <div class="text-[12.5px] font-bold text-brand">${appt.appointmentDateFormatted}</div>
+        <div class="text-[11px] text-brand/40">${appt.appointmentTime}</div>
       </td>
       <td class="px-4 py-4 text-center">
         <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border ${config.classes} font-display uppercase tracking-wider">
           ${config.label}
         </span>
+        ${priorityBadge}
       </td>
       <td class="px-4 py-4 text-right whitespace-nowrap">
+        ${document.body.dataset.role === 'doctor' ? '' : `
         <div class="flex items-center justify-end gap-2">
           ${workflowBtn}
           <div class="inline-block text-left action-dropdown relative">
-            <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand-400 transition-colors">
+            <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand/40 transition-colors">
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
-            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
+            <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-[60] overflow-hidden">
               <div class="py-1">
                 ${status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ""}
                 ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ""}
@@ -316,7 +336,7 @@ function rowHTML(appt) {
                 ${
                   ["confirmed", "pending", "arrived"].includes(status)
                     ? `
-                  <button onclick='openEditModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-rotate w-4"></i> Reschedule</button>
+                  <button onclick='openEditModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand/60 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-rotate w-4"></i> Reschedule</button>
                   <button onclick='cancelAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-ban w-4"></i> Cancel</button>
                 `
                     : ""
@@ -326,7 +346,7 @@ function rowHTML(appt) {
               </div>
             </div>
           </div>
-        </div>
+        </div>`}
       </td>
     </tr>`;
 }
@@ -352,11 +372,11 @@ function renderSourceBadge(source) {
 
 function renderPaginationBtns(totalPages) {
   const container = document.getElementById("paginationBtns");
-  let html = `<button data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">← Prev</button>`;
+  let html = `<button data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand/50 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">← Prev</button>`;
   for (let i = 1; i <= totalPages; i++) {
-    html += `<button data-page="${i}" class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg ${i === currentPage ? "bg-primary text-white" : "border border-slate-200 text-brand-500 hover:bg-slate-50"}">${i}</button>`;
+    html += `<button data-page="${i}" class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg ${i === currentPage ? "bg-primary text-white" : "border border-slate-200 text-brand/50 hover:bg-slate-50"}">${i}</button>`;
   }
-  html += `<button data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>`;
+  html += `<button data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} class="page-btn px-2.5 py-1 text-[10.5px] font-medium rounded-lg border border-slate-200 text-brand/50 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>`;
   container.innerHTML = html;
 }
 
@@ -448,9 +468,28 @@ window.openBookModal = (skipReset = false) => {
           if (el.tagName === 'INPUT') el.readOnly = false;
       }
     });
-    
+
     const dropdown = document.getElementById('patient-search-results');
     if (dropdown) dropdown.classList.add('hidden');
+
+    // Add listeners for doctor availability
+    const svcEl = document.getElementById("book-service");
+    const dateEl = document.getElementById("book-date");
+    const timeEl = document.getElementById("book-time");
+    const updateDocs = () => {
+        const cat = svcEl.selectedOptions[0]?.dataset.category || "";
+        const dt = dateEl.value;
+        const tm = timeEl.value;
+        if (cat && dt && tm) {
+            window.fetchAvailableDoctors("book-doctor", cat, dt, tm);
+        }
+    };
+    if (svcEl && !svcEl.hasAttribute('data-bound-avail')) {
+        svcEl.setAttribute('data-bound-avail', 'true');
+        svcEl.addEventListener('change', updateDocs);
+        dateEl.addEventListener('change', updateDocs);
+        timeEl.addEventListener('change', updateDocs);
+    }
   }
 
   // Bind patient search input
@@ -611,7 +650,34 @@ window.submitBook = async () => {
 };
 
 // ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
-window.confirmAppt = (apptInput) => {
+window.fetchAvailableDoctors = async (targetId, category, date, time, currentId = null) => {
+    const sel = document.getElementById(targetId);
+    if (!sel) return;
+    
+    sel.innerHTML = '<option value="">Any available specialist</option>';
+    sel.disabled = true;
+    
+    try {
+        const res = await fetch(`/api/admin/data/available-doctors?category=${encodeURIComponent(category)}&date=${date}&time=${encodeURIComponent(time)}`);
+        const data = await res.json();
+        
+        if (data.ok && data.data) {
+            data.data.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d.id;
+                opt.textContent = d.name;
+                sel.appendChild(opt);
+            });
+            if (currentId) sel.value = currentId;
+        }
+    } catch (err) {
+        console.error("Failed to fetch available doctors", err);
+    } finally {
+        sel.disabled = false;
+    }
+};
+
+window.confirmAppt = async (apptInput) => {
   const appt = getAppt(apptInput);
   document.getElementById("confirm-appt-id").value = appt.id;
   document.getElementById("confirm-modal-message").innerHTML =
@@ -620,33 +686,18 @@ window.confirmAppt = (apptInput) => {
   const docSel = document.getElementById("confirm-doctor");
   const hint = document.getElementById("doctor-hint");
 
-  docSel.value = appt.doctorId || "";
-  const category = appt.serviceCategory
-    ? appt.serviceCategory.toLowerCase()
-    : "";
-  let shownCount = 0;
+  if (!docSel || !hint) {
+    console.warn("Confirm appointment modal elements not found in current view.");
+    showModal("confirm-modal");
+    return;
+  }
 
-  Array.from(docSel.options).forEach((opt) => {
-    if (!opt.value) return;
-    const specs = opt.dataset.specialties
-      ? opt.dataset.specialties.toLowerCase().split(",")
-      : [];
-    const isMatch =
-      !category ||
-      specs.some(
-        (s) =>
-          s.trim() === category ||
-          category.includes(s.trim()) ||
-          s.trim().includes(category),
-      );
-    opt.style.display = isMatch ? "" : "none";
-    if (isMatch) shownCount++;
-  });
-
-  hint.classList.toggle("hidden", shownCount === 0);
-  if (shownCount > 0)
-    hint.textContent = `Matching specialists for ${appt.serviceCategory} shown.`;
-
+  hint.classList.remove("hidden");
+  hint.textContent = "Checking specialist availability...";
+  
+  await window.fetchAvailableDoctors("confirm-doctor", appt.serviceCategory || "", appt.appointmentDate, appt.appointmentTime, appt.doctorId);
+  
+  hint.textContent = docSel.options.length > 1 ? `Matching specialists for ${appt.serviceCategory} shown.` : "No available specialists found for this slot!";
   showModal("confirm-modal");
 };
 
@@ -654,14 +705,28 @@ window.closeConfirmModal = () => hideModal("confirm-modal");
 
 window.submitConfirm = async () => {
   const id = document.getElementById("confirm-appt-id").value;
-  const doctorId = document.getElementById("confirm-doctor").value;
+  let doctorId = document.getElementById("confirm-doctor").value;
 
   if (!doctorId) {
-    Toast.show(
-      "Please assign a doctor to confirm this appointment.",
-      "warning",
-    );
-    return;
+    // Pick the first available doctor from the dropdown if "Any" is selected
+    const docSel = document.getElementById("confirm-doctor");
+    if (docSel && docSel.options.length > 1) {
+      // Find first option with a value
+      for (let i = 0; i < docSel.options.length; i++) {
+        if (docSel.options[i].value) {
+          doctorId = docSel.options[i].value;
+          break;
+        }
+      }
+    }
+
+    if (!doctorId) {
+      Toast.show(
+        "No available specialists found to confirm this appointment.",
+        "warning",
+      );
+      return;
+    }
   }
 
   const res = await post("/api/admin/appointments/status", {
@@ -791,8 +856,20 @@ function _setupEditModal(appt) {
   document.getElementById("edit-appt-id").value = appt.id;
   document.getElementById("edit-date").value = appt.appointmentDate;
   document.getElementById("edit-time").value = appt.appointmentTime;
-  document.getElementById("edit-doctor").value = appt.doctorId ?? "";
-  initialEditFormState = getEditFormState();
+  
+  const dateEl = document.getElementById("edit-date");
+  const timeEl = document.getElementById("edit-time");
+  const updateDocs = () => {
+      window.fetchAvailableDoctors("edit-doctor", appt.serviceCategory || "", dateEl.value, timeEl.value, appt.doctorId);
+  };
+  
+  if (!dateEl.hasAttribute('data-bound-avail')) {
+      dateEl.setAttribute('data-bound-avail', 'true');
+      dateEl.addEventListener('change', updateDocs);
+      timeEl.addEventListener('change', updateDocs);
+  }
+
+  updateDocs();
   showModal("edit-modal");
 }
 
@@ -902,7 +979,7 @@ function renderBlockedList() {
   const container = document.getElementById("blocked-dates-list");
   if (!container) return;
   if (_blockedDates.length === 0) {
-    container.innerHTML = '<p class="text-[11px] text-brand-400 italic">No dates are currently blocked.</p>';
+    container.innerHTML = '<p class="text-[11px] text-brand/40 italic">No dates are currently blocked.</p>';
     return;
   }
   container.innerHTML = _blockedDates.map(b => {
@@ -912,7 +989,7 @@ function renderBlockedList() {
       <div class="flex items-center justify-between px-3 py-2 bg-red-50 border border-red-100 rounded-xl group">
         <div>
           <span class="text-[12px] font-bold text-red-700">${label}</span>
-          ${b.reason ? `<span class="text-[10px] text-brand-400 ml-2">— ${b.reason}</span>` : ""}
+          ${b.reason ? `<span class="text-[10px] text-brand/40 ml-2">— ${b.reason}</span>` : ""}
         </div>
         <button onclick="unblockDate('${b.id}')"
           class="text-[10px] text-red-400 hover:text-red-600 font-bold px-2 py-0.5 rounded-lg hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100">
@@ -986,9 +1063,9 @@ function showConflictModal(data) {
   list.innerHTML = data.conflicts.map(c => `
     <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
       <div>
-        <div class="text-[12.5px] font-bold text-brand-900">${c.patientFirstName} ${c.patientLastName}</div>
-        <div class="text-[11px] text-brand-400">${c.serviceName || ""} · ${c.appointmentTime} · <span class="capitalize">${c.status}</span></div>
-        <div class="text-[10px] text-brand-400">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
+        <div class="text-[12.5px] font-bold text-brand">${c.patientFirstName} ${c.patientLastName}</div>
+        <div class="text-[11px] text-brand/40">${c.serviceName || ""} · ${c.appointmentTime} · <span class="capitalize">${c.status}</span></div>
+        <div class="text-[10px] text-brand/40">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
       </div>
       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase">${c.status}</span>
     </div>`).join("");

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using SamsonDentalCenterManagementSystem.Models;
 
 namespace SamsonDentalCenterManagementSystem.Services;
@@ -7,15 +8,23 @@ public class DentalServiceService
 {
     private readonly Supabase.Client _supabase;
     private readonly ActivityLogService _logs;
+    private readonly IMemoryCache _cache;
+    private const string CacheKey = "dental_services";
 
-    public DentalServiceService(Supabase.Client supabase, ActivityLogService logs)
+    public DentalServiceService(Supabase.Client supabase, ActivityLogService logs, IMemoryCache cache)
     {
         _supabase = supabase;
         _logs = logs;
+        _cache = cache;
     }
 
     public async Task<List<DentalService>> GetAll(bool activeOnly = false)
     {
+        if (_cache.TryGetValue(CacheKey, out List<DentalService>? cachedServices) && cachedServices != null)
+        {
+            return activeOnly ? cachedServices.Where(s => s.IsActive).ToList() : cachedServices;
+        }
+
         try
         {
             var query = _supabase.From<DentalService>();
@@ -25,6 +34,7 @@ public class DentalServiceService
                 .Get();
 
             var services = response.Models ?? new List<DentalService>();
+            _cache.Set(CacheKey, services, TimeSpan.FromMinutes(10));
             return activeOnly ? services.Where(s => s.IsActive).ToList() : services;
         }
         catch (Exception ex)
@@ -59,6 +69,8 @@ public class DentalServiceService
         var response = await _supabase.From<DentalService>().Insert(service);
         var created = response.Models.First();
 
+        _cache.Remove(CacheKey);
+
         await _logs.LogActionAsync(
             null,
             "created dental service",
@@ -80,6 +92,8 @@ public class DentalServiceService
         service = MapPayload(p, service);
         await _supabase.From<DentalService>().Upsert(service);
 
+        _cache.Remove(CacheKey);
+
         await _logs.LogActionAsync(
             null,
             "updated dental service",
@@ -93,6 +107,7 @@ public class DentalServiceService
     public async Task Delete(string id)
     {
         await _supabase.From<DentalService>().Where(x => x.Id == id).Delete();
+        _cache.Remove(CacheKey);
 
         await _logs.LogActionAsync(
             null,

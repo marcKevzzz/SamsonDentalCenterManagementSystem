@@ -4,6 +4,7 @@
 // nested "id" field conflicts with the parent model's "id" field.
 
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using SamsonDentalCenterManagementSystem.Models;
@@ -86,17 +87,21 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly HttpClient _http;
         private readonly string _supabaseUrl;
         private readonly string _serviceRoleKey;
+        private readonly IMemoryCache _cache;
 
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true,
         };
 
-        public DoctorService(HttpClient http, string supabaseUrl, string serviceRoleKey)
+        private const string CacheKeyActive = "active_doctors";
+
+        public DoctorService(HttpClient http, string supabaseUrl, string serviceRoleKey, IMemoryCache cache)
         {
             _http = http;
             _supabaseUrl = supabaseUrl.TrimEnd('/');
             _serviceRoleKey = serviceRoleKey;
+            _cache = cache;
         }
 
         // ── Build a pre-authorised request ────────────────────────────────────
@@ -148,6 +153,11 @@ namespace SamsonDentalCenterManagementSystem.Services
         // ── Fetch active doctors only ─────────────────────────────────────────
         public async Task<List<DoctorDto>> GetActiveWithProfilesAsync()
         {
+            if (_cache.TryGetValue(CacheKeyActive, out List<DoctorDto>? cachedDoctors) && cachedDoctors != null)
+            {
+                return cachedDoctors;
+            }
+
             var req = BuildRequest(HttpMethod.Get,
                 "/doctors?select=*,profile:profiles(*)&is_active=eq.true&order=created_at.asc");
             var res = await _http.SendAsync(req);
@@ -160,6 +170,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             foreach (var d in doctors)
                 d.Availability = (avail.TryGetValue(d.Id, out var s) || avail.TryGetValue(d.Id.ToLower(), out s)) ? s : new();
 
+            _cache.Set(CacheKeyActive, doctors, TimeSpan.FromMinutes(10));
             return doctors;
         }
 
@@ -288,6 +299,8 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
+
+            _cache.Remove(CacheKeyActive);
         }
 
         // ── Set availability — bypasses RLS ──────────────────────────────────

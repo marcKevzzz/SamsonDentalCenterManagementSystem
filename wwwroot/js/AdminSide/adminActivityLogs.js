@@ -43,7 +43,7 @@
 
   function renderLogs(logs) {
     if (!logs || logs.length === 0) {
-      container.innerHTML = `<div class="py-8 text-center text-brand-500 text-[12px]">No activity logs found.</div>`;
+      container.innerHTML = `<div class="py-8 text-center text-brand/50 text-[12px]">No activity logs found.</div>`;
       return;
     }
 
@@ -78,17 +78,17 @@
                 ${log.category ? `<span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-bold uppercase ${getCategoryColor(log.category)} text-white w-fit mb-1.5 shadow-sm shadow-brand/5">${log.category}</span>` : ""}
                 <div class="text-[13px] leading-relaxed">
                   <span class="font-bold text-brand/90 text-sm">${log.userName || "Unknown"}</span>
-                  <span class="font-medium text-brand-500 mx-0.5">${log.action}</span>
-                  ${log.details ? `<span class="font-bold text-brand-700">${log.details}</span>` : ""}
+                  <span class="font-medium text-brand/50 mx-0.5">${log.action}</span>
+                  ${log.details ? `<span class="font-bold text-brand/70">${log.details}</span>` : ""}
                 </div>
              </div>
             <div class="text-right">
-              <div class="text-[11px] font-bold text-brand-900">${time}</div>
+              <div class="text-[11px] font-bold text-brand">${time}</div>
               <div class="text-[9px] font-medium text-slate-400">${date}</div>
             </div>
           </div>
           <div class="flex items-center justify-between mt-2">
-            <div class="text-[10px] font-medium text-brand-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+            <div class="text-[10px] font-medium text-brand/40 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
               <i class="fa-solid fa-network-wired mr-1 opacity-50"></i>${log.ipAddress || "Internal"}
             </div>
             ${log.link ? `<span class="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">View details <i class="fa-solid fa-arrow-right ml-1"></i></span>` : ""}
@@ -106,7 +106,7 @@
       case "inquiry": return "bg-orange-500";
       case "system": return "bg-slate-500";
       case "auth": return "bg-violet-500";
-      default: return "bg-brand-500";
+      default: return "bg-brand/50";
     }
   }
 
@@ -124,7 +124,7 @@
     if (act.includes("login") || act.includes("auth")) {
       return { bg: "bg-violet-50", text: "text-violet-600 border border-violet-100" };
     }
-    return { bg: "bg-slate-50", text: "text-slate-600 border border-slate-100" };
+    return { bg: "bg-primary/10", text: "text-slate-600 border border-slate-100" };
   }
 
   searchInput?.addEventListener("input", applyFilters);

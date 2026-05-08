@@ -15,14 +15,14 @@ async function loadMyAvailability() {
 
         // Admin role — no personal availability
         if (json.message === 'admin') {
-            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand-400 text-[12px]"><i class="fa-solid fa-circle-info mr-2"></i>Availability schedules are managed per doctor and receptionist.</div>';
+            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand/40 text-[12px]"><i class="fa-solid fa-circle-info mr-2"></i>Availability schedules are managed per doctor and receptionist.</div>';
             return;
         }
 
         const data = json.data || [];
         
         if (data.length === 0) {
-            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand-400 text-[12px]"><i class="fa-solid fa-calendar-xmark mr-2"></i>No availability schedule set. Contact an admin to configure your schedule.</div>';
+            container.innerHTML = '<div class="col-span-full py-8 text-center text-brand/40 text-[12px]"><i class="fa-solid fa-calendar-xmark mr-2"></i>No availability schedule set. Contact an admin to configure your schedule.</div>';
             return;
         }
 
@@ -36,7 +36,7 @@ async function loadMyAvailability() {
                     </div>
                     <div>
                         <div class="text-[14px] font-bold text-brand">${days[slot.dayOfWeek]}</div>
-                        <div class="text-[11px] font-bold text-brand-400 uppercase tracking-widest">${slot.startTime} - ${slot.endTime}</div>
+                        <div class="text-[11px] font-bold text-brand/40 uppercase tracking-widest">${slot.startTime} - ${slot.endTime}</div>
                     </div>
                 </div>
                 <div class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
@@ -59,7 +59,7 @@ async function loadMyLeaves() {
         const json = await res.json();
         
         if (!json.ok || json.data.length === 0) {
-            container.innerHTML = '<div class="py-8 text-center text-brand-400 text-[12px]">No leave requests found.</div>';
+            container.innerHTML = '<div class="py-8 text-center text-brand/40 text-[12px]">No leave requests found.</div>';
             return;
         }
 
@@ -74,7 +74,7 @@ async function loadMyLeaves() {
                         <div class="text-[13px] font-bold text-brand">${leave.leave_type || leave.leaveType}</div>
                         <span class="px-2 py-0.5 rounded-md border ${statusClass} text-[9px] font-bold uppercase tracking-wider">${leave.status}</span>
                     </div>
-                    <div class="flex items-center gap-2 text-[11px] text-brand-400">
+                    <div class="flex items-center gap-2 text-[11px] text-brand/40">
                         <i class="fa-regular fa-calendar"></i>
                         <span>${new Date(leave.start_date || leave.startDate).toLocaleDateString()} - ${new Date(leave.end_date || leave.endDate).toLocaleDateString()}</span>
                     </div>

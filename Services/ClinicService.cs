@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using SamsonDentalCenterManagementSystem.Models;
 using Supabase;
 
@@ -7,16 +8,24 @@ namespace SamsonDentalCenterManagementSystem.Services
     {
         private readonly Supabase.Client _supabase;
         private readonly ActivityLogService _logs;
+        private readonly IMemoryCache _cache;
         private const string DefaultSettingsId = "00000000-0000-0000-0000-000000000001";
+        private const string CacheKey = "clinic_settings";
 
-        public ClinicService(Supabase.Client supabase, ActivityLogService logs)
+        public ClinicService(Supabase.Client supabase, ActivityLogService logs, IMemoryCache cache)
         {
             _supabase = supabase;
             _logs = logs;
+            _cache = cache;
         }
 
         public async Task<ClinicSettings> GetSettingsAsync()
         {
+            if (_cache.TryGetValue(CacheKey, out ClinicSettings? cachedSettings) && cachedSettings != null)
+            {
+                return cachedSettings;
+            }
+
             try
             {
                 var response = await _supabase.From<ClinicSettings>()
@@ -28,6 +37,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 {
                     settings = new ClinicSettings { Id = DefaultSettingsId };
                 }
+
+                _cache.Set(CacheKey, settings, TimeSpan.FromMinutes(10));
                 return settings;
             }
             catch (Exception ex)
@@ -45,6 +56,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 settings.UpdatedAt = DateTime.UtcNow;
                 await _supabase.From<ClinicSettings>().Upsert(settings);
 
+                _cache.Remove(CacheKey);
                 await _logs.LogActionAsync(null, "updated clinic settings", null, null, "Settings", "/Admin/Settings");
             }
             catch (Exception ex)

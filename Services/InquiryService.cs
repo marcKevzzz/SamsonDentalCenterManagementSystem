@@ -48,18 +48,21 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Inquiry>> GetAllInquiriesAsync()
         {
-           var path = "/inquiries?select=*,patient:profiles!patient_id(*)&order=created_at.desc";
+            var path = "/inquiries?select=*,patient:profiles!patient_id(*),sender:profiles!sender_id(*)&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
 
             var json = await res.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<Inquiry>>(json, _json) ?? new();
+            
+            var result = JsonSerializer.Deserialize<List<Inquiry>>(json, _json) ?? new();
+            
+            return result;
         }
 
         public async Task<List<Inquiry>> GetInquiriesByPatientIdAsync(string patientId)
         {
-            var path = $"/inquiries?select=*,patient:profiles!patient_id(*)&patient_id=eq.{patientId}&order=created_at.desc";
+            var path = $"/inquiries?select=*,patient:profiles!patient_id(*),sender:profiles!sender_id(*)&patient_id=eq.{patientId}&order=created_at.desc";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
@@ -93,7 +96,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                     guest_first_name = inquiry.GuestFirstName,
                     guest_last_name = inquiry.GuestLastName,
                     guest_phone = inquiry.GuestPhone,
-                    is_from_staff = isFromStaff
+                    is_from_staff = isFromStaff,
+                    sender_id = senderId ?? inquiry.PatientId
                 }),
                 Encoding.UTF8, "application/json");
 

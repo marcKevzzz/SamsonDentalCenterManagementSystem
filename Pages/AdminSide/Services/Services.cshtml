@@ -7,7 +7,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
 
 <!-- Data injected via AdminStore -->
 
-  <div id="page-services" class="page p-4 md:p-6 !pr-0 max-h-[calc(100vh-60px)] relative overflow-hidden">
+  <div id="page-services" class="page p-4 md:p-6 !pr-0 relative overflow-hidden">
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5 mr-4 md:mr-6">
       <div>
@@ -59,7 +59,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
       </span>
     </div>
 
-    <div id="servicesGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[calc(100vh-265px)] overflow-x-auto pr-4 md:pr-6">
+    <div id="servicesGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4  pr-4 md:pr-6">
       <div class="col-span-full py-16 text-center" id="services-loading">
         <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4 text-primary">
           <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
@@ -129,7 +129,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="flex items-center gap-4 py-3 px-4 rounded-xl bg-slate-50/50 border border-slate-100">
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="mIsActive" class="sr-only peer" checked>
-                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-[20px] rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-[20px] rtl:peer-checked:after:x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                     <span class="ms-3 text-[12px] font-medium text-brand/70">Active</span>
                   </label>
                 </div>
@@ -139,7 +139,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
                 <div class="flex items-center gap-4 py-3 px-4 rounded-xl bg-slate-50/50 border border-slate-100">
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="mNeedsXray" class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-[20px] rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-[20px] rtl:peer-checked:after:x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                     <span class="ms-3 text-[12px] font-medium text-brand/70">Required</span>
                   </label>
                 </div>
@@ -171,7 +171,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
 
             <div class="flex items-center gap-6 p-4 rounded-xl bg-slate-50/50 border border-slate-100">
               <div id="heroPreview" class="w-24 h-24 rounded-xl bg-white border border-slate-100 shadow-sm overflow-hidden flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-image text-brand-100 text-3xl"></i>
+                <i class="fa-solid fa-image text-brand/10 text-3xl"></i>
               </div>
               <div class="flex-1 space-y-2">
                 <input type="hidden" id="mHero" />
@@ -284,7 +284,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
             Discard Changes
           </button>
           <button id="modalSaveBtn" 
-            class="px-8 py-3 bg-primary text-white text-[13px] font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+            class="px-8 py-3 bg-primary text-white text-[13px] font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:y-0.5 active:translate-y-0 transition-all">
             Save Service Profile
           </button>
         </div>
@@ -306,7 +306,7 @@ var services = Model.Services ?? new List<SamsonDentalCenterManagementSystem.Mod
           </p>
           <div class="flex flex-col gap-2">
             <button id="confirmDeleteBtn"
-              class="w-full py-3.5 bg-red-500 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+              class="w-full py-3.5 bg-red-500 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:y-0.5 active:translate-y-0 transition-all">
               Yes, Delete Service
             </button>
             <button 

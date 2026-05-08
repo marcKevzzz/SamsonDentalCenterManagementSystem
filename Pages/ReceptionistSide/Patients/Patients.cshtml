@@ -8,17 +8,17 @@
 <div id="page-patients" class="page p-4 md:p-6 space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
         <div class="animate-in fade-in slide-in-from-left duration-500">
-            <h2 class="font-display text-2xl font-bold text-brand-900 tracking-tight">Patient Registry</h2>
-            <p class="text-[13px] text-brand-500 mt-1">Search, filter, and manage all patient records.</p>
+            <h2 class="font-display text-2xl font-bold text-brand tracking-tight">Patient Registry</h2>
+            <p class="text-[13px] text-brand/50 mt-1">Search, filter, and manage all patient records.</p>
         </div>
         <div class="flex items-center gap-3 animate-in fade-in slide-in-from-right duration-500">
             <div class="relative group">
-                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[12px] group-focus-within:text-primary transition-colors"></i>
+                <i class="fa-solid fa-search absolute left-4 top-1/2 translate-half text-slate-400 text-[12px] group-focus-within:text-primary transition-colors"></i>
                 <input id="patient-search" oninput="filterPatients()" placeholder="Search by name or email..." 
                        class="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-[13px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all w-64 shadow-sm" />
             </div>
             <select id="patient-status" onchange="filterPatients()"
-                    class="bg-white border border-slate-200 text-brand-900 text-[13px] font-bold px-4 py-2.5 rounded-2xl outline-none focus:border-primary transition-all shadow-sm cursor-pointer">
+                    class="bg-white border border-slate-200 text-brand text-[13px] font-bold px-4 py-2.5 rounded-2xl outline-none focus:border-primary transition-all shadow-sm cursor-pointer">
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -32,9 +32,11 @@
                 <thead>
                     <tr class="bg-slate-50/50 border-b border-slate-100">
                         <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Patient Information</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Contacts</th>
                         <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Age / Gender</th>
                         <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Last Visit</th>
-                        <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Status</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Doctor</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display">Account Status</th>
                         <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-display text-right">Actions</th>
                     </tr>
                 </thead>
@@ -49,7 +51,7 @@
         </div>
         
         <div id="patients-pagination" class="hidden flex items-center justify-between px-8 py-5 bg-slate-50/30 border-t border-slate-100">
-            <span id="patients-info" class="text-[12px] text-brand-500 font-medium"></span>
+            <span id="patients-info" class="text-[12px] text-brand/50 font-medium"></span>
             <div id="patients-btns" class="flex items-center gap-1.5">
                 <!-- Buttons injected by adminPatient.js -->
             </div>

@@ -60,6 +60,42 @@ public class AdminDataController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("available-doctors")]
+    public async Task<IActionResult> GetAvailableDoctors(
+        [FromQuery] string category,
+        [FromQuery] DateTime date,
+        [FromQuery] string time,
+        [FromQuery] int duration = 60,
+        [FromQuery] int buffer = 15
+    )
+    {
+        try
+        {
+            var doctors = await _appointmentService.GetAvailableDoctorsForSlot(
+                category,
+                date,
+                time,
+                duration,
+                buffer
+            );
+            var dtos = doctors
+                .Select(d => new
+                {
+                    id = d.Id,
+                    name = d.Profile != null
+                        ? $"{d.Title} {d.Profile.FirstName} {d.Profile.LastName}"
+                        : "Unknown",
+                    specialties = d.Specialties,
+                })
+                .ToList();
+            return Ok(new { ok = true, data = dtos });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
     [HttpGet("appointments")]
     public async Task<IActionResult> GetAppointments()
     {
@@ -80,7 +116,30 @@ public class AdminDataController : ControllerBase
                 data = await _appointmentService.GetAllAsync();
             }
 
-            var dtos = data.Select(a => new
+            // Group pending appointments to identify FCFS queue position
+            var pendingGroups = data
+                .Where(a => a.Status.ToLower() == "pending")
+                .GroupBy(a => new { a.AppointmentDate.Date, a.AppointmentTime })
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(x => x.CreatedAt).ToList()
+                );
+
+            var dtos = data.Select(a => {
+                int? qPos = null;
+                bool isLeader = false;
+                
+                if (a.Status.ToLower() == "pending")
+                {
+                    var key = new { a.AppointmentDate.Date, a.AppointmentTime };
+                    if (pendingGroups.TryGetValue(key, out var list))
+                    {
+                        qPos = list.FindIndex(x => x.Id == a.Id) + 1;
+                        isLeader = qPos == 1 && list.Count > 1; // Only show leader if there's actually a competition
+                    }
+                }
+
+                return new
                 {
                     id = a.Id,
                     patientId = a.PatientId,
@@ -92,6 +151,7 @@ public class AdminDataController : ControllerBase
                     patientAvatarUrl = a.PatientProfile?.AvatarUrl,
                     serviceId = a.ServiceId,
                     serviceName = a.Service?.Name,
+                    serviceCategory = a.Service?.Category,
                     doctorId = a.DoctorId,
                     doctorName = a.Doctor != null
                         ? (
@@ -107,8 +167,12 @@ public class AdminDataController : ControllerBase
                     notes = a.Notes,
                     source = a.Source,
                     createdAt = a.CreatedAt,
-                })
-                .ToList();
+                    queuePosition = qPos,
+                    isQueueLeader = isLeader,
+                    hasQueueCompetition = qPos.HasValue && pendingGroups[new { a.AppointmentDate.Date, a.AppointmentTime }].Count > 1
+                };
+            }).ToList();
+
             return Ok(new { ok = true, data = dtos });
         }
         catch (Exception ex)
@@ -238,7 +302,7 @@ public class AdminDataController : ControllerBase
                     appointmentId = invoice.AppointmentId,
                     patientId = invoice.PatientId,
                     patient = invoice.Patient != null ? new {
-                        fullName = $"{invoice.Patient.FirstName} {invoice.Patient.LastName}",
+                        fullName = (invoice.Patient.FirstName + " " + invoice.Patient.LastName).Trim(),
                         email = invoice.Patient.Email,
                         phone = invoice.Patient.PhoneNumber,
                         address = invoice.Patient.Address,
@@ -330,12 +394,32 @@ public class AdminDataController : ControllerBase
         {
             var data = await _inquiryService.GetAllInquiriesAsync();
 
+            // Visibility Filtering: Transform to a "Chatting System"
             var currentUserId = User.FindFirst("sub")?.Value;
             var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
 
-            if (currentUserRole == "doctor" && !string.IsNullOrEmpty(currentUserId))
+            // Enhanced Filtering Logic
+            if (!string.IsNullOrEmpty(currentUserId))
             {
-                data = data.Where(i => i.AssignedDoctorId == currentUserId).ToList();
+                data = data.Where(i => 
+                {
+                    // 1. Internal discussions (started by staff) are private to participants
+                    if (i.IsFromStaff)
+                    {
+                        return i.PatientId == currentUserId || 
+                               i.SenderId == currentUserId || 
+                               i.AssignedDoctorId == currentUserId;
+                    }
+
+                    // 2. Patient-initiated inquiries (support tickets)
+                    if (currentUserRole == "doctor")
+                    {
+                        // Doctors ONLY see patient inquiries assigned to them
+                        return i.AssignedDoctorId == currentUserId;
+                    }
+                    // Admins and Receptionists can see all patient inquiries
+                    return true; 
+                }).ToList();
             }
 
             var dtos = data.Select(i => new
@@ -354,9 +438,11 @@ public class AdminDataController : ControllerBase
                     createdAt = i.CreatedAt,
                     updatedAt = i.UpdatedAt,
                     isFromStaff = i.IsFromStaff,
+                    senderId = i.SenderId,
                     patient = i.Patient != null
                         ? new
                         {
+                            id = i.Patient.Id,
                             firstName = i.Patient.FirstName,
                             lastName = i.Patient.LastName,
                             fullName = $"{i.Patient.FirstName} {i.Patient.LastName}",
@@ -366,7 +452,25 @@ public class AdminDataController : ControllerBase
                             phone = i.Patient.PhoneNumber,
                             dob = i.Patient.DateOfBirth,
                             sex = i.Patient.Sex,
-                            address = i.Patient.Address
+                            address = i.Patient.Address,
+                            role = i.Patient.Role
+                        }
+                        : null,
+                    sender = i.Sender != null
+                        ? new
+                        {
+                            id = i.Sender.Id,
+                            firstName = i.Sender.FirstName,
+                            lastName = i.Sender.LastName,
+                            fullName = $"{i.Sender.FirstName} {i.Sender.LastName}",
+                            avatarUrl = i.Sender.AvatarUrl,
+                            isActive = i.Sender.IsActive,
+                            email = i.Sender.Email,
+                            phone = i.Sender.PhoneNumber,
+                            dob = i.Sender.DateOfBirth,
+                            sex = i.Sender.Sex,
+                            address = i.Sender.Address,
+                            role = i.Sender.Role
                         }
                         : null,
                 })
@@ -1039,7 +1143,7 @@ public class AdminDataController : ControllerBase
     }
 
     [HttpPost("update-leave-status")]
-    public async Task<IActionResult> UpdateLeaveStatus([FromBody] LeaveStatusUpdatePayload payload)
+    public async Task<IActionResult> UpdateLeaveStatusLegacy([FromBody] LeaveStatusUpdatePayload payload)
     {
         try
         {

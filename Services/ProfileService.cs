@@ -288,7 +288,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             return publicUrl;
         }
 
-        public async void RemoveAvatar(string userId)
+        public async Task RemoveAvatar(string userId)
         {
             var profile = await _supabase.From<Profile>().Where(x => x.Id == userId).Single();
 

@@ -316,7 +316,7 @@ function toggleSidebar() {
 function openSidebar() {
   const sb = document.getElementById("sidebar");
 
-  sb.classList.remove("-translate-x-full");
+  sb.classList.remove("translate-x-full");
   sb.classList.add("translate-x-0");
 
   document.getElementById("overlay")?.classList.remove("hidden");
@@ -326,7 +326,7 @@ function openSidebar() {
 function closeSidebar() {
   const sb = document.getElementById("sidebar");
 
-  sb?.classList.add("-translate-x-full");
+  sb?.classList.add("translate-x-full");
   sb?.classList.remove("translate-x-0");
 
   document.getElementById("overlay")?.classList.add("hidden");
@@ -344,7 +344,7 @@ window.addEventListener("resize", () => {
 
   if (window.innerWidth >= 1024) {
     // Desktop mode
-    sb?.classList.remove("-translate-x-full");
+    sb?.classList.remove("translate-x-full");
     sb?.classList.add("translate-x-0");
 
     // Restore sidebar state (collapsed/expanded)

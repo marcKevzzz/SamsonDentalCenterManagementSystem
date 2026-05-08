@@ -47,8 +47,8 @@ function renderGrid() {
         <div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
           <i class="fa-solid fa-calendar-check text-slate-300 text-xl"></i>
         </div>
-        <p class="text-[13px] font-bold text-brand-400">No blocked dates</p>
-        <p class="text-[11px] text-brand-300 mt-1">All dates are open for appointments.</p>
+        <p class="text-[13px] font-bold text-brand/40">No blocked dates</p>
+        <p class="text-[11px] text-brand/30 mt-1">All dates are open for appointments.</p>
       </div>`;
     return;
   }
@@ -74,8 +74,8 @@ function renderGrid() {
             <div class="text-[13px] font-bold text-brand">${label}</div>
             <div class="flex items-center gap-2 mt-0.5">
               ${b.reason
-                ? `<span class="text-[11px] text-brand-400"><i class="fa-solid fa-message text-[9px] mr-1 text-brand-300"></i>${b.reason}</span>`
-                : `<span class="text-[11px] text-brand-300 italic">No reason provided</span>`
+                ? `<span class="text-[11px] text-brand/40"><i class="fa-solid fa-message text-[9px] mr-1 text-brand/30"></i>${b.reason}</span>`
+                : `<span class="text-[11px] text-brand/30 italic">No reason provided</span>`
               }
               ${isToday ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 uppercase ml-1">Today</span>' : ''}
               ${isPast ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 uppercase ml-1">Past</span>' : ''}
@@ -167,9 +167,9 @@ function showConflictModal(data) {
   document.getElementById("bd-conflict-list").innerHTML = data.conflicts.map(c => `
     <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
       <div>
-        <div class="text-[12.5px] font-bold text-brand-900">${c.patientName}</div>
-        <div class="text-[11px] text-brand-400">${c.serviceName || ""} · ${c.appointmentTime} · <span class="capitalize">${c.status}</span></div>
-        <div class="text-[10px] text-brand-400">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
+        <div class="text-[12.5px] font-bold text-brand">${c.patientName}</div>
+        <div class="text-[11px] text-brand/40">${c.serviceName || ""} · ${c.appointmentTime} · <span class="capitalize">${c.status}</span></div>
+        <div class="text-[10px] text-brand/40">${c.patientEmail}${c.patientPhone ? " · " + c.patientPhone : ""}</div>
       </div>
       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase">${c.status}</span>
     </div>`).join("");

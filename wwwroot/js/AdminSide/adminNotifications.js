@@ -116,7 +116,7 @@
               <h4 class="text-[12px] font-bold text-brand leading-tight">${n.title}</h4>
               <span class="text-[9px] text-slate-400 whitespace-nowrap">${time}</span>
             </div>
-            <p class="text-[11px] text-brand-500 mt-0.5">${n.message}</p>
+            <p class="text-[11px] text-brand/50 mt-0.5">${n.message}</p>
           </div>
         </div>
       </div>`;

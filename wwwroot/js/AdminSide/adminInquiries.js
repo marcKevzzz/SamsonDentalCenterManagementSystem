@@ -164,9 +164,10 @@ function initializeWithData(data) {
     window.innerWidth >= 768
   ) {
     const first = ALL_INQUIRIES[0];
+    const other = getOtherParty(first);
     const displayName = getDisplayName(first);
-    const avatarUrl = first.patient?.avatarUrl || "";
-    const isActive = first.patient?.isActive ?? true;
+    const avatarUrl = other?.avatarUrl || "";
+    const isActive = other?.isActive ?? true;
 
     // We can't easily find the "element" here, so we simulate the click after a short delay
     setTimeout(() => {
@@ -176,11 +177,27 @@ function initializeWithData(data) {
   }
 }
 
+function getOtherParty(inq) {
+  const myId = document.querySelector(selectors.adminId)?.value;
+  if (!myId) return inq.patient;
+
+  // If I am the creator (sender), the other party is the 'patient' target
+  if (inq.senderId === myId) return inq.patient;
+
+  // If I am the 'patient' target, the other party is the 'sender' creator
+  if (inq.patientId === myId) return inq.sender;
+
+  // Default fallback for staff viewing patient support tickets
+  return inq.patient;
+}
+
 function getDisplayName(inq) {
   console.log("[Inquiry Debug] Resolving name for:", inq);
-  if (inq.patient && inq.patient.firstName)
-    return `${inq.patient.firstName} ${inq.patient.lastName}`;
-  if (inq.patient && inq.patient.fullName) return inq.patient.fullName;
+  const other = getOtherParty(inq);
+  
+  if (other && (other.firstName || other.lastName))
+    return `${other.firstName || ''} ${other.lastName || ''}`.trim();
+  if (other && other.fullName) return other.fullName;
 
   const guestName =
     `${inq.guestFirstName || ""} ${inq.guestLastName || ""}`.trim();
@@ -188,6 +205,7 @@ function getDisplayName(inq) {
 
   if (inq.patientName && inq.patientName !== "null null")
     return inq.patientName;
+    
   return "Guest Patient";
 }
 
@@ -219,6 +237,19 @@ function timeAgo(date) {
   return "just now";
 }
 
+function calculateAge(dob) {
+  if (!dob) return null;
+  const birthDate = new Date(dob);
+  if (isNaN(birthDate.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+  }
+  return age;
+}
+
 function formatDateSeparator(date) {
   let dStr = String(date);
   if (!dStr.endsWith('Z') && !dStr.includes('+') && dStr.includes('T')) dStr += 'Z';
@@ -245,17 +276,17 @@ function renderInquiryList() {
     container.innerHTML = `
             <div class="p-8 text-center">
                 <i class="fa-solid fa-inbox text-slate-200 text-3xl mb-3 block"></i>
-                <p class="text-[12px] text-brand-400 font-medium">No inquiries found</p>
+                <p class="text-[12px] text-brand/40 font-medium">No inquiries found</p>
             </div>`;
     return;
   }
 
   container.innerHTML = ALL_INQUIRIES.map((inq) => {
+    const other = getOtherParty(inq);
     const displayName = getDisplayName(inq);
-    const avatarUrl = inq.patient?.avatarUrl || "";
-    const isActive = inq.patient?.isActive ?? true;
-    const initials =
-      displayName.length > 0 ? displayName[0].toUpperCase() : "G";
+    const avatarUrl = other?.avatarUrl || "";
+    const isActive = other?.isActive ?? true;
+    const initials = displayName.trim().split(" ").map(n => n[0]).slice(0, 2).join("");
     const isPending = inq.status === "pending";
     const isUnread = !inq.isRead;
     
@@ -283,7 +314,7 @@ function renderInquiryList() {
                     ${
                       avatarUrl
                         ? `<img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-slate-200" />`
-                        : `<div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-[11px] font-bold">${initials}</div>`
+                        : `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[11px] font-bold">${initials}</div>`
                     }
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center">
@@ -297,7 +328,7 @@ function renderInquiryList() {
                                     ${!isActive ? `<span class="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Deactivated</span>` : ""}
                                 </div>
                             </div>
-                            <span class="text-[10px] text-slate-400">${timeAgo(inq.updatedAt)}</span>
+                            <span class="text-[10px] text-slate-400">${timeAgo(inq.createdAt)}</span>
                         </div>
                     </div>
                 </div>
@@ -348,10 +379,11 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
   const avatarBox = document.querySelector(selectors.chatAvatar);
   if (avatarUrl) {
     avatarBox.innerHTML = `<img src="${avatarUrl}" class="w-full h-full rounded-full object-cover" />`;
-    avatarBox.classList.remove("bg-brand");
+    avatarBox.classList.remove("bg-primary");
   } else {
-    avatarBox.innerText = name[0].toUpperCase();
-    avatarBox.classList.add("bg-brand");
+    const initials = name.trim().split(" ").map(n => n[0]).slice(0, 2).join("");
+    avatarBox.innerText = (initials || "G").toUpperCase();
+    avatarBox.classList.add("bg-primary");
   }
 
   const select = document.getElementById("assign-doctor-select");
@@ -380,9 +412,9 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
   if (isStaffThread) {
     if (resolveBtn) resolveBtn.classList.add('hidden');
     if (predefinedReplies) predefinedReplies.classList.add('hidden');
-    if (patientSidebar) patientSidebar.classList.add('hidden');
     if (internalNoteContainer) internalNoteContainer.classList.add('hidden');
     if (assignDoctorContainer) assignDoctorContainer.classList.add('hidden');
+    if (patientSidebar) patientSidebar.classList.remove('hidden');
   } else {
     // Show them for patient threads
     if (resolveBtn) {
@@ -395,7 +427,12 @@ async function loadInquiry(id, name, subject, avatarUrl, isActive, element) {
     
     if (assignDoctorContainer) {
         const role = document.body.dataset.role || 'admin';
-        if (role === 'admin' || role === 'doctor') assignDoctorContainer.classList.remove('hidden');
+        // Receptionists and Admins can assign doctors; Doctors cannot assign themselves/others here.
+        if (role === 'admin' || role === 'receptionist') {
+            assignDoctorContainer.classList.remove('hidden');
+        } else {
+            assignDoctorContainer.classList.add('hidden');
+        }
     }
   }
 
@@ -473,14 +510,16 @@ function renderPatientSidebar(inq) {
   const sidebar = document.getElementById('inquiry-patient-sidebar');
   if (!sidebar) return;
 
-  if (!inq || !inq.patient) {
+  const other = inq ? getOtherParty(inq) : null;
+
+  if (!inq || !other) {
       sidebar.innerHTML = `
         <div class="p-6 text-center">
             <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-4 text-slate-300">
                 <i class="fa-solid fa-user-secret text-2xl"></i>
             </div>
             <h4 class="text-[14px] font-bold text-brand">${inq ? getDisplayName(inq) : 'Guest Patient'}</h4>
-            <p class="text-[11px] text-brand-400 mt-1">${inq && inq.patientId ? 'Patient account found but profile error.' : 'This user is not registered in our system yet.'}</p>
+            <p class="text-[11px] text-brand/40 mt-1">${inq && inq.patientId ? 'Patient account found but profile error.' : 'This user is not registered in our system yet.'}</p>
             ${inq && inq.guestEmail ? `<div class="mt-4 p-3 bg-slate-50 rounded-xl text-left border border-slate-100">
                 <div class="text-[9px] font-bold text-slate-400 uppercase mb-1">Guest Email</div>
                 <div class="text-[11px] text-brand truncate">${inq.guestEmail}</div>
@@ -493,18 +532,21 @@ function renderPatientSidebar(inq) {
   const role = document.body.dataset.role || 'admin';
   const basePath = role === 'admin' ? '/Admin' : (role === 'doctor' ? '/Doctor' : '/Receptionist');
 
-  const p = inq.patient;
+  const p = other;
   const initials = (p.firstName?.[0] || '') + (p.lastName?.[0] || '');
 
   sidebar.innerHTML = `
     <div class="p-6">
         <div class="text-center mb-6">
             <div class="relative inline-block">
-                ${p.avatarUrl ? `<img src="${p.avatarUrl}" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md mx-auto" />` : `<div class="w-20 h-20 rounded-2xl bg-brand/5 text-brand flex items-center justify-center text-2xl font-bold mx-auto border-2 border-white shadow-sm">${initials}</div>`}
+                ${p.avatarUrl ? `<img src="${p.avatarUrl}" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md mx-auto" />` : `<div class="w-20 h-20 rounded-2xl bg-primary text-white flex items-center justify-center text-2xl font-bold mx-auto border-2 border-white shadow-sm">${initials}</div>`}
                 <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white ${p.isActive ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
             </div>
             <h4 class="text-[15px] font-bold text-brand mt-3">${p.fullName || (p.firstName + ' ' + p.lastName)}</h4>
-            <p class="text-[11px] text-brand-400">Patient ID: ${inq.patientId?.split('-')[0] || 'N/A'}</p>
+            ${(inq.isFromStaff || inq.is_from_staff) 
+                ? `<p class="text-[11px] text-brand/40 uppercase font-bold tracking-widest">Role: ${p.role || 'Staff'}</p>`
+                : `<p class="text-[11px] text-brand/40">Patient ID: ${inq.patientId?.split('-')[0] || 'N/A'}</p>`
+            }
         </div>
 
         <div class="space-y-4">
@@ -551,12 +593,13 @@ function renderPatientSidebar(inq) {
             </div>
         </div>
 
+        ${!(inq.isFromStaff || inq.is_from_staff) ? `
         <div class="mt-8 pt-6 border-t border-slate-100">
             <a href="${basePath}/Patients/Details?id=${inq.patientId}" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand text-white text-[12px] font-bold hover:bg-brand/90 transition-all">
                 <i class="fa-solid fa-folder-open"></i>
                 View Full Medical Record
             </a>
-        </div>
+        </div>` : ''}
     </div>
   `;
 }
@@ -608,7 +651,7 @@ async function fetchMessages() {
                             <span class="text-[9px] font-bold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded uppercase">Internal Note</span>
                             <span class="text-[10px] font-bold text-brand">${msg.sender_name} (${msg.sender_role})</span>
                         </div>
-                        <p class="text-[12px] text-brand-700 leading-relaxed italic">${msg.message}</p>
+                        <p class="text-[12px] text-brand/70 leading-relaxed italic">${msg.message}</p>
                         <div class="text-[9px] mt-1 text-amber-500/70 font-bold">${new Date(dStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
                 </div>`;

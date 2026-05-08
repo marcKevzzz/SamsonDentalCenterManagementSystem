@@ -93,17 +93,6 @@ public class AppointmentsController : ControllerBase
                 return Conflict(new { ok = false, error = "This date has been blocked by the clinic. Please choose another date." });
         }
 
-        // FIX Bug 2: Only check double-booking when the logged-in user IS the patient
-        if (!p.IsGuest && !p.IsWaitlist && !p.IsForOther && !string.IsNullOrEmpty(p.PatientId))
-        {
-            var hasBooking = await _apptService.HasExistingBookingAsPatient(p.PatientId, p.AppointmentDate);
-            if (hasBooking)
-                return Conflict(new
-                {
-                    ok    = false,
-                    error = "You already have an appointment on this date. To book for someone else, use the 'Someone Else' tab."
-                });
-        }
 
         try
         {
@@ -118,7 +107,7 @@ public class AppointmentsController : ControllerBase
                 status            = appt.Status,   // "confirmed" | "pending" | "waitlist"
                 isGuest           = appt.IsGuest,
                 isWaitlist        = appt.IsWaitlist,
-                needsConfirmation = appt.IsGuest && !appt.IsWaitlist,  // guest non-waitlist needs email confirm
+                needsConfirmation = appt.EmailStatus == "pending" && !appt.IsWaitlist,  // only pending non-waitlist needs confirm
                 token             = appt.ConfirmationToken,
                 refNumber         = $"SDC-{appt.Id[..8].ToUpper()}"
             });

@@ -95,7 +95,7 @@ function renderStaffCards() {
                 <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
                     <i class="fa-solid fa-headset text-xl"></i>
                 </div>
-                <p class="text-[13px] text-brand-400">No receptionists added yet.</p>
+                <p class="text-[13px] text-brand/40">No receptionists added yet.</p>
             </div>`;
         return;
     }
@@ -139,16 +139,16 @@ function renderReceptionistCard(rec) {
                 : `<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white text-[15px] font-bold shrink-0 shadow-sm">${initials}</div>`
             }
             <div class="flex-1 min-w-0">
-              <div class="font-display font-bold text-brand-900 text-[14px] leading-tight truncate">${fullName}</div>
-              <div class="text-[11px] text-brand-400 truncate mt-0.5">${rec.profile?.email || ""}</div>
+              <div class="font-display font-bold text-brand text-[14px] leading-tight truncate">${fullName}</div>
+              <div class="text-[11px] text-brand/40 truncate mt-0.5">${rec.profile?.email || ""}</div>
             </div>
             <div class="flex items-center gap-1">
                 <button onclick='openStaffModal(${recData})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors" title="Edit Profile & Info"><i class="fa-solid fa-pen text-[10px]"></i></button>
                 <div class="relative action-dropdown">
-                    <button onclick="toggleDropdown(event, this)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-brand-400 hover:text-primary transition-colors">
+                    <button onclick="toggleDropdown(event, this)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-brand/40 hover:text-primary transition-colors">
                         <i class="fa-solid fa-ellipsis-vertical text-[10px]"></i>
                     </button>
-                    <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand-900/5 z-[60] overflow-hidden">
+                    <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-[60] overflow-hidden">
                         <div class="py-1">
                             <button onclick="resendInvite('${rec.profileId}')" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
                                 <i class="fa-solid fa-paper-plane w-4"></i> Resend Invite
@@ -164,11 +164,11 @@ function renderReceptionistCard(rec) {
           <p class="text-[11.5px] text-slate-500 leading-tight line-clamp-2 mb-3">${rec.bio || ""}</p>
           ${rec.deskLocation ? `<div class="flex flex-wrap gap-1.5"><span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 font-medium"><i class="fa-solid fa-location-dot mr-1"></i> Desk: ${rec.deskLocation}</span></div>` : ''}
           <div class="border-t border-slate-100 pt-2 mt-2">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-brand-400 mb-1">Availability</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-brand/40 mb-1">Availability</p>
             <div class="flex flex-row gap-1">
                 ${(rec.availability || []).length > 0 
-                    ? rec.availability.map(a => `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-brand-600 font-medium">${DAY_ABBR[a.dayOfWeek]}</span>`).join('')
-                    : '<p class="text-[11px] text-brand-300 italic">No schedule set.</p>'
+                    ? rec.availability.map(a => `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-brand/60 font-medium">${DAY_ABBR[a.dayOfWeek]}</span>`).join('')
+                    : '<p class="text-[11px] text-brand/30 italic">No schedule set.</p>'
                 }
             </div>
           </div>

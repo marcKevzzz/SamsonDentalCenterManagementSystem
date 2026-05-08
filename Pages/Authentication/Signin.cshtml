@@ -107,7 +107,7 @@ Layout = "_AuthLayout";
           <label class="block font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Email
             Address</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+            <span class="absolute left-3.5 top-1/2 translate-half text-muted pointer-events-none">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -127,7 +127,7 @@ Layout = "_AuthLayout";
           <label for="si_pw"
             class="font-body text-[0.71rem] font-medium tracking-[0.08em] uppercase text-muted mb-2">Password</label>
           <div class="relative" name="pass">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+            <span class="absolute left-3.5 top-1/2 translate-half text-muted pointer-events-none">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -137,7 +137,7 @@ Layout = "_AuthLayout";
             <input asp-for="Input.Password" id="si_pw" type="password" class="auth-input pr-11"
               placeholder="Enter your password" />
             <button type="button" data-input="si_pw"
-              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors check-pw">
+              class="absolute right-3.5 top-1/2 translate-half text-muted hover:text-primary transition-colors check-pw">
               <svg class="eye-show" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -177,6 +177,7 @@ Layout = "_AuthLayout";
 
         <!-- Guest -->
         <a href="../"
+        onclick="localStorage.clear();"
           class="brand-font font-medium text-[0.82rem] tracking-wider uppercase w-full border-2 border-[#e5e7eb] text-brand py-3.5 rounded-xl hover:border-brand hover:bg-brand hover:text-white transition-all duration-200 flex items-center justify-center gap-2 no-underline">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">

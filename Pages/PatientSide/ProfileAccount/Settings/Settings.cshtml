@@ -12,7 +12,7 @@ new { Value = "Male", Text = "Male" },
 new { Value = "Female", Text = "Female" },
 new { Value = "prefer_not", Text = "Prefer not to say" }
 }, "Value", "Text", sex);
-var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand";
+<!-- var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-brand"; -->
 }
 
 
@@ -122,7 +122,7 @@ var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-l
           <label class="input-label">Sex</label>
           <div class="relative">
              @Html.DropDownList("sex", sexOptions, new { id = "sex", @class = "premium-input appearance-none" })
-             <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none text-[10px]"></i>
+             <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 translate-half text-slate-300 pointer-events-none text-[10px]"></i>
           </div>
         </div>
       </div>
@@ -170,7 +170,7 @@ var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-l
           <label class="input-label">Current Password</label>
           <div class="relative">
             <input type="password" id="currentPw" class="premium-input pr-12" placeholder="••••••••" />
-            <button data-target="currentPw" class="pw-toggle absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand transition-colors">
+            <button data-target="currentPw" class="pw-toggle absolute right-4 top-1/2 translate-half text-slate-300 hover:text-brand transition-colors">
               <i class="fa-solid fa-eye text-sm"></i>
             </button>
           </div>
@@ -179,7 +179,7 @@ var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-l
           <label class="input-label">New Password</label>
           <div class="relative">
             <input type="password" id="newPw" class="premium-input pr-12" placeholder="Min 8 characters" />
-            <button data-target="newPw" class="pw-toggle absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand transition-colors">
+            <button data-target="newPw" class="pw-toggle absolute right-4 top-1/2 translate-half text-slate-300 hover:text-brand transition-colors">
               <i class="fa-solid fa-eye text-sm"></i>
             </button>
           </div>
@@ -194,7 +194,7 @@ var selectClass = "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-l
           <label class="input-label">Confirm New Password</label>
           <div class="relative">
             <input type="password" id="confirmPw" class="premium-input pr-12" placeholder="Repeat new password" />
-            <button data-target="confirmPw" class="pw-toggle absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand transition-colors">
+            <button data-target="confirmPw" class="pw-toggle absolute right-4 top-1/2 translate-half text-slate-300 hover:text-brand transition-colors">
               <i class="fa-solid fa-eye text-sm"></i>
             </button>
           </div>

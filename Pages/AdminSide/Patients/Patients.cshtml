@@ -8,10 +8,10 @@ Layout = "AdminSide/_StaffLayout";
 <div id="page-patients" class="page p-4 md:p-6">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <div>
-      <h2 class="font-display text-xl font-bold text-brand-900">
+      <h2 class="font-display text-xl font-bold text-brand">
         Patients
       </h2>
-      <p class="text-[12px] text-brand-500 mt-0.5">
+      <p class="text-[12px] text-brand/50 mt-0.5">
         Manage all registered patients
       </p>
     </div>
@@ -36,7 +36,7 @@ Layout = "AdminSide/_StaffLayout";
           class="w-full pl-7 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary/40" />
       </div>
       <select id="patient-status" onchange="filterPatients()"
-        class="px-9 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-brand-500 outline-none w-fit">
+        class="px-9 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-lg text-brand/50 outline-none w-fit">
         <option value="">All Status</option>
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
@@ -47,34 +47,38 @@ Layout = "AdminSide/_StaffLayout";
         <thead class="bg-slate-50">
           <tr>
             <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-2.5 font-display">
               Patient
             </th>
             <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-2.5 font-display">
+              Contact Info
+            </th>
+            <th
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-2.5 font-display">
               Age / Gender
             </th>
             <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-2.5 font-display">
               Last Visit
             </th>
             <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-2.5 font-display">
               Doctor
             </th>
             <th
-              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 py-2.5 font-display">
+              class="text-left text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 py-2.5 font-display">
               Account Status
             </th>
             <th
-              class="text-right text-[10px] font-bold uppercase tracking-wider text-brand-400 px-4 pr-12 py-2.5 font-display">
+              class="text-right text-[10px] font-bold uppercase tracking-wider text-brand/40 px-4 pr-12 py-2.5 font-display">
               Action
             </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50" id="patients-body">
           <tr>
-            <td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand-400">
+            <td colspan="6" class="px-4 py-10 text-center text-[12px] text-brand/40">
               <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Initializing patient data...
             </td>
           </tr>
@@ -82,7 +86,7 @@ Layout = "AdminSide/_StaffLayout";
       </table>
     </div>
     <div id="patients-pagination" class="hidden flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-100">
-      <span class="text-[10.5px] text-brand-400" id="patients-info"></span>
+      <span class="text-[10.5px] text-brand/40" id="patients-info"></span>
       <div class="flex gap-1.5" id="patients-btns"></div>
     </div>
   </div>

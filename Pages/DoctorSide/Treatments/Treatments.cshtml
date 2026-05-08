@@ -9,10 +9,10 @@
   <div class="flex items-center justify-between mb-8">
     <div>
       <h2 class="text-2xl font-bold text-brand tracking-tight">Arrived Patients</h2>
-      <p class="text-[13px] text-brand-400 mt-1">Patients waiting for treatment and billing generation</p>
+      <p class="text-[13px] text-brand/40 mt-1">Patients waiting for treatment and billing generation</p>
     </div>
     <div class="flex items-center gap-3">
-      <span class="px-4 py-2 bg-brand-50 border border-brand-100 rounded-xl text-[12px] font-bold text-brand" id="arrived-count">
+      <span class="px-4 py-2 bg-brand-50 border border-brand/10 rounded-xl text-[12px] font-bold text-brand" id="arrived-count">
         Waiting: ...
       </span>
     </div>
@@ -23,14 +23,14 @@
       <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary">
         <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
       </div>
-      <p class="text-[13px] text-brand-400 font-medium">Loading arrived patients...</p>
+      <p class="text-[13px] text-brand/40 font-medium">Loading arrived patients...</p>
     </div>
   </div>
 
   <div class="flex flex-wrap items-center justify-between gap-4 mb-5 mt-10">
       <div>
           <h3 class="text-xl font-bold text-brand tracking-tight">Recent Treatments</h3>
-          <p class="text-[12px] text-brand-400">Track and manage treatment records</p>
+          <p class="text-[12px] text-brand/40">Track and manage treatment records</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
           <div class="relative min-w-[200px]">
@@ -38,7 +38,7 @@
               <input type="text" id="invSearch" placeholder="Search patient..." 
                   class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] focus:border-primary outline-none transition-all" />
           </div>
-          <select id="invStatusFilter" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-brand-600 outline-none focus:border-primary transition-all">
+          <select id="invStatusFilter" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-brand/60 outline-none focus:border-primary transition-all">
               <option value="">All Status</option>
               <option value="paid">Paid</option>
               <option value="pending">Pending</option>
@@ -51,12 +51,12 @@
       <table id="recentInvoicesTable" class="w-full text-left border-collapse min-w-[800px]">
           <thead>
               <tr class="bg-slate-50/50 border-b border-slate-100">
-                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Date</th>
-                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Patient</th>
-                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest">Services</th>
-                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-right">Amount</th>
-                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-center">Status</th>
-                  <th class="px-6 py-4 text-[11px] font-bold text-brand-400 uppercase tracking-widest text-right">Actions</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest">Date</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest">Patient</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest">Services</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest text-right">Amount</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest text-center">Status</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-brand/40 uppercase tracking-widest text-right">Actions</th>
               </tr>
           </thead>
           <tbody class="divide-y divide-slate-50" id="invoices-table-body">
@@ -65,7 +65,7 @@
                       <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary">
                           <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
                       </div>
-                      <p class="text-[13px] text-brand-400 font-medium">Loading recent treatments...</p>
+                      <p class="text-[13px] text-brand/40 font-medium">Loading recent treatments...</p>
                   </td>
               </tr>
           </tbody>
@@ -228,6 +228,19 @@
         <!-- ── TAB 2: DETAILED PROCEDURES ────────────────────────────────────── -->
         <div id="panel-treatment" class="flex-1 overflow-y-auto hidden">
           <div class="p-8">
+            <div id="medical-info-check-container"></div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Height (cm)</label>
+                    <input type="number" id="inv-height" step="0.1" placeholder="0.0" class="w-full text-[13px] px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-primary transition-all" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Weight (kg)</label>
+                    <input type="number" id="inv-weight" step="0.1" placeholder="0.0" class="w-full text-[13px] px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-primary transition-all" />
+                </div>
+            </div>
+
             <div id="treatment-body" class="space-y-4"></div>
           </div>
         </div>
@@ -258,11 +271,11 @@
         <div class="p-8 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 id="view-treat-patient" class="text-xl font-bold text-brand tracking-tight">Patient Name</h3>
-                <p id="view-treat-date" class="text-[12px] text-brand-400">Date of Treatment</p>
+                <p id="view-treat-date" class="text-[12px] text-brand/40">Date of Treatment</p>
             </div>
             <div class="text-right">
                 <span id="view-treat-id" class="text-[10px] font-bold text-slate-300 uppercase tracking-widest block mb-1">#ID</span>
-                <button onclick="closeViewTreatmentModal()" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-brand-400 hover:bg-brand-50 hover:text-brand transition-all">
+                <button onclick="closeViewTreatmentModal()" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-brand/40 hover:bg-brand-50 hover:text-brand transition-all">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>

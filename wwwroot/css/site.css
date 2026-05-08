@@ -872,6 +872,10 @@ textarea.form-input {
   will-change: transform;
 }
 
+.translate-half {
+  transform: translateY(-50%);
+}
+
 /* #track-1 {
   transform: translateX(50%); 
 } */
@@ -881,17 +885,13 @@ textarea.form-input {
 }
 
 @media (max-width: 580px) {
-  .marquee-track,
-  .marquee-track-reverse {
-    animation-duration: 20s; /* Faster on mobile */
-  }
 /*   
   #track-1 {
     transform: translateX(100%); 
   } */
   
   #track-2 {
-    transform: translateX(-300%); 
+    transform: translateX(-350%); 
   }
 }
 

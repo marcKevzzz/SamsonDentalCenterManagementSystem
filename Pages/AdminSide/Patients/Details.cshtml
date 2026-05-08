@@ -11,20 +11,20 @@
     <!-- Header / Breadcrumbs -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div class="flex items-center gap-3">
-            <a href="/Admin/Patients" class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-500 hover:bg-slate-50 hover:border-brand-200 transition-all shadow-sm">
+            <a href="/Admin/Patients" class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand/50 hover:bg-slate-50 hover:border-brand/20 transition-all shadow-sm">
                 <i class="fa-solid fa-arrow-left text-xs"></i>
             </a>
             <div>
-                <h2 class="text-xl font-bold text-brand-900 tracking-tight">Patient Portfolio</h2>
-                <div class="flex items-center gap-2 text-[10px] text-brand-400 mt-0.5">
+                <h2 class="text-xl font-bold text-brand tracking-tight">Patient Portfolio</h2>
+                <div class="flex items-center gap-2 text-[10px] text-brand/40 mt-0.5">
                     <span class="font-bold uppercase tracking-wider">Clinical</span>
                     <i class="fa-solid fa-chevron-right text-[7px] opacity-30"></i>
-                    <span class="text-brand-600 font-bold uppercase tracking-wider">@p?.FirstName @p?.LastName</span>
+                    <span class="text-brand/60 font-bold uppercase tracking-wider">@p?.FirstName @p?.LastName</span>
                 </div>
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="openNewMessage()" class="px-4 py-2 bg-white border border-slate-200 text-brand-600 rounded-xl text-[12px] font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+            <button onclick="openNewMessage()" class="px-4 py-2 bg-white border border-slate-200 text-brand/60 rounded-xl text-[12px] font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
                 <i class="fa-solid fa-comment-dots text-[10px]"></i>
                 <span class="hidden sm:inline">Message</span>
             </button>
@@ -51,38 +51,38 @@
                         }
                         <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white shadow-sm"></div>
                     </div>
-                    <h3 class="text-lg font-bold text-brand-900">@p?.FirstName @p?.LastName</h3>
+                    <h3 class="text-lg font-bold text-brand">@p?.FirstName @p?.LastName</h3>
                     <div class="mt-1 flex items-center gap-1.5 justify-center">
-                        <span class="px-2 py-0.5 bg-slate-100 text-[8px] font-bold uppercase tracking-widest text-brand-400 rounded-md">#@p?.Id.Substring(0, 8).ToUpper()</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-[8px] font-bold uppercase tracking-widest text-brand/40 rounded-md">#@p?.Id.Substring(0, 8).ToUpper()</span>
                         <span class="px-2 py-0.5 @(p?.IsActive == true ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600") text-[8px] font-bold uppercase tracking-widest rounded-md">@(p?.IsActive == true ? "ACTIVE" : "INACTIVE")</span>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand-100 transition-colors">
-                        <div class="text-[8px] text-brand-400 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand/10 transition-colors">
+                        <div class="text-[8px] text-brand/40 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <i class="fa-solid fa-venus-mars text-[7px]"></i> Demographics
                         </div>
-                        <div class="text-[12px] font-bold text-brand-900">@age yrs • @(p?.Sex ?? "Unknown")</div>
+                        <div class="text-[12px] font-bold text-brand">@age yrs • @(p?.Sex ?? "Unknown")</div>
                     </div>
-                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand-100 transition-colors">
-                        <div class="text-[8px] text-brand-400 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand/10 transition-colors">
+                        <div class="text-[8px] text-brand/40 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <i class="fa-solid fa-phone text-[7px]"></i> Contact
                         </div>
-                        <div class="text-[12px] font-bold text-brand-900">@p?.PhoneNumber</div>
-                        <div class="text-[10px] text-brand-400 truncate mt-0.5">@p?.Email</div>
+                        <div class="text-[12px] font-bold text-brand">@p?.PhoneNumber</div>
+                        <div class="text-[10px] text-brand/40 truncate mt-0.5">@p?.Email</div>
                     </div>
-                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand-100 transition-colors">
-                        <div class="text-[8px] text-brand-400 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand/10 transition-colors">
+                        <div class="text-[8px] text-brand/40 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <i class="fa-solid fa-location-dot text-[7px]"></i> Residence
                         </div>
-                        <div class="text-[11px] font-bold text-brand-900 line-clamp-2">@(p?.Address ?? "No address listed")</div>
+                        <div class="text-[11px] font-bold text-brand line-clamp-2">@(p?.Address ?? "No address listed")</div>
                     </div>
                 </div>
 
                 @if (Model.MedicalInfo != null) {
                     <div class="mt-6 pt-6 border-t border-slate-100">
-                        <div class="text-[9px] text-brand-400 font-bold uppercase tracking-widest mb-3 flex items-center justify-between">
+                        <div class="text-[9px] text-brand/40 font-bold uppercase tracking-widest mb-3 flex items-center justify-between">
                             Alerts
                             <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
                         </div>
@@ -108,20 +108,20 @@
                         <i class="fa-solid fa-wallet text-lg"></i>
                     </div>
                     <div>
-                        <div class="text-[9px] text-brand-400 font-bold uppercase tracking-widest mb-0.5">Balance</div>
-                        <div class="text-xl font-bold text-brand-900">₱@Model.OutstandingBalance.ToString("N0")</div>
+                        <div class="text-[9px] text-brand/40 font-bold uppercase tracking-widest mb-0.5">Balance</div>
+                        <div class="text-xl font-bold text-brand">₱@Model.OutstandingBalance.ToString("N0")</div>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center gap-4 group hover:border-brand-100 transition-all">
-                    <div class="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center gap-4 group hover:border-brand/10 transition-all">
+                    <div class="w-11 h-11 rounded-xl bg-brand-50 text-brand/60 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-calendar-check text-lg"></i>
                     </div>
                     <div>
-                        <div class="text-[9px] text-brand-400 font-bold uppercase tracking-widest mb-0.5">Next Visit</div>
+                        <div class="text-[9px] text-brand/40 font-bold uppercase tracking-widest mb-0.5">Next Visit</div>
                         @if (Model.NextAppointment != null) {
-                            <div class="text-[13px] font-bold text-brand-900">@Model.NextAppointment.AppointmentDate.ToString("MMM dd")</div>
-                            <div class="text-[10px] font-bold text-brand-400 uppercase">@Model.NextAppointment.AppointmentTime</div>
+                            <div class="text-[13px] font-bold text-brand">@Model.NextAppointment.AppointmentDate.ToString("MMM dd")</div>
+                            <div class="text-[10px] font-bold text-brand/40 uppercase">@Model.NextAppointment.AppointmentTime</div>
                         } else {
                             <div class="text-[12px] font-bold text-slate-300 italic">None Scheduled</div>
                         }
@@ -133,10 +133,10 @@
                         <i class="fa-solid fa-tooth text-lg"></i>
                     </div>
                     <div>
-                        <div class="text-[9px] text-brand-400 font-bold uppercase tracking-widest mb-0.5">Last Treatment</div>
+                        <div class="text-[9px] text-brand/40 font-bold uppercase tracking-widest mb-0.5">Last Treatment</div>
                         @if (Model.LastTreatmentDate.HasValue) {
-                            <div class="text-[13px] font-bold text-brand-900">@Model.LastTreatmentDate.Value.ToString("MMM dd, yyyy")</div>
-                            <div class="text-[10px] font-bold text-brand-400 uppercase truncate max-w-[120px]">@Model.ClinicalTimeline.FirstOrDefault()?.ServiceName</div>
+                            <div class="text-[13px] font-bold text-brand">@Model.LastTreatmentDate.Value.ToString("MMM dd, yyyy")</div>
+                            <div class="text-[10px] font-bold text-brand/40 uppercase truncate max-w-[120px]">@Model.ClinicalTimeline.FirstOrDefault()?.ServiceName</div>
                         } else {
                             <div class="text-[12px] font-bold text-slate-300 italic">New Patient</div>
                         }
@@ -150,14 +150,14 @@
                 <div class="flex items-center justify-between">
                     <div id="tab-bar" class="flex gap-1.5 bg-white p-1 rounded-xl border border-slate-200/60 shadow-sm">
                         <button onclick="switchTab('timeline')" data-tab="timeline" class="tab-btn active px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">History</button>
-                        <button onclick="switchTab('chart')" data-tab="chart" class="tab-btn text-brand-400 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Chart</button>
-                        <button onclick="switchTab('medical')" data-tab="medical" class="tab-btn text-brand-400 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Medical</button>
-                        <button onclick="switchTab('appointments')" data-tab="appointments" class="tab-btn text-brand-400 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Visits</button>
+                        <button onclick="switchTab('chart')" data-tab="chart" class="tab-btn text-brand/40 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Chart</button>
+                        <button onclick="switchTab('medical')" data-tab="medical" class="tab-btn text-brand/40 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Medical</button>
+                        <button onclick="switchTab('appointments')" data-tab="appointments" class="tab-btn text-brand/40 hover:bg-slate-50 px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">Visits</button>
                     </div>
                     
-                    <div class="hidden md:flex items-center gap-3 text-[10px] font-bold text-brand-400">
+                    <div class="hidden md:flex items-center gap-3 text-[10px] font-bold text-brand/40">
                         <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Stable</div>
-                        <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-brand-900"></span> Active</div>
+                        <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-brand"></span> Active</div>
                     </div>
                 </div>
 
@@ -167,14 +167,14 @@
                         <div class="relative space-y-6 before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
                             @foreach (var t in Model.ClinicalTimeline) {
                                 <div class="relative pl-12 group">
-                                    <div class="absolute left-0 top-1 w-10 h-10 rounded-xl bg-white border-2 border-brand-100 flex items-center justify-center z-10 shadow-sm group-hover:border-primary group-hover:scale-105 transition-all">
-                                        <i class="fa-solid fa-kit-medical text-brand-300 text-sm group-hover:text-primary transition-colors"></i>
+                                    <div class="absolute left-0 top-1 w-10 h-10 rounded-xl bg-white border-2 border-brand/10 flex items-center justify-center z-10 shadow-sm group-hover:border-primary group-hover:scale-105 transition-all">
+                                        <i class="fa-solid fa-kit-medical text-brand/30 text-sm group-hover:text-primary transition-colors"></i>
                                     </div>
-                                    <div class="bg-white border border-slate-100 rounded-2xl p-5 hover:border-brand-200 transition-all">
+                                    <div class="bg-white border border-slate-100 rounded-2xl p-5 hover:border-brand/20 transition-all">
                                         <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
                                             <div>
-                                                <h4 class="text-[14px] font-bold text-brand-900">@t.ServiceName</h4>
-                                                <div class="flex items-center gap-3 mt-0.5 text-[10px] font-bold text-brand-400 uppercase tracking-widest">
+                                                <h4 class="text-[14px] font-bold text-brand">@t.ServiceName</h4>
+                                                <div class="flex items-center gap-3 mt-0.5 text-[10px] font-bold text-brand/40 uppercase tracking-widest">
                                                     <span>@t.CreatedAt.ToString("MMM dd, yyyy")</span>
                                                 </div>
                                             </div>
@@ -184,11 +184,11 @@
                                             @if (!string.IsNullOrEmpty(t.ToothNumbers)) {
                                                 <div class="flex flex-wrap gap-1.5">
                                                     @foreach(var tooth in t.ToothNumbers.Split(',')) {
-                                                        <span class="px-2.5 py-0.5 bg-slate-50 text-brand-600 text-[9px] font-bold rounded-lg border border-slate-100">#@tooth.Trim()</span>
+                                                        <span class="px-2.5 py-0.5 bg-slate-50 text-brand/60 text-[9px] font-bold rounded-lg border border-slate-100">#@tooth.Trim()</span>
                                                     }
                                                 </div>
                                             }
-                                            <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 italic text-[12px] text-brand-600 leading-relaxed shadow-inner">
+                                            <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 italic text-[12px] text-brand/60 leading-relaxed shadow-inner">
                                                 "@t.ProcedureDetails"
                                             </div>
                                         </div>
@@ -201,8 +201,8 @@
                             <div class="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i class="fa-solid fa-folder-open text-slate-200 text-2xl"></i>
                             </div>
-                            <h4 class="text-lg font-bold text-brand-900 mb-1">No Clinical History</h4>
-                            <p class="text-[12px] text-brand-400 max-w-xs mx-auto">This patient hasn't had any recorded treatments yet.</p>
+                            <h4 class="text-lg font-bold text-brand mb-1">No Clinical History</h4>
+                            <p class="text-[12px] text-brand/40 max-w-xs mx-auto">This patient hasn't had any recorded treatments yet.</p>
                         </div>
                     }
                 </div>
@@ -213,18 +213,18 @@
                         <div class="min-w-[800px]">
                             <div class="flex items-center justify-between mb-8">
                                 <div>
-                                    <h3 class="text-lg font-bold text-brand-900">Odontogram Visualization</h3>
-                                    <p class="text-[10px] text-brand-400 font-bold uppercase tracking-widest mt-0.5">Digital charting of patient tooth status</p>
+                                    <h3 class="text-lg font-bold text-brand">Odontogram Visualization</h3>
+                                    <p class="text-[10px] text-brand/40 font-bold uppercase tracking-widest mt-0.5">Digital charting of patient tooth status</p>
                                 </div>
                                 <div class="flex gap-3">
-                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand-400 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-emerald-500 shadow-sm"></span> Healthy</div>
-                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand-400 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-blue-500 shadow-sm"></span> Filled</div>
-                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand-400 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-rose-500 shadow-sm"></span> Decay</div>
+                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand/40 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-emerald-500 shadow-sm"></span> Healthy</div>
+                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand/40 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-blue-500 shadow-sm"></span> Filled</div>
+                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand/40 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-rose-500 shadow-sm"></span> Decay</div>
                                 </div>
                             </div>
 
                             <div class="bg-slate-50/50 rounded-[2rem] p-10 border border-slate-100 shadow-inner relative overflow-hidden">
-                                <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-slate-200/50"></div>
+                                <div class="absolute inset-x-0 top-1/2 translate-half h-px bg-slate-200/50"></div>
                                 
                                 <!-- Upper Arch -->
                                 <div class="flex justify-center gap-2 mb-12 relative z-10">
@@ -279,35 +279,35 @@
                         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-6">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-brand-900 text-white flex items-center justify-center shadow-md">
+                                    <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-md">
                                         <i class="fa-solid fa-file-medical text-base"></i>
                                     </div>
                                     <div>
-                                        <h3 class="text-md font-bold text-brand-900">Medical Profile</h3>
-                                        <p class="text-[9px] font-bold uppercase tracking-widest text-brand-400">Vital signs & data</p>
+                                        <h3 class="text-md font-bold text-brand">Medical Profile</h3>
+                                        <p class="text-[9px] font-bold uppercase tracking-widest text-brand/40">Vital signs & data</p>
                                     </div>
                                 </div>
-                                <button onclick="openEditMedical()" class="w-8 h-8 rounded-lg bg-slate-50 text-brand-400 hover:text-brand-900 hover:bg-slate-100 transition-all flex items-center justify-center">
+                                <button onclick="openEditMedical()" class="w-8 h-8 rounded-lg bg-slate-50 text-brand/40 hover:text-brand hover:bg-slate-100 transition-all flex items-center justify-center">
                                     <i class="fa-solid fa-pen-to-square text-[12px]"></i>
                                 </button>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                                    <div class="text-[9px] font-bold text-brand-400 uppercase tracking-widest mb-1">Blood Type</div>
-                                    <div class="text-lg font-bold text-brand-900">@(Model.MedicalInfo?.BloodType ?? "Unknown")</div>
+                                    <div class="text-[9px] font-bold text-brand/40 uppercase tracking-widest mb-1">Blood Type</div>
+                                    <div class="text-lg font-bold text-brand">@(Model.MedicalInfo?.BloodType ?? "Unknown")</div>
                                 </div>
                                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                                    <div class="text-[9px] font-bold text-brand-400 uppercase tracking-widest mb-1">Smoker</div>
+                                    <div class="text-[9px] font-bold text-brand/40 uppercase tracking-widest mb-1">Smoker</div>
                                     <div class="text-lg font-bold @(Model.MedicalInfo?.IsSmoker == true ? "text-rose-600" : "text-emerald-600")">@(Model.MedicalInfo?.IsSmoker == true ? "Yes" : "No")</div>
                                 </div>
                                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                                    <div class="text-[9px] font-bold text-brand-400 uppercase tracking-widest mb-1">Weight</div>
-                                    <div class="text-lg font-bold text-brand-900">@(Model.MedicalInfo?.Weight?.ToString("0.0") ?? "---") <span class="text-[10px] font-bold text-brand-400 uppercase">kg</span></div>
+                                    <div class="text-[9px] font-bold text-brand/40 uppercase tracking-widest mb-1">Weight</div>
+                                    <div class="text-lg font-bold text-brand">@(Model.MedicalInfo?.Weight?.ToString("0.0") ?? "---") <span class="text-[10px] font-bold text-brand/40 uppercase">kg</span></div>
                                 </div>
                                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                                    <div class="text-[9px] font-bold text-brand-400 uppercase tracking-widest mb-1">Height</div>
-                                    <div class="text-lg font-bold text-brand-900">@(Model.MedicalInfo?.Height?.ToString("0.0") ?? "---") <span class="text-[10px] font-bold text-brand-400 uppercase">cm</span></div>
+                                    <div class="text-[9px] font-bold text-brand/40 uppercase tracking-widest mb-1">Height</div>
+                                    <div class="text-lg font-bold text-brand">@(Model.MedicalInfo?.Height?.ToString("0.0") ?? "---") <span class="text-[10px] font-bold text-brand/40 uppercase">cm</span></div>
                                 </div>
                             </div>
                         </div>
@@ -320,8 +320,8 @@
                                         <i class="fa-solid fa-shield-virus text-base"></i>
                                     </div>
                                     <div>
-                                        <h3 class="text-md font-bold text-brand-900">Allergies & Risks</h3>
-                                        <p class="text-[9px] font-bold uppercase tracking-widest text-brand-400">Critical safety info</p>
+                                        <h3 class="text-md font-bold text-brand">Allergies & Risks</h3>
+                                        <p class="text-[9px] font-bold uppercase tracking-widest text-brand/40">Critical safety info</p>
                                     </div>
                                 </div>
                             </div>
@@ -359,22 +359,22 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50/80 border-b border-slate-100">
-                                    <th class="px-6 py-4 text-[9px] font-bold text-brand-400 uppercase tracking-widest">Date & Time</th>
-                                    <th class="px-6 py-4 text-[9px] font-bold text-brand-400 uppercase tracking-widest">Service</th>
-                                    <th class="px-6 py-4 text-[9px] font-bold text-brand-400 uppercase tracking-widest">Status</th>
-                                    <th class="px-6 py-4 text-[9px] font-bold text-brand-400 uppercase tracking-widest text-right">Action</th>
+                                    <th class="px-6 py-4 text-[9px] font-bold text-brand/40 uppercase tracking-widest">Date & Time</th>
+                                    <th class="px-6 py-4 text-[9px] font-bold text-brand/40 uppercase tracking-widest">Service</th>
+                                    <th class="px-6 py-4 text-[9px] font-bold text-brand/40 uppercase tracking-widest">Status</th>
+                                    <th class="px-6 py-4 text-[9px] font-bold text-brand/40 uppercase tracking-widest text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50">
                                 @foreach (var a in Model.Appointments.OrderByDescending(x => x.AppointmentDate)) {
                                     <tr class="hover:bg-slate-50/50 transition-colors group">
                                         <td class="px-6 py-4">
-                                            <div class="text-[12px] font-bold text-brand-900">@a.AppointmentDate.ToString("MMM dd, yyyy")</div>
-                                            <div class="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-0.5">@a.AppointmentTime</div>
+                                            <div class="text-[12px] font-bold text-brand">@a.AppointmentDate.ToString("MMM dd, yyyy")</div>
+                                            <div class="text-[10px] font-bold text-brand/40 uppercase tracking-widest mt-0.5">@a.AppointmentTime</div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="text-[12px] font-bold text-brand-700">@a.ServiceName</div>
-                                            <div class="text-[9px] font-bold text-brand-300 mt-0.5 flex items-center gap-1.5">
+                                            <div class="text-[12px] font-bold text-brand/70">@a.ServiceName</div>
+                                            <div class="text-[9px] font-bold text-brand/30 mt-0.5 flex items-center gap-1.5">
                                                 <i class="fa-solid fa-user-doctor text-[7px]"></i>
                                                 Dr. @(a.Doctor?.Profile?.LastName ?? "TBD")
                                             </div>
@@ -392,7 +392,7 @@
                                             <span class="px-2 py-0.5 @color text-[8px] font-bold rounded-lg border uppercase tracking-widest">@a.Status</span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <button class="w-8 h-8 rounded-lg bg-white border border-slate-100 text-brand-300 hover:text-brand-900 hover:border-brand-300 transition-all shadow-sm">
+                                            <button class="w-8 h-8 rounded-lg bg-white border border-slate-100 text-brand/30 hover:text-brand hover:border-brand/30 transition-all shadow-sm">
                                                 <i class="fa-solid fa-ellipsis text-[12px]"></i>
                                             </button>
                                         </td>
@@ -413,14 +413,14 @@
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
             <div class="p-6 border-b border-slate-100 bg-slate-50">
-                <h3 class="text-lg font-bold text-brand-900">Edit Medical Info</h3>
-                <p class="text-[10px] font-bold text-brand-400 uppercase tracking-widest">Update clinical records for @p?.FirstName</p>
+                <h3 class="text-lg font-bold text-brand">Edit Medical Info</h3>
+                <p class="text-[10px] font-bold text-brand/40 uppercase tracking-widest">Update clinical records for @p?.FirstName</p>
             </div>
             <form id="edit-medical-form" class="p-6 space-y-4">
                 <input type="hidden" name="PatientId" value="@p?.Id" />
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Blood Type</label>
+                        <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Blood Type</label>
                         <select name="BloodType" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none">
                             <option value="">Select...</option>
                             @foreach(var type in new[]{"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}){
@@ -429,23 +429,23 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Smoker Status</label>
+                        <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Smoker Status</label>
                         <select name="IsSmoker" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none">
                             <option value="false" selected="@(Model.MedicalInfo?.IsSmoker == false)">Non-Smoker</option>
                             <option value="true" selected="@(Model.MedicalInfo?.IsSmoker == true)">Smoker</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Height (cm)</label>
+                        <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Height (cm)</label>
                         <input type="number" step="0.1" name="Height" value="@Model.MedicalInfo?.Height" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none" />
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-brand-400 uppercase mb-1.5 ml-1">Weight (kg)</label>
+                        <label class="block text-[10px] font-bold text-brand/40 uppercase mb-1.5 ml-1">Weight (kg)</label>
                         <input type="number" step="0.1" name="Weight" value="@Model.MedicalInfo?.Weight" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-primary outline-none" />
                     </div>
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeEditMedical()" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-brand-600 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
+                    <button type="button" onclick="closeEditMedical()" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-brand/60 bg-slate-50 hover:bg-slate-100 transition-all">Cancel</button>
                     <button type="submit" class="flex-1 px-4 py-2.5 text-[12px] font-bold rounded-xl text-white bg-primary shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">Save Changes</button>
                 </div>
             </form>
@@ -523,10 +523,10 @@
     }
     .tab-btn:hover:not(.active) {
         background-color: #f8fafc; /* slate-50 */
-        color: #0f172a; /* brand-900 */
+        color: #0f172a; /* brand */
     }
     .tab-btn.active {
-        background-color: #0f172a; /* brand-900 */
+        background-color: #0f172a; /* brand */
         color: white !important;
         box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.15);
     }

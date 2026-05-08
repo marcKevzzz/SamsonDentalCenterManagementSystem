@@ -316,3 +316,9 @@ CREATE TABLE public.otps (
   CONSTRAINT otps_pkey PRIMARY KEY (id)
 );
 CREATE INDEX idx_otps_email_code ON public.otps USING btree (email, code);
+CREATE INDEX idx_activity_logs_created_at ON public.activity_logs USING btree (created_at DESC);
+CREATE INDEX idx_reviews_created_at ON public.reviews USING btree (created_at DESC);
+CREATE INDEX idx_profiles_created_at ON public.profiles USING btree (created_at DESC);
+CREATE INDEX idx_staff_leaves_created_at ON public.staff_leaves USING btree (created_at DESC);
+CREATE INDEX idx_invoices_created_at ON public.invoices USING btree (created_at DESC);
+CREATE INDEX idx_staff_availability_staff_type ON public.staff_availability USING btree (staff_type);

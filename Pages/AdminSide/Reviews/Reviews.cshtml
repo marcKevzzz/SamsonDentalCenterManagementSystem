@@ -9,7 +9,7 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="font-display font-bold text-brand text-2xl">Reviews</h1>
-            <p class="text-brand-400 text-sm mt-1">Manage external and manual customer reviews.</p>
+            <p class="text-brand/40 text-sm mt-1">Manage external and manual customer reviews.</p>
         </div>
         <div class="flex gap-3">
             <button onclick="importLocalData(event)" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-brand hover:bg-slate-50 transition-all flex items-center gap-2">
@@ -79,7 +79,7 @@
                                         <i class="fa-solid fa-star @(i < rev.Rating ? "" : "opacity-20")"></i>
                                     }
                                 </div>
-                                <span class="text-[10px] font-bold text-brand-400 uppercase tracking-widest flex items-center gap-1">
+                                <span class="text-[10px] font-bold text-brand/40 uppercase tracking-widest flex items-center gap-1">
                                     @if(rev.Platform == "Google") { <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
                                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -97,14 +97,14 @@
                     
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" value="" class="sr-only peer" @(rev.IsVisible ? "checked" : "") onchange="toggleVisibility('@rev.Id', this.checked)">
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[16px] rtl:peer-checked:after:-translate-x-[16px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[16px] rtl:peer-checked:after:x-[16px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                     </label>
                 </div>
 
-                <p class="text-[13px] text-brand-600 leading-relaxed flex-1 italic">"@rev.ReviewText"</p>
+                <p class="text-[13px] text-brand/60 leading-relaxed flex-1 italic">"@rev.ReviewText"</p>
                 
                 <div class="mt-4 pt-4 border-t border-slate-50 flex justify-between items-center">
-                    <span class="text-[11px] text-brand-400 font-medium">@((rev.ReviewDate ?? rev.CreatedAt).ToString("MMM dd, yyyy"))</span>
+                    <span class="text-[11px] text-brand/40 font-medium">@((rev.ReviewDate ?? rev.CreatedAt).ToString("MMM dd, yyyy"))</span>
                     @if(!string.IsNullOrEmpty(rev.ExternalLink)) {
                         <a href="@rev.ExternalLink" target="_blank" class="text-[11px] font-bold text-primary hover:underline">View Original</a>
                     }
@@ -131,11 +131,11 @@
 
             <div class="p-8 space-y-5">
                 <div>
-                    <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-widest mb-2">Author Name</label>
+                    <label class="block text-[11px] font-bold text-brand/40 uppercase tracking-widest mb-2">Author Name</label>
                     <input type="text" id="newAuthor" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:bg-white focus:border-primary transition-all outline-none" placeholder="e.g. John Doe">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-widest mb-2">Rating</label>
+                    <label class="block text-[11px] font-bold text-brand/40 uppercase tracking-widest mb-2">Rating</label>
                     <div class="flex gap-2 text-2xl text-slate-200 cursor-pointer" id="starRating">
                         <i class="fa-solid fa-star" data-val="1"></i>
                         <i class="fa-solid fa-star" data-val="2"></i>
@@ -145,18 +145,18 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-widest mb-2">Review Date</label>
+                    <label class="block text-[11px] font-bold text-brand/40 uppercase tracking-widest mb-2">Review Date</label>
                     <input type="date" id="newDate" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:bg-white focus:border-primary transition-all outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-brand-400 uppercase tracking-widest mb-2">Review Content</label>
+                    <label class="block text-[11px] font-bold text-brand/40 uppercase tracking-widest mb-2">Review Content</label>
                     <textarea id="newText" rows="4" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:bg-white focus:border-primary transition-all outline-none resize-none" placeholder="Write the review here..."></textarea>
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
-                <button onclick="closeAddModal()" class="px-6 py-2.5 text-[12px] font-bold text-brand-500 hover:text-brand-900 transition-colors">Cancel</button>
-                <button onclick="saveReview()" id="saveBtn" class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand-900/10 hover:opacity-90 transition-all">Save Review</button>
+                <button onclick="closeAddModal()" class="px-6 py-2.5 text-[12px] font-bold text-brand/50 hover:text-brand transition-colors">Cancel</button>
+                <button onclick="saveReview()" id="saveBtn" class="px-8 py-2.5 text-[12px] font-bold rounded-xl bg-brand text-white shadow-xl shadow-brand/10 hover:opacity-90 transition-all">Save Review</button>
             </div>
         </div>
     </div>

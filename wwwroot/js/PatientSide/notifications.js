@@ -1,3 +1,5 @@
+import { PatientStore } from "./PatientStore.js";
+
 let currentFilter = 'all';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -6,10 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchNotifications() {
     try {
-        const res = await fetch('/api/patient/data/notifications');
-        const json = await res.json();
-        if (json.ok) {
-            renderNotifications(json.data);
+        const data = await PatientStore.fetch("notifications", "/api/patient/data/notifications");
+        if (data) {
+            renderNotifications(data);
         }
     } catch (err) {
         console.error("Failed to load notifications", err);
@@ -74,7 +75,7 @@ function renderNotifications(notifs) {
     updateBadge();
 }
 
-function filterTab(name) {
+window.filterTab = function(name) {
   currentFilter = name;
   ["all", "appointments", "system"].forEach((t) => {
     const btn = document.getElementById("ftab-" + t);
@@ -112,6 +113,7 @@ window.markRead = async function(el, id) {
 
   try {
       await fetch(`/api/patient/data/notifications/read/${id}`, { method: 'POST' });
+      PatientStore.invalidate("notifications");
   } catch (err) {
       console.error(err);
   }

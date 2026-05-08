@@ -150,29 +150,26 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Invoice?> GetInvoiceByIdAsync(string id)
         {
-            var res = await _supabase.From<Invoice>().Where(i => i.Id == id).Get();
-            return res.Models.FirstOrDefault();
+            var path = $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&id=eq.{id}";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
+            
+            if (!res.IsSuccessStatusCode) return null;
+
+            var json = await res.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault();
         }
 
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)
         {
-            var res = await _supabase
-                .From<Invoice>()
-                .Where(x => x.AppointmentId == appointmentId)
-                .Get();
+            var path = $"/invoices?select=*,patient:profiles(*),doctor:doctors(*,profiles(*)),invoice_items(*)&appointment_id=eq.{appointmentId}";
+            var req = BuildRequest(HttpMethod.Get, path);
+            var res = await _http.SendAsync(req);
 
-            var invoice = res.Models.FirstOrDefault();
-            if (invoice != null)
-            {
-                // Fetch items separately or use JOIN if configured
-                var itemsRes = await _supabase
-                    .From<InvoiceItem>()
-                    .Where(x => x.InvoiceId == invoice.Id)
-                    .Get();
-                invoice.Items = itemsRes.Models;
-            }
+            if (!res.IsSuccessStatusCode) return null;
 
-            return invoice;
+            var json = await res.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault();
         }
 
         public async Task<List<Invoice>> GetAllPendingInvoicesAsync()

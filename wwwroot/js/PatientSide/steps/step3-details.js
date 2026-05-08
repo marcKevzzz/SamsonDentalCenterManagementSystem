@@ -175,7 +175,8 @@ function renderDetailsForm() {
                 <div>
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Birthday</label>
                     <input id="f_dob" type="date" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
-                        value="${dob}" ${loggedIn ? "readonly" : ""} />
+                        value="${dob}" ${loggedIn ? "readonly" : ""} oninput="clearErr('dob')" />
+                    <div id="err_dob" class="field-error">Patient must be at least 6 months old.</div>
                 </div>
             </div>
             ${loggedIn ? `
@@ -242,23 +243,22 @@ function renderDetailsForm() {
                 </div>
                 <div>
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">Birthday</label>
-                    <input id="f_otherDob" type="date" class="form-input" />
+                    <input id="f_otherDob" type="date" class="form-input" oninput="clearErr('otherDob')" />
+                    <div id="err_otherDob" class="field-error">Patient must be at least 6 months old.</div>
                 </div>
             </div>
         </div>
 
         <!-- Patient type — logged-in only, hidden when booking for other -->
         
-
-        <!-- Notes (everyone) -->
-        <div class="mt-6">
-            <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
-                Additional Notes <span class="font-normal normal-case text-muted">(optional)</span>
-            </label>
-            <textarea id="f_notes" class="form-input" rows="3"
+      <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2 mt-4">Additional Notes</label>
+            <textarea id="f_notes" class="form-input" rows="3" maxlength="500"
                 placeholder="${loggedIn
       ? "Doctor preference, concerns, or special instructions…"
       : "Any allergies, medications, or concerns…"}">${d.notes || ""}</textarea>
+            <div class="flex justify-end mt-1">
+                <span id="notesCount" class="text-[10px] text-muted">0/500</span>
+            </div>
         </div>
     </div>
 
@@ -268,7 +268,7 @@ function renderDetailsForm() {
             onchange="clearErr('consent')" />
         <label for="f_consent" class="font-body text-[.8rem] text-muted leading-relaxed cursor-pointer">
             I consent to Samson Dental Center collecting my information in accordance with their
-            <a href="#" class="text-primary hover:underline">Privacy Policy</a>.
+            <a href="javascript:void(0)" onclick="openLegalModal('privacy')" class="text-primary hover:underline">Privacy Policy</a>.
         </label>
     </div>
     <div id="err_consent" class="field-error -mt-6 mb-6 pl-1">You must accept the privacy policy.</div>
@@ -282,6 +282,18 @@ function renderDetailsForm() {
 
   // Restore back-navigation values on top of pre-fill
   if (d.isForOther) toggleBookingTab(true);
+
+  // Character count logic
+  setTimeout(() => {
+    const notesArea = document.getElementById("f_notes");
+    const count = document.getElementById("notesCount");
+    if (notesArea && count) {
+      count.textContent = `${notesArea.value.length}/500`;
+      notesArea.addEventListener("input", (e) => {
+        count.textContent = `${e.target.value.length}/500`;
+      });
+    }
+  }, 0);
 }
 
 function toggleBookingTab(isOther) {
@@ -436,6 +448,21 @@ function submitDetails() {
         }
       }
     });
+    
+    // Age validation
+    const dobEl = document.getElementById("f_dob");
+    if (dobEl?.value) {
+        const dobDate = new Date(dobEl.value);
+        const minAgeDate = new Date();
+        minAgeDate.setMonth(minAgeDate.getMonth() - 6);
+        if (dobDate > minAgeDate) {
+            document.getElementById("err_dob")?.classList.add("show");
+            dobEl.classList.add("error");
+            errors.push("Patient must be at least 6 months old.");
+            ok = false;
+        }
+    }
+
   } else {
     const fn = document.getElementById("f_otherFirstName");
     const ln = document.getElementById("f_otherLastName");
@@ -474,13 +501,27 @@ function submitDetails() {
         fn?.classList.add("error");
         ok = false;
     }
-    if (ln?.value && nameRegex.test(ln.value)) {
-        document.getElementById("err_otherLastName")?.classList.add("show");
-        const errEl = document.getElementById("err_otherLastName");
-        if (errEl) errEl.textContent = "Last name cannot contain numbers.";
-        ln?.classList.add("error");
-        ok = false;
-    }
+        if (ln?.value && nameRegex.test(ln.value)) {
+            document.getElementById("err_otherLastName")?.classList.add("show");
+            const errEl = document.getElementById("err_otherLastName");
+            if (errEl) errEl.textContent = "Last name cannot contain numbers.";
+            ln?.classList.add("error");
+            ok = false;
+        }
+
+        // Age validation for other
+        const otherDobEl = document.getElementById("f_otherDob");
+        if (otherDobEl?.value) {
+            const dobDate = new Date(otherDobEl.value);
+            const minAgeDate = new Date();
+            minAgeDate.setMonth(minAgeDate.getMonth() - 6);
+            if (dobDate > minAgeDate) {
+                document.getElementById("err_otherDob")?.classList.add("show");
+                otherDobEl.classList.add("error");
+                errors.push("Patient must be at least 6 months old.");
+                ok = false;
+            }
+        }
 
     if (!ok) errors.push("Please check the patient details.");
   }

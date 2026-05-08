@@ -14,11 +14,12 @@ const STEPS = {
         validate: (v) => {
           if (!v) return false;
           const date = new Date(v);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // Only compare dates
-          return date <= today;
+          const minAgeDate = new Date();
+          minAgeDate.setMonth(minAgeDate.getMonth() - 6);
+          minAgeDate.setHours(0, 0, 0, 0);
+          return date <= minAgeDate;
         },
-        msg: "Birthday cannot be in the future.",
+        msg: "Patient must be at least 6 months old.",
       },
       { id: "su_sex", validate: (v) => !!v, msg: "Please select your sex." },
     ],

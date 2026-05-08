@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -13,17 +14,22 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly string _serviceRoleKey;
         private readonly string _apifyKey;
         private readonly ActivityLogService _logs;
+        private readonly IMemoryCache _cache;
         private static readonly JsonSerializerOptions _json = new()
         {
             PropertyNameCaseInsensitive = true,
         };
+
+        private const string CacheKeyVisible = "visible_reviews";
+        private const string CacheKeyStats = "review_stats";
 
         public ReviewService(
             HttpClient http,
             string supabaseUrl,
             string serviceRoleKey,
             string apifyKey,
-            ActivityLogService logs
+            ActivityLogService logs,
+            IMemoryCache cache
         )
         {
             _http = http;
@@ -31,6 +37,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _serviceRoleKey = serviceRoleKey;
             _apifyKey = apifyKey;
             _logs = logs;
+            _cache = cache;
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path)
@@ -55,6 +62,11 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Review>> GetVisibleReviewsAsync()
         {
+            if (_cache.TryGetValue(CacheKeyVisible, out List<Review>? cachedReviews) && cachedReviews != null)
+            {
+                return cachedReviews;
+            }
+
             var req = BuildRequest(
                 HttpMethod.Get,
                 "/reviews?is_visible=eq.true&order=created_at.desc"
@@ -62,7 +74,10 @@ namespace SamsonDentalCenterManagementSystem.Services
             var res = await _http.SendAsync(req);
             res.EnsureSuccessStatusCode();
             var json = await res.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<Review>>(json, _json) ?? new();
+            var reviews = JsonSerializer.Deserialize<List<Review>>(json, _json) ?? new();
+
+            _cache.Set(CacheKeyVisible, reviews, TimeSpan.FromMinutes(10));
+            return reviews;
         }
 
         public async Task ToggleVisibilityAsync(string id, bool visible)
@@ -74,6 +89,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 "application/json"
             );
             await _http.SendAsync(req);
+
+            InvalidateCache();
 
             await _logs.LogActionAsync(
                 null,
@@ -104,6 +121,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 "application/json"
             );
             await _http.SendAsync(req);
+            InvalidateCache();
 
             await _logs.LogActionAsync(
                 null,
@@ -142,6 +160,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 "application/json"
             );
             await _http.SendAsync(req);
+            InvalidateCache();
         }
 
         public async Task SyncApifyReviewsAsync(string query, string location)
@@ -335,13 +354,31 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<(double average, int count)> GetReviewStatsAsync()
         {
+            if (_cache.TryGetValue(CacheKeyStats, out (double average, int count) cachedStats))
+            {
+                return cachedStats;
+            }
+
             var reviews = await GetVisibleReviewsAsync();
             if (!reviews.Any())
-                return (4.8, 24); // More realistic fallback for Samson Dental
+            {
+                var fallback = (4.8, 24);
+                _cache.Set(CacheKeyStats, fallback, TimeSpan.FromMinutes(10));
+                return fallback;
+            }
 
             double avg = reviews.Average(r => r.Rating);
             int count = reviews.Count;
-            return (Math.Round(avg, 1), count);
+            var stats = (Math.Round(avg, 1), count);
+
+            _cache.Set(CacheKeyStats, stats, TimeSpan.FromMinutes(10));
+            return stats;
+        }
+
+        private void InvalidateCache()
+        {
+            _cache.Remove(CacheKeyVisible);
+            _cache.Remove(CacheKeyStats);
         }
 
         public async Task ImportLocalReviewsAsync()

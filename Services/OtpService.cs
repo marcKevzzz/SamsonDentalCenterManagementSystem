@@ -12,7 +12,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             _supabase = supabase;
         }
 
-        public async Task<string> GenerateOtp(string email, string type, int expiryMinutes = 15)
+        public async Task<string> GenerateOtp(string email, string type, int expiryMinutes = 30)
         {
             // Invalidate old OTPs of same type for this email
             await _supabase.From<Otp>()
@@ -34,11 +34,13 @@ namespace SamsonDentalCenterManagementSystem.Services
             };
 
             await _supabase.From<Otp>().Insert(otp);
+            Console.WriteLine($"[OtpService] Generated {type} OTP for {email}. Expires at: {otp.ExpiresAt} UTC");
             return code;
         }
 
         public async Task<bool> VerifyOtp(string email, string code, string type)
         {
+            var now = DateTime.UtcNow;
             var res = await _supabase.From<Otp>()
                 .Where(x => x.Email == email)
                 .Where(x => x.Code == code)
@@ -48,8 +50,17 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var otp = res.Models.FirstOrDefault();
             
-            if (otp == null || otp.ExpiresAt < DateTime.UtcNow)
+            if (otp == null)
+            {
+                Console.WriteLine($"[OtpService] No valid OTP found for {email} / {type}");
                 return false;
+            }
+
+            if (otp.ExpiresAt.ToUniversalTime() < now)
+            {
+                Console.WriteLine($"[OtpService] OTP expired for {email}. ExpiresAt: {otp.ExpiresAt.ToUniversalTime()} UTC, Now: {now} UTC");
+                return false;
+            }
 
             // Mark as used
             await _supabase.From<Otp>()
@@ -57,6 +68,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 .Set(x => x.IsUsed, true)
                 .Update();
 
+            Console.WriteLine($"[OtpService] OTP verified for {email}");
             return true;
         }
     }

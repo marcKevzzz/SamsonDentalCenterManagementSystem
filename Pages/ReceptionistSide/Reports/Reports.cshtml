@@ -10,7 +10,7 @@ Layout = "AdminSide/_StaffLayout";
   <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
     <div>
       <h2 class="font-display text-xl font-bold text-brand">Reports</h2>
-      <p class="text-[12px] text-brand-500 mt-0.5">
+      <p class="text-[12px] text-brand/50 mt-0.5">
         Analytics and performance insights
       </p>
     </div>
@@ -42,7 +42,7 @@ Layout = "AdminSide/_StaffLayout";
             <div>
                 <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Bookings</h3>
                 <div class="font-display text-3xl font-bold text-brand" id="kpi-bookings">0</div>
-                <p class="text-[11px] text-brand-500 mt-1">Total volume in selected period</p>
+                <p class="text-[11px] text-brand/50 mt-1">Total volume in selected period</p>
             </div>
         </div>
         <!-- Completion Rate -->
@@ -55,7 +55,7 @@ Layout = "AdminSide/_StaffLayout";
             <div>
                 <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Completion Rate</h3>
                 <div class="font-display text-3xl font-bold text-emerald-600" id="kpi-completion">0%</div>
-                <p class="text-[11px] text-brand-500 mt-1">Completed vs. No-Shows</p>
+                <p class="text-[11px] text-brand/50 mt-1">Completed vs. No-Shows</p>
             </div>
         </div>
         <!-- Peak Hours -->
@@ -68,7 +68,7 @@ Layout = "AdminSide/_StaffLayout";
             <div>
                 <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Peak Hours</h3>
                 <div class="font-display text-2xl font-bold text-brand mt-1" id="kpi-peak">N/A</div>
-                <p class="text-[11px] text-brand-500 mt-1.5">Most requested time slot</p>
+                <p class="text-[11px] text-brand/50 mt-1.5">Most requested time slot</p>
             </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ Layout = "AdminSide/_StaffLayout";
         <!-- Status Distribution -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200">
             <h3 class="font-display font-bold text-brand mb-1">Appointment Status Distribution</h3>
-            <p class="text-[11px] text-brand-500 mb-4">Breakdown of scheduling health</p>
+            <p class="text-[11px] text-brand/50 mb-4">Breakdown of scheduling health</p>
             <div class="h-64 w-full flex justify-center">
                 <canvas id="statusChart"></canvas>
             </div>
@@ -87,15 +87,15 @@ Layout = "AdminSide/_StaffLayout";
         <!-- Demographics -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200">
             <h3 class="font-display font-bold text-brand mb-1">Patient Loyalty & Demographics</h3>
-            <p class="text-[11px] text-brand-500 mb-4">First-time vs Returning & Location Heatmap</p>
+            <p class="text-[11px] text-brand/50 mb-4">First-time vs Returning & Location Heatmap</p>
             
             <div class="flex gap-4 mb-6">
                 <div class="flex-1 bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <div class="text-[10px] font-bold text-brand-500 uppercase">First-Time</div>
+                    <div class="text-[10px] font-bold text-brand/50 uppercase">First-Time</div>
                     <div class="text-2xl font-bold text-primary" id="demo-first">0</div>
                 </div>
                 <div class="flex-1 bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <div class="text-[10px] font-bold text-brand-500 uppercase">Returning</div>
+                    <div class="text-[10px] font-bold text-brand/50 uppercase">Returning</div>
                     <div class="text-2xl font-bold text-emerald-600" id="demo-returning">0</div>
                 </div>
             </div>
@@ -112,7 +112,7 @@ Layout = "AdminSide/_StaffLayout";
           <!-- Provider Utilization -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 overflow-hidden">
               <h3 class="font-display font-bold text-brand mb-1">Provider Utilization Report</h3>
-              <p class="text-[11px] text-brand-500 mb-4">Tracking doctor busyness and workload</p>
+              <p class="text-[11px] text-brand/50 mb-4">Tracking doctor busyness and workload</p>
               
               <div class="w-full overflow-x-auto rounded-xl border border-slate-100">
                   <table class="w-full text-left">
@@ -133,7 +133,7 @@ Layout = "AdminSide/_StaffLayout";
           <!-- Section B: The Appointment Pulse -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200">
               <h3 class="font-display font-bold text-brand mb-1">The Appointment Pulse</h3>
-              <p class="text-[11px] text-brand-500 mb-4">Actionable insights to optimize clinic flow</p>
+              <p class="text-[11px] text-brand/50 mb-4">Actionable insights to optimize clinic flow</p>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <!-- No-Show Rate -->
