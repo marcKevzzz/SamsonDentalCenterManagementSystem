@@ -3,8 +3,13 @@
 ## Current Status: Stabilizing Data Layer & Performance
 
 ### Recently Completed
+- **System Documentation**: Redesigned `/Clinic/Docs` with a modern, minimalist UI (dark mode, glassmorphism, GSAP animations) and accurate technical details on middlewares, tech stack, security, and RBAC.
 - **Purged Oral Health Infrastructure**: Completely removed `oral_health_score`, `oral_health_summary` and related logic from DB, Models, and Dashboard.
+
+
+- **Fixed Appointment Availability Logic**: Resolved issue where `confirmed` or `arrived` appointments (especially those promoted from waitlist) were not correctly blocking doctor slots by removing restrictive `is_waitlist` filters and normalizing date parsing in `AppointmentService.cs`.
 - **Fixed Appointment Date Inconsistency**: Resolved persistent 1-2 day date-mismatch bug by implementing `DateOnlyConverter` for strict `yyyy-MM-dd` serialization and normalizing all calendar dates to `DateTimeKind.Unspecified`. This prevents timezone leakage across DB, Email, and UI layers.
+
 - **Hardened Clinical Records Sync**: Fixed 23502 (null id) constraint error in `patient_tooth_status` by implementing true UPSERT logic with `ON CONFLICT (patient_id, tooth_number)`.
 - **Storage Resilience**: Implemented automatic bucket creation in `ClinicService.cs` to handle missing `treatment-xrays` or gallery buckets.
 - **Enhanced Records UI**: Fixed Diagnostic Imaging tab in patient profile to correctly display treatment X-rays.

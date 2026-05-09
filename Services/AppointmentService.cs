@@ -146,9 +146,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var dateStr = date.ToString("yyyy-MM-dd");
+                var dateStr = date.Date.ToString("yyyy-MM-dd");
                 var path =
-                    $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
+                    $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -270,11 +270,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 var doctorIds = string.Join(",", doctors.Select(d => d.Id));
                 var profileIds = string.Join(",", doctors.Select(d => d.ProfileId));
-                var dateStr = date.ToString("yyyy-MM-dd");
+                var dateStr = date.Date.ToString("yyyy-MM-dd");
                 var dayOfWeek = (int)date.DayOfWeek;
 
                 // 1. Fetch Appointments
-                var batchPath = $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=in.({doctorIds})&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
+                var batchPath = $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=in.({doctorIds})&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)";
                 
                 // 2. Fetch Staff Availability
                 var availPath = $"/staff_availability?staff_id=in.({doctorIds})&day_of_week=eq.{dayOfWeek}&is_active=eq.true";
