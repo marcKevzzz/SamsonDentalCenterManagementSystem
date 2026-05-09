@@ -113,6 +113,22 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var path = await _supabase.Storage.From(bucket).Upload(data, uniqueName, new Supabase.Storage.FileOptions { ContentType = contentType });
                 return _supabase.Storage.From(bucket).GetPublicUrl(uniqueName);
             }
+            catch (Exception ex) when (ex.Message.Contains("Bucket not found", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    // Attempt to create bucket if it doesn't exist (e.g. treatment-xrays)
+                    await _supabase.Storage.CreateBucket(bucket, new Supabase.Storage.BucketUpsertOptions { Public = true });
+                    
+                    var uniqueName = $"{Guid.NewGuid()}_{fileName}";
+                    await _supabase.Storage.From(bucket).Upload(data, uniqueName, new Supabase.Storage.FileOptions { ContentType = contentType });
+                    return _supabase.Storage.From(bucket).GetPublicUrl(uniqueName);
+                }
+                catch (Exception innerEx)
+                {
+                    throw new Exception($"File upload to {bucket} failed and could not create bucket: {innerEx.Message}");
+                }
+            }
             catch (Exception ex)
             {
                 throw new Exception($"File upload to {bucket} failed: {ex.Message}");

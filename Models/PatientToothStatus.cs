@@ -6,7 +6,7 @@ namespace SamsonDentalCenterManagementSystem.Models
     [Table("patient_tooth_status")]
     public class PatientToothStatus : BaseModel
     {
-        [PrimaryKey("id", false)]
+        [PrimaryKey("id", true)]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Column("patient_id")]

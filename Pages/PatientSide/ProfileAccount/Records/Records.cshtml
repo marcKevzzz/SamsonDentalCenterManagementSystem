@@ -261,21 +261,40 @@ ViewData["Title"] = "Dental Records";
   <!-- ═══ X-RAY TAB ═══ -->
   <div id="tabContent-xray" class="tab-pane-rec hidden">
       <div class="flex flex-col gap-8">
-          @if (false)
+          @{
+              var xrayTreatments = Model.Treatments.Where(t => !string.IsNullOrEmpty(t.XrayUrl) || !string.IsNullOrEmpty(t.XrayType)).ToList();
+          }
+          @if (xrayTreatments.Any())
           {
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  @foreach (var treatment in Model.Treatments)
+                  @foreach (var treatment in xrayTreatments)
                   {
                       <div class="group relative bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all">
-                          <div class="aspect-square bg-slate-900 flex items-center justify-center overflow-hidden">
-                              <i class="fa-solid fa-file-medical text-slate-700 text-5xl group-hover:scale-110 transition-transform"></i>
+                          <div class="aspect-square bg-slate-900 flex items-center justify-center overflow-hidden cursor-pointer" onclick="window.open('@treatment.XrayUrl', '_blank')">
+                              @if (!string.IsNullOrEmpty(treatment.XrayUrl))
+                              {
+                                  <img src="@treatment.XrayUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="X-ray" />
+                              }
+                              else
+                              {
+                                  <i class="fa-solid fa-file-medical text-slate-700 text-5xl group-hover:scale-110 transition-transform"></i>
+                              }
                           </div>
                           <div class="p-8">
                               <div class="flex items-center justify-between mb-2">
-                                  <h3 class="font-bold text-brand text-base">@treatment.ServiceName</h3>
-                                  <i class="fa-solid fa-expand text-slate-200 text-xs group-hover:text-primary transition-colors"></i>
+                                  <h3 class="font-bold text-brand text-base">@(string.IsNullOrEmpty(treatment.XrayType) ? "Dental X-ray" : treatment.XrayType)</h3>
+                                  <a href="@treatment.XrayUrl" target="_blank" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-brand/40 hover:bg-primary hover:text-white transition-all">
+                                      <i class="fa-solid fa-expand text-xs"></i>
+                                  </a>
                               </div>
                               <p class="text-muted text-[0.65rem] uppercase tracking-[0.15em] font-bold">Captured: @treatment.CreatedAt.ToString("MMM dd, yyyy")</p>
+                              @if (!string.IsNullOrEmpty(treatment.XrayNotes))
+                              {
+                                  <div class="mt-4 pt-4 border-t border-slate-50">
+                                      <p class="text-[0.65rem] font-bold text-slate-300 uppercase tracking-widest mb-1">Radiographic Notes</p>
+                                      <p class="text-[0.75rem] text-muted leading-relaxed italic line-clamp-3">"@treatment.XrayNotes"</p>
+                                  </div>
+                              }
                           </div>
                       </div>
                   }
