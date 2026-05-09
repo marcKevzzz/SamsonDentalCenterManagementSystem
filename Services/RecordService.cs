@@ -57,10 +57,8 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             if (updates == null || !updates.Any()) return;
 
-            // Clear IDs to let the database unique constraint (patient_id, tooth_number) handle the UPSERT
-            foreach(var u in updates) u.Id = null; 
-
-            await _supabase.From<PatientToothStatus>().Upsert(updates);
+            // Use the unique constraint (patient_id, tooth_number) to handle the UPSERT
+            await _supabase.From<PatientToothStatus>().Upsert(updates, new Supabase.Postgrest.QueryOptions { OnConflict = "patient_id,tooth_number" });
 
             var patientId = updates.First().PatientId;
             await _logs.LogActionAsync(actorId, "updated tooth chart", $"Patient: {patientId}, {updates.Count} teeth updated", "Clinical", "/Admin/Patients/Profile?id=" + patientId);

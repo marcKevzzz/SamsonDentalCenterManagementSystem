@@ -5,262 +5,429 @@
     ViewData["Title"] = "System Documentation";
 }
 
-<div class="min-h-screen bg-[#0a0a0b] text-white overflow-hidden dot-grid p-6 lg:p-12 relative">
-    <!-- Background Decor -->
-    <div class="absolute top-0 right-0 w-[50vw] h-[50vw] bg-indigo-500/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-[40vw] h-[40vw] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+<div class="min-h-screen bg-[#050505] text-[#a0a0a0] font-sans selection:bg-indigo-500/30 selection:text-white">
+    <!-- Dot Grid Background -->
+    <div class="fixed inset-0 dot-grid pointer-events-none opacity-20"></div>
+    
+    <!-- Decorative Blurs -->
+    <div class="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none"></div>
 
     <style>
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --font-outfit: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
-        .gradient-text {
-            background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+
+        body {
+            font-family: var(--font-outfit);
+        }
+
+        .dot-grid {
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .dot-grid {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-            background-size: 30px 30px;
+
+        .mono {
+            font-family: var(--font-mono);
         }
-        section { scroll-margin-top: 100px; }
+
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            padding-left: 8px;
+        }
+
+        section {
+            scroll-margin-top: 120px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #252525;
+        }
     </style>
 
-    <div class="max-w-5xl mx-auto py-10 relative z-10">
-        <!-- Header -->
-        <header class="mb-24 opacity-0" id="doc-header">
-            <div class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
-                System Transparency & Tech Stack
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 py-20 relative z-10 flex flex-col lg:flex-row gap-16">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="lg:w-64 lg:sticky lg:top-24 h-fit hidden lg:block">
+            <div class="space-y-1">
+                <div class="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-500 mb-6">Index</div>
+                <a href="#overview" class="nav-link block text-sm py-2">Overview</a>
+                <a href="#tech-stack" class="nav-link block text-sm py-2">Tech Stack</a>
+                <a href="#architecture" class="nav-link block text-sm py-2">Architecture</a>
+                <a href="#security" class="nav-link block text-sm py-2">Security & Identity</a>
+                <a href="#rbac" class="nav-link block text-sm py-2">Role Permissions</a>
+                <a href="#database" class="nav-link block text-sm py-2">Data Infrastructure</a>
+                <a href="#middleware" class="nav-link block text-sm py-2">Middleware Pipeline</a>
             </div>
-            <h1 class="text-5xl md:text-8xl font-bold mb-8 gradient-text tracking-tighter">SDC Operations<br>Engine</h1>
-            <p class="text-white/40 text-xl max-w-2xl leading-relaxed">
-                Explore the technological foundation of Samson Dental Center—where enterprise-grade security meets clinical excellence and patient-first design.
-            </p>
-        </header>
+
+            <div class="mt-20 pt-10 border-t border-white/5">
+                <div class="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 mb-4">Version</div>
+                <div class="mono text-xs text-white/40">v1.2.4-stable</div>
+            </div>
+        </aside>
 
         <!-- Main Content -->
-        <div class="space-y-40">
-            <!-- Architecture -->
-            <section class="opacity-0 translate-y-10 doc-section">
-                <div class="flex flex-col md:flex-row gap-12 items-start">
-                    <div class="md:w-1/3">
-                        <h2 class="text-3xl font-bold mb-4">Architecture</h2>
-                        <p class="text-white/40 text-sm leading-relaxed">
-                            A modern, cloud-native stack designed for high availability and sub-second latency.
-                        </p>
-                    </div>
-                    <div class="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div class="glass p-8 rounded-3xl">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6">
-                                <i class="fa-solid fa-server text-indigo-400"></i>
-                            </div>
-                            <h3 class="text-white font-bold mb-3">Backend Core</h3>
-                            <p class="text-white/50 text-[13px] leading-relaxed">
-                                Built on <strong>.NET 9.0 Core</strong>, utilizing a service-oriented architecture with asynchronous processing for appointment scheduling and billing.
-                            </p>
-                        </div>
-                        <div class="glass p-8 rounded-3xl">
-                            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6">
-                                <i class="fa-solid fa-database text-blue-400"></i>
-                            </div>
-                            <h3 class="text-white font-bold mb-3">Data Infrastructure</h3>
-                            <p class="text-white/50 text-[13px] leading-relaxed">
-                                Powered by <strong>Supabase (PostgreSQL)</strong>, featuring Row-Level Security (RLS) to ensure patients only ever access their own data.
-                            </p>
-                        </div>
-                    </div>
+        <main class="flex-1 space-y-32">
+            
+            <!-- Hero Section -->
+            <section id="overview" class="space-y-8 reveal">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/5 border border-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase tracking-widest">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                    System Documentation
                 </div>
+                <h1 class="text-6xl lg:text-8xl font-extrabold tracking-tighter text-white leading-[0.9]">
+                    Samson Ops <br/>
+                    <span class="text-white/20">Engine</span>
+                </h1>
+                <p class="text-xl text-white/50 max-w-2xl leading-relaxed">
+                    A comprehensive technical overview of the infrastructure, security protocols, and architectural patterns powering Samson Dental Center.
+                </p>
             </section>
 
-            <!-- Integrity & Security -->
-            <section class="opacity-0 translate-y-10 doc-section">
-                <div class="glass p-12 rounded-[40px] border-indigo-500/10">
-                    <div class="flex items-center gap-4 mb-10">
-                        <div class="px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest">
-                            Secure & Compliant
-                        </div>
-                    </div>
-                    <h2 class="text-4xl font-bold mb-8">System Integrity</h2>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        <div class="space-y-4">
-                            <h4 class="text-white font-semibold flex items-center gap-2">
-                                <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
-                                HIPAA Alignment
-                            </h4>
-                            <p class="text-white/40 text-sm leading-relaxed">
-                                Encrypted data transmission (TLS 1.3) and storage-at-rest ensure that sensitive dental records remain strictly confidential.
-                            </p>
-                        </div>
-                        <div class="space-y-4">
-                            <h4 class="text-white font-semibold flex items-center gap-2">
-                                <i class="fa-solid fa-fingerprint text-indigo-400 text-sm"></i>
-                                Identity Bridge
-                            </h4>
-                            <p class="text-white/40 text-sm leading-relaxed">
-                                Multi-factor authentication support and secure OTP (One-Time Password) flows protect your account from unauthorized access.
-                            </p>
-                        </div>
-                        <div class="space-y-4">
-                            <h4 class="text-white font-semibold flex items-center gap-2">
-                                <i class="fa-solid fa-clock-rotate-left text-indigo-400 text-sm"></i>
-                                Audit Logging
-                            </h4>
-                            <p class="text-white/40 text-sm leading-relaxed">
-                                Every administrative action is logged and immutable, providing full transparency on how clinical data is managed.
-                            </p>
-                        </div>
-                    </div>
+            <!-- Tech Stack -->
+            <section id="tech-stack" class="space-y-12 reveal">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Technology Stack</h2>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
                 </div>
-            </section>
-
-            <!-- AI Operations -->
-            <section class="opacity-0 translate-y-10 doc-section">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                    <div>
-                        <h2 class="text-3xl font-bold mb-6">Samson Dental Core (SLM)</h2>
-                        <p class="text-white/40 leading-relaxed mb-8">
-                            A specialized, high-efficiency appointment management model optimized for low-latency, high-accuracy scheduling. 
-                            Operating on strict domain constraints for Samson Dental Center.
-                        </p>
-                        <ul class="space-y-4">
-                            <li class="flex gap-4 items-start">
-                                <div class="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0 mt-1">
-                                    <i class="fa-solid fa-bolt text-indigo-400 text-[10px]"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-semibold text-sm">Low-Latency Scheduling</h4>
-                                    <p class="text-white/30 text-xs mt-1">Direct natural language processing for instant availability extraction.</p>
-                                </div>
-                            </li>
-                            <li class="flex gap-4 items-start">
-                                <div class="w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0 mt-1">
-                                    <i class="fa-solid fa-shield-heart text-blue-400 text-[10px]"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-semibold text-sm">Strict Domain Constraints</h4>
-                                    <p class="text-white/30 text-xs mt-1">Focuses exclusively on dental health; redirects general medical inquiries for safety.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="glass p-8 rounded-[32px] border-l-4 border-l-indigo-500/50">
-                        <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-4">Operational Protocol</div>
-                        <div class="space-y-4 font-mono text-xs">
-                            <div class="p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span class="text-white/30">Step 1:</span> <span class="text-indigo-400">Model</span> Extracts 2026-05-16 from text.
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @{
+                        var tools = new[] {
+                            (Icon: "fa-brands fa-microsoft", Title: "Backend", Desc: ".NET 8 (Web App)", Color: "indigo"),
+                            (Icon: "fa-solid fa-code", Title: "Frontend", Desc: "Razor Pages (SSR)", Color: "blue"),
+                            (Icon: "fa-solid fa-database", Title: "Database", Desc: "PostgreSQL (Supabase)", Color: "emerald"),
+                            (Icon: "fa-solid fa-layer-group", Title: "ORM", Desc: "EF Core & Supabase", Color: "violet"),
+                            (Icon: "fa-solid fa-shield-halved", Title: "Identity", Desc: "Supabase Auth (JWT)", Color: "rose"),
+                            (Icon: "fa-solid fa-bolt", Title: "Real-time", Desc: "SignalR Core", Color: "amber"),
+                            (Icon: "fa-solid fa-paper-plane", Title: "Email", Desc: "FluentEmail + SMTP", Color: "sky"),
+                            (Icon: "fa-solid fa-memory", Title: "Caching", Desc: "Memory & Distributed", Color: "slate")
+                        };
+                    }
+                    @foreach (var tool in tools) {
+                        <div class="glass-card p-6 rounded-3xl group">
+                            <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4 group-hover:bg-@tool.Color-500/10 group-hover:text-@tool.Color-400 transition-colors">
+                                <i class="@tool.Icon text-lg opacity-50 group-hover:opacity-100"></i>
                             </div>
-                            <div class="p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span class="text-white/30">Step 2:</span> <span class="text-blue-400">Backend</span> Runs SELECT against Supabase & BlockedDates.
-                            </div>
-                            <div class="p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span class="text-white/30">Step 3:</span> <span class="text-indigo-400">Model</span> Outputs structured JSON for SignalR Hub.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Leadership -->
-            <section class="opacity-0 translate-y-10 doc-section">
-                <div class="flex flex-col md:flex-row gap-12 items-center">
-                    <div class="md:w-1/2 space-y-6">
-                        <h2 class="text-4xl font-bold">Leadership</h2>
-                        <p class="text-white/40 leading-relaxed text-lg">
-                            Behind the technology is a team of professionals committed to dental innovation and administrative excellence.
-                        </p>
-                        <div class="space-y-6 pt-4">
-                            <div class="flex items-center gap-6 p-6 glass rounded-3xl border-l-4 border-l-indigo-500">
-                                <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                                    <i class="fa-solid fa-user-doctor text-indigo-400 text-2xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-bold text-lg">Dr. Marcus Rivera</h4>
-                                    <p class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Chief Executive Officer</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-6 p-6 glass rounded-3xl border-l-4 border-l-blue-500">
-                                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-                                    <i class="fa-solid fa-user-tie text-blue-400 text-2xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-bold text-lg">Samson Admin</h4>
-                                    <p class="text-blue-400 text-xs font-bold uppercase tracking-widest">Clinic Administrator</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="md:w-1/2 grid grid-cols-2 gap-4">
-                        <div class="glass p-6 rounded-3xl text-center">
-                            <div class="text-3xl font-bold mb-1 gradient-text">60+</div>
-                            <div class="text-white/30 text-[10px] uppercase font-bold tracking-widest">Years of Heritage</div>
-                        </div>
-                        <div class="glass p-6 rounded-3xl text-center">
-                            <div class="text-3xl font-bold mb-1 gradient-text">2k+</div>
-                            <div class="text-white/30 text-[10px] uppercase font-bold tracking-widest">Active Patients</div>
-                        </div>
-                        <div class="glass p-6 rounded-3xl text-center">
-                            <div class="text-3xl font-bold mb-1 gradient-text">12</div>
-                            <div class="text-white/30 text-[10px] uppercase font-bold tracking-widest">Specialists</div>
-                        </div>
-                        <div class="glass p-6 rounded-3xl text-center">
-                            <div class="text-3xl font-bold mb-1 gradient-text">99%</div>
-                            <div class="text-white/30 text-[10px] uppercase font-bold tracking-widest">System Uptime</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Tech Stats -->
-            <section class="opacity-0 translate-y-10 doc-section">
-                <h2 class="text-2xl font-bold mb-12 flex items-center gap-4">
-                    <span class="w-8 h-[1px] bg-indigo-500"></span>
-                    Integrated Features
-                </h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    @foreach (var feature in new[] { "Patient EHR", "Smart Scheduling", "Invoice Engine", "Analytics Suite", "SignalR Hubs", "Staff Portal", "Dynamic Chatbot", "Dental Charting" })
-                    {
-                        <div class="glass py-8 px-4 rounded-[32px] text-center group hover:bg-indigo-500 transition-all duration-500 hover:-translate-y-2">
-                            <div class="text-white/80 font-bold text-xs uppercase tracking-widest">@feature</div>
+                            <h3 class="text-white text-sm font-bold mb-1">@tool.Title</h3>
+                            <p class="text-[11px] text-white/40">@tool.Desc</p>
                         </div>
                     }
                 </div>
             </section>
 
-            <!-- Developer Footnote -->
-            <section class="opacity-0 translate-y-10 doc-section pb-20">
-                <div class="glass p-12 rounded-[40px] relative overflow-hidden text-center">
-                    <div class="relative z-10 max-w-2xl mx-auto">
-                        <h2 class="text-3xl font-bold mb-6">Engineering Excellence</h2>
-                        <p class="text-white/60 leading-relaxed mb-10">
-                            Designed and engineered by <strong>Marc Kevin</strong> in collaboration with <strong>Antigravity AI</strong>. 
-                            Our goal is to redefine dental management through software that is as beautiful as it is powerful.
+            <!-- Architecture -->
+            <section id="architecture" class="space-y-12 reveal">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">System Architecture</h2>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-6">
+                        <p class="text-white/50 leading-relaxed">
+                            The application implements a **Modular Monolith** pattern using a service-oriented approach. Business logic is strictly encapsulated within the <span class="mono text-indigo-400">Services/</span> layer.
                         </p>
-                        <div class="flex justify-center gap-8">
-                            <a href="#" class="text-white/40 hover:text-indigo-400 transition-colors flex items-center gap-2">
-                                <i class="fa-brands fa-github"></i>
-                                <span class="text-xs font-bold tracking-widest uppercase">Source</span>
-                            </a>
-                            <a href="#" class="text-white/40 hover:text-indigo-400 transition-colors flex items-center gap-2">
-                                <i class="fa-solid fa-globe"></i>
-                                <span class="text-xs font-bold tracking-widest uppercase">Website</span>
-                            </a>
+                        <div class="space-y-4">
+                            <div class="flex gap-4">
+                                <div class="mt-1 text-indigo-500"><i class="fa-solid fa-circle-check text-[10px]"></i></div>
+                                <div class="text-sm">Logic encapsulated in <span class="mono text-indigo-400">Services/</span> (e.g., Appointment, Profile).</div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="mt-1 text-indigo-500"><i class="fa-solid fa-circle-check text-[10px]"></i></div>
+                                <div class="text-sm">Real-time hub synchronization via <span class="mono text-indigo-400">AdminHub</span>.</div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="mt-1 text-indigo-500"><i class="fa-solid fa-circle-check text-[10px]"></i></div>
+                                <div class="text-sm">Background task management via <span class="mono text-indigo-400">AppointmentReminderService</span>.</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px]"></div>
+                    <div class="bg-white/5 rounded-3xl p-8 border border-white/5 mono text-[11px] leading-loose">
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="w-3 h-3 rounded-full bg-rose-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+                        </div>
+                        <div class="text-white/20">// High-level Logic Flow</div>
+                        <div class="text-indigo-400">Request</div> -> 
+                        <div class="text-blue-400">Middleware</div> -> 
+                        <div class="text-emerald-400">ClaimsTransformation</div>
+                        <br/>
+                        <div class="pl-4 text-white/60">
+                            -> <span class="text-white">PageModel/Controller</span><br/>
+                            <span class="pl-4">-> <span class="text-indigo-400">ServiceLayer</span> (Business Logic)</span><br/>
+                            <span class="pl-8">-> <span class="text-blue-400">SupabaseClient</span> (Data)</span>
+                        </div>
+                        <div class="text-rose-400">Response</div> <- SignalR Sync
+                    </div>
                 </div>
             </section>
-        </div>
+
+            <!-- Security -->
+            <section id="security" class="space-y-12 reveal">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Security & Identity</h2>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                </div>
+                <div class="glass-card p-12 rounded-[40px] relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-10 opacity-5">
+                        <i class="fa-solid fa-shield-shield text-9xl"></i>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-white font-bold mb-2">JWT Authentication</h4>
+                                <p class="text-sm text-white/40 leading-relaxed">
+                                    Stateless authentication using cryptographically signed JSON Web Tokens provided by Supabase Auth.
+                                </p>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold mb-2">HTTP-Only Cookies</h4>
+                                <p class="text-sm text-white/40 leading-relaxed">
+                                    Tokens are persisted in secure, http-only cookies mitigate XSS risks. Logic intercepts <span class="mono text-indigo-400">sb-access-token</span> for mapping.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-white font-bold mb-2">Row-Level Security (RLS)</h4>
+                                <p class="text-sm text-white/40 leading-relaxed">
+                                    The database itself enforces privacy. A patient's session token can only ever access their own data rows in Supabase.
+                                </p>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold mb-2">Service Role & Anon Clients</h4>
+                                <p class="text-sm text-white/40 leading-relaxed">
+                                    Uses a restricted "Service Role" for administrative global data visibility and an "Anon Client" for public sign-in/OTP flows.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RBAC -->
+            <section id="rbac" class="space-y-12 reveal">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Role-Based Access Control (RBAC)</h2>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <div class="lg:col-span-1 space-y-6">
+                        <p class="text-sm text-white/50 leading-relaxed">
+                            RBAC is implemented via a custom <span class="mono text-indigo-400">IClaimsTransformation</span> that injects application-specific roles from the <span class="mono text-indigo-400">profiles</span> table.
+                        </p>
+                        <div class="grid grid-cols-1 gap-4">
+                            @{
+                                var roles = new[] {
+                                    (Role: "Admin", Access: "Full System Access", Icon: "fa-crown", Color: "indigo"),
+                                    (Role: "Doctor", Access: "Medical & Schedules", Icon: "fa-stethoscope", Color: "blue"),
+                                    (Role: "Receptionist", Access: "Booking & Billing", Icon: "fa-calendar-check", Color: "emerald"),
+                                    (Role: "Patient", Access: "Records & Booking", Icon: "fa-user-injured", Color: "rose")
+                                };
+                            }
+                            @foreach (var r in roles) {
+                                <div class="flex items-center gap-4 p-4 glass-card rounded-2xl">
+                                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-@r.Color-500">
+                                        <i class="fa-solid @r.Icon text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white text-xs font-bold">@r.Role</div>
+                                        <div class="text-[10px] text-white/30 uppercase tracking-tighter">@r.Access</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <div class="glass-card overflow-hidden rounded-3xl border border-white/5">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-white/5 text-white/60 uppercase tracking-widest font-bold">
+                                    <tr>
+                                        <th class="p-6 border-b border-white/5">Policy Name</th>
+                                        <th class="p-6 border-b border-white/5">Permitted Roles</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    <tr>
+                                        <td class="p-6 mono text-indigo-400">AdminOnly</td>
+                                        <td class="p-6">Admin</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 mono text-blue-400">DoctorOrAdmin</td>
+                                        <td class="p-6">Doctor, Admin</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 mono text-emerald-400">ReceptionistOrAdmin</td>
+                                        <td class="p-6">Receptionist, Admin</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 mono text-rose-400">StaffOnly</td>
+                                        <td class="p-6">Admin, Doctor, Receptionist</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database -->
+            <section id="database" class="space-y-12 reveal">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Data Infrastructure & Strategy</h2>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-8 rounded-[32px]">
+                        <div class="text-indigo-400 mb-4"><i class="fa-solid fa-scroll text-2xl"></i></div>
+                        <h4 class="text-white font-bold mb-3">Source of Truth</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">
+                            The definitive schema resides in <span class="mono text-indigo-400">Blueprint/schema.sql</span>. All database entities must align strictly with this SQL definition.
+                        </p>
+                    </div>
+                    <div class="glass-card p-8 rounded-[32px]">
+                        <div class="text-emerald-400 mb-4"><i class="fa-solid fa-cloud-arrow-down text-2xl"></i></div>
+                        <h4 class="text-white font-bold mb-3">Supabase Integration</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">
+                            Direct REST API calls via <span class="mono text-indigo-400">Supabase-csharp</span> are used for high-performance data operations and real-time listeners.
+                        </p>
+                    </div>
+                    <div class="glass-card p-8 rounded-[32px]">
+                        <div class="text-blue-400 mb-4"><i class="fa-solid fa-diagram-project text-2xl"></i></div>
+                        <h4 class="text-white font-bold mb-3">EF Core Strategy</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">
+                            Used for complex relational mappings and local database context (<span class="mono text-indigo-400">AppDbContext</span>) where traditional ORM features are required.
+                        </p>
+                    </div>
+                    <div class="glass-card p-8 rounded-[32px]">
+                        <div class="text-rose-400 mb-4"><i class="fa-solid fa-code-branch text-2xl"></i></div>
+                        <h4 class="text-white font-bold mb-3">Atomic Migrations</h4>
+                        <p class="text-sm text-white/40 leading-relaxed">
+                            Database changes are tracked via sequential SQL scripts in <span class="mono text-indigo-400">Backend/Migrations/</span> for versioned schema evolution.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Middleware -->
+            <section id="middleware" class="space-y-12 reveal">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Middleware Pipeline</h2>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                </div>
+                <div class="space-y-4">
+                    @{
+                        var pipeline = new[] {
+                            "CORS Policy (AllowVanilla) — Enforces cross-origin security.",
+                            "Authentication — Validates JWT tokens extracted from HTTP-only cookies.",
+                            "Session Management — Manages server-side state for temporary data.",
+                            "Claims Transformation — Custom RBAC injection into security context.",
+                            "Authorization — Enforces role-based policies on pages and API endpoints.",
+                            "Static Asset Mapping — Optimized delivery of frontend resources."
+                        };
+                    }
+                    @for (int i = 0; i < pipeline.Length; i++) {
+                        <div class="flex items-center gap-6 group">
+                            <div class="mono text-[10px] text-white/20 group-hover:text-indigo-500 transition-colors">0@(i+1)</div>
+                            <div class="flex-1 p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-sm group-hover:bg-white/[0.04] transition-all">
+                                @pipeline[i]
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <section class="pt-20 pb-10 border-t border-white/5 text-center reveal">
+                <p class="text-white/20 text-xs tracking-widest uppercase mb-4">Developed with excellence</p>
+                <div class="text-white/40 text-sm">
+                    Marc Kevin &copy; 2026 &bull; Samson Dental Center
+                </div>
+            </section>
+
+        </main>
     </div>
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script>
+        gsap.registerPlugin(ScrollTrigger);
+
         document.addEventListener('DOMContentLoaded', () => {
-            const tl = gsap.timeline();
-            tl.to("#doc-header", { opacity: 1, duration: 1.5, ease: "power4.out" })
-              .to(".doc-section", { opacity: 1, y: 0, stagger: 0.3, duration: 1, ease: "power3.out" }, "-=1");
+            // Reveal on scroll
+            gsap.utils.toArray('.reveal').forEach((elem) => {
+                gsap.fromTo(elem, 
+                    { opacity: 0, y: 30 },
+                    { 
+                        opacity: 1, 
+                        y: 0, 
+                        duration: 1.2, 
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: elem,
+                            start: "top 85%",
+                            toggleActions: "play none none none"
+                        }
+                    }
+                );
+            });
+
+            // Anchor smooth scroll
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
         });
     </script>
 }
+

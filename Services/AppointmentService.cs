@@ -146,9 +146,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                var dateStr = date.ToString("yyyy-MM-dd");
+                var dateStr = date.Date.ToString("yyyy-MM-dd");
                 var path =
-                    $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
+                    $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=eq.{doctorId}&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)";
                 var req = BuildRequest(HttpMethod.Get, path);
                 var res = await _http.SendAsync(req);
                 res.EnsureSuccessStatusCode();
@@ -270,11 +270,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 var doctorIds = string.Join(",", doctors.Select(d => d.Id));
                 var profileIds = string.Join(",", doctors.Select(d => d.ProfileId));
-                var dateStr = date.ToString("yyyy-MM-dd");
+                var dateStr = date.Date.ToString("yyyy-MM-dd");
                 var dayOfWeek = (int)date.DayOfWeek;
 
                 // 1. Fetch Appointments
-                var batchPath = $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=in.({doctorIds})&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)&is_waitlist=eq.false";
+                var batchPath = $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=in.({doctorIds})&appointment_date=eq.{dateStr}&status=in.(confirmed,arrived)";
                 
                 // 2. Fetch Staff Availability
                 var availPath = $"/staff_availability?staff_id=in.({doctorIds})&day_of_week=eq.{dayOfWeek}&is_active=eq.true";
@@ -502,12 +502,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (!string.IsNullOrEmpty(p.PatientEmail)) p.PatientEmail = p.PatientEmail.Trim().ToLower();
             if (!string.IsNullOrEmpty(p.OtherEmail)) p.OtherEmail = p.OtherEmail.Trim().ToLower();
 
-            // ── Date Parsing (Fix Timezone Shift) ────────────────────────────
-            if (!DateTime.TryParse(p.AppointmentDate, out var parsedDate))
-                 throw new Exception("Invalid appointment date.");
-            
-            // Strip time and offset to keep it on the selected day
-            var fixedDate = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Unspecified);
+            // ── Date Parsing ────────────────────────────────────────────────
+            // Strip time and keep as Unspecified to prevent serialization shifts for DATE columns
+            var fixedDate = DateTime.ParseExact(p.AppointmentDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
             // ── Validation ───────────────────────────────────────────────────
             if (!p.IsWaitlist)
@@ -801,7 +798,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 PatientEmail = p.PatientEmail,
                 PatientPhone = p.PatientPhone,
                 PatientSex = p.PatientSex,
-                PatientDob = p.PatientDob,
+                PatientDob = p.PatientDob.HasValue ? new DateTime(p.PatientDob.Value.Year, p.PatientDob.Value.Month, p.PatientDob.Value.Day, 0, 0, 0, DateTimeKind.Unspecified) : null,
                 IsGuest = p.IsGuest,
                 IsForOther = p.IsForOther,
                 OtherFirstName = p.OtherFirstName,
@@ -809,7 +806,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 OtherEmail = p.OtherEmail,
                 OtherPhone = p.OtherPhone,
                 OtherSex = p.OtherSex,
-                OtherDob = p.OtherDob,
+                OtherDob = p.OtherDob.HasValue ? new DateTime(p.OtherDob.Value.Year, p.OtherDob.Value.Month, p.OtherDob.Value.Day, 0, 0, 0, DateTimeKind.Unspecified) : null,
                 ServiceId = p.ServiceId,
                 DoctorId = p.DoctorId,
                 AppointmentDate = fixedDate,
@@ -1270,7 +1267,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 throw new Exception($"Appointment {id} not found.");
 
             // Step 2: Build a minimal PATCH payload — no ORM, no upsert
-            var fixedDate = DateTime.SpecifyKind(newDate.Date, DateTimeKind.Unspecified);
+            // Force UTC midnight to prevent serialization shifts
+            var fixedDate = new DateTime(newDate.Year, newDate.Month, newDate.Day, 0, 0, 0, DateTimeKind.Utc);
 
             var payload = new Dictionary<string, object?>
             {
@@ -1396,7 +1394,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 PatientEmail = dto.PatientEmail,
                 PatientPhone = dto.PatientPhone,
                 PatientSex = dto.PatientSex,
-                PatientDob = dto.PatientDob,
+                PatientDob = dto.PatientDob.HasValue ? DateTime.SpecifyKind(dto.PatientDob.Value.Date, DateTimeKind.Unspecified) : null,
                 IsGuest = dto.IsGuest,
                 IsForOther = dto.IsForOther,
                 OtherFirstName = dto.OtherFirstName,
@@ -1404,10 +1402,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                 OtherEmail = dto.OtherEmail,
                 OtherPhone = dto.OtherPhone,
                 OtherSex = dto.OtherSex,
-                OtherDob = dto.OtherDob,
+                OtherDob = dto.OtherDob.HasValue ? DateTime.SpecifyKind(dto.OtherDob.Value.Date, DateTimeKind.Unspecified) : null,
                 ServiceId = dto.ServiceId,
                 DoctorId = dto.DoctorId,
-                AppointmentDate = dto.AppointmentDate,
+                AppointmentDate = DateTime.SpecifyKind(dto.AppointmentDate.Date, DateTimeKind.Unspecified),
                 AppointmentTime = dto.AppointmentTime,
                 Status = dto.Status,
                 EmailStatus = dto.EmailStatus,

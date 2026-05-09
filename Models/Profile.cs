@@ -21,6 +21,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string LastName { get; set; } = string.Empty;
 
         [Column("date_of_birth")]
+        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
         [JsonPropertyName("date_of_birth")]
         public DateTime? DateOfBirth { get; set; }
 

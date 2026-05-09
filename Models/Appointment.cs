@@ -35,6 +35,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? PatientSex { get; set; }
 
         [Column("patient_dob")]
+        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
         public DateTime? PatientDob { get; set; }
 
         [Column("is_guest")]
@@ -59,6 +60,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? OtherSex { get; set; }
 
         [Column("other_dob")]
+        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
         public DateTime? OtherDob { get; set; }
 
         [Column("service_id")]
@@ -76,6 +78,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? DoctorId { get; set; }
 
         [Column("appointment_date")]
+        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
         public DateTime AppointmentDate { get; set; }
 
         [Column("appointment_time")]
