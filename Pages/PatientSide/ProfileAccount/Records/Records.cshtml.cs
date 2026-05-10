@@ -5,7 +5,7 @@ using SamsonDentalCenterManagementSystem.Helpers;
 using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
 
-namespace SamsonDentalCenterManagementSystem.Pages;
+namespace SamsonDentalCenterManagementSystem.Pages.Patient;
 
 public class RecordsModel : PageModel
 {
@@ -51,7 +51,17 @@ public class RecordsModel : PageModel
         if (Patient == null || Patient.Role?.ToLower() != "patient")
             return RedirectToPage("/Index");
 
-        MedicalInfo = await _recordService.GetMedicalInfoAsync(userId);
+        // Parallel fetch for clinical data
+        var medicalTask = _recordService.GetMedicalInfoAsync(userId);
+        var treatmentsTask = _recordService.GetTreatmentsByPatientAsync(userId);
+        var toothChartTask = _recordService.GetToothChartAsync(userId);
+
+        await Task.WhenAll(medicalTask, treatmentsTask, toothChartTask);
+
+        MedicalInfo = await medicalTask;
+        Treatments = await treatmentsTask;
+        ToothChart = await toothChartTask;
+
         if (MedicalInfo != null)
         {
             try
@@ -69,9 +79,6 @@ public class RecordsModel : PageModel
             }
             catch { }
         }
-
-        Treatments = await _recordService.GetTreatmentsByPatientAsync(userId);
-        ToothChart = await _recordService.GetToothChartAsync(userId);
 
         foreach (var ts in ToothChart)
         {

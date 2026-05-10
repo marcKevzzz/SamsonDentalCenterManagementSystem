@@ -9,7 +9,7 @@ namespace SamsonDentalCenterManagementSystem.Models
     {
         // internal object? Models;
 
-        [PrimaryKey("id", true)]
+        [PrimaryKey("id", false)]
         public string Id { get; set; } = string.Empty;
 
         [Column("first_name")]
@@ -28,15 +28,18 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string? Email { get; set; }
 
         [Column("role")]
+        [JsonPropertyName("role")]
+        [Newtonsoft.Json.JsonProperty("role")]
         public string? Role { get; set; }
 
         [Reference(typeof(Patient), foreignKey: "patients_profile_id_fkey")]
+        [JsonPropertyName("patients")]
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
         public Patient? Patient { get; set; }
 
         private DateTime? _dob;
-        [System.Text.Json.Serialization.JsonIgnore]
-        [Newtonsoft.Json.JsonIgnore]
+        [Column("date_of_birth")]
+        [JsonPropertyName("date_of_birth")]
         public DateTime? DateOfBirth 
         { 
             get => Patient?.DateOfBirth ?? _dob; 
@@ -44,8 +47,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         }
 
         private string? _sex;
-        [System.Text.Json.Serialization.JsonIgnore]
-        [Newtonsoft.Json.JsonIgnore]
+        [Column("sex")]
+        [JsonPropertyName("sex")]
         public string? Sex 
         { 
             get => Patient?.Sex ?? _sex; 
@@ -53,8 +56,8 @@ namespace SamsonDentalCenterManagementSystem.Models
         }
 
         private string? _address;
-        [System.Text.Json.Serialization.JsonIgnore]
-        [Newtonsoft.Json.JsonIgnore]
+        [Column("address")]
+        [JsonPropertyName("address")]
         public string? Address 
         { 
             get => Patient?.Address ?? _address; 

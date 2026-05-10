@@ -3,7 +3,7 @@ using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
 using System.Security.Claims;
 
-namespace SamsonDentalCenterManagementSystem.Pages;
+namespace SamsonDentalCenterManagementSystem.Pages.Patient;
 
 public class MyAppointmentsModel : PageModel
 {
@@ -32,11 +32,15 @@ public class MyAppointmentsModel : PageModel
 
         if (!string.IsNullOrEmpty(patientId))
         {
-            // 2. Fetch from Supabase via our service
-            Appointments = await _appointmentService.GetByPatient(patientId);
+            // 2. Fetch both appointments and review stats in parallel
+            var apptsTask = _appointmentService.GetByPatient(patientId);
+            var statsTask = _reviewService.GetPatientReviewStatsAsync(patientId);
 
-            // 3. Fetch review stats
-            var stats = await _reviewService.GetPatientReviewStatsAsync(patientId);
+            await Task.WhenAll(apptsTask, statsTask);
+
+            Appointments = await apptsTask;
+            var stats = await statsTask;
+
             if (stats.count > 0)
             {
                 AverageRating = stats.average.ToString("F1");

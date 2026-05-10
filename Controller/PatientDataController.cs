@@ -93,17 +93,22 @@ public class PatientDataController : ControllerBase
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var appointments = await _appointmentService.GetByPatient(userId);
-            var unreadNotifs = await _notificationService.GetUnreadCountAsync(userId);
-            var invoices = await _invoiceService.GetInvoicesByPatientIdAsync(userId);
-            var treatments = await _recordService.GetTreatmentsByPatientAsync(userId);
+            var appointmentsTask = _appointmentService.GetPendingCountByPatientAsync(userId);
+            var unreadNotifsTask = _notificationService.GetUnreadCountAsync(userId);
+            var treatmentsTask = _recordService.GetTreatmentCountByPatientAsync(userId);
+
+            await Task.WhenAll(appointmentsTask, unreadNotifsTask, treatmentsTask);
+
+            var pendingAppointments = await appointmentsTask;
+            var unreadNotifs = await unreadNotifsTask;
+            var totalRecords = await treatmentsTask;
 
             return Ok(new {
                 ok = true,
                 data = new {
-                    pendingAppointments = appointments.Count(a => a.Status.ToLower() == "pending"),
+                    pendingAppointments = pendingAppointments,
                     unreadNotifications = unreadNotifs,
-                    totalRecords = invoices.Count
+                    totalRecords = totalRecords
                 }
             });
         }

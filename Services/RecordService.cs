@@ -78,18 +78,42 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<Treatment>> GetTreatmentsByPatientAsync(string patientId)
         {
-            // First get all invoices for this patient
-            var invoiceRes = await _supabase.From<Invoice>().Where(i => i.PatientId == patientId).Get();
-            var invoiceIds = invoiceRes.Models.Select(i => i.Id).ToList();
-
+            // First get the invoices for this patient to get the invoice IDs
+            // This is more reliable than complex join filters in Supabase-csharp
+            // and avoids !inner join issues if some records have null references.
+            var invoicesRes = await _supabase.From<Invoice>()
+                .Where(x => x.PatientId == patientId)
+                .Select("id")
+                .Get();
+            
+            var invoiceIds = invoicesRes.Models.Select(i => i.Id).ToList();
             if (!invoiceIds.Any()) return new List<Treatment>();
 
-            // Then get treatments linked to these invoices
-            var treatmentRes = await _supabase.From<Treatment>()
+            // Now fetch treatments for these invoices
+            var res = await _supabase.From<Treatment>()
                 .Filter("invoice_id", Supabase.Postgrest.Constants.Operator.In, invoiceIds)
+                .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
                 .Get();
 
-            return treatmentRes.Models.OrderByDescending(t => t.CreatedAt).ToList();
+            return res.Models;
+        }
+
+        public async Task<int> GetTreatmentCountByPatientAsync(string patientId)
+        {
+            // Similar logic but optimized for count
+            var invoicesRes = await _supabase.From<Invoice>()
+                .Where(x => x.PatientId == patientId)
+                .Select("id")
+                .Get();
+            
+            var invoiceIds = invoicesRes.Models.Select(i => i.Id).ToList();
+            if (!invoiceIds.Any()) return 0;
+
+            var res = await _supabase.From<Treatment>()
+                .Filter("invoice_id", Supabase.Postgrest.Constants.Operator.In, invoiceIds)
+                .Count(Supabase.Postgrest.Constants.CountType.Exact);
+
+            return res;
         }
         public async Task InitializePatientRecords(string patientId, string actorId)
         {

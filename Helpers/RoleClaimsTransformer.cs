@@ -34,10 +34,20 @@ namespace SamsonDentalCenterManagementSystem.Helpers
 
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var profileService = scope.ServiceProvider.GetRequiredService<ProfileService>();
-                var profile = await profileService.GetProfileById(userId);
-                var role = profile?.Role ?? "patient"; // default to patient
+                // 1. Try to read from existing claims (e.g. role_app or role)
+                // This allows Supabase custom claims or hooks to bypass DB lookup
+                var role = principal.FindFirst("role_app")?.Value 
+                        ?? principal.FindFirst("app_role")?.Value
+                        ?? principal.FindFirst("role")?.Value;
+
+                // If role is "authenticated" (default Supabase role) or empty, we MUST use DB lookup
+                if (string.IsNullOrEmpty(role) || role == "authenticated")
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var profileService = scope.ServiceProvider.GetRequiredService<ProfileService>();
+                    var profile = await profileService.GetProfileById(userId);
+                    role = profile?.Role ?? "patient"; // default to patient
+                }
 
                 var identity = principal.Identity as ClaimsIdentity;
                 if (identity != null)

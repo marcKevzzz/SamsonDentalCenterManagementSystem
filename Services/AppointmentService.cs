@@ -1485,6 +1485,26 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
+        public async Task<int> GetPendingCountByPatientAsync(string patientId)
+        {
+            try
+            {
+                // Count pending, non-waitlist appointments for this patient
+                var res = await _supabase.From<Appointment>()
+                    .Where(a => a.PatientId == patientId)
+                    .Where(a => a.Status == "pending")
+                    .Where(a => a.IsWaitlist == false)
+                    .Count(Supabase.Postgrest.Constants.CountType.Exact);
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetPendingCountByPatient Error]: {ex.Message}");
+                return 0;
+            }
+        }
+
         public async Task<List<Appointment>> GetByDoctorIdAsync(string doctorId)
         {
             try

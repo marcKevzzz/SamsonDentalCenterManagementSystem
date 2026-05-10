@@ -4,15 +4,17 @@ using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
 using System.Security.Claims;
 
-namespace SamsonDentalCenterManagementSystem.Pages;
+namespace SamsonDentalCenterManagementSystem.Pages.Patient;
 
-public class DashboardModel : PageModel
+public class PatientDashboardModel : PageModel
 {
     private readonly AppointmentService _appointmentService;
+    private readonly ProfileService _profileService;
 
-    public DashboardModel(AppointmentService appointmentService)
+    public PatientDashboardModel(AppointmentService appointmentService, ProfileService profileService)
     {
         _appointmentService = appointmentService;
+        _profileService = profileService;
     }
 
     public List<Appointment> Appointments { get; set; } = new();
@@ -31,8 +33,13 @@ public class DashboardModel : PageModel
 
         if (!string.IsNullOrEmpty(patientId))
         {
-            Appointments = await _appointmentService.GetByPatient(patientId);
-            Profile = await _appointmentService._supabase.From<Profile>().Where(x => x.Id == patientId).Single();
+            var apptsTask = _appointmentService.GetByPatient(patientId);
+            var profileTask = _profileService.GetProfileById(patientId);
+
+            await Task.WhenAll(apptsTask, profileTask);
+
+            Appointments = await apptsTask;
+            Profile = await profileTask;
             
             // Sort to find the next one
             NextAppointment = Appointments

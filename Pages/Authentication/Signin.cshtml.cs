@@ -145,8 +145,24 @@ public class SigninModel : PageModel
                         }
 
                         var avatarUrl = profile?.AvatarUrl ?? "";
-                        var role = profile?.Role ?? "";
+                        var role = profile?.Role;
 
+                        // Fallback: If DB role is missing, try to get it from JWT claims (role_app / app_role / role)
+                        if (string.IsNullOrEmpty(role))
+                        {
+                            role = user.AppMetadata?.GetValueOrDefault("role_app")?.ToString()
+                                ?? user.AppMetadata?.GetValueOrDefault("app_role")?.ToString()
+                                ?? user.AppMetadata?.GetValueOrDefault("role")?.ToString()
+                                ?? user.UserMetadata?.GetValueOrDefault("role_app")?.ToString()
+                                ?? user.UserMetadata?.GetValueOrDefault("role")?.ToString();
+                            
+                            // Ignore the default Supabase "authenticated" role
+                            if (role == "authenticated") role = null;
+                        }
+
+                        role ??= "patient"; // final fallback
+
+                        Console.WriteLine($"[SignIn] Returning user {user.Email} with role: {role}");
                         return new JsonResult(
                             new
                             {

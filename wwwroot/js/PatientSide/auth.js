@@ -337,6 +337,7 @@ async function handleSignIn() {
     if (result.ok) {
       // 3. Success! Redirect to Dashboard
       if (result.user) {
+        console.log("[Auth] User data received:", result.user);
         signIn(result.user);
       }
       Toast.show("Welcome back!", "success");

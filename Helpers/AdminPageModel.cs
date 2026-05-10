@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SamsonDentalCenterManagementSystem.Models;
 using SamsonDentalCenterManagementSystem.Services;
 
 namespace SamsonDentalCenterManagementSystem.Helpers
@@ -48,8 +49,24 @@ namespace SamsonDentalCenterManagementSystem.Helpers
 
             try
             {
-                var profile = await _profileService.GetProfileById(userId);
-                var role = profile?.Role?.ToLower() ?? "patient";
+                // 1. Try to read role directly from JWT claims (fast path)
+                var role = User.FindFirst("role_app")?.Value 
+                        ?? User.FindFirst("app_role")?.Value
+                        ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+                Profile? profile = null;
+
+                // If role is still patient or unknown, we MUST verify with ProfileService
+                if (string.IsNullOrEmpty(role) || role == "patient" || role == "authenticated")
+                {
+                    profile = await _profileService.GetProfileById(userId);
+                    role = profile?.Role?.ToLower() ?? "patient";
+                }
+                else 
+                {
+                    // Even if we have a staff role from JWT, we still want profile names if possible
+                    profile = await _profileService.GetProfileById(userId);
+                }
 
                 var staffRoles = new[] { "admin", "doctor", "receptionist" };
                 if (!staffRoles.Contains(role))

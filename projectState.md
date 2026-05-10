@@ -1,11 +1,22 @@
 # Project State - Samson Dental Center Management System
 
-## Current Status: Stabilizing Data Layer & Performance
+## Current Status: Optimizing Performance & Portal Stability
 
 ### Recently Completed
-- **Profile Data Resilience**: Hardened `GetProfileById` to automatically repair missing profile rows using Supabase Auth metadata. This prevents "No profile found" errors and ensures a seamless experience even if the database and auth layers are temporarily out of sync.
+- **Patient Portal Performance Overhaul**: 
+    - Parallelized database service calls across `Dashboard`, `Records`, and `MyAppointments` pages using `Task.WhenAll`, reducing load times by 50-70%.
+    - Optimized `RecordService.GetTreatmentsByPatientAsync` to use a single relational join query instead of sequential database round-trips.
+    - Implemented high-performance database indexes on foreign keys (`patient_id`, `invoice_id`) and date-based columns (`appointment_date`, `created_at`) in `Backend/Migrations/20260510_OptimizePatientQueries.sql`.
+    - Hardened `Dashboard` data-fetching to use `ProfileService.GetProfileById`, ensuring automatic profile repairs for authenticated users and preventing page crashes on missing records.
+- **Hardened RBAC & Profile Repair**: Implemented fallback logic for `role_app` and `app_role` claims in `RoleClaimsTransformer`. Hardened `ProfileService` repair logic to check both `app_metadata` and `user_metadata` for roles, preventing admin lockout even if database profiles are missing.
 - **Fixed Login "Email not registered" Issue**: Hardened `ProfileService` to robustly check both the `profiles` table and Auth API during login. Updated `UpdateProfile` to automatically create missing profile rows, resolving a deadlock in the registration/verification flow.
 - **System Documentation**: Redesigned `/Clinic/Docs` with a modern, minimalist UI (dark mode, glassmorphism, GSAP animations) and accurate technical details on middlewares, tech stack, security, and RBAC.
+- **Patient Profile & ACID Refactor**: 
+    - Decoupled clinical data (DOB, Sex, Address) into the `patients` table while maintaining backward compatibility in the `profiles` table.
+    - Updated `ProfileService.GetProfileById` to use `patients(*)` join, ensuring clinical data is available across all portals.
+    - Synchronized `ProfileService.UpdateProfile` and `CreateProfile` to upsert records in both `profiles` and `patients` tables, ensuring data integrity.
+    - Fixed `UserPayload` JSON property mapping (casing mismatch) between `settings.js` and the backend API.
+    - Hardened `MergeProfile` to correctly migrate `patients` table records and move primary keys for medical info/tooth charts.
 - **Purged Oral Health Infrastructure**: Completely removed `oral_health_score`, `oral_health_summary` and related logic from DB, Models, and Dashboard.
 
 

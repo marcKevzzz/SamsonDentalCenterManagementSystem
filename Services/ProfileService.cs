@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -18,6 +19,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         private readonly IEmailService _emailService;
         private readonly HttpClient _http;
         private readonly IHttpClientFactory _httpClientFactory;
+        
+        // Tracking to prevent log spam and redundant repair attempts
+        private static readonly ConcurrentDictionary<string, DateTime> _failedRepairAttempts = new();
+        private static readonly TimeSpan REPAIR_COOLDOWN = TimeSpan.FromMinutes(5);
 
         public ProfileService(
             Supabase.Client supabase,
@@ -51,12 +56,17 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                await _adminClient.InitializeAsync();
+                // Use the admin client to bypass RLS and ensure we always get the profile
                 var response = await _adminClient.From<Profile>().Where(x => x.Id == userId).Get();
-
-                var profile = response.Models.FirstOrDefault();
+                var profile = response.Models?.FirstOrDefault();
                 if (profile == null)
                 {
+                    // Check cooldown
+                    if (_failedRepairAttempts.TryGetValue(userId, out var lastAttempt) && (DateTime.UtcNow - lastAttempt) < REPAIR_COOLDOWN)
+                    {
+                        return null; // Skip repair, too soon
+                    }
+
                     Console.WriteLine($"[ProfileService] No profile found for {userId}. Attempting on-the-fly repair...");
                     
                     // Fetch user from Auth Admin API
@@ -71,36 +81,107 @@ namespace SamsonDentalCenterManagementSystem.Services
                         using var doc = JsonDocument.Parse(json);
                         var root = doc.RootElement;
 
-                        var authEmail = root.GetProperty("email").GetString();
-                        var metadata = root.GetProperty("user_metadata");
+                        var authEmail = root.TryGetProperty("email", out var e) ? e.GetString() : email;
                         
-                        var firstName = metadata.TryGetProperty("first_name", out var fn) ? fn.GetString() : "User";
-                        var lastName = metadata.TryGetProperty("last_name", out var ln) ? ln.GetString() : "";
-                        var role = metadata.TryGetProperty("role", out var r) ? r.GetString() : "patient";
+                        string role = "patient";
+                        string fnStr = "User";
+                        string lnStr = "";
+
+                        // Helper to pick valid role (ignores Supabase default 'authenticated')
+                        string? PickValidRole(params string?[] candidates) {
+                            foreach (var c in candidates) {
+                                if (!string.IsNullOrEmpty(c) && c != "authenticated") return c;
+                            }
+                            return null;
+                        }
+
+                        // 1. Check app_metadata (Highest Priority for Roles)
+                        if (root.TryGetProperty("app_metadata", out var appMeta))
+                        {
+                            role = PickValidRole(
+                                appMeta.TryGetProperty("role_app", out var r1) ? r1.GetString() : null,
+                                appMeta.TryGetProperty("role", out var r2) ? r2.GetString() : null
+                            ) ?? role;
+                        }
+
+                        // 2. Check user_metadata (Fallback for Roles, primary for Names)
+                        if (root.TryGetProperty("user_metadata", out var userMeta))
+                        {
+                            if (role == "patient")
+                            {
+                                role = PickValidRole(
+                                    userMeta.TryGetProperty("role_app", out var r1) ? r1.GetString() : null,
+                                    userMeta.TryGetProperty("role", out var r2) ? r2.GetString() : null
+                                ) ?? role;
+                            }
+                            
+                            fnStr = userMeta.TryGetProperty("first_name", out var fn) ? fn.GetString() : fnStr;
+                            lnStr = userMeta.TryGetProperty("last_name", out var ln) ? ln.GetString() : lnStr;
+                        }
+
+                        // 3. Check top-level properties (Last Resort)
+                        if (role == "patient") {
+                            role = PickValidRole(
+                                root.TryGetProperty("role_app", out var r1) ? r1.GetString() : null,
+                                root.TryGetProperty("role", out var r2) ? r2.GetString() : null
+                            ) ?? "patient";
+                        }
+
+                        Console.WriteLine($"[ProfileService] Repairing user {userId} ({authEmail}) with detected role: {role}");
 
                         // Create the profile
                         await UpdateProfile(userId, new UserPayload 
                         { 
-                            FirstName = firstName!, 
-                            LastName = lastName!, 
+                            FirstName = fnStr!, 
+                            LastName = lnStr!, 
                             Email = authEmail!,
                             IsActive = true,
                             Role = role
                         });
 
-                        // Fetch it again
-                        var retryRes = await _adminClient.From<Profile>().Where(x => x.Id == userId).Get();
-                        profile = retryRes.Models.FirstOrDefault();
+                        // Small delay to allow for database propagation/triggers
+                        await Task.Delay(200);
+
+                        // Fetch it again using the SAME client that did the Upsert
+                        var retryRes = await _supabase.From<Profile>().Where(x => x.Id == userId).Get();
+                        profile = retryRes.Models?.FirstOrDefault();
+
+                        if (profile != null) {
+                             Console.WriteLine($"[ProfileService] Repair successful for {userId}. Role: {profile.Role}");
+                             _failedRepairAttempts.TryRemove(userId, out _); // Clear failure if it finally worked
+                        }
+                    }
+                    else
+                    {
+                        var errStr = await authRes.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[ProfileService] Auth API Failure for {userId}: {authRes.StatusCode}");
                     }
 
                     if (profile == null)
                     {
-                        Console.WriteLine("[ProfileService] Repair failed. No profile found.");
+                        Console.WriteLine($"[ProfileService] Repair failed for {userId}. Record still not found after Upsert.");
+                        _failedRepairAttempts[userId] = DateTime.UtcNow; // Mark as failed for cooldown
                         return null;
                     }
                 }
 
-                if (profile.DateOfBirth.HasValue)
+                // If we found a profile, hydrate the Patient reference separately to avoid ambiguous join issues
+                if (profile != null)
+                {
+                    // Ensure role is not null
+                    if (string.IsNullOrEmpty(profile.Role)) profile.Role = "patient";
+
+                    var patientRes = await _adminClient.From<Patient>().Where(x => x.ProfileId == userId).Get();
+                    profile.Patient = patientRes.Models?.FirstOrDefault();
+
+                    if (profile.Patient != null)
+                    {
+                        // Sync clinical fields from Patient table to Profile model backing fields
+                        Console.WriteLine($"[ProfileService] Hydrated Patient record for {userId}. DOB: {profile.Patient.DateOfBirth}");
+                    }
+                }
+
+                if (profile != null && profile.DateOfBirth.HasValue)
                 {
                     // DateOfBirth comes back as UTC midnight — convert to local date only
                     profile.DateOfBirth = profile.DateOfBirth.Value.Date;
@@ -110,11 +191,20 @@ namespace SamsonDentalCenterManagementSystem.Services
                 {
                     profile.Email = email;
                 }
+                if (profile != null)
+                {
+                    Console.WriteLine($"[ProfileService] GetProfileById({userId}) -> Found: {profile.FirstName} {profile.LastName}, Role: '{profile.Role}', HasPatientRef: {profile.Patient != null}");
+                }
+                else
+                {
+                    Console.WriteLine($"[ProfileService] GetProfileById({userId}) -> Profile NOT FOUND after repair attempts.");
+                }
                 return profile;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ProfileService] Exception: {ex.Message}");
+                Console.WriteLine($"[ProfileService] Exception in GetProfileById: {ex.Message}");
+                if (ex.InnerException != null) Console.WriteLine($"[ProfileService] Inner: {ex.InnerException.Message}");
                 return null;
             }
         }
@@ -384,17 +474,25 @@ namespace SamsonDentalCenterManagementSystem.Services
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public async Task<List<Profile>> GetShadowProfilesForEmail(
-            string email,
-            string currentUserId
-        )
+        public async Task<List<Profile>> GetShadowProfilesForEmail(string email, string currentUserId)
         {
-            await _supabase.InitializeAsync();
-            var response = await _supabase
-                .From<Profile>()
-                .Where(p => p.Email == email && p.Id != currentUserId && p.Role == "patient")
-                .Get();
-            return response.Models ?? new List<Profile>();
+            try
+            {
+                // Use the admin client to bypass RLS and ensure we see all profiles
+                var res = await _adminClient.From<Profile>()
+                    .Filter("email", Supabase.Postgrest.Constants.Operator.Equals, email)
+                    .Filter("id", Supabase.Postgrest.Constants.Operator.NotEqual, currentUserId)
+                    .Filter("role", Supabase.Postgrest.Constants.Operator.Equals, "patient")
+                    .Get();
+                
+                return res.Models;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetShadowProfilesForEmail Error]: {ex.Message}");
+                // Return empty list instead of crashing the whole request if this fails
+                return new List<Profile>();
+            }
         }
 
         public async Task<string> UploadAvatar(
@@ -556,6 +654,20 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             // Use Upsert to handle potential trigger conflicts
             await _supabase.From<Profile>().Upsert(profile);
+
+            // If patient, initialize patient table record
+            if (p.Role == "patient")
+            {
+                var patient = new Patient
+                {
+                    ProfileId = p.Id!,
+                    DateOfBirth = p.DateOfBirth,
+                    Sex = p.Sex,
+                    Address = p.Address,
+                    IsClaimed = true // Since it's being created by admin/system
+                };
+                await _supabase.From<Patient>().Upsert(patient);
+            }
         }
 
         // UPDATE profile fields
@@ -600,6 +712,19 @@ namespace SamsonDentalCenterManagementSystem.Services
                 profile.IsActive = p.IsActive.Value;
 
             await _supabase.From<Profile>().Upsert(profile);
+
+            // Sync to Patient table if role is patient
+            if (profile.Role == "patient")
+            {
+                var patient = new Patient
+                {
+                    ProfileId = userId,
+                    DateOfBirth = profile.DateOfBirth,
+                    Sex = profile.Sex,
+                    Address = profile.Address
+                };
+                await _supabase.From<Patient>().Upsert(patient);
+            }
 
             // Sync Additional Doctor Fields
             if (profile.Role == "doctor")
@@ -1072,7 +1197,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 _http.DefaultRequestHeaders.Clear();
                 _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
                 _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
-
                 var res = await _http.PostAsync(
                     $"{_supabaseUrl}/auth/v1/admin/users",
                     new StringContent(
@@ -1087,17 +1211,12 @@ namespace SamsonDentalCenterManagementSystem.Services
                     var err = await res.Content.ReadAsStringAsync();
                     if (err.Contains("email_exists") || err.Contains("already been registered"))
                     {
-                        // Check if the existing user's ID matches the one we want
                         var existingId = await GetUserIdByEmail(email);
                         if (existingId == id)
                         {
-                            // ID matches! Just update the password.
                             await UpdateUserPassword(id, password);
                             return id;
                         }
-
-                        // If we are claiming a record, we might need to merge IDs later,
-                        // but for now, we error if the email belongs to a DIFFERENT ID.
                         throw new Exception(
                             $"This email is already registered to a different account. (ID: {existingId})"
                         );
@@ -1126,7 +1245,6 @@ namespace SamsonDentalCenterManagementSystem.Services
         )
         {
             await _supabase.InitializeAsync();
-            // Optimize: Use server-side filtering for Name to avoid fetching all patients
             var query = _supabase
                 .From<Profile>()
                 .Where(p => p.Role == "patient")
@@ -1136,7 +1254,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             var response = await query.Get();
             var profiles = response.Models;
 
-            // Match by Name + DOB OR Name + Phone
             return profiles.FirstOrDefault(p =>
                 p.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)
                 && p.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase)
@@ -1156,82 +1273,105 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                await _supabase.InitializeAsync();
-
-                // 1. Update Appointments
-                await _supabase
+                await _adminClient
                     .From<Appointment>()
                     .Where(a => a.PatientId == sourceId)
                     .Set(a => a.PatientId, targetId)
                     .Set(a => a.IsGuest, false)
                     .Update();
 
-                // 2. Invoices (Treatments are linked to Invoices, which link to PatientId)
-                await _supabase
+                await _adminClient
                     .From<Invoice>()
                     .Where(i => i.PatientId == sourceId)
                     .Set(i => i.PatientId, targetId)
                     .Update();
 
-                // 3. Update Notifications
-                await _supabase
+                await _adminClient
                     .From<Notification>()
                     .Where(n => n.ProfileId == sourceId)
                     .Set(n => n.ProfileId, targetId)
                     .Update();
 
-                // 4. Transfer Medical Info
-                var sourceInfoRes = await _supabase
+                var sourceInfoRes = await _adminClient
                     .From<PatientMedicalInfo>()
                     .Where(x => x.PatientId == sourceId)
                     .Get();
                 var sourceInfo = sourceInfoRes.Models.FirstOrDefault();
                 if (sourceInfo != null)
                 {
-                    var targetInfoRes = await _supabase
+                    var targetInfoRes = await _adminClient
                         .From<PatientMedicalInfo>()
                         .Where(x => x.PatientId == targetId)
                         .Get();
-                    if (targetInfoRes.Models.Count == 0)
+                    var targetInfo = targetInfoRes.Models.FirstOrDefault();
+
+                    if (targetInfo == null)
                     {
-                        sourceInfo.PatientId = targetId;
-                        await _supabase.From<PatientMedicalInfo>().Insert(sourceInfo);
+                        // Update PK using Set to avoid mapping issues
+                        await _adminClient.From<PatientMedicalInfo>()
+                            .Where(x => x.PatientId == sourceId)
+                            .Set(x => x.PatientId, targetId)
+                            .Update();
+                    }
+                    else
+                    {
+                        bool changed = false;
+                        if (string.IsNullOrEmpty(targetInfo.AllergiesJson)) { targetInfo.AllergiesJson = sourceInfo.AllergiesJson; changed = true; }
+                        if (string.IsNullOrEmpty(targetInfo.HistoryJson)) { targetInfo.HistoryJson = sourceInfo.HistoryJson; changed = true; }
+                        if (string.IsNullOrEmpty(targetInfo.MedicationsJson)) { targetInfo.MedicationsJson = sourceInfo.MedicationsJson; changed = true; }
+                        
+                        if (changed) await _adminClient.From<PatientMedicalInfo>().Update(targetInfo);
+                        await _adminClient.From<PatientMedicalInfo>().Where(x => x.PatientId == sourceId).Delete();
                     }
                 }
 
-                // 5. Transfer Tooth Status
-                var sourceToothRes = await _supabase
+                var sourceChartRes = await _adminClient
                     .From<PatientToothStatus>()
                     .Where(x => x.PatientId == sourceId)
                     .Get();
-                if (sourceToothRes.Models.Any())
+                
+                foreach (var status in sourceChartRes.Models)
                 {
-                    var targetToothRes = await _supabase
+                    var targetStatusRes = await _adminClient
                         .From<PatientToothStatus>()
-                        .Where(x => x.PatientId == targetId)
+                        .Where(x => x.PatientId == targetId && x.ToothNumber == status.ToothNumber)
                         .Get();
-                    if (!targetToothRes.Models.Any())
+                    
+                    if (!targetStatusRes.Models.Any())
                     {
-                        foreach (var t in sourceToothRes.Models)
-                        {
-                            t.Id = Guid.NewGuid().ToString();
-                            t.PatientId = targetId;
-                        }
-                        await _supabase.From<PatientToothStatus>().Insert(sourceToothRes.Models);
+                        await _adminClient.From<PatientToothStatus>()
+                            .Where(x => x.Id == status.Id)
+                            .Set(x => x.PatientId, targetId)
+                            .Update();
+                    }
+                    else
+                    {
+                        await _adminClient.From<PatientToothStatus>().Where(x => x.Id == status.Id).Delete();
                     }
                 }
 
-                // 6. Delete old profile
-                await _supabase.From<Profile>().Where(x => x.Id == sourceId).Delete();
+                // MERGE Patient Table Record
+                var sourcePatientRes = await _adminClient.From<Patient>().Where(x => x.ProfileId == sourceId).Get();
+                var sourcePatient = sourcePatientRes.Models.FirstOrDefault();
+                if (sourcePatient != null)
+                {
+                    var targetPatientRes = await _adminClient.From<Patient>().Where(x => x.ProfileId == targetId).Get();
+                    if (!targetPatientRes.Models.Any())
+                    {
+                        await _adminClient.From<Patient>()
+                            .Where(x => x.ProfileId == sourceId)
+                            .Set(x => x.ProfileId, targetId)
+                            .Update();
+                    }
+                    else
+                    {
+                        await _adminClient.From<Patient>().Where(x => x.ProfileId == sourceId).Delete();
+                    }
+                }
 
-                await _logs.LogActionAsync(
-                    targetId,
-                    "merged profile",
-                    $"Merged data from {sourceId} to {targetId}",
-                    targetId,
-                    "User",
-                    "/Admin/Patients"
-                );
+                await _adminClient.From<Profile>().Where(x => x.Id == sourceId).Delete();
+
+                Console.WriteLine($"[MergeProfile] Successfully merged {sourceId} into {targetId}");
             }
             catch (Exception ex)
             {

@@ -22,10 +22,8 @@ public class SettingsModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var userId = User.FindFirst("sub")?.Value;
-        var email = User.FindFirst("email")?.Value;  // ← from JWT claims
-
-       
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var email = User.FindFirst("email")?.Value;
 
         if (string.IsNullOrEmpty(userId))
             return RedirectToPage("/Index");

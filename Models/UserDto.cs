@@ -8,22 +8,22 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("id")]
         public string? Id { get; set; }
 
-        [JsonPropertyName("firstName")]
+        [JsonPropertyName("first_name")]
         public string FirstName { get; set; } = string.Empty;
 
-        [JsonPropertyName("lastName")]
+        [JsonPropertyName("last_name")]
         public string LastName { get; set; } = string.Empty;
 
         [JsonPropertyName("email")]
         public string Email { get; set; } = string.Empty;
 
-        [JsonPropertyName("dateOfBirth")]
+        [JsonPropertyName("date_of_birth")]
         public DateTime? DateOfBirth { get; set; }
 
         [JsonPropertyName("sex")]
         public string? Sex { get; set; }
 
-        [JsonPropertyName("phoneNumber")]
+        [JsonPropertyName("phone_number")]
         public string? PhoneNumber { get; set; }
 
         [JsonPropertyName("address")]

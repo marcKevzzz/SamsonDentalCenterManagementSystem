@@ -342,3 +342,9 @@ CREATE TABLE public.treatments (
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
+
+-- Performance Optimization Indexes
+CREATE INDEX idx_treatments_invoice_id ON public.treatments(invoice_id);
+CREATE INDEX idx_invoices_patient_id ON public.invoices(patient_id);
+CREATE INDEX idx_appointments_patient_status ON public.appointments(patient_id, status);
+CREATE INDEX idx_treatments_created_at ON public.treatments(created_at DESC);

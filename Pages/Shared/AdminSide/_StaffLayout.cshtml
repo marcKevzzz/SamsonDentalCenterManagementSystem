@@ -37,6 +37,30 @@
   <script type="module" src="~/js/AdminSide/adminStore.js" asp-append-version="true"></script>
   <script type="module" src="~/js/AdminSide/site.js" asp-append-version="true" defer></script>
   <script src="~/js/AdminSide/adminNotifications.js" asp-append-version="true" defer></script>
+  
+  <script>
+    // Sync Server-side User State to LocalStorage for Frontend consistency
+    (function() {
+        const userId = '@ViewData["UserId"]';
+        const userRole = '@ViewData["UserRole"]';
+        const userName = '@ViewData["UserName"]';
+        const userInitials = '@ViewData["UserInitials"]';
+
+        if (userId && !localStorage.getItem('sb_user')) {
+            const names = (userName || "Staff User").split(' ');
+            const userObj = {
+                id: userId,
+                role: userRole || 'admin',
+                firstName: names[0] || 'Staff',
+                lastName: names.slice(1).join(' ') || 'User',
+                initials: userInitials || 'S',
+                email: '' // Not critical for UI display here
+            };
+            localStorage.setItem('sb_user', JSON.stringify(userObj));
+            console.log("[StaffLayout] Synchronized user state to localStorage:", userObj.role);
+        }
+    })();
+  </script>
 </head>
 
 <body data-role="@(ViewData["UserRole"]?.ToString()?.ToLower() ?? "admin")">
