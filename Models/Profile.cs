@@ -20,15 +20,6 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("last_name")]
         public string LastName { get; set; } = string.Empty;
 
-        [Column("date_of_birth")]
-        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
-        [JsonPropertyName("date_of_birth")]
-        public DateTime? DateOfBirth { get; set; }
-
-        [Column("sex")]
-        [JsonPropertyName("sex")]
-        public string? Sex { get; set; }
-
         [Column("phone_number")]
         [JsonPropertyName("phone_number")]
         public string? PhoneNumber { get; set; }
@@ -36,11 +27,39 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("email")]
         public string? Email { get; set; }
 
-        [Column("address")]
-        public string? Address { get; set; }
-
         [Column("role")]
         public string? Role { get; set; }
+
+        [Reference(typeof(Patient), foreignKey: "patients_profile_id_fkey")]
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public Patient? Patient { get; set; }
+
+        private DateTime? _dob;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public DateTime? DateOfBirth 
+        { 
+            get => Patient?.DateOfBirth ?? _dob; 
+            set { _dob = value; if (Patient != null) Patient.DateOfBirth = value; } 
+        }
+
+        private string? _sex;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string? Sex 
+        { 
+            get => Patient?.Sex ?? _sex; 
+            set { _sex = value; if (Patient != null) Patient.Sex = value; } 
+        }
+
+        private string? _address;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string? Address 
+        { 
+            get => Patient?.Address ?? _address; 
+            set { _address = value; if (Patient != null) Patient.Address = value; } 
+        }
 
         [Column("avatar_url")]
         [JsonPropertyName("avatar_url")]

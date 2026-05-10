@@ -61,6 +61,9 @@ public class SigninModel : PageModel
         // This avoids the "Multiple Handlers" conflict
         bool rememberMe = Request.Form["rememberMe"] == "true";
         
+        if (!string.IsNullOrEmpty(Input.Email))
+            Input.Email = Input.Email.Trim().ToLower();
+
         if (string.IsNullOrEmpty(Input.Email) || string.IsNullOrEmpty(Input.Password))
         {
             return new JsonResult(

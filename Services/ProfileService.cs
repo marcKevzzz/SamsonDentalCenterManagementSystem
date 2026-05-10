@@ -10,6 +10,7 @@ namespace SamsonDentalCenterManagementSystem.Services
     public class ProfileService
     {
         private readonly Supabase.Client _supabase;
+        private readonly Supabase.Client _adminClient;
         private readonly string _supabaseUrl;
         private readonly ActivityLogService _logs;
         private readonly string _serviceRoleKey;
@@ -36,22 +37,67 @@ namespace SamsonDentalCenterManagementSystem.Services
             _emailService = emailService;
             _httpClientFactory = httpClientFactory;
             _http = _httpClientFactory.CreateClient("SupabaseClient");
+
+            // Initialize Admin Client for RLS-bypassing checks
+            var options = new Supabase.SupabaseOptions
+            {
+                AutoRefreshToken = true,
+                AutoConnectRealtime = false
+            };
+            _adminClient = new Supabase.Client(_supabaseUrl, _serviceRoleKey, options);
         }
 
         public async Task<Profile?> GetProfileById(string userId, string? email = null)
         {
             try
             {
-                // Service role client needs to be initialized before use
-                await _supabase.InitializeAsync();
-
-                var response = await _supabase.From<Profile>().Where(x => x.Id == userId).Get();
+                await _adminClient.InitializeAsync();
+                var response = await _adminClient.From<Profile>().Where(x => x.Id == userId).Get();
 
                 var profile = response.Models.FirstOrDefault();
                 if (profile == null)
                 {
-                    Console.WriteLine("[ProfileService] No profile found.");
-                    return null;
+                    Console.WriteLine($"[ProfileService] No profile found for {userId}. Attempting on-the-fly repair...");
+                    
+                    // Fetch user from Auth Admin API
+                    _http.DefaultRequestHeaders.Clear();
+                    _http.DefaultRequestHeaders.Add("apikey", _serviceRoleKey);
+                    _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
+
+                    var authRes = await _http.GetAsync($"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users/{userId}");
+                    if (authRes.IsSuccessStatusCode)
+                    {
+                        var json = await authRes.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(json);
+                        var root = doc.RootElement;
+
+                        var authEmail = root.GetProperty("email").GetString();
+                        var metadata = root.GetProperty("user_metadata");
+                        
+                        var firstName = metadata.TryGetProperty("first_name", out var fn) ? fn.GetString() : "User";
+                        var lastName = metadata.TryGetProperty("last_name", out var ln) ? ln.GetString() : "";
+                        var role = metadata.TryGetProperty("role", out var r) ? r.GetString() : "patient";
+
+                        // Create the profile
+                        await UpdateProfile(userId, new UserPayload 
+                        { 
+                            FirstName = firstName!, 
+                            LastName = lastName!, 
+                            Email = authEmail!,
+                            IsActive = true,
+                            Role = role
+                        });
+
+                        // Fetch it again
+                        var retryRes = await _adminClient.From<Profile>().Where(x => x.Id == userId).Get();
+                        profile = retryRes.Models.FirstOrDefault();
+                    }
+
+                    if (profile == null)
+                    {
+                        Console.WriteLine("[ProfileService] Repair failed. No profile found.");
+                        return null;
+                    }
                 }
 
                 if (profile.DateOfBirth.HasValue)
@@ -77,10 +123,9 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
-                await _supabase.InitializeAsync();
-                var response = await _supabase.From<Profile>().Where(x => x.Email == email).Get();
-
-                return response.Models.Count > 0;
+                // Use GetUserIdByEmail which already handles Profiles lookup + Auth Admin fallback
+                var userId = await GetUserIdByEmail(email);
+                return !string.IsNullOrEmpty(userId);
             }
             catch (Exception ex)
             {
@@ -147,6 +192,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             string phone,
             string? sex,
             DateTime? dob,
+            string? address,
             bool requiresReview
         )
         {
@@ -298,6 +344,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                     throw new Exception($"Profile insert failed: {err}");
                 }
 
+                // 4. Create Patient record
+                await CreatePatientRecord(newId, dob, sex, address, null, null, null);
+
                 return newId;
             }
             catch (Exception ex)
@@ -305,6 +354,34 @@ namespace SamsonDentalCenterManagementSystem.Services
                 Console.WriteLine($"[CreateShadowProfile] Error: {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task CreatePatientRecord(string profileId, DateTime? dob, string? sex, string? address, string? emergencyContact, string? relationship, string? createdById)
+        {
+            var inviteCode = GenerateInviteCode();
+            var patient = new Patient
+            {
+                ProfileId = profileId,
+                DateOfBirth = dob,
+                Sex = sex,
+                Address = address,
+                IsClaimed = false,
+                InviteCode = inviteCode,
+                InviteExpiresAt = DateTime.UtcNow.AddDays(30), // 30 days to claim
+                EmergencyContact = emergencyContact,
+                Relationship = relationship,
+                CreatedById = createdById
+            };
+
+            await _supabase.From<Patient>().Upsert(patient);
+        }
+
+        private string GenerateInviteCode()
+        {
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed ambiguous chars like 0, 1, O, I
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         public async Task<List<Profile>> GetShadowProfilesForEmail(
@@ -484,10 +561,18 @@ namespace SamsonDentalCenterManagementSystem.Services
         // UPDATE profile fields
         public async Task UpdateProfile(string userId, UserPayload p)
         {
-            var profile = await _supabase.From<Profile>().Where(x => x.Id == userId).Single();
+            var response = await _supabase.From<Profile>().Where(x => x.Id == userId).Get();
+            var profile = response.Models.FirstOrDefault();
 
             if (profile == null)
-                throw new Exception("Profile not found.");
+            {
+                profile = new Profile 
+                { 
+                    Id = userId, 
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true // Default to active if creating new
+                };
+            }
 
             if (!string.IsNullOrWhiteSpace(p.FirstName))
                 profile.FirstName = p.FirstName;
@@ -510,6 +595,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 profile.DateOfBirth = p.DateOfBirth.Value;
             }
+
+            if (p.IsActive.HasValue)
+                profile.IsActive = p.IsActive.Value;
 
             await _supabase.From<Profile>().Upsert(profile);
 
@@ -607,7 +695,11 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 await UpdateUserMetadata(
                     userId,
-                    new { first_name = profile.FirstName, last_name = profile.LastName }
+                    new { 
+                        first_name = profile.FirstName, 
+                        last_name = profile.LastName,
+                        role = profile.Role
+                    }
                 );
             }
             catch (Exception ex)

@@ -15,15 +15,7 @@ CREATE TABLE public.activity_logs (
 );
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  patient_id uuid,
-  patient_email text NOT NULL,
-  patient_phone text NOT NULL,
-  patient_sex text,
-  patient_dob date,
-  is_guest boolean NOT NULL DEFAULT false,
-  is_for_other boolean NOT NULL DEFAULT false,
-  other_sex text,
-  other_dob date,
+  patient_id uuid NOT NULL,
   service_id uuid NOT NULL,
   doctor_id uuid,
   appointment_date date NOT NULL,
@@ -38,18 +30,15 @@ CREATE TABLE public.appointments (
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   email_status text DEFAULT 'Pending'::text,
-  other_first_name text,
-  other_last_name text,
-  other_email text,
-  other_phone text,
   source text NOT NULL DEFAULT 'online'::text,
-  patient_first_name text NOT NULL,
-  patient_last_name text NOT NULL,
   reminder_sent boolean NOT NULL DEFAULT false,
+  soft_lock_until timestamp with time zone,
+  booker_id uuid NOT NULL,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id),
-  CONSTRAINT appointments_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id)
+  CONSTRAINT appointments_doctor_id_fkey FOREIGN KEY (doctor_id) REFERENCES public.doctors(id),
+  CONSTRAINT appointments_booker_id_fkey FOREIGN KEY (booker_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.blocked_dates (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -59,6 +48,16 @@ CREATE TABLE public.blocked_dates (
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT blocked_dates_pkey PRIMARY KEY (id),
   CONSTRAINT blocked_dates_blocked_by_fkey FOREIGN KEY (blocked_by) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.chatbot_conversations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  session_id uuid NOT NULL,
+  user_id uuid,
+  message text NOT NULL,
+  is_bot boolean NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT chatbot_conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT chatbot_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.clinic_settings (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -86,21 +85,6 @@ CREATE TABLE public.clinic_settings (
   system_integrity_info text DEFAULT 'Our system employs end-to-end encryption for patient data, HIPAA-compliant storage via Supabase, and real-time audit logging to ensure maximum security and privacy.'::text,
   CONSTRAINT clinic_settings_pkey PRIMARY KEY (id)
 );
-
-CREATE TABLE public.chatbot_conversations (
-    id uuid NOT NULL DEFAULT gen_random_uuid(),
-    session_id uuid NOT NULL,
-    user_id uuid,
-    message text NOT NULL,
-    is_bot boolean NOT NULL,
-    created_at timestamp with time zone DEFAULT now(),
-    CONSTRAINT chatbot_conversations_pkey PRIMARY KEY (id),
-    CONSTRAINT chatbot_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
-);
-
-ALTER TABLE public.chatbot_conversations ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public insert to chatbot_conversations" ON public.chatbot_conversations FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Allow public select from chatbot_conversations" ON public.chatbot_conversations FOR SELECT TO anon, authenticated USING (true);
 CREATE TABLE public.dental_services (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE,
@@ -149,9 +133,11 @@ CREATE TABLE public.inquiries (
   is_read boolean NOT NULL DEFAULT false,
   is_from_staff boolean NOT NULL DEFAULT false,
   assigned_doctor_id uuid,
+  sender_id uuid,
   CONSTRAINT inquiries_pkey PRIMARY KEY (id),
   CONSTRAINT inquiries_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
-  CONSTRAINT inquiries_assigned_doctor_id_fkey FOREIGN KEY (assigned_doctor_id) REFERENCES public.profiles(id)
+  CONSTRAINT inquiries_assigned_doctor_id_fkey FOREIGN KEY (assigned_doctor_id) REFERENCES public.profiles(id),
+  CONSTRAINT inquiries_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.inquiry_messages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -206,6 +192,16 @@ CREATE TABLE public.notifications (
   CONSTRAINT notifications_pkey PRIMARY KEY (id),
   CONSTRAINT notifications_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.otps (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  code text NOT NULL,
+  type text NOT NULL,
+  expires_at timestamp with time zone NOT NULL,
+  is_used boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT otps_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.patient_medical_info (
   patient_id uuid NOT NULL,
   blood_type text,
@@ -228,6 +224,21 @@ CREATE TABLE public.patient_tooth_status (
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT patient_tooth_status_pkey PRIMARY KEY (id),
   CONSTRAINT patient_tooth_status_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.patients (
+  profile_id uuid NOT NULL,
+  emergency_contact text,
+  relationship text,
+  invite_code text UNIQUE,
+  invite_expires_at timestamp with time zone,
+  is_claimed boolean NOT NULL DEFAULT false,
+  created_by_id uuid,
+  date_of_birth date,
+  sex text,
+  address text,
+  CONSTRAINT patients_pkey PRIMARY KEY (profile_id),
+  CONSTRAINT patients_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id),
+  CONSTRAINT patients_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.payments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -258,8 +269,7 @@ CREATE TABLE public.profiles (
   is_active boolean NOT NULL DEFAULT true,
   reactivation_requested boolean NOT NULL DEFAULT false,
   requires_merge_review boolean DEFAULT false,
-  CONSTRAINT profiles_pkey PRIMARY KEY (id),
-  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+  CONSTRAINT profiles_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.receptionists (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -283,8 +293,9 @@ CREATE TABLE public.reviews (
   is_visible boolean NOT NULL DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
   review_date timestamp with time zone,
-  patient_id uuid REFERENCES public.profiles(id),
-  CONSTRAINT reviews_pkey PRIMARY KEY (id)
+  patient_id uuid,
+  CONSTRAINT reviews_pkey PRIMARY KEY (id),
+  CONSTRAINT reviews_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.staff_availability (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -322,31 +333,12 @@ CREATE TABLE public.treatments (
   status text NOT NULL DEFAULT 'completed'::text CHECK (status = ANY (ARRAY['completed'::text, 'in-progress'::text, 'planned'::text])),
   notes text,
   created_at timestamp with time zone DEFAULT now(),
+  tooth_data jsonb,
+  xray_url text,
+  xray_type text,
+  xray_notes text,
+  xray_data text,
   CONSTRAINT treatments_pkey PRIMARY KEY (id),
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)
 );
-
-CREATE TABLE public.otps (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  email text NOT NULL,
-  code text NOT NULL,
-  type text NOT NULL, -- 'signup', 'appointment', 'password_reset', 'invitation'
-  expires_at timestamp with time zone NOT NULL,
-  is_used boolean NOT NULL DEFAULT false,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT otps_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_otps_email_code ON public.otps USING btree (email, code);
-CREATE INDEX idx_activity_logs_created_at ON public.activity_logs USING btree (created_at DESC);
-CREATE INDEX idx_reviews_created_at ON public.reviews USING btree (created_at DESC);
-CREATE INDEX idx_profiles_created_at ON public.profiles USING btree (created_at DESC);
-CREATE INDEX idx_staff_leaves_created_at ON public.staff_leaves USING btree (created_at DESC);
-CREATE INDEX idx_invoices_created_at ON public.invoices USING btree (created_at DESC);
-CREATE INDEX idx_staff_availability_staff_type ON public.staff_availability USING btree (staff_type);
-CREATE INDEX idx_appointments_date ON public.appointments USING btree (appointment_date DESC);
-CREATE INDEX idx_appointments_status ON public.appointments USING btree (status);
-CREATE INDEX idx_appointments_reminder_sent ON public.appointments USING btree (reminder_sent);
-CREATE INDEX idx_appointments_patient_id ON public.appointments USING btree (patient_id);
-CREATE INDEX idx_appointments_doctor_id ON public.appointments USING btree (doctor_id);
-CREATE INDEX idx_appointments_created_at ON public.appointments USING btree (created_at DESC);

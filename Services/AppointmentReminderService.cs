@@ -50,10 +50,10 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             // Find appointments for tomorrow (between 24 and 48 hours from now)
             // that haven't had a reminder sent yet and are confirmed.
-            var tomorrow = DateTime.UtcNow.AddDays(1).Date;
+            var tomorrow = DateTime.SpecifyKind(DateTime.UtcNow.AddDays(1).Date, DateTimeKind.Utc);
             
             var response = await supabase.From<Appointment>()
-                .Select("id, patient_email, patient_first_name, patient_last_name, appointment_date, appointment_time, service_id")
+                .Select("*, patient:patient_id(*)")
                 .Where(x => x.AppointmentDate == tomorrow)
                 .Where(x => x.Status == "confirmed")
                 .Where(x => x.ReminderSent == false)

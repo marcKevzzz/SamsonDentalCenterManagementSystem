@@ -12,6 +12,7 @@ namespace SamsonDentalCenterManagementSystem.Models
         public string Id { get; set; } = string.Empty;
 
         [Column("blocked_date")]
+        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
         public DateTime Date { get; set; }
 
         [Column("reason")]

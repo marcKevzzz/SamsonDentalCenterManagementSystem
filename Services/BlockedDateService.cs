@@ -35,7 +35,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             var entry = new BlockedDate
             {
                 Id = Guid.NewGuid().ToString(),
-                Date = DateTime.SpecifyKind(date.Date, DateTimeKind.Unspecified),
+                Date = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc),
                 Reason = reason,
                 BlockedBy = blockedBy,
                 CreatedAt = DateTime.UtcNow,

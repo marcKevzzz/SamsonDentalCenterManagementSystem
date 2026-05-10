@@ -1343,6 +1343,7 @@ public class AdminDataController : ControllerBase
                 p.PhoneNumber,
                 p.Sex,
                 p.DateOfBirth,
+                p.Address,
                 false // requiresReview
             );
 

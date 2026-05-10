@@ -3,12 +3,18 @@
 ## Current Status: Stabilizing Data Layer & Performance
 
 ### Recently Completed
+- **Profile Data Resilience**: Hardened `GetProfileById` to automatically repair missing profile rows using Supabase Auth metadata. This prevents "No profile found" errors and ensures a seamless experience even if the database and auth layers are temporarily out of sync.
+- **Fixed Login "Email not registered" Issue**: Hardened `ProfileService` to robustly check both the `profiles` table and Auth API during login. Updated `UpdateProfile` to automatically create missing profile rows, resolving a deadlock in the registration/verification flow.
 - **System Documentation**: Redesigned `/Clinic/Docs` with a modern, minimalist UI (dark mode, glassmorphism, GSAP animations) and accurate technical details on middlewares, tech stack, security, and RBAC.
 - **Purged Oral Health Infrastructure**: Completely removed `oral_health_score`, `oral_health_summary` and related logic from DB, Models, and Dashboard.
 
 
 - **Fixed Appointment Availability Logic**: Resolved issue where `confirmed` or `arrived` appointments (especially those promoted from waitlist) were not correctly blocking doctor slots by removing restrictive `is_waitlist` filters and normalizing date parsing in `AppointmentService.cs`.
-- **Fixed Appointment Date Inconsistency**: Resolved persistent 1-2 day date-mismatch bug by implementing `DateOnlyConverter` for strict `yyyy-MM-dd` serialization and normalizing all calendar dates to `DateTimeKind.Unspecified`. This prevents timezone leakage across DB, Email, and UI layers.
+- [x] Pure ACID Identity Refactor: Total decoupling of appointments from identity.
+- [x] Clinical data centralization in Patients table (DOB, Sex, Address).
+- [x] Appointment model cleanup (removed 14+ redundant fields).
+- [x] Implementation of BookerId vs PatientId logic.
+- **Fixed Appointment Date Inconsistency**: Resolved persistent 1-day date-mismatch bug by standardizing on `DateTimeKind.Utc` at midnight for all calendar-day fields (`AppointmentDate`, `PatientDob`, `OtherDob`). Updated `DateOnlyConverter`, `AppointmentService`, and `AppointmentReminderService` to enforce this standard, preventing timezone-related shifts during serialization. Added diagnostic logging to monitor incoming payloads.
 
 - **Hardened Clinical Records Sync**: Fixed 23502 (null id) constraint error in `patient_tooth_status` by implementing true UPSERT logic with `ON CONFLICT (patient_id, tooth_number)`.
 - **Storage Resilience**: Implemented automatic bucket creation in `ClinicService.cs` to handle missing `treatment-xrays` or gallery buckets.
@@ -86,7 +92,6 @@
 ### In Progress
 - **Signup Refactor**: Moving UI/Auth fields (`ClaimId`, `Password`) out of the `Profile` model to prevent further schema cache conflicts.
 
-- **Appointment Date Inconsistency**: Resolved by strictly forcing `DateTimeKind.Utc` and midnight time for all calendar-day fields (AppointmentDate, DOBs) in `AppointmentService.cs`.
 - **HttpClient Timeouts**: Largely mitigated by optimizing heavy queries and using `IHttpClientFactory`.
 
 ### Architecture Notes

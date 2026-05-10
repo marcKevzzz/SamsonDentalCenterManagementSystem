@@ -40,6 +40,7 @@ builder
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<AppointmentReminderService>();
+builder.Services.AddHostedService<AppointmentLockWorker>();
 
 // ── Supabase client ───────────────────────────────────────────────────────────
 var supabaseUrl =

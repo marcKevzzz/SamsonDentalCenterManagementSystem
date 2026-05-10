@@ -15,52 +15,93 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("patient_id")]
         public string? PatientId { get; set; }
 
-        [Column("patient_first_name")]
-        public string PatientFirstName { get; set; } = string.Empty;
+        [Column("booker_id")]
+        public string? BookerId { get; set; }
 
-        [Column("patient_last_name")]
-        public string PatientLastName { get; set; } = string.Empty;
+        [Reference(typeof(Profile), foreignKey: "appointments_patient_id_fkey")]
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public Profile? PatientProfile { get; set; }
+
+        [Reference(typeof(Profile), foreignKey: "appointments_booker_id_fkey")]
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public Profile? BookerProfile { get; set; }
+
+        private string? _patientFirstName;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string PatientFirstName 
+        { 
+            get => PatientProfile?.FirstName ?? _patientFirstName ?? "Unknown"; 
+            set { _patientFirstName = value; if (PatientProfile != null) PatientProfile.FirstName = value; } 
+        }
+
+        private string? _patientLastName;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string PatientLastName 
+        { 
+            get => PatientProfile?.LastName ?? _patientLastName ?? "Patient"; 
+            set { _patientLastName = value; if (PatientProfile != null) PatientProfile.LastName = value; } 
+        }
 
         [System.Text.Json.Serialization.JsonIgnore]
         [Newtonsoft.Json.JsonIgnore]
         public string PatientName => $"{PatientFirstName} {PatientLastName}".Trim();
 
-        [Column("patient_email")]
-        public string PatientEmail { get; set; } = string.Empty;
+        private string? _patientEmail;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string PatientEmail 
+        { 
+            get => PatientProfile?.Email ?? _patientEmail ?? string.Empty; 
+            set { _patientEmail = value; if (PatientProfile != null) PatientProfile.Email = value; } 
+        }
 
-        [Column("patient_phone")]
-        public string PatientPhone { get; set; } = string.Empty;
+        private string? _patientPhone;
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string PatientPhone 
+        { 
+            get => PatientProfile?.PhoneNumber ?? _patientPhone ?? string.Empty; 
+            set { _patientPhone = value; if (PatientProfile != null) PatientProfile.PhoneNumber = value; } 
+        }
 
-        [Column("patient_sex")]
-        public string? PatientSex { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public bool IsForOther 
+        { 
+            get => _isForOther || (!string.IsNullOrEmpty(BookerId) && !string.IsNullOrEmpty(PatientId) && BookerId != PatientId); 
+            set => _isForOther = value; 
+        }
+        private bool _isForOther;
 
-        [Column("patient_dob")]
-        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
-        public DateTime? PatientDob { get; set; }
-
-        [Column("is_guest")]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public bool IsGuest { get; set; }
 
-        [Column("is_for_other")]
-        public bool IsForOther { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string? PatientSex 
+        { 
+            get => PatientProfile?.Sex ?? _patientSex; 
+            set { _patientSex = value; if (PatientProfile != null) PatientProfile.Sex = value; } 
+        }
+        private string? _patientSex;
 
-        [Column("other_first_name")]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public DateTime? PatientDob 
+        { 
+            get => PatientProfile?.DateOfBirth ?? _patientDob; 
+            set { _patientDob = value; if (PatientProfile != null) PatientProfile.DateOfBirth = value; } 
+        }
+        private DateTime? _patientDob;
+
         public string? OtherFirstName { get; set; }
-
-        [Column("other_last_name")]
         public string? OtherLastName { get; set; }
-
-        [Column("other_email")]
         public string? OtherEmail { get; set; }
-
-        [Column("other_phone")]
         public string? OtherPhone { get; set; }
-
-        [Column("other_sex")]
         public string? OtherSex { get; set; }
-
-        [Column("other_dob")]
-        [Newtonsoft.Json.JsonConverter(typeof(SamsonDentalCenterManagementSystem.Helpers.DateOnlyConverter))]
         public DateTime? OtherDob { get; set; }
 
         [Column("service_id")]
@@ -121,6 +162,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("soft_lock_until")]
+        public DateTime? SoftLockUntil { get; set; }
+
         // ── Navigation properties — populated only by direct HTTP joins ────────
         // NOT mapped as [Column] — these come from embedded PostgREST selects.
         // Use both JsonProperty and JsonPropertyName so both Newtonsoft and STJ
@@ -128,7 +172,5 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Reference(typeof(Doctor))]
         public Doctor? Doctor { get; set; }
 
-        [Reference(typeof(Profile))]
-        public Profile? PatientProfile { get; set; }
     }
 }
