@@ -64,7 +64,7 @@ public class AdminDataController : ControllerBase
     public async Task<IActionResult> GetAvailableDoctors(
         [FromQuery] string category,
         [FromQuery] DateTime date,
-        [FromQuery] string time,
+        [FromQuery] string? time = null,
         [FromQuery] int duration = 60,
         [FromQuery] int buffer = 15
     )
@@ -74,7 +74,7 @@ public class AdminDataController : ControllerBase
             var doctors = await _appointmentService.GetAvailableDoctorsForSlot(
                 category,
                 date,
-                time,
+                time ?? "",
                 duration,
                 buffer
             );
@@ -891,26 +891,31 @@ public class AdminDataController : ControllerBase
             var dtos = data.Select(d => new
                 {
                     id = d.Id,
-                    profileId = d.ProfileId,
+                    profile_id = d.ProfileId,
                     title = d.Title,
                     specialties = d.Specialties,
                     bio = d.Bio,
-                    isActive = d.IsActive,
+                    is_active = d.IsActive,
+                    years_of_experience = d.YearsOfExperience,
                     profile = d.Profile != null
-                        ? new
+                        ? new[] { new
                         {
-                            firstName = d.Profile.FirstName,
-                            lastName = d.Profile.LastName,
+                            first_name = d.Profile.FirstName,
+                            last_name = d.Profile.LastName,
                             email = d.Profile.Email,
-                            avatarUrl = d.Profile.AvatarUrl,
-                        }
-                        : null,
-                    availability = d
+                            phone_number = d.Profile.PhoneNumber,
+                            date_of_birth = d.Profile.DateOfBirth?.ToString("yyyy-MM-dd"),
+                            sex = d.Profile.Sex,
+                            address = d.Profile.Address,
+                            avatar_url = d.Profile.AvatarUrl,
+                        }}
+                        : Array.Empty<object>(),
+                    staff_availability = d
                         .Availability?.Select(a => new
                         {
-                            dayOfWeek = a.DayOfWeek,
-                            startTime = a.StartTime,
-                            endTime = a.EndTime,
+                            day_of_week = a.DayOfWeek,
+                            start_time = a.StartTime,
+                            end_time = a.EndTime,
                         })
                         .ToList(),
                 })
@@ -932,25 +937,29 @@ public class AdminDataController : ControllerBase
             var dtos = data.Select(r => new
                 {
                     id = r.Id,
-                    profileId = r.ProfileId,
-                    deskLocation = r.DeskLocation,
+                    profile_id = r.ProfileId,
+                    desk_location = r.DeskLocation,
                     bio = r.Bio,
-                    isActive = r.IsActive,
+                    is_active = r.IsActive,
                     profile = r.Profile != null
-                        ? new
+                        ? new[] { new
                         {
-                            firstName = r.Profile.FirstName,
-                            lastName = r.Profile.LastName,
+                            first_name = r.Profile.FirstName,
+                            last_name = r.Profile.LastName,
                             email = r.Profile.Email,
-                            avatarUrl = r.Profile.AvatarUrl,
-                        }
-                        : null,
-                    availability = r
+                            phone_number = r.Profile.PhoneNumber,
+                            date_of_birth = r.Profile.DateOfBirth?.ToString("yyyy-MM-dd"),
+                            sex = r.Profile.Sex,
+                            address = r.Profile.Address,
+                            avatar_url = r.Profile.AvatarUrl,
+                        }}
+                        : Array.Empty<object>(),
+                    staff_availability = r
                         .Availability?.Select(a => new
                         {
-                            dayOfWeek = a.DayOfWeek,
-                            startTime = a.StartTime,
-                            endTime = a.EndTime,
+                            day_of_week = a.DayOfWeek,
+                            start_time = a.StartTime,
+                            end_time = a.EndTime,
                         })
                         .ToList(),
                 })

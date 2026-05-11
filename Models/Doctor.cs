@@ -27,6 +27,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [Column("years_of_experience")]
+        public int? YearsOfExperience { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 

@@ -245,9 +245,11 @@ namespace SamsonDentalCenterManagementSystem.Services
                         profile.DateOfBirth ??= patient.DateOfBirth;
                         profile.Sex ??= patient.Sex;
                         profile.Address ??= patient.Address;
+                        profile.EmergencyContact = patient.EmergencyContact;
+                        profile.Relationship = patient.Relationship;
 
                         Console.WriteLine(
-                            $"[ProfileService] Hydrated Patient record for {userId}. DOB: {patient.DateOfBirth}"
+                            $"[ProfileService] Hydrated Patient record for {userId}. DOB: {patient.DateOfBirth}, Relationship: {patient.Relationship}"
                         );
                     }
                 }
@@ -314,7 +316,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // 1. Strong Match: Exact Email
                 var emailRes = await _adminClient
                     .From<Profile>()
-                    .Where(x => x.Email == email && x.Role == "patient")
+                    .Where(x => x.Email == email)
+                    .Where(x => x.Role == "patient")
                     .Limit(1)
                     .Get();
 
@@ -324,12 +327,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // 2. Strong Match: Exact Name AND Exact Phone
                 var namePhoneRes = await _adminClient
                     .From<Profile>()
-                    .Where(x =>
-                        x.FirstName == firstName
-                        && x.LastName == lastName
-                        && x.PhoneNumber == phone
-                        && x.Role == "patient"
-                    )
+                    .Where(x => x.FirstName == firstName)
+                    .Where(x => x.LastName == lastName)
+                    .Where(x => x.PhoneNumber == phone)
+                    .Where(x => x.Role == "patient")
                     .Limit(1)
                     .Get();
 
@@ -339,9 +340,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // 3. Partial Match: Exact Name but different email/phone (Requires Review)
                 var nameRes = await _adminClient
                     .From<Profile>()
-                    .Where(x =>
-                        x.FirstName == firstName && x.LastName == lastName && x.Role == "patient"
-                    )
+                    .Where(x => x.FirstName == firstName)
+                    .Where(x => x.LastName == lastName)
+                    .Where(x => x.Role == "patient")
                     .Limit(1)
                     .Get();
 
@@ -370,10 +371,19 @@ namespace SamsonDentalCenterManagementSystem.Services
         )
         {
             string newId;
+
+            // FIX: Ensure we have at least an email or phone for Auth creation.
+            // If both are missing, generate a shadow email to avoid 400 validation error.
+            if (string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(phone))
+            {
+                email = $"guest_{Guid.NewGuid().ToString("N")[..12]}@shadow.local";
+                Console.WriteLine($"[CreateShadowProfile] No contact info provided. Using shadow email: {email}");
+            }
+
             try
             {
                 // 0. Check if user already exists in auth.users by email
-                string? existingId = await GetUserIdByEmail(email);
+                string? existingId = !string.IsNullOrEmpty(email) ? await GetUserIdByEmail(email) : null;
                 if (!string.IsNullOrEmpty(existingId))
                 {
                     Console.WriteLine(
@@ -937,7 +947,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                         // 1. Delete old
                         await _adminClient
                             .From<StaffAvailability>()
-                            .Where(x => x.StaffId == doc.Id && x.StaffType == "doctor")
+                            .Where(x => x.StaffId == doc.Id)
+                            .Where(x => x.StaffType == "doctor")
                             .Delete();
 
                         // 2. Insert new
@@ -978,7 +989,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                         // 1. Delete old
                         await _adminClient
                             .From<StaffAvailability>()
-                            .Where(x => x.StaffId == rec.Id && x.StaffType == "receptionist")
+                            .Where(x => x.StaffId == rec.Id)
+                            .Where(x => x.StaffType == "receptionist")
                             .Delete();
 
                         // 2. Insert new
@@ -1534,7 +1546,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 {
                     var targetStatusRes = await _adminClient
                         .From<PatientToothStatus>()
-                        .Where(x => x.PatientId == targetId && x.ToothNumber == status.ToothNumber)
+                        .Where(x => x.PatientId == targetId)
+                        .Where(x => x.ToothNumber == status.ToothNumber)
                         .Get();
 
                     if (!targetStatusRes.Models.Any())

@@ -35,7 +35,7 @@ namespace SamsonDentalCenterManagementSystem.Pages.PatientSide.Appointments
                 return Page();
             }
 
-            bool isValid = await _otpService.VerifyOtp(Email, Code, "appointment");
+            bool isValid = await _otpService.VerifyOtp(Email, Code, "appointment", false); // Don't mark used yet
             if (!isValid)
             {
                 TempData["Error"] = "Invalid or expired code.";
@@ -49,6 +49,9 @@ namespace SamsonDentalCenterManagementSystem.Pages.PatientSide.Appointments
                 TempData["Error"] = "Could not find appointment to confirm.";
                 return Page();
             }
+
+            // ONLY mark as used if confirmation succeeded
+            await _otpService.MarkOtpAsUsed(Email, Code, "appointment");
 
             return Redirect($"/appointments/confirmed?id={appt.Id}");
         }

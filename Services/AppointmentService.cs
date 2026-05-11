@@ -110,6 +110,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                         Specialties = d.Specialties,
                         Bio = d.Bio,
                         IsActive = d.IsActive,
+                        YearsOfExperience = d.YearsOfExperience,
                         Profile =
                             d.Profile != null
                                 ? new Profile
@@ -121,6 +122,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                                     AvatarUrl = d.Profile.AvatarUrl,
                                     PhoneNumber = d.Profile.PhoneNumber,
                                     Role = d.Profile.Role,
+                                    Sex = d.Profile.Sex,
+                                    DateOfBirth = d.Profile.DateOfBirth,
+                                    Address = d.Profile.Address,
                                 }
                                 : null,
                     })
@@ -331,7 +335,13 @@ namespace SamsonDentalCenterManagementSystem.Services
                             JsonSerializer.Deserialize<List<StaffLeave>>(json, _jsonOptions)
                             ?? new();
                         foreach (var l in allLeaves)
-                            onLeaveProfileIds.Add(l.ProfileId);
+                        {
+                            if (!string.IsNullOrEmpty(l.ProfileId))
+                            {
+                                onLeaveProfileIds.Add(l.ProfileId.Trim().ToLower());
+                                Console.WriteLine($"[GetAvailability.Batch] Found approved leave for ProfileId: {l.ProfileId} on {dateStr}");
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -344,6 +354,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                     }
                 }
             }
+
+            if (!doctors.Any()) return new();
 
             var result = new Dictionary<string, object>();
             var currentTime = openTime;
@@ -374,35 +386,34 @@ namespace SamsonDentalCenterManagementSystem.Services
                 if (!overlapsNoon)
                 {
                     var availableDoctorIds = new List<string>();
+                    bool anyDoctorScheduled = false;
+
                     foreach (var doc in doctors)
                     {
-                        // 1. Check if on leave
-                        if (onLeaveProfileIds.Contains(doc.ProfileId))
+                        var dProfId = doc.ProfileId?.Trim().ToLower();
+                        if (!string.IsNullOrEmpty(dProfId) && onLeaveProfileIds.Any(lp => lp.Trim().ToLower() == dProfId))
+                        {
+                            Console.WriteLine($"[GetAvailability.Batch] Skipping doctor {doc.Id} (Profile: {doc.ProfileId}) - ON LEAVE");
                             continue;
+                        }
 
-                        // 2. Check individual availability
-                        var scheds = staffSchedMap.ContainsKey(doc.Id)
-                            ? staffSchedMap[doc.Id]
-                            : new();
+                        var scheds = staffSchedMap.ContainsKey(doc.Id) ? staffSchedMap[doc.Id] : new();
                         bool worksThisTime = false;
                         foreach (var s in scheds)
                         {
-                            if (
-                                DateTime.TryParse(s.StartTime, out var sStart)
-                                && DateTime.TryParse(s.EndTime, out var sEnd)
-                            )
+                            if (DateTime.TryParse(s.StartTime, out var sStart) && DateTime.TryParse(s.EndTime, out var sEnd))
                             {
                                 if (currentTime >= sStart.TimeOfDay && slotEnd <= sEnd.TimeOfDay)
                                 {
                                     worksThisTime = true;
+                                    anyDoctorScheduled = true;
                                     break;
                                 }
                             }
                         }
-                        if (!worksThisTime)
-                            continue;
+                        if (!worksThisTime) continue;
 
-                        // 3. Check existing appointments
+                        // Check busy
                         var booked = bookedMap[doc.Id];
                         bool isBusy = false;
                         foreach (var b in booked)
@@ -411,28 +422,20 @@ namespace SamsonDentalCenterManagementSystem.Services
                             {
                                 var bStart = bStartDt.TimeOfDay;
                                 var bBuffer = b.Service?.BufferMinutes ?? 15;
-                                var bEnd = bStart.Add(
-                                    TimeSpan.FromMinutes(b.DurationMinutes + bBuffer)
-                                );
-
-                                // Overlap check with buffers
-                                if (
-                                    currentTime < bEnd
-                                    && slotEnd.Add(TimeSpan.FromMinutes(buffer)) > bStart
-                                )
+                                var bEnd = bStart.Add(TimeSpan.FromMinutes(b.DurationMinutes + bBuffer));
+                                if (currentTime < bEnd && slotEnd.Add(TimeSpan.FromMinutes(buffer)) > bStart)
                                 {
                                     isBusy = true;
                                     break;
                                 }
                             }
                         }
-                        if (!isBusy)
-                            availableDoctorIds.Add(doc.Id);
+                        if (!isBusy) availableDoctorIds.Add(doc.Id);
                     }
 
                     // Calculate available doctors
                     int finalCount = availableDoctorIds.Count;
-                    bool isWaitlistEligible = finalCount == 0 && doctors.Any();
+                    bool isWaitlistEligible = finalCount == 0 && anyDoctorScheduled;
 
                     result[slotLabel] = new
                     {
@@ -447,6 +450,68 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
 
             return result;
+        }
+
+        public async Task<object> GetMonthAvailability(string category, int year, int month, string? serviceId = null)
+        {
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+            var fullyBookedDates = new List<string>();
+            var unavailableDates = new List<string>();
+
+            // For each day in the month, check if it's fully booked
+            for (var date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                // Skip Sundays (clinic closed) or Past dates
+                if (date.DayOfWeek == DayOfWeek.Sunday || date.Date < DateTime.Today)
+                    continue;
+
+                var avail = await GetAvailability(category, date, serviceId);
+                
+                if (avail.Count > 0)
+                {
+                    bool hasAnyAvailable = false;
+                    bool hasAnyWaitlistEligible = false;
+
+                    foreach (var val in avail.Values)
+                    {
+                        var json = JsonSerializer.Serialize(val);
+                        using var doc = JsonDocument.Parse(json);
+                        
+                        if (doc.RootElement.TryGetProperty("available", out var availProp) && availProp.GetBoolean())
+                        {
+                            hasAnyAvailable = true;
+                            break;
+                        }
+
+                        if (doc.RootElement.TryGetProperty("waitlistEligible", out var waitProp) && waitProp.GetBoolean())
+                        {
+                            hasAnyWaitlistEligible = true;
+                        }
+                    }
+
+                    if (!hasAnyAvailable)
+                    {
+                        if (hasAnyWaitlistEligible)
+                        {
+                            fullyBookedDates.Add(date.ToString("yyyy-MM-dd"));
+                        }
+                        else
+                        {
+                            // All slots have available=false AND waitlistEligible=false
+                            // This happens when all doctors are on leave or clinic hours are zeroed.
+                            unavailableDates.Add(date.ToString("yyyy-MM-dd"));
+                        }
+                    }
+                }
+                else
+                {
+                    // No slots generated at all for this day (Clinic Closed or no doctor shifts)
+                    unavailableDates.Add(date.ToString("yyyy-MM-dd"));
+                }
+            }
+
+            return new { fullyBooked = fullyBookedDates, unavailable = unavailableDates };
         }
 
         // ── FIX Bug 2: Double-booking check — only blocks same patient as PATIENT ─
@@ -469,7 +534,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var res = await _supabase
                     .From<Appointment>()
                     .Where(a => a.PatientId == patientId)
-                    .Where(a => a.Status != "cancelled" && a.Status != "no_show")
+                    .Where(a => a.Status != "cancelled")
+                    .Where(a => a.Status != "no_show")
                     .Get();
 
                 // 1. Simultaneous Limit (Global active appointments)
@@ -524,7 +590,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         // Logged-in patients  → "confirmed"  (they're authenticated, trust them)
         // Guests              → "pending"    (needs email confirmation)
         // Waitlist            → "waitlist"   (regardless of login state)
-        private (string Status, DateTime? LockUntil) DetermineStatusWithLock(AppointmentPayload p, DateTime appointmentDate)
+        private (string Status, DateTime? LockUntil) DetermineStatusWithLock(AppointmentPayload p, DateTime appointmentDate, string? bookerId = null)
         {
             DateTime? lockUntil = null;
             string status = "pending";
@@ -533,9 +599,12 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 status = "waitlist";
             }
-            else if (!p.IsGuest && !p.IsForOther && !string.IsNullOrEmpty(p.PatientId))
+            else if (!string.IsNullOrEmpty(bookerId))
             {
-                // Authenticated patient booking for themselves -> "confirmed"
+                // If the booker is authenticated, we trust the appointment.
+                // This covers: 
+                // 1. Authenticated user booking for themselves.
+                // 2. Authenticated user booking for "Someone Else" (child/family).
                 status = "confirmed";
             }
             else
@@ -559,7 +628,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         }
 
         // ── Create appointment ────────────────────────────────────────────────
-        public async Task<Appointment> Create(AppointmentPayload p)
+        public async Task<Appointment> Create(AppointmentPayload p, string? userId = null)
         {
             if (!string.IsNullOrEmpty(p.PatientEmail))
                 p.PatientEmail = p.PatientEmail.Trim().ToLower();
@@ -576,7 +645,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     "yyyy-MM-dd",
                     System.Globalization.CultureInfo.InvariantCulture
                 ),
-                DateTimeKind.Utc
+                DateTimeKind.Unspecified
             );
             Console.WriteLine(
                 $"[DEBUG] AppointmentService.Create - Normalized AppointmentDate: {fixedDate:yyyy-MM-dd HH:mm:ss} {fixedDate.Kind}"
@@ -753,7 +822,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             p.PatientId = targetPatientId; 
 
-            var (status, lockUntil) = DetermineStatusWithLock(p, fixedDate);
+            var (status, lockUntil) = DetermineStatusWithLock(p, fixedDate, userId);
             var emailStatus = (status == "confirmed" || status == "waitlist") ? status : "pending";
             if (p.IsGuestConfirmed)
             {
@@ -947,6 +1016,12 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var res = await _supabase.From<Appointment>().Insert(appt);
             var created = res.Models.First();
+
+            // Hydrate patient details from payload for immediate use (since insert result won't have the joined Profile)
+            created.PatientFirstName = p.PatientFirstName;
+            created.PatientLastName = p.PatientLastName;
+            created.PatientEmail = p.PatientEmail;
+
             created.Service = new DentalService { Id = p.ServiceId, Name = p.ServiceName };
 
             // Log action
@@ -1749,10 +1824,16 @@ namespace SamsonDentalCenterManagementSystem.Services
                         return apptFromToken;
                 }
 
-                // Find pending appointment for this email in database
+                // Find profiles with this email first
+                var profileRes = await _supabase.From<Profile>().Where(p => p.Email == email).Get();
+                var profileIds = profileRes.Models.Select(p => p.Id).ToList();
+                if (!profileIds.Any()) return null;
+
+                // Find pending appointment for these profiles in database
                 var res = await _supabase
                     .From<Appointment>()
-                    .Where(x => x.PatientEmail == email && x.EmailStatus == "pending")
+                    .Filter("patient_id", Supabase.Postgrest.Constants.Operator.In, profileIds)
+                    .Where(x => x.EmailStatus == "pending")
                     .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
                     .Get();
 

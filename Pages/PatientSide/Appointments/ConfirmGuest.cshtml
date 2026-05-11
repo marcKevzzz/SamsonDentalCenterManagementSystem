@@ -5,7 +5,7 @@
     ViewData["HideNav"] = true;
 }
 
-<div class="min-h-screen bg-white lg:bg-[#FAFAFA] flex items-center justify-center p-4">
+<div class="min-h-screen bg-white lg:bg-[#FAFAFA] flex items-center justify-center p-4 mx-auto">
     <div class="max-w-[440px] w-full">
         <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-brand transition-colors mb-8 font-body text-sm no-underline group">
             <svg class="transition-transform group-hover:x-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -61,6 +61,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Show success toast
+        if (typeof Toast !== 'undefined') {
+            Toast.show("Security code sent to your email", "success");
+        }
+
         const inputs = document.querySelectorAll('#otp-inputs input');
         
         // Handle Paste

@@ -95,5 +95,13 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonIgnore]
         [Newtonsoft.Json.JsonIgnore]
         public string? ClaimId { get; set; }
+
+        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string? EmergencyContact { get; set; }
+
+        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public string? Relationship { get; set; }
     }
 }

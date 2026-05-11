@@ -35,13 +35,13 @@ namespace SamsonDentalCenterManagementSystem.Helpers
             // Try exact format first to avoid timezone shifts
             if (DateTime.TryParseExact(s, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
             {
-                return DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+                return DateTime.SpecifyKind(dt, DateTimeKind.Unspecified);
             }
 
             // Fallback to standard parsing but strip time
             if (DateTime.TryParse(s, out var dt2))
             {
-                return DateTime.SpecifyKind(dt2.Date, DateTimeKind.Utc);
+                return DateTime.SpecifyKind(dt2.Date, DateTimeKind.Unspecified);
             }
 
             return null;

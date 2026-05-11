@@ -78,6 +78,22 @@
                         </div>
                         <div class="text-[11px] font-bold text-brand line-clamp-2">@(p?.Address ?? "No address listed")</div>
                     </div>
+                    @if (!string.IsNullOrEmpty(p?.Relationship)) {
+                    <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-brand/10 transition-colors">
+                        <div class="text-[8px] text-brand/40 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-people-arrows text-[7px]"></i> Relationship
+                        </div>
+                        <div class="text-[12px] font-bold text-brand">@p.Relationship</div>
+                    </div>
+                    }
+                    @if (!string.IsNullOrEmpty(p?.EmergencyContact)) {
+                    <div class="p-3.5 rounded-xl bg-rose-50/50 border border-rose-100 hover:border-rose-200 transition-colors">
+                        <div class="text-[8px] text-rose-500 font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-phone-flip text-[7px]"></i> Emergency
+                        </div>
+                        <div class="text-[12px] font-bold text-brand">@p.EmergencyContact</div>
+                    </div>
+                    }
                 </div>
 
                 @if (Model.MedicalInfo != null) {

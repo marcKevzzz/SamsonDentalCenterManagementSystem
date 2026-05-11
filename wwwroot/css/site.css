@@ -711,7 +711,7 @@ body.standalone {
 .form-input:focus {
   background: #ffffff;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.08);
+  box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
 }
 
 .form-input::placeholder {

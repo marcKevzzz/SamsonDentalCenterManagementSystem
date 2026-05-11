@@ -97,11 +97,34 @@ namespace SamsonDentalCenterManagementSystem.Models
         }
         private DateTime? _patientDob;
 
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? OtherFirstName { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? OtherLastName { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? OtherEmail { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? OtherPhone { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? OtherSex { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public DateTime? OtherDob { get; set; }
 
         [Column("service_id")]

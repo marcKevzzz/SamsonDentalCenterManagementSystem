@@ -68,7 +68,8 @@ public class AdminDoctorsController : ControllerBase
         try
         {
             var result = await _doctorService.CreateAsync(
-                d.ProfileId, d.Title ?? "Dr.", d.Specialties, d.Bio, d.IsActive);
+                d.ProfileId, d.Title ?? "Dr.", d.Specialties, d.Bio, d.YearsOfExperience, d.IsActive);
+            _doctorService.InvalidateCache();
             return Ok(new { ok = true, data = result });
         }
         catch (Exception ex)
@@ -85,7 +86,8 @@ public class AdminDoctorsController : ControllerBase
         try
         {
             var result = await _doctorService.UpdateAsync(
-                id, d.Title ?? "Dr.", d.Specialties, d.Bio, d.IsActive);
+                id, d.Title ?? "Dr.", d.Specialties, d.Bio, d.YearsOfExperience, d.IsActive);
+            _doctorService.InvalidateCache();
             return Ok(new { ok = true, data = result });
         }
         catch (Exception ex)
@@ -102,6 +104,7 @@ public class AdminDoctorsController : ControllerBase
         try
         {
             await _doctorService.SoftDeleteAsync(id);
+            _doctorService.InvalidateCache();
             return Ok(new { ok = true });
         }
         catch (Exception ex)
@@ -130,6 +133,6 @@ public class AdminDoctorsController : ControllerBase
 
 // ── Request DTOs ─────────────────────────────────────────────────────────────
 public record CreateDoctorRequest(
-    string ProfileId, string? Title, string[]? Specialties, string? Bio, bool IsActive = true);
+    string ProfileId, string? Title, string[]? Specialties, string? Bio, int? YearsOfExperience, bool IsActive = true);
 public record UpdateDoctorRequest(
-    string? Title, string[]? Specialties, string? Bio, bool IsActive = true);
+    string? Title, string[]? Specialties, string? Bio, int? YearsOfExperience, bool IsActive = true);

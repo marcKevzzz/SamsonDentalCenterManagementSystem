@@ -105,42 +105,43 @@ function renderStaffCards() {
 }
 
 function renderReceptionistCard(rec) {
-    const firstName = rec.profile?.firstName || "";
-    const lastName = rec.profile?.lastName || "";
+    const profile = Array.isArray(rec.profiles) ? rec.profiles[0] : rec.profiles;
+    const firstName = profile?.first_name || "";
+    const lastName = profile?.last_name || "";
     const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
-    const fullName = rec.profile ? `${firstName} ${lastName}`.trim() : `(No Profile)`;
+    const fullName = profile ? `${firstName} ${lastName}`.trim() : `(No Profile)`;
     
     const recData = JSON.stringify({
         id: rec.id,
-        profileId: rec.profileId,
-        firstName: rec.profile?.firstName || "",
-        lastName: rec.profile?.lastName || "",
-        email: rec.profile?.email || "",
-        dob: rec.profile?.dob?.split('T')[0] || "",
-        sex: rec.profile?.sex || "",
-        phone: rec.profile?.phone || "",
-        address: rec.profile?.address || "",
-        deskLocation: rec.deskLocation,
+        profileId: rec.profile_id,
+        firstName: profile?.first_name || "",
+        lastName: profile?.last_name || "" ,
+        email: profile?.email || "",
+        dob: profile?.date_of_birth?.split('T')[0] || "",
+        sex: profile?.sex || "",
+        phone: profile?.phone_number || "",
+        address: profile?.address || "",
+        deskLocation: rec.desk_location,
         bio: rec.bio,
-        isActive: rec.isActive,
-        availability: rec.availability || []
+        isActive: rec.is_active,
+        availability: rec.staff_availability || []
     }).replace(/'/g, "&apos;");
 
     return `
-      <div data-role="receptionist" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${rec.isActive ? "" : "opacity-60"}">
-        <div class="flex items-center justify-between px-4 py-1.5 ${rec.isActive ? "bg-purple-50" : "bg-slate-100"}">
-          <span class="text-[10px] font-bold uppercase tracking-wider ${rec.isActive ? "text-purple-600" : "text-slate-400"}"><i class="fa-solid fa-headset mr-1"></i> Receptionist</span>
-          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${rec.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${rec.isActive ? "Active" : "Inactive"}</span>
+      <div data-role="receptionist" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${rec.is_active ? "" : "opacity-60"}">
+        <div class="flex items-center justify-between px-4 py-1.5 ${rec.is_active ? "bg-purple-50" : "bg-slate-100"}">
+          <span class="text-[10px] font-bold uppercase tracking-wider ${rec.is_active ? "text-purple-600" : "text-slate-400"}"><i class="fa-solid fa-headset mr-1"></i> Receptionist</span>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${rec.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${rec.is_active ? "Active" : "Inactive"}</span>
         </div>
         <div class="p-5">
           <div class="flex items-start gap-3 mb-4">
-            ${rec.profile?.avatarUrl 
-                ? `<img src="${rec.profile.avatarUrl}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />`
+            ${profile?.avatar_url 
+                ? `<img src="${profile.avatar_url}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />`
                 : `<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white text-[15px] font-bold shrink-0 shadow-sm">${initials}</div>`
             }
             <div class="flex-1 min-w-0">
               <div class="font-display font-bold text-brand text-[14px] leading-tight truncate">${fullName}</div>
-              <div class="text-[11px] text-brand/40 truncate mt-0.5">${rec.profile?.email || ""}</div>
+              <div class="text-[11px] text-brand/40 truncate mt-0.5">${profile?.email || ""}</div>
             </div>
             <div class="flex items-center gap-1">
                 <button onclick='openStaffModal(${recData})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors" title="Edit Profile & Info"><i class="fa-solid fa-pen text-[10px]"></i></button>
@@ -150,11 +151,11 @@ function renderReceptionistCard(rec) {
                     </button>
                     <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-[60] overflow-hidden">
                         <div class="py-1">
-                            <button onclick="resendInvite('${rec.profileId}')" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
+                            <button onclick="resendInvite('${rec.profile_id}')" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
                                 <i class="fa-solid fa-paper-plane w-4"></i> Resend Invite
                             </button>
-                            <button onclick="toggleActive('${rec.profileId}', ${rec.isActive})" class="w-full text-left px-4 py-2.5 text-[12px] font-medium ${rec.isActive ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"} flex items-center gap-3 transition-colors">
-                                <i class="fa-solid ${rec.isActive ? "fa-user-slash" : "fa-user-check"} w-4"></i> ${rec.isActive ? "Deactivate" : "Activate"}
+                            <button onclick="toggleActive('${rec.profile_id}', ${rec.is_active})" class="w-full text-left px-4 py-2.5 text-[12px] font-medium ${rec.is_active ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"} flex items-center gap-3 transition-colors">
+                                <i class="fa-solid ${rec.is_active ? "fa-user-slash" : "fa-user-check"} w-4"></i> ${rec.is_active ? "Deactivate" : "Activate"}
                             </button>
                         </div>
                     </div>

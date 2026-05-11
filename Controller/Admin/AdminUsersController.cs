@@ -143,6 +143,7 @@ public class AdminUsersController : ControllerBase
                             p.Title ?? "Dr.",
                             p.Specialties ?? Array.Empty<string>(),
                             p.Bio,
+                            p.YearsOfExperience,
                             p.IsActive ?? true
                         );
 
@@ -160,6 +161,7 @@ public class AdminUsersController : ControllerBase
                                 }).ToList();
                                 await _doctorService.SetAvailabilityAsync(doc.Id, slots);
                             }
+                            _doctorService.InvalidateCache();
                         }
                         else
                         {
@@ -259,10 +261,44 @@ public class AdminUsersController : ControllerBase
         try
         {
             await _profileService.UpdateProfile(id, p);
+
+            // ── Handle Staff Secondary Tables ─────────────────────────────
+            var role = p.Role?.ToLower();
+            if (role == "doctor")
+            {
+                var doc = await _doctorService.GetDoctorByProfileIdAsync(id);
+                if (doc != null)
+                {
+                    await _doctorService.UpdateAsync(
+                        doc.Id,
+                        p.Title ?? doc.Title,
+                        p.Specialties ?? doc.Specialties,
+                        p.Bio ?? doc.Bio,
+                        p.YearsOfExperience ?? doc.YearsOfExperience,
+                        p.IsActive ?? doc.IsActive
+                    );
+                    _doctorService.InvalidateCache();
+                }
+            }
+            else if (role == "receptionist")
+            {
+                var rec = await _receptionistService.GetReceptionistByProfileIdAsync(id);
+                if (rec != null)
+                {
+                    await _receptionistService.UpdateAsync(
+                        rec.Id,
+                        p.DeskLocation ?? rec.DeskLocation,
+                        p.Bio ?? rec.Bio,
+                        p.IsActive ?? rec.IsActive
+                    );
+                }
+            }
+
             return Ok(new { ok = true });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "UpdateUser failed for {Id}", id);
             return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }

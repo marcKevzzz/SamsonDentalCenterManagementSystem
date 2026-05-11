@@ -87,10 +87,17 @@
 
             <!-- ── Doctor-only fields ──────────────────────────────────────── -->
             <div id="doctorFields">
-                <div class="flex flex-col gap-1.5 mb-4">
-                    <label class="text-[11px] font-medium text-slate-600 tracking-wide">Title <span class="text-red-400">*</span></label>
-                    <input id="staffTitle" type="text" placeholder="e.g. Dr." value="Dr."
-                           class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] font-medium text-slate-600 tracking-wide">Title <span class="text-red-400">*</span></label>
+                        <input id="staffTitle" type="text" placeholder="e.g. Dr." value="Dr."
+                               class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] font-medium text-slate-600 tracking-wide">Years of Experience</label>
+                        <input id="staffExperience" type="number" placeholder="e.g. 10"
+                               class="modal-input px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10" />
+                    </div>
                 </div>
 
                 <!-- ── Specialties Multi-select ────────────────────────────── -->

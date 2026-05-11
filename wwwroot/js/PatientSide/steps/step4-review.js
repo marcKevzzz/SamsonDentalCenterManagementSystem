@@ -98,8 +98,13 @@ export function renderStep4() {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
             ${[
                 ["Patient",      patientDisplay],
-                ["Email",        d.isForOther ? d.otherEmail : d.email],
-                ["Phone",        d.isForOther ? d.otherPhone : d.phone],
+                ...(d.isForOther ? [
+                    ["Relationship", d.relationship],
+                    ["Emergency",    d.emergencyContact]
+                ] : [
+                    ["Email",        d.email],
+                    ["Phone",        d.phone]
+                ]),
                 ["Birthday",     d.isForOther ? d.otherDob : d.dob]
             ].map(([l, v]) => `
             <div>
@@ -162,10 +167,10 @@ export async function confirmBooking() {
             isForOther:      d.isForOther,
             otherFirstName:  d.otherFirstName || null,
             otherLastName:   d.otherLastName || null,
-            otherEmail:      d.otherEmail || null,
-            otherPhone:      d.otherPhone || null,
             otherSex:        d.otherSex  || null,
             otherDob:        d.otherDob  || null,
+            emergencyContact: d.emergencyContact || null,
+            relationship:    d.relationship || null,
             serviceId:       STATE.service?.id   ?? "",
             serviceName:     STATE.service?.name ?? "",
             doctorId:        STATE.doctor?.id    ?? null,

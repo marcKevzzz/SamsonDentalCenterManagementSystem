@@ -107,45 +107,47 @@ function renderStaffCards() {
 }
 
 function renderDoctorCard(doc) {
-    const firstName = doc.profile?.firstName || "";
-    const lastName = doc.profile?.lastName || "";
+    const profile = Array.isArray(doc.profile) ? doc.profile[0] : doc.profile;
+    const firstName = profile?.first_name || "";
+    const lastName = profile?.last_name || "";
     const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
-    const fullName = doc.profile ? `${doc.title} ${firstName} ${lastName}`.trim() : `${doc.title} (No Profile)`;
+    const fullName = profile ? `${doc.title} ${firstName} ${lastName}`.trim() : `${doc.title} (No Profile)`;
     const specList = Array.isArray(doc.specialties) ? doc.specialties : (doc.specialties ? doc.specialties.split(',') : []);
     
     // We encode the profile data too for editing
     const docData = JSON.stringify({
         id: doc.id,
-        profileId: doc.profileId,
-        firstName: doc.profile?.firstName || "",
-        lastName: doc.profile?.lastName || "",
-        email: doc.profile?.email || "",
-        dob: doc.profile?.dob?.split('T')[0] || "",
-        sex: doc.profile?.sex || "",
-        phone: doc.profile?.phone || "",
-        address: doc.profile?.address || "",
+        profileId: doc.profile_id,
+        firstName: profile?.first_name || "",
+        lastName: profile?.last_name || "",
+        email: profile?.email || "",
+        dob: profile?.date_of_birth?.split('T')[0] || "",
+        sex: profile?.sex || "",
+        phone: profile?.phone_number || "",
+        address: profile?.address || "",
         title: doc.title,
+        yearsOfExperience: doc.years_of_experience,
         specialties: specList,
         bio: doc.bio,
-        isActive: doc.isActive,
-        availability: doc.availability || []
+        isActive: doc.is_active,
+        availability: doc.staff_availability || []
     }).replace(/'/g, "&apos;");
 
     return `
-      <div data-role="doctor" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${doc.isActive ? "" : "opacity-60"}">
-        <div class="flex items-center justify-between px-4 py-1.5 ${doc.isActive ? "bg-blue-50" : "bg-slate-100"}">
-          <span class="text-[10px] font-bold uppercase tracking-wider ${doc.isActive ? "text-primary" : "text-slate-400"}"><i class="fa-solid fa-user-doctor mr-1"></i> Doctor</span>
-          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${doc.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${doc.isActive ? "Active" : "Inactive"}</span>
+      <div data-role="doctor" class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all ${doc.is_active ? "" : "opacity-60"}">
+        <div class="flex items-center justify-between px-4 py-1.5 ${doc.is_active ? "bg-blue-50" : "bg-slate-100"}">
+          <span class="text-[10px] font-bold uppercase tracking-wider ${doc.is_active ? "text-primary" : "text-slate-400"}"><i class="fa-solid fa-user-doctor mr-1"></i> Doctor</span>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${doc.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}">${doc.is_active ? "Active" : "Inactive"}</span>
         </div>
         <div class="p-5">
           <div class="flex items-start gap-3 mb-4">
-            ${doc.profile?.avatarUrl 
-                ? `<img src="${doc.profile.avatarUrl}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />`
+            ${profile?.avatar_url 
+                ? `<img src="${profile.avatar_url}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />`
                 : `<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white text-[15px] font-bold shrink-0 shadow-sm">${initials}</div>`
             }
             <div class="flex-1 min-w-0">
               <div class="font-display font-bold text-brand text-[14px] leading-tight truncate">${fullName}</div>
-              <div class="text-[11px] text-brand/40 truncate mt-0.5">${doc.profile?.email || ""}</div>
+              <div class="text-[11px] text-brand/40 truncate mt-0.5">${profile?.email || ""}</div>
             </div>
             <div class="flex items-center gap-1">
                 <button onclick='openStaffModal(${docData})' class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors" title="Edit Profile & Info"><i class="fa-solid fa-pen text-[10px]"></i></button>
@@ -155,11 +157,11 @@ function renderDoctorCard(doc) {
                     </button>
                     <div class="dropdown-menu hidden absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/5 z-[60] overflow-hidden">
                         <div class="py-1">
-                            <button onclick="resendInvite('${doc.profileId}')" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
+                            <button onclick="resendInvite('${doc.profile_id}')" class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
                                 <i class="fa-solid fa-paper-plane w-4"></i> Resend Invite
                             </button>
-                            <button onclick="toggleActive('${doc.profileId}', ${doc.isActive})" class="w-full text-left px-4 py-2.5 text-[12px] font-medium ${doc.isActive ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"} flex items-center gap-3 transition-colors">
-                                <i class="fa-solid ${doc.isActive ? "fa-user-slash" : "fa-user-check"} w-4"></i> ${doc.isActive ? "Deactivate" : "Activate"}
+                            <button onclick="toggleActive('${doc.profile_id}', ${doc.is_active})" class="w-full text-left px-4 py-2.5 text-[12px] font-medium ${doc.is_active ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"} flex items-center gap-3 transition-colors">
+                                <i class="fa-solid ${doc.is_active ? "fa-user-slash" : "fa-user-check"} w-4"></i> ${doc.is_active ? "Deactivate" : "Activate"}
                             </button>
                         </div>
                     </div>
@@ -390,6 +392,7 @@ window.openStaffModal = async function (data = null) {
         document.getElementById("staffAddress").value   = data.address || "";
         
         if (document.getElementById("staffTitle")) document.getElementById("staffTitle").value = data.title || "Dr.";
+        if (document.getElementById("staffExperience")) document.getElementById("staffExperience").value = data.yearsOfExperience || "";
         document.getElementById("staffBio").value = data.bio || "";
         document.getElementById("staffIsActive").checked = data.isActive ?? true;
 
@@ -460,6 +463,7 @@ window.saveStaff = async function () {
         address: document.getElementById("staffAddress").value.trim(),
         role: "doctor", // Locked on this page
         title: document.getElementById("staffTitle")?.value.trim() || "Dr.",
+        yearsOfExperience: document.getElementById("staffExperience")?.value ? parseInt(document.getElementById("staffExperience").value) : null,
         bio: document.getElementById("staffBio").value.trim(),
         specialties: _selectedSpecialties,
         isActive: document.getElementById("staffIsActive").checked,

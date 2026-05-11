@@ -170,34 +170,54 @@ function renderServiceList() {
   if (STATE.service) {
     detailEl.classList.remove("hidden");
     detailEl.innerHTML = `
-        <div class="bg-brand rounded-2xl p-6 text-white">
-            <div class="flex items-start justify-between gap-4 mb-4">
-                <div>
-                    <div class="font-body text-[.62rem] font-medium tracking-[.13em] uppercase text-white/40 mb-1">
+        <div class="bg-brand border-2 border-primary rounded-2xl overflow-hidden shadow-md">
+            ${STATE.service.hero ? `
+            <div class="h-32 sm:h-48 w-full relative overflow-hidden">
+                <img src="${STATE.service.hero}" class="w-full h-full object-cover" alt="${STATE.service.name}">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand/80 via-brand/20 to-transparent"></div>
+                <div class="absolute bottom-4 left-5">
+                    <div class="font-body text-[.6rem] font-bold tracking-[.15em] uppercase text-white/60 mb-0.5">
                         ${STATE.service.category}
                     </div>
-                    <h3 class="brand-font font-bold text-[1.1rem]">${STATE.service.name}</h3>
+                    <h3 class="brand-font font-bold text-[1.2rem] text-white">${STATE.service.name}</h3>
                 </div>
-                <span class="font-body text-[.78rem] font-medium text-white bg-white/5 px-3 py-1 rounded-full whitespace-nowrap">
-                    ₱${STATE.service.price}
-                </span>
             </div>
-            <p class="font-body text-[.85rem] text-white/60 leading-relaxed mb-5">
-                ${STATE.service.summary || STATE.service.tagline}
-            </p>
-            <div class="grid grid-cols-2 gap-3">
-                ${(STATE.service.benefits ?? [])
-                  .slice(0, 4)
-                  .map(
-                    (b) => `
-                <div class="flex items-start gap-2 font-body text-[.78rem] text-white/70">
-                    <span class="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    </span>${b}
-                </div>`,
-                  )
-                  .join("")}
+            ` : `
+            <div class="p-6 bg-brand">
+                <div class="font-body text-[.6rem] font-bold tracking-[.15em] uppercase text-white/40 mb-1">
+                    ${STATE.service.category}
+                </div>
+                <h3 class="brand-font font-bold text-[1.2rem] text-white">${STATE.service.name}</h3>
+            </div>
+            `}
+            
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="font-body text-[1.1rem] font-bold text-white">₱${STATE.service.price}</span>
+                    <span class="font-body text-[.7rem] font-medium text-white/90 bg-white/10 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                        ${STATE.service.durationMinutes ? STATE.service.durationMinutes + " mins" : STATE.service.duration || "60 mins"}
+                    </span>
+                </div>
+                
+                <p class="font-body text-[.85rem] text-white/60 leading-relaxed mb-6">
+                    ${STATE.service.summary || STATE.service.tagline}
+                </p>
+                
+                <div class="space-y-3">
+                    ${(STATE.service.benefits ?? [])
+                      .slice(0, 4)
+                      .map(
+                        (b) => `
+                    <div class="flex items-start gap-3 font-body text-[.8rem] text-white/70">
+                        <div class="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center shrink-0 mt-0.5 border border-white/10">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                                stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <span>${b}</span>
+                    </div>`,
+                      )
+                      .join("")}
+                </div>
             </div>
         </div>`;
   } else {

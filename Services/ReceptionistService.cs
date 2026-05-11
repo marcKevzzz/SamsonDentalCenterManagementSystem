@@ -24,7 +24,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("profile_id")]
         public string ProfileId { get; set; } = string.Empty;
 
-        [JsonPropertyName("profiles")]
+        [JsonPropertyName("profile")]
         public ProfileDto? Profile { get; set; }
 
         [JsonPropertyName("staff_availability")]
@@ -90,7 +90,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<List<ReceptionistDto>> GetAllWithProfilesAsync()
         {
-            var path = "/receptionists?select=*,profiles(*)&order=created_at.asc";
+            var path = "/receptionists?select=*,profile:profiles!profile_id(*)&order=created_at.asc";
             var req  = BuildRequest(HttpMethod.Get, path);
             var res  = await _http.SendAsync(req);
 
@@ -108,7 +108,7 @@ namespace SamsonDentalCenterManagementSystem.Services
         
         public async Task<ReceptionistDto?> GetReceptionistByProfileIdAsync(string profileId)
         {
-            var path = $"/receptionists?select=*,profiles(*)&profile_id=eq.{profileId}";
+            var path = $"/receptionists?select=*,profile:profiles!profile_id(*)&profile_id=eq.{profileId}";
             var req  = BuildRequest(HttpMethod.Get, path);
             var res  = await _http.SendAsync(req);
 

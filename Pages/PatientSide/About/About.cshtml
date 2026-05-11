@@ -268,7 +268,7 @@ ViewData["Title"] = "About page";
                                 <div class="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
                                      <div class="flex flex-col">
                                          <span class="text-[9px] font-bold uppercase tracking-wider text-white/30">Experience</span>
-                                         <span class="text-[12px] font-bold text-white/85">10+ Years</span>
+                                         <span class="text-[12px] font-bold text-white/85">@(doc.YearsOfExperience?.ToString() ?? "5")+ Years</span>
                                      </div>
                                      <div class="flex gap-2">
                                          <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-primary transition-colors cursor-pointer border border-white/10">

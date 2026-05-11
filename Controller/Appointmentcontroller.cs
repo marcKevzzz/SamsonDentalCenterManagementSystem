@@ -71,6 +71,17 @@ public class AppointmentsController : ControllerBase
         return Ok(availability);
     }
 
+    [HttpGet("month-availability")]
+    public async Task<IActionResult> GetMonthAvailability(
+        [FromQuery] string category,
+        [FromQuery] int year,
+        [FromQuery] int month,
+        [FromQuery] string? serviceId = null)
+    {
+        var dates = await _apptService.GetMonthAvailability(category, year, month, serviceId);
+        return Ok(dates);
+    }
+
     // POST /api/appointments
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] AppointmentPayload p)
@@ -99,7 +110,8 @@ public class AppointmentsController : ControllerBase
 
         try
         {
-            var appt = await _apptService.Create(p);
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var appt = await _apptService.Create(p, userId);
 
             // FIX Bug 4: surface the actual status to the client
             return Ok(new

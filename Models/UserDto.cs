@@ -50,6 +50,9 @@ namespace SamsonDentalCenterManagementSystem.Models
         [JsonPropertyName("deskLocation")]
         public string? DeskLocation { get; set; }
 
+        [JsonPropertyName("yearsOfExperience")]
+        public int? YearsOfExperience { get; set; }
+
         [JsonPropertyName("isActive")]
         public bool? IsActive { get; set; }
     }

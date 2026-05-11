@@ -31,6 +31,7 @@ export function renderStep2() {
   const nameEl = document.getElementById("s2ServiceName");
   if (nameEl) nameEl.textContent = STATE.service?.name ?? "";
   renderCalendar();
+  loadMonthAvailability();
   if (STATE.date) renderTimeSlots(STATE.date);
   updateSlotSummary();
 }
@@ -48,6 +49,24 @@ async function fetchAvailabilityForDate(dateStr) {
     AVAILABILITY_CACHE[key] = await res.json();
   } catch (err) {
     console.error("[step2] Availability fetch failed:", err);
+  }
+}
+
+async function loadMonthAvailability() {
+  if (!STATE.service) return;
+  const { year, month } = CAL;
+  try {
+    const res = await fetch(
+      `/api/appointments/month-availability?category=${encodeURIComponent(STATE.service.category)}&year=${year}&month=${month + 1}&serviceId=${STATE.service.id}`
+    );
+    if (res.ok) {
+      const data = await res.json();
+      STATE.fullBookedDates = data.fullyBooked ?? [];
+      STATE.unavailableDates = data.unavailable ?? [];
+      renderCalendar();
+    }
+  } catch (err) {
+    console.error("[step2] Month availability fetch failed:", err);
   }
 }
 
@@ -71,7 +90,8 @@ const dt = new Date(y, m, d); // Keep this for isPast and isSun checks
     const isSel = STATE.date === dstr;
     const isFull = isDateFullyBooked(dstr);
     const isBlocked = STATE.blockedDates.includes(dstr);
-    const disabled = isPast || isSun || isBlocked;
+    const isUnavail = STATE.unavailableDates.includes(dstr);
+    const disabled = isPast || isSun || isBlocked || isUnavail;
 
     let cls = "cal-day ";
     if (disabled) cls += "disabled";
@@ -125,6 +145,7 @@ export function shiftCal(dir) {
     CAL.year--;
   }
   renderCalendar();
+  loadMonthAvailability();
 }
 
 // ── Pick date ─────────────────────────────────────────────────────────────────

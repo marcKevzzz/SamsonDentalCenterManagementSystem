@@ -35,10 +35,13 @@ namespace SamsonDentalCenterManagementSystem.Services
         [JsonPropertyName("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [JsonPropertyName("years_of_experience")]
+        public int? YearsOfExperience { get; set; }
+
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }
 
-        // ── profiles columns (nested object from the join) ────────────────────
+        // ── profile column (nested object from the join) ────────────────────
         [JsonPropertyName("profile")]
         public ProfileDto? Profile { get; set; }
 
@@ -79,6 +82,15 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         [JsonPropertyName("role")]
         public string? Role { get; set; }
+
+        [JsonPropertyName("sex")]
+        public string? Sex { get; set; }
+
+        [JsonPropertyName("date_of_birth")]
+        public DateTime? DateOfBirth { get; set; }
+
+        [JsonPropertyName("address")]
+        public string? Address { get; set; }
     }
 
     // ── Service ───────────────────────────────────────────────────────────────
@@ -148,6 +160,11 @@ namespace SamsonDentalCenterManagementSystem.Services
                 d.Availability = (avail.TryGetValue(d.Id, out var s) || avail.TryGetValue(d.Id.ToLower(), out s)) ? s : new();
 
             return doctors;
+        }
+
+        public void InvalidateCache()
+        {
+            _cache.Remove(CacheKeyActive);
         }
 
         // ── Fetch active doctors only ─────────────────────────────────────────
@@ -233,9 +250,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task<DoctorDto?> CreateAsync(
             string profileId,
             string title,
-            string[]? specialties,
-            string? bio,
-            bool isActive
+            string[]? specialties = null,
+            string? bio = null,
+            int? yearsOfExperience = null,
+            bool isActive = true
         )
         {
             var req = BuildRequest(HttpMethod.Post, "/doctors");
@@ -247,6 +265,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     title = title,
                     specialties = specialties ?? Array.Empty<string>(),
                     bio = bio,
+                    years_of_experience = yearsOfExperience,
                     is_active = isActive,
                 }
             );
@@ -264,9 +283,10 @@ namespace SamsonDentalCenterManagementSystem.Services
         public async Task<DoctorDto?> UpdateAsync(
             string id,
             string title,
-            string[]? specialties,
-            string? bio,
-            bool isActive
+            string[]? specialties = null,
+            string? bio = null,
+            int? yearsOfExperience = null,
+            bool isActive = true
         )
         {
             var req = BuildRequest(HttpMethod.Patch, $"/doctors?id=eq.{id}");
@@ -277,6 +297,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     title = title,
                     specialties = specialties ?? Array.Empty<string>(),
                     bio = bio,
+                    years_of_experience = yearsOfExperience,
                     is_active = isActive,
                 }
             );

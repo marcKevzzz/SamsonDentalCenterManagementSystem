@@ -15,6 +15,7 @@
 - **Improved Page Stability**:
     - Added comprehensive try-catch blocks and logging to `Records.cshtml.cs` and `Settings.cshtml.cs`.
     - Prevented silent redirections to the home page by logging detailed error context (missing profiles, role mismatches, or data fetch failures).
+- **Fixed JSON Deserialization Crashes**: Resolved `System.Text.Json.JsonException` in `DoctorService` and `ReceptionistService` by aligning DTOs with Supabase's singular-object response for 1-to-1 joins. Standardized queries to use explicit `profile:profiles!profile_id(*)` aliases.
 
 
 - **Fixed Appointment Availability Logic**: Resolved issue where `confirmed` or `arrived` appointments (especially those promoted from waitlist) were not correctly blocking doctor slots by removing restrictive `is_waitlist` filters and normalizing date parsing in `AppointmentService.cs`.
@@ -99,6 +100,7 @@
 
 ### In Progress
 - **Signup Refactor**: Moving UI/Auth fields (`ClaimId`, `Password`) out of the `Profile` model to prevent further schema cache conflicts.
+- **Admin & Appointment Stability**: Fixing booking status logic, enhancing calendar availability for staff leaves, and repairing admin staff data rendering.
 
 - **HttpClient Timeouts**: Largely mitigated by optimizing heavy queries and using `IHttpClientFactory`.
 

@@ -38,14 +38,16 @@ export const STATE = {
         isForOther:  false,
         otherFirstName: "",
         otherLastName:  "",
-        otherEmail:     "",
-        otherPhone:     "",
         otherSex:       "",
-        otherDob:       ""
+        otherDob:       "",
+        relationship:   "",
+        emergencyContact: ""
     },
     patient: readServerUser(),  // from server — never from localStorage
     ref:     "",
-    blockedDates: []
+    blockedDates: [],
+    fullBookedDates: [],
+    unavailableDates: []
 };
 
 // ── Fetch Blocked Dates ────────────────────────────────────────────────────────
@@ -86,8 +88,8 @@ export function resetState() {
     STATE.details    = {
         firstName: "", lastName: "", email: "", phone: "",
         sex: "", dob: "", patientType: "New Patient", notes: "",
-        isForOther: false, otherFirstName: "", otherLastName: "", otherEmail: "", otherPhone: "",
-        otherSex: "", otherDob: ""
+        isForOther: false, otherFirstName: "", otherLastName: "", 
+        otherSex: "", otherDob: "", relationship: "", emergencyContact: ""
     };
     // patient stays — it's from the server
 }
@@ -99,6 +101,7 @@ export function formatDate(dateStr, opts = {
 }
 
 export function isDateFullyBooked(dateStr) {
+    if (STATE.fullBookedDates.includes(dateStr)) return true;
     if (!STATE.service) return false;
     const key   = availCacheKey(STATE.service.id, dateStr);
     const slots = AVAILABILITY_CACHE[key];

@@ -96,13 +96,13 @@ function renderDetailsForm() {
         </div>
 
         <!-- Tab switcher — only for logged-in users -->
-        <div class="flex p-1 bg-offwhite rounded-xl mb-6">
+        <div class="flex p-1 bg-offwhite rounded-xl mb-6 border border-mute">
             <button onclick="toggleBookingTab(false)" id="tab-self"
-                class="flex-1 py-2.5 text-[.8rem] font-bold brand-font rounded-lg transition-all duration-200 shadow-sm bg-white text-brand">
+                class="flex-1 py-2.5 text-[.8rem] font-bold brand-font rounded-lg transition-all duration-200 bg-brand text-white shadow-sm">
                 For Myself
             </button>
             <button onclick="toggleBookingTab(true)" id="tab-other"
-                class="flex-1 py-2.5 text-[.8rem] font-bold brand-font rounded-lg transition-all duration-200 text-muted hover:text-brand">
+                class="flex-1 py-2.5 text-[.8rem] font-bold brand-font rounded-lg transition-all duration-200 text-muted hover:bg-white hover:text-brand hover:shadow-sm">
                 Someone Else
             </button>
         </div>
@@ -147,18 +147,18 @@ function renderDetailsForm() {
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Email <span class="text-primary">*</span>
                     </label>
-                    <input id="f_email" type="email" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
+                    <input id="f_email" type="email" class="form-input ${(loggedIn && email) ? "bg-slate-50" : ""}"
                         placeholder="juan@email.com" value="${email}"
-                        ${loggedIn ? "readonly" : 'oninput="clearErr(\'email\')"'} />
+                        ${(loggedIn && email) ? "readonly" : 'oninput="clearErr(\'email\')"'} />
                     <div id="err_email" class="field-error">Valid email is required.</div>
                 </div>
                 <div>
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
                         Phone <span class="text-primary">*</span>
                     </label>
-                    <input id="f_phone" type="tel" class="form-input ${loggedIn ? "bg-slate-50" : ""}"
+                    <input id="f_phone" type="tel" class="form-input ${(loggedIn && phone) ? "bg-slate-50" : ""}"
                         placeholder="0912 345 6789" value="${phone}"
-                        ${loggedIn ? "readonly" : 'oninput="clearErr(\'phone\')"'} />
+                        ${(loggedIn && phone) ? "readonly" : 'oninput="clearErr(\'phone\')"'} />
                     <div id="err_phone" class="field-error">Phone is required.</div>
                 </div>
             </div>
@@ -216,19 +216,19 @@ function renderDetailsForm() {
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
-                        Email <span class="text-primary">*</span>
+                        Relationship <span class="text-primary">*</span>
                     </label>
-                    <input id="f_otherEmail" type="email" class="form-input" placeholder="patient@email.com"
-                        oninput="clearErr('otherEmail')" />
-                    <div id="err_otherEmail" class="field-error">Valid email is required.</div>
+                    <input id="f_relationship" type="text" class="form-input" placeholder="e.g. Mother, Father, Friend"
+                        oninput="clearErr('relationship')" />
+                    <div id="err_relationship" class="field-error">Relationship is required.</div>
                 </div>
                 <div>
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
-                        Phone <span class="text-primary">*</span>
+                        Emergency Contact <span class="text-primary">*</span>
                     </label>
-                    <input id="f_otherPhone" type="tel" class="form-input" placeholder="+63 9XX XXX XXXX"
-                        oninput="clearErr('otherPhone')" />
-                    <div id="err_otherPhone" class="field-error">Phone is required.</div>
+                    <input id="f_emergencyContact" type="text" class="form-input" placeholder="Full name of contact"
+                        oninput="clearErr('emergencyContact')" />
+                    <div id="err_emergencyContact" class="field-error">Emergency contact is required.</div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -298,26 +298,25 @@ function renderDetailsForm() {
 
 function toggleBookingTab(isOther) {
   const selfFields = document.getElementById("selfFields");
-  const otherFields = document.getElementById("forOtherFields");
+  const forOtherFields = document.getElementById("forOtherFields");
   const tabSelf = document.getElementById("tab-self");
   const tabOther = document.getElementById("tab-other");
 
   STATE.details.isForOther = isOther;
 
+  const activeCls = "flex-1 py-2.5 text-[.8rem] font-bold brand-font rounded-lg transition-all duration-200 bg-brand text-white shadow-sm";
+  const inactiveCls = "flex-1 py-2.5 text-[.8rem] font-bold brand-font rounded-lg transition-all duration-200 text-muted hover:bg-white hover:text-brand hover:shadow-sm";
+
   if (isOther) {
-    selfFields.classList.add("hidden");
-    otherFields.classList.remove("hidden");
-    tabOther.classList.add("bg-white", "shadow-sm", "text-brand");
-    tabOther.classList.remove("text-muted");
-    tabSelf.classList.remove("bg-white", "shadow-sm", "text-brand");
-    tabSelf.classList.add("text-muted");
+    selfFields?.classList.add("hidden");
+    forOtherFields?.classList.remove("hidden");
+    if (tabOther) tabOther.className = activeCls;
+    if (tabSelf) tabSelf.className = inactiveCls;
   } else {
-    selfFields.classList.remove("hidden");
-    otherFields.classList.add("hidden");
-    tabSelf.classList.add("bg-white", "shadow-sm", "text-brand");
-    tabSelf.classList.remove("text-muted");
-    tabOther.classList.remove("bg-white", "shadow-sm", "text-brand");
-    tabOther.classList.add("text-muted");
+    selfFields?.classList.remove("hidden");
+    forOtherFields?.classList.add("hidden");
+    if (tabSelf) tabSelf.className = activeCls;
+    if (tabOther) tabOther.className = inactiveCls;
   }
 }
 
@@ -346,8 +345,8 @@ function restoreFormValues() {
   set("f_notes", d.notes);
   set("f_otherFirstName", d.otherFirstName);
   set("f_otherLastName", d.otherLastName);
-  set("f_otherEmail", d.otherEmail);
-  set("f_otherPhone", d.otherPhone);
+  set("f_relationship", d.relationship);
+  set("f_emergencyContact", d.emergencyContact);
   set("f_otherSex", d.otherSex);
   set("f_otherDob", d.otherDob);
 
@@ -385,7 +384,6 @@ function submitDetails() {
   const errors = [];
   const nameRegex = /\d/; // Regex to check for numbers
 
-  if (!isOther) {
     const fields = [
       { id: "firstName", label: "First Name" },
       { id: "lastName", label: "Last Name" },
@@ -398,8 +396,13 @@ function submitDetails() {
       const val = el?.value.trim();
 
       if (!val) {
-        document.getElementById(`err_${f.id}`)?.classList.add("show");
-        el?.classList.add("error");
+        // If it's a hidden field (isOther is true), we don't necessarily want to show the red error box 
+        // unless it's actually empty. But since they are pre-filled for logged-in users, 
+        // this only happens if the user's profile is incomplete.
+        if (!isOther) {
+            document.getElementById(`err_${f.id}`)?.classList.add("show");
+            el?.classList.add("error");
+        }
         errors.push(`${f.label} is required.`);
         ok = false;
       } else {
@@ -407,12 +410,14 @@ function submitDetails() {
         if (f.id === "email") {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(val)) {
-            const errEl = document.getElementById("err_email");
-            if (errEl) {
-              errEl.textContent = "Please enter a valid email address.";
-              errEl.classList.add("show");
+            if (!isOther) {
+                const errEl = document.getElementById("err_email");
+                if (errEl) {
+                  errEl.textContent = "Please enter a valid email address.";
+                  errEl.classList.add("show");
+                }
+                el?.classList.add("error");
             }
-            el?.classList.add("error");
             errors.push("Invalid email format.");
             ok = false;
           }
@@ -420,35 +425,39 @@ function submitDetails() {
 
         if (f.id === "firstName" || f.id === "lastName") {
           if (nameRegex.test(val)) {
-            const errEl = document.getElementById(`err_${f.id}`);
-            if (errEl) {
-              errEl.textContent = `${f.label} cannot contain numbers.`;
-              errEl.classList.add("show");
+            if (!isOther) {
+                const errEl = document.getElementById(`err_${f.id}`);
+                if (errEl) {
+                  errEl.textContent = `${f.label} cannot contain numbers.`;
+                  errEl.classList.add("show");
+                }
+                el?.classList.add("error");
             }
-            el?.classList.add("error");
             errors.push(`${f.label} cannot contain numbers.`);
             ok = false;
           }
         }
 
         if (f.id === "phone") {
-          // Simple PH phone regex (starts with 09 or +639 or 9)
           const phoneRegex = /^(09|\+639|9)\d{9}$/;
           const cleanPhone = val.replace(/\s+/g, "");
           if (!phoneRegex.test(cleanPhone)) {
-            const errEl = document.getElementById("err_phone");
-            if (errEl) {
-              errEl.textContent = "Please enter a valid phone number.";
-              errEl.classList.add("show");
+            if (!isOther) {
+                const errEl = document.getElementById("err_phone");
+                if (errEl) {
+                  errEl.textContent = "Please enter a valid phone number.";
+                  errEl.classList.add("show");
+                }
+                el?.classList.add("error");
             }
-            el?.classList.add("error");
             errors.push("Invalid phone number.");
             ok = false;
           }
         }
       }
     });
-    
+
+  if (!isOther) {
     // Age validation
     const dobEl = document.getElementById("f_dob");
     if (dobEl?.value) {
@@ -466,8 +475,8 @@ function submitDetails() {
   } else {
     const fn = document.getElementById("f_otherFirstName");
     const ln = document.getElementById("f_otherLastName");
-    const em = document.getElementById("f_otherEmail");
-    const ph = document.getElementById("f_otherPhone");
+    const rel = document.getElementById("f_relationship");
+    const ec = document.getElementById("f_emergencyContact");
 
     if (!fn?.value.trim()) {
       document.getElementById("err_otherFirstName")?.classList.add("show");
@@ -480,17 +489,14 @@ function submitDetails() {
       ok = false;
     }
 
-    const emailVal = em?.value.trim();
-    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-        document.getElementById("err_otherEmail")?.classList.add("show");
-        em?.classList.add("error");
+    if (!rel?.value.trim()) {
+        document.getElementById("err_relationship")?.classList.add("show");
+        rel?.classList.add("error");
         ok = false;
     }
-
-    const phoneVal = ph?.value.trim().replace(/\s+/g, "");
-    if (!phoneVal || !/^(09|\+639|9)\d{9}$/.test(phoneVal)) {
-        document.getElementById("err_otherPhone")?.classList.add("show");
-        ph?.classList.add("error");
+    if (!ec?.value.trim()) {
+        document.getElementById("err_emergencyContact")?.classList.add("show");
+        ec?.classList.add("error");
         ok = false;
     }
 
@@ -553,8 +559,8 @@ function submitDetails() {
 
   STATE.details.otherFirstName = document.getElementById("f_otherFirstName").value;
   STATE.details.otherLastName = document.getElementById("f_otherLastName").value;
-  STATE.details.otherEmail = document.getElementById("f_otherEmail").value;
-  STATE.details.otherPhone = document.getElementById("f_otherPhone").value;
+  STATE.details.relationship = document.getElementById("f_relationship").value;
+  STATE.details.emergencyContact = document.getElementById("f_emergencyContact").value;
   STATE.details.otherSex = document.getElementById("f_otherSex").value;
   STATE.details.otherDob = document.getElementById("f_otherDob").value;
   STATE.details.notes = document.getElementById("f_notes").value;

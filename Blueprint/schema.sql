@@ -114,6 +114,7 @@ CREATE TABLE public.doctors (
   specialties ARRAY NOT NULL DEFAULT '{}'::text[],
   bio text,
   is_active boolean NOT NULL DEFAULT true,
+  years_of_experience integer,
   created_at timestamp with time zone DEFAULT now(),
   profile_id uuid UNIQUE,
   CONSTRAINT doctors_pkey PRIMARY KEY (id),
