@@ -101,6 +101,7 @@ public class AdminDataController : ControllerBase
     {
         try
         {
+            await _appointmentService.CleanupExpiredWaitlistLocks();
             var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst("role")?.Value?.ToLower() ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
 
@@ -149,6 +150,12 @@ public class AdminDataController : ControllerBase
                     patientEmail = a.PatientEmail,
                     patientPhone = a.PatientPhone,
                     patientAvatarUrl = a.PatientProfile?.AvatarUrl,
+                    isForOther = a.IsForOther,
+                    isGuest = a.IsGuest,
+                    otherFirstName = a.OtherFirstName,
+                    otherLastName = a.OtherLastName,
+                    otherEmail = a.OtherEmail,
+                    otherPhone = a.OtherPhone,
                     serviceId = a.ServiceId,
                     serviceName = a.Service?.Name,
                     serviceCategory = a.Service?.Category,
@@ -160,6 +167,7 @@ public class AdminDataController : ControllerBase
                                 : $"{a.Doctor.Title} Unknown".Trim()
                         )
                         : null,
+                    appointmentDateFormatted = a.AppointmentDate.ToString("MMM dd, yyyy"),
                     appointmentDate = a.AppointmentDate,
                     appointmentTime = a.AppointmentTime,
                     status = a.Status,
@@ -169,7 +177,17 @@ public class AdminDataController : ControllerBase
                     createdAt = a.CreatedAt,
                     queuePosition = qPos,
                     isQueueLeader = isLeader,
-                    hasQueueCompetition = qPos.HasValue && pendingGroups[new { a.AppointmentDate.Date, a.AppointmentTime }].Count > 1
+                    hasQueueCompetition = qPos.HasValue && pendingGroups[new { a.AppointmentDate.Date, a.AppointmentTime }].Count > 1,
+                    doctor = a.Doctor != null ? new {
+                        id = a.Doctor.Id,
+                        title = a.Doctor.Title,
+                        profile = a.Doctor.Profile != null ? new {
+                            firstName = a.Doctor.Profile.FirstName,
+                            lastName = a.Doctor.Profile.LastName,
+                            email = a.Doctor.Profile.Email,
+                            avatarUrl = a.Doctor.Profile.AvatarUrl
+                        } : null
+                    } : null
                 };
             }).ToList();
 
@@ -898,7 +916,7 @@ public class AdminDataController : ControllerBase
                     is_active = d.IsActive,
                     years_of_experience = d.YearsOfExperience,
                     profile = d.Profile != null
-                        ? new[] { new
+                        ? new
                         {
                             first_name = d.Profile.FirstName,
                             last_name = d.Profile.LastName,
@@ -908,8 +926,8 @@ public class AdminDataController : ControllerBase
                             sex = d.Profile.Sex,
                             address = d.Profile.Address,
                             avatar_url = d.Profile.AvatarUrl,
-                        }}
-                        : Array.Empty<object>(),
+                        }
+                        : null,
                     staff_availability = d
                         .Availability?.Select(a => new
                         {
@@ -942,7 +960,7 @@ public class AdminDataController : ControllerBase
                     bio = r.Bio,
                     is_active = r.IsActive,
                     profile = r.Profile != null
-                        ? new[] { new
+                        ? new
                         {
                             first_name = r.Profile.FirstName,
                             last_name = r.Profile.LastName,
@@ -952,8 +970,8 @@ public class AdminDataController : ControllerBase
                             sex = r.Profile.Sex,
                             address = r.Profile.Address,
                             avatar_url = r.Profile.AvatarUrl,
-                        }}
-                        : Array.Empty<object>(),
+                        }
+                        : null,
                     staff_availability = r
                         .Availability?.Select(a => new
                         {

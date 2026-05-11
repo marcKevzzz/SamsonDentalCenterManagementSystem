@@ -107,7 +107,8 @@ ViewData["Title"] = "My Appointments page";
                         time = appt.AppointmentTime,
                         status = appt.Status,
                         notes = appt.Notes,
-                        durationMinutes = appt.Service?.DurationMinutes ?? 60
+                        durationMinutes = appt.Service?.DurationMinutes ?? 60,
+                        softLockUntil = appt.SoftLockUntil
                     });
 
                     var s = appt.Status.ToLower();
@@ -213,6 +214,16 @@ ViewData["Title"] = "My Appointments page";
               </div>
 
               <div class="mt-auto p-8 bg-slate-50/50 border-t border-slate-100 flex flex-col gap-3">
+                  <div id="promotionActions" class="hidden flex flex-col gap-3">
+                      <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-2">
+                          <p class="font-body text-[0.72rem] text-orange-800 leading-relaxed">
+                              <i class="fa-solid fa-bell mr-1"></i> A slot has opened! Please confirm your attendance before the timer expires.
+                          </p>
+                      </div>
+                      <button id="btnConfirmPromotion" class="w-full py-3 bg-emerald-600 text-white brand-font font-bold text-[0.8rem] tracking-widest uppercase rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
+                          Confirm My Slot
+                      </button>
+                  </div>
                   <div id="activeActions" class="flex flex-col gap-3">
                       <button id="btnReschedule" class="w-full py-3 bg-brand text-white brand-font font-bold text-[0.8rem] tracking-widest uppercase rounded-xl hover:bg-primary transition-all shadow-lg shadow-brand/10">
                           Reschedule

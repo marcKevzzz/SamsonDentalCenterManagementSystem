@@ -459,55 +459,151 @@ namespace SamsonDentalCenterManagementSystem.Services
             var fullyBookedDates = new List<string>();
             var unavailableDates = new List<string>();
 
-            // For each day in the month, check if it's fully booked
+            // 1. Batch Fetching
+            var settings = await _clinic.GetSettingsAsync();
+            var blockedDates = await _blockedDates.GetBlockedDateStringsAsync();
+            var doctors = await GetDoctorsForService(category);
+            Console.WriteLine($"[DEBUG] GetMonthAvailability - Category: {category}, Doctors Found: {doctors.Count}");
+            if (!doctors.Any()) 
+                return new { fullyBooked = fullyBookedDates, unavailable = unavailableDates };
+
+            int duration = 60;
+            int buffer = 15;
+            if (!string.IsNullOrEmpty(serviceId))
+            {
+                var svcRes = await _supabase.From<DentalService>().Where(s => s.Id == serviceId).Get();
+                var svc = svcRes.Models.FirstOrDefault();
+                if (svc != null) { duration = svc.DurationMinutes; buffer = svc.BufferMinutes; }
+            }
+
+            var doctorIds = string.Join(",", doctors.Select(d => d.Id));
+            var profileIds = string.Join(",", doctors.Select(d => d.ProfileId));
+            var startStr = startDate.ToString("yyyy-MM-dd");
+            var endStr = endDate.ToString("yyyy-MM-dd");
+
+            // Appointments for the whole month
+            var apptPath = $"/appointments?select=*,service:dental_services!service_id(*)&doctor_id=in.({doctorIds})&appointment_date=gte.{startStr}&appointment_date=lte.{endStr}&status=in.(confirmed,arrived)";
+            var apptReq = BuildRequest(HttpMethod.Get, apptPath);
+            var apptRes = await _http.SendAsync(apptReq);
+            var allMonthAppts = apptRes.IsSuccessStatusCode 
+                ? (JsonSerializer.Deserialize<List<Appointment>>(await apptRes.Content.ReadAsStringAsync(), _jsonOptions) ?? new())
+                : new();
+
+            // Staff Availability (Shifts)
+            var availPath = $"/staff_availability?staff_id=in.({doctorIds})&is_active=eq.true";
+            var availReq = BuildRequest(HttpMethod.Get, availPath);
+            var availRes = await _http.SendAsync(availReq);
+            var allMonthShifts = availRes.IsSuccessStatusCode
+                ? (JsonSerializer.Deserialize<List<AvailabilityDto>>(await availRes.Content.ReadAsStringAsync(), _jsonOptions) ?? new())
+                : new();
+
+            // Staff Leaves
+            var leavePath = $"/staff_leaves?status=eq.approved&start_date=lte.{endStr}&end_date=gte.{startStr}";
+            if (!string.IsNullOrEmpty(profileIds)) leavePath += $"&profile_id=in.({profileIds})";
+            var leaveReq = BuildRequest(HttpMethod.Get, leavePath);
+            var leaveRes = await _http.SendAsync(leaveReq);
+            var allMonthLeaves = leaveRes.IsSuccessStatusCode
+                ? (JsonSerializer.Deserialize<List<StaffLeave>>(await leaveRes.Content.ReadAsStringAsync(), _jsonOptions) ?? new())
+                : new();
+
+            // 2. Process locally for each day
             for (var date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                // Skip Sundays (clinic closed) or Past dates
-                if (date.DayOfWeek == DayOfWeek.Sunday || date.Date < DateTime.Today)
-                    continue;
-
-                var avail = await GetAvailability(category, date, serviceId);
+                if (date.DayOfWeek == DayOfWeek.Sunday || date.Date < DateTime.Today) continue;
                 
-                if (avail.Count > 0)
+                var dateStr = date.ToString("yyyy-MM-dd");
+                if (blockedDates.Contains(dateStr)) { unavailableDates.Add(dateStr); continue; }
+
+                var dayName = date.DayOfWeek.ToString();
+                var hours = settings.ClinicalHours.FirstOrDefault(h => h.Day.Equals(dayName, StringComparison.OrdinalIgnoreCase));
+                if (hours == null || hours.Closed) { unavailableDates.Add(dateStr); continue; }
+
+                if (!DateTime.TryParse(hours.Open, out var openDt) || !DateTime.TryParse(hours.Close, out var closeDt)) { unavailableDates.Add(dateStr); continue; }
+                var openTime = openDt.TimeOfDay;
+                var closeTime = closeDt.TimeOfDay;
+
+                TimeSpan? noonStart = DateTime.TryParse(hours.NoonStart, out var ns) ? ns.TimeOfDay : null;
+                TimeSpan? noonEnd = DateTime.TryParse(hours.NoonEnd, out var ne) ? ne.TimeOfDay : null;
+
+                var dayAppts = allMonthAppts.Where(a => a.AppointmentDate.Date == date.Date).ToList();
+                var dayLeaves = allMonthLeaves.Where(l => !string.IsNullOrEmpty(l.ProfileId) && l.StartDate.Date <= date.Date && l.EndDate.Date >= date.Date).Select(l => l.ProfileId.ToLower()).ToHashSet();
+
+                var currentTime = openTime;
+                var nowTime = DateTime.Now.TimeOfDay;
+                bool isToday = date.Date == DateTime.Today;
+                
+                bool hasAnyAvailable = false;
+                bool hasAnyWaitlistEligible = false;
+
+                // Check if any doctor works AT ALL on this day (regardless of service duration)
+                bool anyDoctorHasShift = false;
+                foreach (var doc in doctors)
                 {
-                    bool hasAnyAvailable = false;
-                    bool hasAnyWaitlistEligible = false;
-
-                    foreach (var val in avail.Values)
+                    if (doc.ProfileId != null && dayLeaves.Contains(doc.ProfileId.ToLower())) continue;
+                    if (allMonthShifts.Any(s => s.StaffId == doc.Id && s.DayOfWeek == (int)date.DayOfWeek))
                     {
-                        var json = JsonSerializer.Serialize(val);
-                        using var doc = JsonDocument.Parse(json);
-                        
-                        if (doc.RootElement.TryGetProperty("available", out var availProp) && availProp.GetBoolean())
-                        {
-                            hasAnyAvailable = true;
-                            break;
-                        }
-
-                        if (doc.RootElement.TryGetProperty("waitlistEligible", out var waitProp) && waitProp.GetBoolean())
-                        {
-                            hasAnyWaitlistEligible = true;
-                        }
-                    }
-
-                    if (!hasAnyAvailable)
-                    {
-                        if (hasAnyWaitlistEligible)
-                        {
-                            fullyBookedDates.Add(date.ToString("yyyy-MM-dd"));
-                        }
-                        else
-                        {
-                            // All slots have available=false AND waitlistEligible=false
-                            // This happens when all doctors are on leave or clinic hours are zeroed.
-                            unavailableDates.Add(date.ToString("yyyy-MM-dd"));
-                        }
+                        anyDoctorHasShift = true;
+                        break;
                     }
                 }
-                else
+
+                while (currentTime.Add(TimeSpan.FromMinutes(duration)) <= closeTime)
                 {
-                    // No slots generated at all for this day (Clinic Closed or no doctor shifts)
-                    unavailableDates.Add(date.ToString("yyyy-MM-dd"));
+                    if (isToday && currentTime <= nowTime) { currentTime = currentTime.Add(TimeSpan.FromMinutes(duration + buffer)); continue; }
+                    
+                    var slotEnd = currentTime.Add(TimeSpan.FromMinutes(duration));
+                    if (noonStart.HasValue && noonEnd.HasValue && currentTime < noonEnd.Value && slotEnd > noonStart.Value) { currentTime = currentTime.Add(TimeSpan.FromMinutes(duration + buffer)); continue; }
+                    int availDocCount = 0;
+                    bool anyDocScheduled = false;
+
+                    foreach (var doc in doctors)
+                    {
+                        if (doc.ProfileId != null && dayLeaves.Contains(doc.ProfileId.ToLower())) continue;
+                        
+                        var scheds = allMonthShifts.Where(s => s.StaffId == doc.Id && s.DayOfWeek == (int)date.DayOfWeek).ToList();
+                        bool works = false;
+                        foreach (var s in scheds)
+                        {
+                            if (DateTime.TryParse(s.StartTime, out var sStart) && DateTime.TryParse(s.EndTime, out var sEnd) && currentTime >= sStart.TimeOfDay && slotEnd <= sEnd.TimeOfDay) { works = true; break; }
+                        }
+                        if (!works) continue;
+                        anyDocScheduled = true;
+
+                        var booked = dayAppts.Where(a => a.DoctorId == doc.Id).ToList();
+                        bool isBusy = false;
+                        foreach (var b in booked)
+                        {
+                            if (DateTime.TryParse(b.AppointmentTime, out var bStartDt))
+                            {
+                                var bStart = bStartDt.TimeOfDay;
+                                var bEnd = bStart.Add(TimeSpan.FromMinutes(b.DurationMinutes + (b.Service?.BufferMinutes ?? 15)));
+                                if (currentTime < bEnd && slotEnd.Add(TimeSpan.FromMinutes(buffer)) > bStart) { isBusy = true; break; }
+                            }
+                        }
+                        if (!isBusy) availDocCount++;
+                    }
+
+                    if (availDocCount > 0) { hasAnyAvailable = true; break; }
+                    if (anyDocScheduled) hasAnyWaitlistEligible = true;
+
+                    // Move forward by a fixed granularity (30 mins) instead of full duration+buffer
+                    // to ensure we don't skip potential valid slots that start at different offsets.
+                    currentTime = currentTime.Add(TimeSpan.FromMinutes(30));
+                }
+
+                if (!hasAnyAvailable)
+                {
+                    // If no slots are available, but doctors are actually working, it's "Fully Booked" (Waitlist)
+                    if (hasAnyWaitlistEligible || anyDoctorHasShift) 
+                    {
+                        Console.WriteLine($"[DEBUG] Date {dateStr}: Fully Booked (Waitlist). anyDoctorHasShift: {anyDoctorHasShift}");
+                        fullyBookedDates.Add(dateStr);
+                    }
+                    else 
+                    {
+                        Console.WriteLine($"[DEBUG] Date {dateStr}: Unavailable. no doctors with category '{category}' have shifts today.");
+                        unavailableDates.Add(dateStr);
+                    }
                 }
             }
 
@@ -639,16 +735,16 @@ namespace SamsonDentalCenterManagementSystem.Services
             Console.WriteLine(
                 $"[DEBUG] AppointmentService.Create - Incoming AppointmentDate: '{p.AppointmentDate}'"
             );
-            var fixedDate = DateTime.SpecifyKind(
-                DateTime.ParseExact(
-                    p.AppointmentDate,
-                    "yyyy-MM-dd",
-                    System.Globalization.CultureInfo.InvariantCulture
-                ),
-                DateTimeKind.Unspecified
+            var parsedDate = DateTime.ParseExact(
+                p.AppointmentDate,
+                "yyyy-MM-dd",
+                System.Globalization.CultureInfo.InvariantCulture
             );
+            // Force UTC at midnight to ensure consistency across DB/Email
+            var fixedDate = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
+
             Console.WriteLine(
-                $"[DEBUG] AppointmentService.Create - Normalized AppointmentDate: {fixedDate:yyyy-MM-dd HH:mm:ss} {fixedDate.Kind}"
+                $"[DEBUG] AppointmentService.Create - Normalized AppointmentDate (UTC): {fixedDate:yyyy-MM-dd HH:mm:ss} {fixedDate.Kind}"
             );
 
             // ── Validation ───────────────────────────────────────────────────
@@ -1145,6 +1241,82 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
+        public async Task<Appointment?> ConfirmPromotion(string id)
+        {
+            try
+            {
+                var appt = await GetById(id);
+                if (appt == null || appt.Status != "pending" || appt.IsWaitlist) return null;
+
+                // If lock is still valid
+                if (appt.SoftLockUntil != null && appt.SoftLockUntil < DateTime.UtcNow)
+                {
+                    Console.WriteLine($"[Waitlist] Lock expired for {id} at {appt.SoftLockUntil}");
+                    return null;
+                }
+
+                var payload = new Dictionary<string, object?>
+                {
+                    ["status"] = "confirmed",
+                    ["email_status"] = "confirmed",
+                    ["soft_lock_until"] = null, // Clear the lock
+                    ["confirmed_at"] = DateTime.UtcNow
+                };
+
+                var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
+                patchReq.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+                var res = await _http.SendAsync(patchReq);
+
+                if (res.IsSuccessStatusCode)
+                {
+                    var updated = await GetById(id);
+                    if (updated != null)
+                    {
+                        await SendBookingConfirmationEmail(updated);
+                        await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "confirmed", id = id });
+                        return updated;
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ConfirmPromotion] {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task PromoteSpecific(string id)
+        {
+            var appt = await GetById(id) ?? throw new Exception("Not found.");
+            if (!appt.IsWaitlist) throw new Exception("Not a waitlist appointment.");
+
+            // Force promote this specific entry
+            var isSameDay = appt.AppointmentDate.Date == DateTime.UtcNow.Date;
+            var lockDuration = isSameDay ? TimeSpan.FromMinutes(30) : TimeSpan.FromHours(4);
+            var lockUntil = DateTime.UtcNow.Add(lockDuration);
+
+            var payload = new Dictionary<string, object?>
+            {
+                ["is_waitlist"] = false,
+                ["email_status"] = "pending",
+                ["status"] = "pending",
+                ["soft_lock_until"] = lockUntil,
+                ["notes"] = $"[SYSTEM] Manually promoted. Respond needed by {lockUntil:HH:mm} UTC."
+            };
+
+            var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
+            patchReq.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+            await _http.SendAsync(patchReq);
+
+            var promoted = await GetById(id);
+            if (promoted != null)
+            {
+                await SendWaitlistPromotionEmail(promoted);
+                await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "promoted", id = id });
+            }
+        }
+
         //         // ── Cancel + promote waitlist ─────────────────────────────────────────
         public async Task Cancel(string id)
         {
@@ -1177,7 +1349,7 @@ namespace SamsonDentalCenterManagementSystem.Services
             );
         }
 
-        private async Task PromoteWaitlist(
+        public async Task PromoteWaitlist(
             string serviceId,
             string? doctorId,
             DateTime date,
@@ -1204,17 +1376,19 @@ namespace SamsonDentalCenterManagementSystem.Services
                     return;
 
                 var isSameDay = date.Date == DateTime.UtcNow.Date;
+                // Normal: 4 hours, Same Day: 30 minutes
                 var lockDuration = isSameDay ? TimeSpan.FromMinutes(30) : TimeSpan.FromHours(4);
                 var lockUntil = DateTime.UtcNow.Add(lockDuration);
 
                 var payload = new Dictionary<string, object?>
                 {
                     ["is_waitlist"] = false,
-                    ["email_status"] = "pending", // Always pending for waitlist promotion so they must confirm
+                    ["email_status"] = "pending", 
                     ["status"] = "pending",
                     ["appointment_time"] = time,
                     ["doctor_id"] = doctorId,
-                    ["soft_lock_until"] = lockUntil
+                    ["soft_lock_until"] = lockUntil,
+                    ["notes"] = $"[SYSTEM] Promoted from waitlist. Responded needed by {lockUntil:HH:mm} UTC."
                 };
 
                 var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{next.Id}");
@@ -1227,17 +1401,61 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var patchRes = await _http.SendAsync(patchReq);
                 patchRes.EnsureSuccessStatusCode();
 
-                // Re-fetch with joins so ServiceName and Doctor are populated for the email
+                // Re-fetch with joins
                 var promoted = await GetById(next.Id);
                 if (promoted != null)
                 {
                     await SendWaitlistPromotionEmail(promoted);
-                    Console.WriteLine($"[Waitlist] Promoted {next.Id} to slot {time}");
+                    
+                    // Notify via SignalR
+                    await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "promoted", id = next.Id });
+                    
+                    Console.WriteLine($"[Waitlist] Promoted {next.Id} to slot {time}. Lock until: {lockUntil}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[PromoteWaitlist] {ex.Message}");
+            }
+        }
+
+        public async Task CleanupExpiredWaitlistLocks()
+        {
+            try
+            {
+                // Find appointments that were promoted but lock expired
+                var path = $"/appointments?select=*&status=eq.pending&soft_lock_until=lt.{DateTime.UtcNow:yyyy-MM-ddTHH:mm:ss}Z&is_waitlist=eq.false";
+                var req = BuildRequest(HttpMethod.Get, path);
+                var res = await _http.SendAsync(req);
+                if (!res.IsSuccessStatusCode) return;
+
+                var json = await res.Content.ReadAsStringAsync();
+                var expired = JsonSerializer.Deserialize<List<AppointmentDto>>(json, _jsonOptions) ?? new();
+
+                foreach (var appt in expired)
+                {
+                    Console.WriteLine($"[Waitlist Cleanup] Expiring lock for {appt.Id}...");
+                    
+                    // Move back to waitlist
+                    var payload = new Dictionary<string, object?>
+                    {
+                        ["is_waitlist"] = true,
+                        ["status"] = "pending",
+                        ["soft_lock_until"] = null,
+                        ["notes"] = "[SYSTEM] Promotion expired. Moved back to waitlist."
+                    };
+
+                    var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{appt.Id}");
+                    patchReq.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+                    await _http.SendAsync(patchReq);
+
+                    // Trigger promotion for the NEXT person
+                    await PromoteWaitlist(appt.ServiceId, null, appt.AppointmentDate, appt.AppointmentTime);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CleanupExpiredWaitlistLocks] {ex.Message}");
             }
         }
 
@@ -1944,6 +2162,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                         Service = appt.ServiceName,
                         Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
                         Time = appt.AppointmentTime.ToUpper(),
+                        RescheduleLink = $"{_appBaseUrl}/Appointments"
                     }
                 );
             }
@@ -2006,6 +2225,8 @@ namespace SamsonDentalCenterManagementSystem.Services
                         Doctor = docName,
                         Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
                         Time = appt.AppointmentTime.ToUpper(),
+                        ConfirmLink = $"{_appBaseUrl}/Confirm-Promotion?id={appt.Id}",
+                        ExpirationTime = appt.SoftLockUntil?.AddHours(8).ToString("hh:mm tt")
                     }
                 );
             }

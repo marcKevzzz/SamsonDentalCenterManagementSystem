@@ -1,0 +1,14 @@
+[
+  {
+    "id": "cd594495-e99a-4678-94d2-03b0b3e86f28",
+    "profile_id": "b4fae8d5-c07f-4a58-883d-024573b1766c",
+    "leave_type": "Emergency",
+    "start_date": "2026-05-29",
+    "end_date": "2026-05-30",
+    "reason": "tinamaan ng silos",
+    "status": "approved",
+    "approved_by": "7f6633c9-7d02-4e50-9d06-b2bc39ed33fc",
+    "created_at": "2026-05-08 20:14:06.161983+00",
+    "updated_at": "2026-05-08 21:37:53.500921+00"
+  }
+]

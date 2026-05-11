@@ -105,7 +105,7 @@ function renderStaffCards() {
 }
 
 function renderReceptionistCard(rec) {
-    const profile = Array.isArray(rec.profiles) ? rec.profiles[0] : rec.profiles;
+    const profile = rec.profile;
     const firstName = profile?.first_name || "";
     const lastName = profile?.last_name || "";
     const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();

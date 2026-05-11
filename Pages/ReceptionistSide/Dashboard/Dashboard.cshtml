@@ -98,6 +98,41 @@
                 </div>
             </div>
 
+            <!-- Clinic Calendar Section -->
+            <div class="bg-white rounded-[32px] border border-slate-200 overflow-hidden shadow-sm flex flex-col mb-6">
+                <div class="px-6 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                    <div>
+                        <h3 class="font-display font-bold text-brand text-lg tracking-tight">Clinic Calendar</h3>
+                        <p class="text-[12px] text-brand/40 mt-0.5">Live view of appointment distribution and pending requests.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-orange-500 uppercase tracking-wider bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
+                           <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> Pending
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Calendar Widget -->
+                    <div id="receptionistCalendarWidget" class="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                        <div class="flex items-center justify-center py-12">
+                             <i class="fa-solid fa-spinner fa-spin text-primary mr-2"></i>
+                             <span class="text-[13px] text-brand/40">Initializing calendar...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Day View -->
+                    <div id="receptionistDayView" class="flex flex-col h-full">
+                        <div class="flex flex-col items-center justify-center h-full text-center py-12 px-6 bg-slate-50/30 rounded-2xl border border-dashed border-slate-200">
+                            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-300 mb-3 shadow-sm">
+                                <i class="fa-solid fa-calendar-day text-lg"></i>
+                            </div>
+                            <h4 class="text-[14px] font-bold text-brand">Select a Date</h4>
+                            <p class="text-[12px] text-brand/40 mt-1">Click on a day in the calendar to view and manage pending appointments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Charts row -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm">
@@ -228,7 +263,10 @@
     </div>
 </div>
 
+<partial name="AdminSide/_AppointmentViewModal" />
+
 <script type="module" src="~/js/AdminSide/adminDashboard.js" asp-append-version="true"></script>
+<script type="module" src="~/js/ReceptionistSide/receptionistCalendar.js" asp-append-version="true"></script>
 
 <script type="module">
     import { Toast } from '../../js/ui.js';

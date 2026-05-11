@@ -47,7 +47,9 @@ export const STATE = {
     ref:     "",
     blockedDates: [],
     fullBookedDates: [],
-    unavailableDates: []
+    unavailableDates: [],
+    loadingAvailability: false,
+    loadingTimeSlots: false
 };
 
 // ── Fetch Blocked Dates ────────────────────────────────────────────────────────
@@ -91,6 +93,8 @@ export function resetState() {
         isForOther: false, otherFirstName: "", otherLastName: "", 
         otherSex: "", otherDob: "", relationship: "", emergencyContact: ""
     };
+    STATE.fullBookedDates = []; // Reset monthly data
+    STATE.unavailableDates = [];
     // patient stays — it's from the server
 }
 

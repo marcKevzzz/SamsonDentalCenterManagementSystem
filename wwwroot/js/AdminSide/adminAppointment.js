@@ -124,7 +124,8 @@ function initializeWithData(data) {
     }
     if (!a.doctorName && a.doctor) {
       const d = a.doctor;
-      const p = d.profile || d.Profile;
+      const rawProfile = d.profile || d.Profile;
+      const p = Array.isArray(rawProfile) ? rawProfile[0] : rawProfile;
       if (p) {
         const displayTitle = d.title === "Admin" ? "Staff" : d.title || "";
         const fn = p.first_name || p.firstName || "";
@@ -308,13 +309,20 @@ function rowHTML(appt) {
       </div>`;
   }
 
+  const role = document.body.dataset.role || "admin";
+  const isDoctor = role === "doctor";
+
   let workflowBtn = "";
-  if (appt.status === "pending") {
-    workflowBtn = `<button onclick='confirmAppt(${idStr})' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>`;
-  } else if (appt.status === "confirmed") {
-    workflowBtn = `<button onclick='updateStatus(${idStr}, "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>`;
-  } else if (appt.status === "arrived") {
-    workflowBtn = ""; // Handled by doctor treatment
+  if (!isDoctor) {
+    if (status === "pending") {
+      workflowBtn = `<button onclick='confirmAppt(${idStr})' class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">Confirm</button>`;
+    } else if (status === "confirmed") {
+      workflowBtn = `<button onclick='updateStatus(${idStr}, "arrived")' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Check-In</button>`;
+    } else if (status === "arrived") {
+      workflowBtn = `<button onclick='updateStatus(${idStr}, "completed")' class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition-colors shadow-sm">Checkout</button>`;
+    } else if (status === "waitlist") {
+      workflowBtn = `<button onclick='promoteManually(${idStr})' class="px-3 py-1.5 rounded-lg bg-orange-500 text-white text-[11px] font-bold hover:bg-orange-600 transition-colors shadow-sm">Promote</button>`;
+    }
   }
 
   const avatarHtml = (() => {
@@ -384,13 +392,15 @@ function rowHTML(appt) {
                 <button onclick='openViewModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand hover:bg-slate-50 flex items-center gap-3 transition-colors">
                   <i class="fa-solid fa-eye w-4"></i> View Details
                 </button>
+                
+                ${!isDoctor ? `
                 ${status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ""}
-                ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ""}
+                ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ""}
                 ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>` : ""}
                 ${
                   status === "arrived"
                     ? `
-                  <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
+                  <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
                   <button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
                 `
                     : ""
@@ -404,7 +414,8 @@ function rowHTML(appt) {
                 `
                     : ""
                 }
-                ${document.body.dataset.role === "admin" && ["waitlist", "no_show", "no-show", "cancelled", "completed"].includes(status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ""}
+                ${role === "admin" && ["waitlist", "no_show", "no-show", "cancelled", "completed"].includes(status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ""}
+                ` : ""}
               </div>
             </div>
           </div>
@@ -495,7 +506,7 @@ window.filterTable = () => {
     const matchStatus =
       !status || statusArray.includes(appt.status.toLowerCase());
 
-    const matchDate = !date || appt.appointmentDate === date;
+    const matchDate = !date || (appt.appointmentDate && appt.appointmentDate.split('T')[0] === date);
     return matchSearch && matchStatus && matchDate;
   });
 
@@ -863,6 +874,12 @@ window.fetchAvailableDoctors = async (
 ) => {
   const sel = document.getElementById(targetId);
   if (!sel) return;
+
+  if (!date || !time) {
+    sel.innerHTML = '<option value="">Any available specialist</option>';
+    sel.disabled = false;
+    return;
+  }
 
   sel.innerHTML = '<option value="">Any available specialist</option>';
   sel.disabled = true;
@@ -1367,6 +1384,164 @@ window.unblockDate = async function (id) {
         }
       } catch {
         Toast.show("Network error.", "danger");
+      }
+    },
+  });
+};
+
+// ── Receptionist Calendar View ───────────────────────────────────────────
+let calDate = new Date();
+
+window.toggleCalendarView = (btn) => {
+    const view = document.getElementById('calendar-view');
+    const isShowing = !view.classList.contains('hidden');
+    
+    if (isShowing) {
+        view.classList.add('hidden');
+        btn.classList.remove('active', 'text-brand', 'border-brand');
+        btn.classList.add('text-slate-500', 'border-transparent');
+    } else {
+        view.classList.remove('hidden');
+        btn.classList.add('active', 'text-brand', 'border-brand');
+        btn.classList.remove('text-slate-500', 'border-transparent');
+        renderCalendarView();
+    }
+};
+
+window.shiftCal = (dir) => {
+    calDate.setMonth(calDate.getMonth() + dir);
+    renderCalendarView();
+};
+
+function renderCalendarView() {
+    const view = document.getElementById('calendar-view');
+    if (!view) return;
+
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth();
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMon = new Date(y, m + 1, 0).getDate();
+    const monthName = calDate.toLocaleString('default', { month: 'long' });
+
+    // Group appointments by date for indicators
+    const apptsByDate = ALL_APPT.reduce((acc, a) => {
+        const d = a.appointmentDate.split('T')[0];
+        if (!acc[d]) acc[d] = [];
+        acc[d].push(a);
+        return acc;
+    }, {});
+
+    let cells = Array(firstDay).fill('<div class="h-24 sm:h-32 bg-slate-50/30 border border-slate-100/50"></div>').join('');
+
+    for (let d = 1; d <= daysInMon; d++) {
+        const dStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dt = new Date(y, m, d);
+        const dayAppts = apptsByDate[dStr] || [];
+        const pendingCount = dayAppts.filter(a => a.status === 'pending').length;
+        const isToday = dt.getTime() === today.getTime();
+        
+        cells += `
+            <div class="h-24 sm:h-32 p-2 border border-slate-100 transition-all hover:bg-slate-50/50 relative cursor-pointer group" 
+                 onclick="focusDate('${dStr}')">
+                <div class="flex items-center justify-between">
+                    <span class="text-[12px] font-bold ${isToday ? 'w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center' : 'text-slate-400 group-hover:text-brand'}">${d}</span>
+                    ${dayAppts.length > 0 ? `<span class="text-[9px] font-bold text-brand/40">${dayAppts.length} appt${dayAppts.length > 1 ? 's' : ''}</span>` : ''}
+                </div>
+                
+                <div class="mt-2 space-y-1 overflow-hidden">
+                    ${dayAppts.slice(0, 2).map(a => `
+                        <div class="text-[9px] truncate px-1.5 py-0.5 rounded ${a.status === 'pending' ? 'bg-orange-50 text-orange-600' : 'bg-slate-100 text-slate-500'} font-medium">
+                            ${a.appointmentTime.split(' ')[0]} ${a.patientName}
+                        </div>
+                    `).join('')}
+                    ${dayAppts.length > 2 ? `<div class="text-[8px] text-brand/30 font-bold px-1">+${dayAppts.length - 2} more</div>` : ''}
+                </div>
+
+                ${pendingCount > 0 ? `<div class="absolute bottom-2 right-2 w-2 h-2 rounded-full bg-orange-500 shadow-sm animate-pulse"></div>` : ''}
+            </div>
+        `;
+    }
+
+    // Fill remaining cells for a clean grid
+    const totalCells = Math.ceil((firstDay + daysInMon) / 7) * 7;
+    cells += Array(totalCells - (firstDay + daysInMon)).fill('<div class="h-24 sm:h-32 bg-slate-50/30 border border-slate-100/50"></div>').join('');
+
+    view.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="font-display font-bold text-brand text-lg">${monthName} ${y}</h3>
+                <p class="text-[11px] text-brand/40 font-bold uppercase tracking-widest mt-0.5">Clinic Schedule Overview</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="shiftCal(-1)" class="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-400 transition-all">
+                    <i class="fa-solid fa-chevron-left text-[12px]"></i>
+                </button>
+                <button onclick="calDate = new Date(); renderCalendarView()" class="px-4 h-9 rounded-xl border border-slate-200 text-[11px] font-bold text-brand hover:bg-slate-50 transition-all">Today</button>
+                <button onclick="shiftCal(1)" class="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-400 transition-all">
+                    <i class="fa-solid fa-chevron-right text-[12px]"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-7 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+            ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `
+                <div class="py-3 text-center bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-[0.2em] text-brand/30">
+                    ${d}
+                </div>
+            `).join('')}
+            ${cells}
+        </div>
+
+        <div class="mt-4 flex items-center gap-4">
+            <div class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Has Pending Approval</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-brand"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Today</span>
+            </div>
+        </div>
+    `;
+}
+
+window.focusDate = (date) => {
+    const dateInput = document.getElementById('date-filter');
+    if (dateInput) {
+        dateInput.value = date;
+        window.filterTable();
+        
+        // Scroll to table
+        document.getElementById('search-input').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Optional: toast
+        Toast.show(`Viewing schedule for ${new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`, 'info');
+    }
+};
+
+window.promoteManually = async (apptInput) => {
+  const appt = getAppt(apptInput);
+  if (!appt) return;
+
+  Modal.open({
+    title: "Promote Patient?",
+    message: `Are you sure you want to promote <strong>${appt.patientName}</strong> from the waitlist? This will lock the slot for them and send a promotion email.`,
+    confirmText: "Yes, Promote",
+    type: "warning",
+    onConfirm: async () => {
+      try {
+        const res = await post(`/api/admin/appointments/${appt.id}/promote`, {});
+        if (res.ok !== false) {
+          Toast.show("Patient promoted and notified!", "success");
+          refreshData(true);
+        } else {
+          Toast.show(res.error || "Promotion failed.", "danger");
+        }
+      } catch (err) {
+        Toast.show(err.message, "danger");
       }
     },
   });

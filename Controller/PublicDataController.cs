@@ -11,12 +11,14 @@ public class PublicDataController : ControllerBase
     private readonly ClinicService _clinicService;
     private readonly DentalServiceService _dentalService;
     private readonly DoctorService _doctorService;
+    private readonly AppointmentService _appointmentService;
 
-    public PublicDataController(ClinicService clinicService, DentalServiceService dentalService, DoctorService doctorService)
+    public PublicDataController(ClinicService clinicService, DentalServiceService dentalService, DoctorService doctorService, AppointmentService appointmentService)
     {
         _clinicService = clinicService;
         _dentalService = dentalService;
         _doctorService = doctorService;
+        _appointmentService = appointmentService;
     }
 
     [HttpGet("init")]
@@ -107,12 +109,22 @@ public class PublicDataController : ControllerBase
         return Ok(new { ok = true, data = dtos });
     }
 
+    [HttpGet("confirm-promotion")]
+    public async Task<IActionResult> ConfirmPromotion([FromQuery] string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return BadRequest();
+        var appt = await _appointmentService.ConfirmPromotion(id);
+        if (appt != null) return Redirect($"/appointments/confirmed?id={appt.Id}");
+        return Redirect("/Appointments?error=expired");
+    }
+
     [HttpGet("availability")]
     public async Task<IActionResult> GetAvailability([FromQuery] string date)
     {
         if (!DateTime.TryParse(date, out var parsedDate))
             return BadRequest(new { error = "Invalid date format." });
 
+        await _appointmentService.CleanupExpiredWaitlistLocks();
         var fixedDate = parsedDate.Date;
         var settings = await _clinicService.GetSettingsAsync();
         

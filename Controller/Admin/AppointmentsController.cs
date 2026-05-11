@@ -70,6 +70,22 @@ public class AdminAppointmentsController : ControllerBase
         }
     }
 
+    // ── POST /api/admin/appointments/{id}/promote ────────────────────────────
+    [HttpPost("{id}/promote")]
+    public async Task<IActionResult> Promote(string id)
+    {
+        try
+        {
+            await _appointments.PromoteSpecific(id);
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to promote appointment");
+            return StatusCode(500, new { ok = false, error = ex.Message });
+        }
+    }
+
     // ── POST /api/admin/appointments/slots ────────────────────────────────────
     [HttpPost("slots")]
     public async Task<IActionResult> GetSlots([FromBody] SlotRequest req)

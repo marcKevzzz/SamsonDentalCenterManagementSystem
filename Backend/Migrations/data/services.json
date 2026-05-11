@@ -1,0 +1,276 @@
+[
+  {
+    "id": "287d810f-6361-4009-bd80-3161820335d8",
+    "slug": "general-dentistry",
+    "category": "General Dentistry",
+    "name": "General Dentistry",
+    "tagline": "Thin porcelain shells for a perfect smile",
+    "hero": "https://iglnkxzttnkjnvdzccji.supabase.co/storage/v1/object/public/heroes/service-heroes/287d810f-6361-4009-bd80-3161820335d8.png",
+    "icon": "fa-hand-holding-heart",
+    "summary": "Keep your smile at its best with our comprehensive general dental care. We focus on prevention and early detection to save you from future discomfort and costly procedures. From thorough cleanings to detailed checkups, we provide the essential care your teeth deserve in a relaxing environment.",
+    "duration": "45 min",
+    "recovery": "None / Immediate",
+    "price": "1500.00",
+    "benefits": "[\"Prevents cavities and tooth decay.\",\"Early detection of oral health issues.\",\"Professional plaque and tartar removal.\"]",
+    "steps": "[\"Examinations\",\"Teeth Cleaning\",\"Remove Plaque/Tartar\",\"Diagnostic X-rays\",\"Treatments like fillings or crowns\"]",
+    "faqs": "[]",
+    "is_active": true,
+    "created_at": "2026-04-12 11:53:33+00",
+    "updated_at": "2026-05-08 07:30:51.372298+00",
+    "duration_minutes": 45,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "b3b09400-f984-44cc-a10e-1971dba3bbac",
+    "slug": "teeth-cleaning",
+    "category": "General Dentistry",
+    "name": "Teeth Cleaning",
+    "tagline": "Professional plaque and tartar removal",
+    "hero": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=1200",
+    "icon": "fa-hand-holding-heart",
+    "summary": "A thorough professional cleaning to remove plaque, tartar and surface stains.",
+    "duration": "60 min",
+    "recovery": "None",
+    "price": "800.00",
+    "benefits": [
+      "Fresher breath",
+      "Prevents cavities",
+      "Brighter smile",
+      "Gum disease prevention"
+    ],
+    "steps": [
+      "Oral examination",
+      "Plaque and tartar scaling",
+      "Polishing",
+      "Fluoride treatment"
+    ],
+    "faqs": [
+      {
+        "answer": "Most patients experience no pain, though you might feel some pressure or mild vibrations.",
+        "question": "Does teeth cleaning hurt?"
+      },
+      {
+        "answer": "We recommend a professional cleaning every 6 months to maintain optimal oral health.",
+        "question": "How often should I get a cleaning?"
+      }
+    ],
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30+00",
+    "updated_at": "2026-05-02 06:35:15.955073+00",
+    "duration_minutes": 60,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "272843ad-7d80-4093-8259-a443a383ea09",
+    "slug": "tooth-extraction",
+    "category": "General Dentistry",
+    "name": "Tooth Extraction",
+    "tagline": "Safe and gentle tooth removal",
+    "hero": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=1200",
+    "icon": "fa-hand-holding-heart",
+    "summary": "Simple and surgical extractions performed with care and precision.",
+    "duration": "60 min",
+    "recovery": "1–3 days",
+    "price": "500.00",
+    "benefits": [
+      "Pain relief",
+      "Prevents infection spread",
+      "Quick recovery",
+      "Local anesthesia"
+    ],
+    "steps": [
+      "X-ray assessment",
+      "Numbing the area",
+      "Gentle tooth removal",
+      "Aftercare instructions"
+    ],
+    "faqs": [
+      {
+        "answer": "Stick to soft foods like yogurt, mashed potatoes, and soup for the first 24 hours.",
+        "question": "What can I eat after an extraction?"
+      },
+      {
+        "answer": "The area will be completely numbed during the procedure. Post-op discomfort is managed with mild pain relievers.",
+        "question": "Will it be painful?"
+      }
+    ],
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30.99302+00",
+    "updated_at": "2026-05-02 06:35:15.955073+00",
+    "duration_minutes": 60,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "b612f047-80d7-42f4-a6da-f85566f18808",
+    "slug": "dental-fillings",
+    "category": "General Dentistry",
+    "name": "Dental Fillings",
+    "tagline": "Restore decayed or damaged teeth",
+    "hero": "https://iglnkxzttnkjnvdzccji.supabase.co/storage/v1/object/public/heroes/service-heroes/b612f047-80d7-42f4-a6da-f85566f18808.webp",
+    "icon": "fa-hand-holding-heart",
+    "summary": "Tooth-colored composite fillings that blend naturally with your smile.",
+    "duration": "45 min",
+    "recovery": "None",
+    "price": "600.00",
+    "benefits": "[\"Stops decay\",\"Natural appearance\",\"Durable\",\"Same-day procedure\"]",
+    "steps": "[\"Decay removal\",\"Cleaning the cavity\",\"Applying composite resin\",\"Buffing and polishing\"]",
+    "faqs": "[{\"Question\":\"How long do composite fillings last?\",\"Answer\":\"With good hygiene, they typically last 5 to 10 years.\"},{\"Question\":\"Can I eat right after a filling?\",\"Answer\":\"Yes, but be careful if your mouth is still numb to avoid biting your cheek or tongue.\"}]",
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30+00",
+    "updated_at": "2026-05-02 06:45:32.489251+00",
+    "duration_minutes": 45,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "36ad813d-29a4-4f98-b5b3-bdf461170212",
+    "slug": "teeth-whitening",
+    "category": "Cosmetic",
+    "name": "Teeth Whitening",
+    "tagline": "Professional in-office whitening",
+    "hero": "https://images.unsplash.com/photo-1445527815219-ecbfec67492e?auto=format&fit=crop&q=80&w=1200",
+    "icon": "fa-gem",
+    "summary": "Get up to 8 shades whiter teeth in a single session with our professional whitening system.",
+    "duration": "90 min",
+    "recovery": "None",
+    "price": "3500.00",
+    "benefits": [
+      "Up to 8 shades lighter",
+      "Safe & effective",
+      "Long-lasting",
+      "Immediate results"
+    ],
+    "steps": [
+      "Shade measurement",
+      "Protective barrier application",
+      "Whitening gel application",
+      "UV light activation"
+    ],
+    "faqs": [
+      {
+        "answer": "Some patients feel temporary sensitivity for 24 hours. We apply a desensitizing agent to minimize this.",
+        "question": "Will this make my teeth sensitive?"
+      },
+      {
+        "answer": "Typically 6 months to 2 years, depending on your habits.",
+        "question": "How long do results last?"
+      }
+    ],
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30.99302+00",
+    "updated_at": "2026-05-02 06:35:15.955073+00",
+    "duration_minutes": 90,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "98ffb029-00e3-4bcc-92bd-e60bcf741538",
+    "slug": "root-canal",
+    "category": "Specialized",
+    "name": "Root Canal Treatment",
+    "tagline": "Save infected teeth from extraction",
+    "hero": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1200",
+    "icon": "fa-microscope",
+    "summary": "Endodontic therapy to remove infected pulp and save your natural tooth.",
+    "duration": "90 min",
+    "recovery": "2–3 days",
+    "price": "5000.00",
+    "benefits": [
+      "Saves natural tooth",
+      "Relieves pain",
+      "Prevents spread",
+      "High success rate"
+    ],
+    "steps": [
+      "Local anesthesia",
+      "Accessing the pulp",
+      "Cleaning & shaping canals",
+      "Sealing with Gutta-percha"
+    ],
+    "faqs": [
+      {
+        "answer": "Modern techniques make it as comfortable as getting a filling.",
+        "question": "Is a root canal painful?"
+      },
+      {
+        "answer": "Usually, yes. A crown is recommended to protect the tooth after the procedure.",
+        "question": "Do I need a crown after?"
+      }
+    ],
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30.99302+00",
+    "updated_at": "2026-05-02 06:35:15.955073+00",
+    "duration_minutes": 90,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "3af555f1-12de-4134-9417-ab0d47167d28",
+    "slug": "digital-panoramic-x-ray",
+    "category": "Specialized",
+    "name": "Digital Panoramic X-Ray",
+    "tagline": "Comprehensive 2D imaging of the entire mouth, including wisdom teeth and jaw structure.",
+    "hero": "https://iglnkxzttnkjnvdzccji.supabase.co/storage/v1/object/public/heroes/service-heroes/de98c56d-67ac-4889-9480-c0eb5680a6cc.jpg",
+    "icon": "fa-microscope",
+    "summary": "A vital diagnostic tool that allows our dentists to see beyond the surface. We use advanced digital radiography to capture detailed images of your teeth, bone structure, and jaw, ensuring early detection of issues that are invisible to the naked eye.",
+    "duration": null,
+    "recovery": "None",
+    "price": "1200.00",
+    "benefits": "[\"Early Detection: Identify cavities between teeth\",\"Precision Treatment: Essential for planning accurate extractions\",\"Minimal Radiation: Our modern digital sensors prioritize your safety\"]",
+    "steps": "[\"Patient must remove all jewelry\",\"Positioning a small digital sensor is placed inside the mouth.\",\"The digital image is instantly transmitted to the clinic\\u0027s server.\"]",
+    "faqs": "[{\"Question\":\"Are dental X-rays safe?\",\"Answer\":\"Yes. We use digital radiography, which significantly reduces radiation exposure. To put it in perspective, the radiation from a single dental X-ray is roughly the same as the natural background radiation\"},{\"Question\":\"How often do I need them?\",\"Answer\":\"For most healthy adults, bitewing X-rays are recommended once a year. However, if you are experiencing pain or undergoing a specific treatment like braces or implants, we may require more frequent imaging.\"}]",
+    "is_active": true,
+    "created_at": "2026-05-08 19:21:58+00",
+    "updated_at": "2026-05-08 19:37:17.969594+00",
+    "duration_minutes": 20,
+    "buffer_minutes": 15,
+    "needs_xray": true
+  },
+  {
+    "id": "df868d7a-4c9f-41c0-b110-671f015185b8",
+    "slug": "veneers",
+    "category": "Cosmetic",
+    "name": "Dental Veneers",
+    "tagline": "Thin porcelain shells for a perfect smile",
+    "hero": "https://iglnkxzttnkjnvdzccji.supabase.co/storage/v1/object/public/heroes/service-heroes/df868d7a-4c9f-41c0-b110-671f015185b8.jpg",
+    "icon": "fa-gem",
+    "summary": "Custom-crafted porcelain veneers that transform the shape, color and size of your teeth.",
+    "duration": "60 min",
+    "recovery": "1–2 days",
+    "price": "8000.00",
+    "benefits": "[\"Natural look\",\"Stain resistant\",\"Long-lasting\",\"Minimal prep\"]",
+    "steps": "[\"Tooth preparation\",\"Impression taking\",\"Temporary veneer placement\",\"Final bonding\"]",
+    "faqs": "[{\"Question\":\"Are veneers permanent?\",\"Answer\":\"The process is irreversible because enamel is removed. Veneers last 10-15 years.\"},{\"Question\":\"Do they stain?\",\"Answer\":\"Porcelain is highly resistant to stains from coffee, tea, and tobacco.\"}]",
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30+00",
+    "updated_at": "2026-05-02 06:44:06.115061+00",
+    "duration_minutes": 60,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  },
+  {
+    "id": "e18a7452-4cd5-489d-bb27-5b5d3bc87a5d",
+    "slug": "braces",
+    "category": "Specialized",
+    "name": "Orthodontic Braces",
+    "tagline": "Straighten teeth with traditional braces",
+    "hero": "https://iglnkxzttnkjnvdzccji.supabase.co/storage/v1/object/public/heroes/service-heroes/e18a7452-4cd5-489d-bb27-5b5d3bc87a5d.jpg",
+    "icon": "fa-microscope",
+    "summary": "Metal and ceramic braces to correct misalignment and bite issues.",
+    "duration": "60 min",
+    "recovery": "Ongoing",
+    "price": "35000.00",
+    "benefits": "[\"Corrects alignment\",\"Improves bite\",\"Boosts confidence\",\"Lasting results\"]",
+    "steps": "[\"Consultation \\u0026 Imaging\",\"Brackets bonding\",\"Wire insertion\",\"Monthly adjustments\"]",
+    "faqs": "[{\"Question\":\"Am I too old for braces?\",\"Answer\":\"Never! Orthodontic treatment is effective for patients of all ages, including adults.\"},{\"Question\":\"How do I clean my teeth with braces?\",\"Answer\":\"We provide special brushes and floss threaders to help you clean around the brackets.\"}]",
+    "is_active": true,
+    "created_at": "2026-04-06 11:10:30+00",
+    "updated_at": "2026-05-02 06:46:07.882004+00",
+    "duration_minutes": 60,
+    "buffer_minutes": 15,
+    "needs_xray": false
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "id": "afc448b9-5445-45d8-ae86-7b478a0a904c",
+    "staff_id": "1bdf6368-255f-4836-98f4-60a782eba40d",
+    "staff_type": "doctor",
+    "day_of_week": 1,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "d625456c-03cf-4a5a-abc7-af440b8ed0ce",
+    "staff_id": "1bdf6368-255f-4836-98f4-60a782eba40d",
+    "staff_type": "doctor",
+    "day_of_week": 2,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "d41f8137-d373-4d88-97d5-bd1daa8d224b",
+    "staff_id": "1bdf6368-255f-4836-98f4-60a782eba40d",
+    "staff_type": "doctor",
+    "day_of_week": 3,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "cd434ef5-de96-4c7f-8bc0-f10477281b80",
+    "staff_id": "1bdf6368-255f-4836-98f4-60a782eba40d",
+    "staff_type": "doctor",
+    "day_of_week": 4,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "6675738d-a31d-484d-aeb8-0efe36fe45fd",
+    "staff_id": "1bdf6368-255f-4836-98f4-60a782eba40d",
+    "staff_type": "doctor",
+    "day_of_week": 5,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "2bc202a9-fe98-4e21-8170-8d128a564fa5",
+    "staff_id": "7dfbf7e2-7fe7-4e25-bfee-7f20f9a8f680",
+    "staff_type": "doctor",
+    "day_of_week": 1,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "b397c2ce-f6cb-4b20-aa91-c69c71c2850e",
+    "staff_id": "7dfbf7e2-7fe7-4e25-bfee-7f20f9a8f680",
+    "staff_type": "doctor",
+    "day_of_week": 2,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "3dddd9a7-3278-4fb5-9813-1e9c41b844b0",
+    "staff_id": "7dfbf7e2-7fe7-4e25-bfee-7f20f9a8f680",
+    "staff_type": "doctor",
+    "day_of_week": 4,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "931e5236-7c6e-465c-b1d8-5a545da4a249",
+    "staff_id": "71e36144-4cf0-4ec8-9344-c9c2255a8451",
+    "staff_type": "doctor",
+    "day_of_week": 1,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "be8c8d1b-aee0-47fc-b2bb-fc234660fec3",
+    "staff_id": "71e36144-4cf0-4ec8-9344-c9c2255a8451",
+    "staff_type": "doctor",
+    "day_of_week": 2,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "ef3bab6d-5d50-4541-bae9-466add8357c3",
+    "staff_id": "71e36144-4cf0-4ec8-9344-c9c2255a8451",
+    "staff_type": "doctor",
+    "day_of_week": 3,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "705223fb-68cf-445e-9759-598dbf46d72f",
+    "staff_id": "71e36144-4cf0-4ec8-9344-c9c2255a8451",
+    "staff_type": "doctor",
+    "day_of_week": 4,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "934c3213-d2d1-4d8d-a68f-04d344fc8045",
+    "staff_id": "71e36144-4cf0-4ec8-9344-c9c2255a8451",
+    "staff_type": "doctor",
+    "day_of_week": 5,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  },
+  {
+    "id": "1af89016-d722-48db-ae0f-853a37e7fdea",
+    "staff_id": "71e36144-4cf0-4ec8-9344-c9c2255a8451",
+    "staff_type": "doctor",
+    "day_of_week": 6,
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "is_active": true
+  }
+]

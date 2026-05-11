@@ -1,29 +1,30 @@
-# Project State - Samson Dental Center Management System
-
-## Current Status: Optimizing Performance & Portal Stability
+## Current Status: Optimizing Availability & Receptionist Workflow
 
 ### Recently Completed
-- **Hardened Identity & Profile Resilience**: 
-    - Resolved project-wide "Ambiguous Relationship" errors (PGRST201) by explicitly specifying foreign key relationships and selections in PostgREST queries across `ProfileService`, `AppointmentService`, `InvoiceService`, `AuthController`, and `AdminUsersController`.
-    - Fixed role-based redirection failures where admins were incorrectly identified as patients due to failed profile lookups.
-    - Optimized `ProfileService` with robust "on-the-fly" repair logic that synchronizes roles from Supabase Auth metadata (app_metadata) to the database.
-    - Synchronized `Profile` and `Patient` records to ensure clinical metadata (DOB, Sex, Address) is always available in the patient portal.
-- **Schema Stabilization & Fixes**:
-    - Created `20260512_FixSchemaAndRoleType.sql` to ensure the `app_role` enum type exists and the `profiles` table is correctly structured.
-    - Hardened RLS policies for clinical tables (`patients`, `medical_info`, `tooth_status`) to allow both staff and patient owners to access data.
-    - Fixed issues where the `PureACID` migration would fail due to missing type casts.
-- **Improved Page Stability**:
-    - Added comprehensive try-catch blocks and logging to `Records.cshtml.cs` and `Settings.cshtml.cs`.
-    - Prevented silent redirections to the home page by logging detailed error context (missing profiles, role mismatches, or data fetch failures).
-- **Fixed JSON Deserialization Crashes**: Resolved `System.Text.Json.JsonException` in `DoctorService` and `ReceptionistService` by aligning DTOs with Supabase's singular-object response for 1-to-1 joins. Standardized queries to use explicit `profile:profiles!profile_id(*)` aliases.
-
-
-- **Fixed Appointment Availability Logic**: Resolved issue where `confirmed` or `arrived` appointments (especially those promoted from waitlist) were not correctly blocking doctor slots by removing restrictive `is_waitlist` filters and normalizing date parsing in `AppointmentService.cs`.
-- [x] Pure ACID Identity Refactor: Total decoupling of appointments from identity.
-- [x] Clinical data centralization in Patients table (DOB, Sex, Address).
-- [x] Appointment model cleanup (removed 14+ redundant fields).
-- [x] Implementation of BookerId vs PatientId logic.
-- **Fixed Appointment Date Inconsistency**: Resolved persistent 1-day date-mismatch bug by standardizing on `DateTimeKind.Utc` at midnight for all calendar-day fields (`AppointmentDate`, `PatientDob`, `OtherDob`). Updated `DateOnlyConverter`, `AppointmentService`, and `AppointmentReminderService` to enforce this standard, preventing timezone-related shifts during serialization. Added diagnostic logging to monitor incoming payloads.
+- **Appointment Availability Logic Optimization**:
+    - Refactored the backend availability engine (`AppointmentService.cs`) to use a 30-minute granularity instead of the service duration, ensuring thorough slot detection and preventing valid dates from being skipped.
+    - Fixed a critical data-driven availability bug where "Teeth Whitening" was unavailable on Saturdays due to missing specialties. Created `20260511_UpdateDoctorSpecialties.sql` to add the 'Cosmetic' specialty to Saturday doctors.
+    - Resolved a database `23514` error (check constraint violation) by updating the `appointments_status_check` constraint to include `'waitlist'` as a valid status. Created `20260511_FixAppointmentStatusConstraint.sql`.
+    - Fixed a UI state bug in the patient booking flow where the "Waitlist" status would persist even after switching back to an available date/time.
+    - Added comprehensive diagnostic logging (`[DEBUG]`) to the availability calculation flow for better production traceability.
+- **Receptionist "Live" Calendar**:
+    - Implemented a full monthly calendar view for the receptionist appointments portal.
+    - Added daily appointment density indicators (counts) and "Pending Approval" markers (orange pulsing dots).
+    - Integrated the calendar with the main table filtering logic, allowing receptionists to click a day and instantly view all relevant bookings.
+- **Visual UX Enhancements**:
+    - Upgraded the patient booking calendar with 42-cell skeleton grids to eliminate layout jumping during async availability checks.
+    - Standardized date filtering in the admin portal to resolve the 1-day mismatch bug during list view filtering.
+- **Automated Waitlist Promotion System**:
+    - Implemented a robust "soft-lock" engine in `AppointmentService.cs` (4h standard / 30m same-day) to temporarily reserve newly opened slots for waitlisted patients.
+    - Added background cleanup logic (`CleanupExpiredWaitlistLocks`) that automatically recycles expired locks, ensuring optimal clinic throughput without manual intervention.
+    - Integrated automated email notifications and a public confirmation endpoint (`/api/public/confirm-promotion`) to allow patients to secure slots without logging in.
+    - Enhanced the Patient Dashboard with a real-time "Confirm My Slot" action and orange alert banners for promoted appointments.
+    - Exposed manual promotion controls in the Receptionist dashboard for staff-led overrides.
+- **Administrative Dashboard Security & Stability**:
+    - Implemented role-based UI filtering in `Appointments.cshtml`, hiding sensitive workflow actions (Confirm, Check-in, Promote) from Doctors while keeping them available for Receptionists.
+    - Resolved critical Razor compilation errors (`RZ1006`, `RZ1025`) in the administrative appointment list caused by mismatched tag nesting.
+    - Fixed high-priority JS errors in `adminAppointment.js`: corrected the `Modal.open` utility name and added parameter guards to prevent 400 Bad Request errors on doctor availability fetches.
+    - Standardized workflow button colors: **Emerald (Confirm)**, **Blue (Check-in)**, **Orange (Promote)**.
 
 - **Hardened Clinical Records Sync**: Fixed 23502 (null id) constraint error in `patient_tooth_status` by implementing true UPSERT logic with `ON CONFLICT (patient_id, tooth_number)`.
 - **Storage Resilience**: Implemented automatic bucket creation in `ClinicService.cs` to handle missing `treatment-xrays` or gallery buckets.
@@ -98,9 +99,21 @@
     - Slots are now dynamically flagged as `waitlistEligible` when the clinic is open but all specialists are booked.
     - Optimized batch updates for tooth charts using a cleaner `Upsert` workflow in `RecordService`.
 
+- **Fixed Admin & Receptionist UI Hydration**:
+    - Standardized profile hydration in `AdminDataController` to return singular objects, fixing "Unassigned" status on receptionist and doctor cards.
+    - Updated `adminReceptionists.js` and `adminAppointment.js` to correctly consume standardized profile structures.
+- **Optimized Appointment Availability Performance**:
+    - Refactored `AppointmentService.GetMonthAvailability` to use batch queries (reducing Supabase HTTP calls from ~200+ down to ~7 per month view), drastically improving load times.
+    - Resolved calendar "flicker" and race conditions by implementing high-fidelity skeleton loaders for both the calendar grid and time slots.
+    - Fixed state leakage bug where waitlist/blocked statuses would persist when switching services by clearing the availability cache during service selection.
+    - Implemented a premium pulsing waitlist indicator (orange dot) for fully booked dates to improve user awareness.
+- **Enhanced Receptionist Live Dashboard**:
+    - Added skeleton loading states to the Clinic Calendar widget for a smoother "live" experience during data refreshes.
+    - Ensured consistent interaction between the calendar heatmap and the appointment day-view pane.
+
 ### In Progress
 - **Signup Refactor**: Moving UI/Auth fields (`ClaimId`, `Password`) out of the `Profile` model to prevent further schema cache conflicts.
-- **Admin & Appointment Stability**: Fixing booking status logic, enhancing calendar availability for staff leaves, and repairing admin staff data rendering.
+- **Global Auth & Identity Resilience**: Continuing to harden OTP verification and guest-to-patient transitions.
 
 - **HttpClient Timeouts**: Largely mitigated by optimizing heavy queries and using `IHttpClientFactory`.
 

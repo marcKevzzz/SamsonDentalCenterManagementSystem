@@ -228,6 +228,13 @@ function renderServiceList() {
 // ── Select service ────────────────────────────────────────────────────────────
 function selectService(slug) {
   const svc = SERVICES.find((s) => s.slug === slug);
+  
+  // Clear old availability data if service changed or re-selected
+  STATE.fullBookedDates = [];
+  STATE.unavailableDates = [];
+  STATE.date = null;
+  STATE.time = null;
+
   STATE.service = svc ?? null;
 
   if (svc) {

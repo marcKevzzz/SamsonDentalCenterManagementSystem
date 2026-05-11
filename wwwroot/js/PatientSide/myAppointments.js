@@ -104,13 +104,24 @@ window.viewApptDetails = (appt, el) => {
     // Actions
     const activeActions = document.getElementById('activeActions');
     const completedActions = document.getElementById('completedActions');
+    const promotionActions = document.getElementById('promotionActions');
     
-    if (activeActions && completedActions) {
+    if (activeActions && completedActions && promotionActions) {
         const s = appt.status.toLowerCase();
-        if (s === 'completed' || s === 'cancelled') {
+        
+        // Promotion check: pending + softLockUntil in future
+        const isPromoted = s === 'pending' && appt.softLockUntil && new Date(appt.softLockUntil) > new Date();
+
+        if (isPromoted) {
+            promotionActions.classList.remove('hidden');
+            activeActions.classList.add('hidden');
+            completedActions.classList.add('hidden');
+        } else if (s === 'completed' || s === 'cancelled') {
+            promotionActions.classList.add('hidden');
             activeActions.classList.add('hidden');
             completedActions.classList.toggle('hidden', s === 'cancelled');
         } else {
+            promotionActions.classList.add('hidden');
             activeActions.classList.remove('hidden');
             completedActions.classList.add('hidden');
         }
@@ -119,8 +130,11 @@ window.viewApptDetails = (appt, el) => {
     // Bind Button Events
     const btnReschedule = document.getElementById('btnReschedule');
     const btnCancel = document.getElementById('btnCancel');
+    const btnConfirmPromotion = document.getElementById('btnConfirmPromotion');
+
     if (btnReschedule) btnReschedule.onclick = () => rescheduleAppointment(appt.id);
     if (btnCancel) btnCancel.onclick = () => cancelAppointment(appt.id);
+    if (btnConfirmPromotion) btnConfirmPromotion.onclick = () => confirmPromotion(appt.id);
 };
 
 // ── Actions Logic ──────────────────────────────────────────────────────────────
@@ -156,6 +170,23 @@ window.rescheduleAppointment = function(id) {
         confirmText: "Reschedule",
         onConfirm: () => {
             window.location.href = `/Appointments?rescheduleId=${id}`;
+        }
+    });
+}
+
+window.confirmPromotion = async function(id) {
+    Modal.open({
+        title: "Confirm Your Slot",
+        message: "This will officially confirm your appointment. Are you ready to secure this slot?",
+        type: "success",
+        confirmText: "Yes, Confirm",
+        onConfirm: async () => {
+            try {
+                window.location.href = `/api/public/confirm-promotion?id=${id}`;
+            } catch (err) {
+                console.error("Confirm Error:", err);
+                Toast.show("An error occurred. Please try again.", "danger");
+            }
         }
     });
 }
