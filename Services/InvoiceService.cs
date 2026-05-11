@@ -24,7 +24,17 @@ namespace SamsonDentalCenterManagementSystem.Services
             PropertyNameCaseInsensitive = true,
         };
 
-        public InvoiceService(Supabase.Client supabase, HttpClient http, string supabaseUrl, string serviceRoleKey, ActivityLogService logs, NotificationService notifs, IHubContext<AdminHub> hubContext, IEmailService emailService, string appBaseUrl)
+        public InvoiceService(
+            Supabase.Client supabase,
+            HttpClient http,
+            string supabaseUrl,
+            string serviceRoleKey,
+            ActivityLogService logs,
+            NotificationService notifs,
+            IHubContext<AdminHub> hubContext,
+            IEmailService emailService,
+            string appBaseUrl
+        )
         {
             _supabase = supabase;
             _http = http;
@@ -107,9 +117,19 @@ namespace SamsonDentalCenterManagementSystem.Services
             itemsRes.EnsureSuccessStatusCode();
 
             // Broadcast real-time update
-            await _hubContext.Clients.All.SendAsync("ReceiveInvoiceUpdate", new { action = "create", id = created.Id });
+            await _hubContext.Clients.All.SendAsync(
+                "ReceiveInvoiceUpdate",
+                new { action = "create", id = created.Id }
+            );
 
-            await _logs.LogActionAsync(invoice.PatientId, "generated invoice", $"Total: {created.FinalAmount}", null, "Invoice", $"/Admin/Invoices?id={created.Id}");
+            await _logs.LogActionAsync(
+                invoice.PatientId,
+                "generated invoice",
+                $"Total: {created.FinalAmount}",
+                null,
+                "Invoice",
+                $"/Admin/Invoices?id={created.Id}"
+            );
 
             return created;
         }
@@ -127,17 +147,21 @@ namespace SamsonDentalCenterManagementSystem.Services
                     treatments.Select(t => new
                     {
                         invoice_id = t.InvoiceId,
-                        service_id = string.IsNullOrEmpty(t.ServiceId) ? (object?)null : t.ServiceId,
+                        service_id = string.IsNullOrEmpty(t.ServiceId)
+                            ? (object?)null
+                            : t.ServiceId,
                         service_name = t.ServiceName,
                         tooth_numbers = t.ToothNumbers,
-                        tooth_data = string.IsNullOrEmpty(t.ToothData) ? (object?)null : t.ToothData,
+                        tooth_data = string.IsNullOrEmpty(t.ToothData)
+                            ? (object?)null
+                            : t.ToothData,
                         xray_url = t.XrayUrl,
                         xray_type = t.XrayType,
                         xray_notes = t.XrayNotes,
                         procedure_details = t.ProcedureDetails,
                         diagnosis = t.Diagnosis,
                         status = t.Status,
-                        notes = t.Notes
+                        notes = t.Notes,
                     })
                 ),
                 Encoding.UTF8,
@@ -154,11 +178,13 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Invoice?> GetInvoiceByIdAsync(string id)
         {
-            var path = $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*),payments(*)&id=eq.{id}";
+            var path =
+                $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*),payments(*)&id=eq.{id}";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
-            
-            if (!res.IsSuccessStatusCode) return null;
+
+            if (!res.IsSuccessStatusCode)
+                return null;
 
             var json = await res.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault();
@@ -166,11 +192,13 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task<Invoice?> GetInvoiceByAppointmentIdAsync(string appointmentId)
         {
-            var path = $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*),payments(*)&appointment_id=eq.{appointmentId}";
+            var path =
+                $"/invoices?select=*,patient:profiles!patient_id(*),doctor:doctors(*,profiles:profiles!profile_id(*)),invoice_items(*),payments(*)&appointment_id=eq.{appointmentId}";
             var req = BuildRequest(HttpMethod.Get, path);
             var res = await _http.SendAsync(req);
 
-            if (!res.IsSuccessStatusCode) return null;
+            if (!res.IsSuccessStatusCode)
+                return null;
 
             var json = await res.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<Invoice>>(json, _json)?.FirstOrDefault();
@@ -237,9 +265,24 @@ namespace SamsonDentalCenterManagementSystem.Services
             res.EnsureSuccessStatusCode();
 
             // Broadcast real-time update
-            await _hubContext.Clients.All.SendAsync("ReceiveInvoiceUpdate", new { action = "status_update", id = invoiceId, status = status });
+            await _hubContext.Clients.All.SendAsync(
+                "ReceiveInvoiceUpdate",
+                new
+                {
+                    action = "status_update",
+                    id = invoiceId,
+                    status = status,
+                }
+            );
 
-            await _logs.LogActionAsync(null, "updated invoice status", $"ID: {invoiceId}, New Status: {status}", null, "Invoice", $"/Admin/Invoices?id={invoiceId}");
+            await _logs.LogActionAsync(
+                null,
+                "updated invoice status",
+                $"ID: {invoiceId}, New Status: {status}",
+                null,
+                "Invoice",
+                $"/Admin/Invoices?id={invoiceId}"
+            );
         }
 
         public async Task RecordPaymentAsync(Payment payment)
@@ -256,15 +299,29 @@ namespace SamsonDentalCenterManagementSystem.Services
             var totalPaid = res.Models.Sum(p => p.Amount);
 
             // Log payment
-            await _logs.LogActionAsync(payment.InvoiceId, "payment recorded", $"Amount: {payment.Amount}", null, "Invoice", $"/Admin/Invoices?id={payment.InvoiceId}");
-            
+            await _logs.LogActionAsync(
+                payment.InvoiceId,
+                "payment recorded",
+                $"Amount: {payment.Amount}",
+                null,
+                "Invoice",
+                $"/Admin/Invoices?id={payment.InvoiceId}"
+            );
+
             // Update invoice status based on total paid
-            var invRes = await _supabase.From<Invoice>().Where(i => i.Id == payment.InvoiceId).Get();
+            var invRes = await _supabase
+                .From<Invoice>()
+                .Where(i => i.Id == payment.InvoiceId)
+                .Get();
             var invoice = invRes.Models.FirstOrDefault();
             if (invoice != null)
             {
                 // Notify patient
-                await _notifs.CreateNotificationAsync(invoice.PatientId, "Payment Received", $"A payment of {payment.Amount:C} has been recorded for your invoice.");
+                await _notifs.CreateNotificationAsync(
+                    invoice.PatientId,
+                    "Payment Received",
+                    $"A payment of {payment.Amount:C} has been recorded for your invoice."
+                );
 
                 string newStatus =
                     totalPaid >= invoice.FinalAmount
@@ -275,7 +332,11 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // Send Email Receipt
                 try
                 {
-                    var patientRes = await _supabase.From<Profile>().Where(x => x.Id == invoice.PatientId).Get();
+                    var patientRes = await _supabase
+                        .From<Profile>()
+                        .Select("*")
+                        .Where(x => x.Id == invoice.PatientId)
+                        .Get();
                     var patient = patientRes.Models.FirstOrDefault();
                     if (patient != null && !string.IsNullOrEmpty(patient.Email))
                     {
@@ -284,18 +345,19 @@ namespace SamsonDentalCenterManagementSystem.Services
                             $"{patient.FirstName} {patient.LastName}",
                             $"Payment Receipt - Invoice #{invoice.Id[..8].ToUpper()}",
                             "InvoiceReceipt",
-                            new {
+                            new
+                            {
                                 Name = $"{patient.FirstName} {patient.LastName}",
                                 InvoiceNumber = invoice.Id[..8].ToUpper(),
                                 AmountPaid = payment.Amount.ToString("C"),
                                 Method = payment.PaymentMethod,
                                 Balance = (invoice.FinalAmount - totalPaid).ToString("C"),
-                                Status = newStatus
+                                Status = newStatus,
                             }
                         );
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"[InvoiceReceiptEmail] Failed to send: {ex.Message}");
                 }

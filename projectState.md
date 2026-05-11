@@ -3,21 +3,18 @@
 ## Current Status: Optimizing Performance & Portal Stability
 
 ### Recently Completed
-- **Patient Portal Performance Overhaul**: 
-    - Parallelized database service calls across `Dashboard`, `Records`, and `MyAppointments` pages using `Task.WhenAll`, reducing load times by 50-70%.
-    - Optimized `RecordService.GetTreatmentsByPatientAsync` to use a single relational join query instead of sequential database round-trips.
-    - Implemented high-performance database indexes on foreign keys (`patient_id`, `invoice_id`) and date-based columns (`appointment_date`, `created_at`) in `Backend/Migrations/20260510_OptimizePatientQueries.sql`.
-    - Hardened `Dashboard` data-fetching to use `ProfileService.GetProfileById`, ensuring automatic profile repairs for authenticated users and preventing page crashes on missing records.
-- **Hardened RBAC & Profile Repair**: Implemented fallback logic for `role_app` and `app_role` claims in `RoleClaimsTransformer`. Hardened `ProfileService` repair logic to check both `app_metadata` and `user_metadata` for roles, preventing admin lockout even if database profiles are missing.
-- **Fixed Login "Email not registered" Issue**: Hardened `ProfileService` to robustly check both the `profiles` table and Auth API during login. Updated `UpdateProfile` to automatically create missing profile rows, resolving a deadlock in the registration/verification flow.
-- **System Documentation**: Redesigned `/Clinic/Docs` with a modern, minimalist UI (dark mode, glassmorphism, GSAP animations) and accurate technical details on middlewares, tech stack, security, and RBAC.
-- **Patient Profile & ACID Refactor**: 
-    - Decoupled clinical data (DOB, Sex, Address) into the `patients` table while maintaining backward compatibility in the `profiles` table.
-    - Updated `ProfileService.GetProfileById` to use `patients(*)` join, ensuring clinical data is available across all portals.
-    - Synchronized `ProfileService.UpdateProfile` and `CreateProfile` to upsert records in both `profiles` and `patients` tables, ensuring data integrity.
-    - Fixed `UserPayload` JSON property mapping (casing mismatch) between `settings.js` and the backend API.
-    - Hardened `MergeProfile` to correctly migrate `patients` table records and move primary keys for medical info/tooth charts.
-- **Purged Oral Health Infrastructure**: Completely removed `oral_health_score`, `oral_health_summary` and related logic from DB, Models, and Dashboard.
+- **Hardened Identity & Profile Resilience**: 
+    - Resolved project-wide "Ambiguous Relationship" errors (PGRST201) by explicitly specifying foreign key relationships and selections in PostgREST queries across `ProfileService`, `AppointmentService`, `InvoiceService`, `AuthController`, and `AdminUsersController`.
+    - Fixed role-based redirection failures where admins were incorrectly identified as patients due to failed profile lookups.
+    - Optimized `ProfileService` with robust "on-the-fly" repair logic that synchronizes roles from Supabase Auth metadata (app_metadata) to the database.
+    - Synchronized `Profile` and `Patient` records to ensure clinical metadata (DOB, Sex, Address) is always available in the patient portal.
+- **Schema Stabilization & Fixes**:
+    - Created `20260512_FixSchemaAndRoleType.sql` to ensure the `app_role` enum type exists and the `profiles` table is correctly structured.
+    - Hardened RLS policies for clinical tables (`patients`, `medical_info`, `tooth_status`) to allow both staff and patient owners to access data.
+    - Fixed issues where the `PureACID` migration would fail due to missing type casts.
+- **Improved Page Stability**:
+    - Added comprehensive try-catch blocks and logging to `Records.cshtml.cs` and `Settings.cshtml.cs`.
+    - Prevented silent redirections to the home page by logging detailed error context (missing profiles, role mismatches, or data fetch failures).
 
 
 - **Fixed Appointment Availability Logic**: Resolved issue where `confirmed` or `arrived` appointments (especially those promoted from waitlist) were not correctly blocking doctor slots by removing restrictive `is_waitlist` filters and normalizing date parsing in `AppointmentService.cs`.

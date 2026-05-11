@@ -45,7 +45,9 @@ namespace SamsonDentalCenterManagementSystem.Helpers
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var profileService = scope.ServiceProvider.GetRequiredService<ProfileService>();
-                    var profile = await profileService.GetProfileById(userId);
+                    
+                    var email = principal.FindFirst("email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
+                    var profile = await profileService.GetProfileById(userId, email);
                     role = profile?.Role ?? "patient"; // default to patient
                 }
 

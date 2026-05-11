@@ -41,7 +41,7 @@ public class SigninModel : PageModel
                 var user = await _supabase.Auth.GetUser(token);
                 if (user != null)
                 {
-                    var profile = await _profileService.GetProfileById(user.Id!);
+                    var profile = await _profileService.GetProfileById(user.Id!, user.Email);
                     var role = profile?.Role?.ToLower() ?? "patient";
 
                     if (role == "admin") return Redirect("/Admin/Dashboard");

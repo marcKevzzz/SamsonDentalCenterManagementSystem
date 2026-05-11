@@ -834,6 +834,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                         {
                             var profRes = await _supabase
                                 .From<Profile>()
+                                .Select("*")
                                 .Where(pr => pr.Id == doc.ProfileId)
                                 .Get();
                             doc.Profile = profRes.Models.FirstOrDefault();

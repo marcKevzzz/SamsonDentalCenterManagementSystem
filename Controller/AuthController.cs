@@ -109,6 +109,7 @@ public class AuthController : ControllerBase
         {
             await _supabase
                 .From<Profile>()
+                .Select("*")
                 .Where(x => x.Id == req.UserId)
                 .Set(x => x.ReactivationRequested, true)
                 .Update();

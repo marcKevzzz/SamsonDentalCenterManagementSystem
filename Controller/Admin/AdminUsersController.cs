@@ -286,7 +286,7 @@ public class AdminUsersController : ControllerBase
         }
 
         // 2. Delete profile AFTER
-        await _supabase.From<Profile>().Where(x => x.Id == id).Delete();
+        await _supabase.From<Profile>().Select("*").Where(x => x.Id == id).Delete();
 
         Console.WriteLine($"[DeleteProfile] User {id} fully deleted.");
     }
