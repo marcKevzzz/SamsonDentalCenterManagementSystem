@@ -162,6 +162,13 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("predefined_procedures")]
+        public object? PredefinedProceduresRaw { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public List<string> PredefinedProcedures => DeserializeList<string>(PredefinedProceduresRaw);
+
         // ── Safe deserialized accessors ───────────────────────────────────────
        // In DentalService.cs — add both JsonIgnore attributes to computed properties
 [System.Text.Json.Serialization.JsonIgnore]

@@ -3,7 +3,10 @@
  * Granular caching with LocalStorage persistence.
  */
 export const AdminStore = (() => {
-  const CACHE_KEY_PREFIX = 'admin_v2_';
+  const getCachePrefix = () => {
+    const userId = document.getElementById('admin-id')?.value || 'anon';
+    return `admin_v2_${userId}_`;
+  };
   const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
 
   /**
@@ -53,23 +56,24 @@ export const AdminStore = (() => {
   }
 
   function getLocal(key) {
-    const val = localStorage.getItem(CACHE_KEY_PREFIX + key);
+    const val = localStorage.getItem(getCachePrefix() + key);
     return val ? JSON.parse(val) : null;
   }
 
   function setLocal(key, data) {
-    localStorage.setItem(CACHE_KEY_PREFIX + key, JSON.stringify({
+    localStorage.setItem(getCachePrefix() + key, JSON.stringify({
       data,
       timestamp: Date.now()
     }));
   }
 
   function clearCache(key) {
+    const prefix = getCachePrefix();
     if (key) {
-      localStorage.removeItem(CACHE_KEY_PREFIX + key);
+      localStorage.removeItem(prefix + key);
     } else {
       Object.keys(localStorage)
-        .filter(k => k.startsWith(CACHE_KEY_PREFIX))
+        .filter(k => k.startsWith(prefix))
         .forEach(k => localStorage.removeItem(k));
     }
   }

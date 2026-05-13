@@ -23,6 +23,26 @@ const post = (url, body) =>
       return { ok: false, error: err.message };
     });
 
+// ── Global Exports (Move to top for inline handlers) ────────────────────────
+window.toggleDropdown = (event, btn) => {
+  event.stopPropagation();
+  document.querySelectorAll(".dropdown-menu").forEach((el) => {
+    if (el !== btn.nextElementSibling) el.classList.add("hidden");
+  });
+  const menu = btn.nextElementSibling;
+  menu.classList.toggle("hidden");
+};
+window.filterTable = () => {
+  if (typeof window._internalFilterTable === "function") {
+    window._internalFilterTable();
+  }
+};
+window.confirmAppt = (id) => window._confirmAppt && window._confirmAppt(id);
+window.updateStatus = (id, s) => window._updateStatus && window._updateStatus(id, s);
+window.cancelAppt = (id) => window._cancelAppt && window._cancelAppt(id);
+window.deleteAppt = (id) => window._deleteAppt && window._deleteAppt(id);
+window.refreshData = () => window._refreshData && window._refreshData();
+
 // ── State ───────────────────────────────────────────────────────────────────
 let ALL_APPT = [];
 let ALL_DOCS = [];
@@ -138,6 +158,8 @@ function initializeWithData(data) {
     }
   });
 
+  // Explicitly sort by createdAt descending
+  ALL_APPT.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   filtered = [...ALL_APPT];
 
   renderStats(data.stats);
@@ -342,79 +364,76 @@ function rowHTML(appt) {
           ).toUpperCase();
     return `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">${initials}</div>`;
   })();
-
   return `
-    <tr class="group hover:bg-slate-50/80 transition-colors">
-      <td class="px-4 py-4">
-        <span class="text-[10px] font-bold text-brand/40 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">${shortId}</span>
+    <tr class="group hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100 last:border-0" onclick='openViewModal(${JSON.stringify(appt).replace(/'/g, "&apos;")})'>
+      <td class="px-4 py-4" data-label="Ref ID">
+        <div class="flex flex-col">
+          <span class="text-[12.5px] font-bold text-brand tracking-tight">${shortId}</span>
+          <span class="text-[9px] text-brand/30 font-mono">${appt.id.slice(0, 8)}</span>
+        </div>
       </td>
-      <td class="px-4 py-4">
+      <td class="px-4 py-4" data-label="Patient">
         <div class="flex items-center gap-3">
           ${avatarHtml}
-          <div>
-            <div class="text-[13px] font-bold text-brand leading-none mb-1">${appt.patientName}</div>
-            <div class="text-[10.5px] text-brand/40">${appt.patientEmail}</div>
+          <div class="flex flex-col min-w-0">
+            <span class="text-[13px] font-bold text-brand truncate">${appt.patientName || (appt.patientFirstName + " " + appt.patientLastName)}</span>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="text-[10px] text-brand/40 truncate">${appt.patientEmail || "No Email"}</span>
+              ${appt.isGuest ? '<span class="px-1 py-0.5 rounded text-[8px] font-bold bg-slate-100 text-slate-500 border border-slate-200 uppercase">Guest</span>' : ""}
+            </div>
           </div>
         </div>
       </td>
-      <td class="px-4 py-4">
-        <div class="text-[12.5px] font-medium text-brand/80">${appt.serviceName}</div>
-        <div class="text-[10.5px] text-brand/40 flex items-center gap-1 mt-0.5">
-          <i class="fa-solid fa-user-doctor text-[9px]"></i>
-          ${appt.doctorName || "Unassigned"}
+      <td class="px-4 py-4" data-label="Service & Doctor">
+        <div class="flex flex-col">
+          <span class="text-[12.5px] font-semibold text-brand/80">${appt.serviceName || "Consultation"}</span>
+          <span class="text-[10.5px] text-brand/40 mt-0.5 font-medium">Assigned: ${appt.doctorName || "Pending..."}</span>
         </div>
       </td>
-      <td class="px-4 py-4">
-        <div class="flex flex-col gap-1">
-          ${appt.notes ? `<div class="text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100/50 inline-block max-w-[150px] truncate font-medium" title="${appt.notes}">${appt.notes}</div>` : ""}
-          <span class="text-[9px] font-bold text-brand/30 uppercase tracking-widest ml-0.5">${appt.source.toUpperCase()}</span>
+      <td class="px-4 py-4" data-label="Source">
+        ${renderSourceBadge(appt.source)}
+      </td>
+      <td class="px-4 py-4" data-label="Schedule">
+        <div class="flex flex-col">
+          <span class="text-[12.5px] font-bold text-brand">${appt.appointmentDateFormatted}</span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <i class="fa-regular fa-clock text-[10px] text-primary/60"></i>
+            <span class="text-[11px] font-medium text-brand/50">${appt.appointmentTime}</span>
+          </div>
         </div>
       </td>
-      <td class="px-4 py-4">
-        <div class="text-[12.5px] font-bold text-brand">${appt.appointmentDateFormatted}</div>
-        <div class="text-[11px] text-brand/40">${appt.appointmentTime}</div>
+      <td class="px-4 py-4 text-center" data-label="Status">
+        <div class="flex flex-col items-center">
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${config.classes} uppercase tracking-wide">
+            ${config.label}
+          </span>
+          ${priorityBadge}
+        </div>
       </td>
-      <td class="px-4 py-4 text-center">
-        <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border ${config.classes} font-display uppercase tracking-wider">
-          ${config.label}
-        </span>
-        ${priorityBadge}
-      </td>
-      <td class="px-4 py-4 text-right whitespace-nowrap">
+      <td class="px-4 py-4 text-right whitespace-nowrap" data-label="Action">
         <div class="flex items-center justify-end gap-2">
           ${workflowBtn}
-          <div class="inline-block text-left action-dropdown relative">
-            <button onclick="toggleDropdown(event, this)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-brand/40 transition-colors">
+          <div class="relative inline-block text-left action-dropdown">
+            <button onclick="toggleDropdown(event, this)" class="p-2 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors">
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
-            <div class="dropdown-menu hidden absolute right-0 w-48 bg-white border border-slate-200 rounded-xl shadow-lg shadow-brand/10 z-[60] overflow-hidden">
+            <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               <div class="py-1">
-                <button onclick='openViewModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand hover:bg-slate-50 flex items-center gap-3 transition-colors">
-                  <i class="fa-solid fa-eye w-4"></i> View Details
+                <button onclick='openViewModal(${JSON.stringify(appt).replace(/'/g, "&apos;")})' class="w-full text-left px-4 py-2 text-[12px] text-brand hover:bg-slate-50 flex items-center gap-2">
+                  <i class="fa-regular fa-eye w-4"></i> View Details
                 </button>
-                
-                ${!isDoctor ? `
-                ${status === "pending" ? `<button onclick='confirmAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-check-circle w-4"></i> Confirm Booking</button>` : ""}
-                ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived</button>` : ""}
-                ${status === "confirmed" ? `<button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>` : ""}
-                ${
-                  status === "arrived"
-                    ? `
-                  <button onclick='updateStatus(${idStr}, "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-circle-check w-4"></i> Mark Completed</button>
-                  <button onclick='updateStatus(${idStr}, "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-user-slash w-4"></i> Mark No-Show</button>
-                `
-                    : ""
-                }
-                <div class="h-px bg-slate-100 my-1"></div>
-                ${
-                  ["confirmed", "pending", "arrived"].includes(status)
-                    ? `
-                  <button onclick='openEditModal(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand/60 hover:bg-slate-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-rotate w-4"></i> Reschedule</button>
-                  <button onclick='cancelAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-ban w-4"></i> Cancel</button>
-                `
-                    : ""
-                }
-                ${role === "admin" && ["waitlist", "no_show", "no-show", "cancelled", "completed"].includes(status) ? `<button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"><i class="fa-solid fa-trash-can w-4"></i> Remove Record</button>` : ""}
+                <button onclick='refreshData()' class="w-full text-left px-4 py-2 text-[12px] text-brand hover:bg-slate-50 flex items-center gap-2">
+                  <i class="fa-solid fa-rotate w-4"></i> Refresh
+                </button>
+                ${!isDoctor && (status === "pending" || status === "confirmed") ? `
+                <button onclick='cancelAppt(${idStr})' class="w-full text-left px-4 py-2 text-[12px] text-red-600 hover:bg-red-50 flex items-center gap-2">
+                  <i class="fa-solid fa-ban w-4"></i> Cancel
+                </button>
+                ` : ""}
+                ${!isDoctor && (status === "cancelled" || status === "no_show") ? `
+                <button onclick='deleteAppt(${idStr})' class="w-full text-left px-4 py-2 text-[12px] text-red-600 hover:bg-red-50 flex items-center gap-2">
+                  <i class="fa-regular fa-trash-can w-4"></i> Delete Record
+                </button>
                 ` : ""}
               </div>
             </div>
@@ -423,6 +442,7 @@ function rowHTML(appt) {
       </td>
     </tr>`;
 }
+
 
 function getSourceConfig(source) {
   const s = (source || "online").toLowerCase();
@@ -480,21 +500,24 @@ document.addEventListener("click", (e) => {
 });
 
 // ── Table filter ──────────────────────────────────────────────────────────────
-window.filterTable = () => {
-  const q = document.getElementById("search-input").value.toLowerCase().trim();
-  const status = document.getElementById("status-filter").value;
-  const date = document.getElementById("date-filter").value;
+window._internalFilterTable = () => {
+  const q = document.getElementById("search-input")?.value?.toLowerCase()?.trim() || "";
+  const status = document.getElementById("status-filter")?.value || "";
+  const date = document.getElementById("date-filter")?.value || "";
 
   filtered = ALL_APPT.filter((appt) => {
+    const fullName = `${appt.patientFirstName || ""} ${appt.patientLastName || ""}`.toLowerCase();
+    const otherFullName = `${appt.otherFirstName || ""} ${appt.otherLastName || ""}`.toLowerCase();
+    const docName = (appt.doctorName || "").toLowerCase();
+
     const matchSearch =
       !q ||
-      appt.patientName.toLowerCase().includes(q) ||
-      (appt.patientFirstName &&
-        appt.patientFirstName.toLowerCase().includes(q)) ||
-      (appt.patientLastName &&
-        appt.patientLastName.toLowerCase().includes(q)) ||
-      (appt.doctorName && appt.doctorName.toLowerCase().includes(q)) ||
-      appt.serviceName.toLowerCase().includes(q);
+      fullName.includes(q) ||
+      otherFullName.includes(q) ||
+      docName.includes(q) ||
+      (appt.patientEmail && appt.patientEmail.toLowerCase().includes(q)) ||
+      (appt.serviceName && appt.serviceName.toLowerCase().includes(q)) ||
+      (appt.id && appt.id.toLowerCase().includes(q));
 
     // Split status filter into array to handle comma-separated values
     const statusArray = status
@@ -1546,3 +1569,13 @@ window.promoteManually = async (apptInput) => {
     },
   });
 };
+// ── Internal Function Bindings ─────────────────────────────────────────────
+window._confirmAppt = confirmAppt;
+window._updateStatus = updateStatus;
+window._cancelAppt = cancelAppt;
+window._deleteAppt = deleteAppt;
+window._refreshData = refreshData;
+
+document.addEventListener("click", () => {
+  document.querySelectorAll(".dropdown-menu").forEach((el) => el.classList.add("hidden"));
+});

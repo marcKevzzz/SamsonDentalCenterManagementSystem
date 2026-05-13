@@ -106,6 +106,7 @@ CREATE TABLE public.dental_services (
   duration_minutes integer NOT NULL DEFAULT 60,
   buffer_minutes integer NOT NULL DEFAULT 15,
   needs_xray boolean DEFAULT false,
+  predefined_procedures jsonb DEFAULT '[]'::jsonb,
   CONSTRAINT dental_services_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.doctors (
@@ -339,6 +340,7 @@ CREATE TABLE public.treatments (
   xray_type text,
   xray_notes text,
   xray_data text,
+  xray_images jsonb DEFAULT '[]'::jsonb,
   CONSTRAINT treatments_pkey PRIMARY KEY (id),
   CONSTRAINT treatments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id),
   CONSTRAINT treatments_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.dental_services(id)

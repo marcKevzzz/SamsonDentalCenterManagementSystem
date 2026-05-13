@@ -3,6 +3,18 @@ using Supabase.Postgrest.Models;
 
 namespace SamsonDentalCenterManagementSystem.Models
 {
+    public class XrayImage
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("url")]
+        public string? Url { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        public string? Type { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string? Notes { get; set; }
+    }
+
     [Table("treatments")]
     public class Treatment : BaseModel
     {
@@ -36,8 +48,27 @@ namespace SamsonDentalCenterManagementSystem.Models
         [Column("xray_notes")]
         public string? XrayNotes { get; set; }
 
+        [Column("xray_images")]
+        public object? XrayImagesRaw { get; set; }
 
-
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public List<XrayImage> XrayImages
+        {
+            get
+            {
+                if (XrayImagesRaw == null) return new();
+                if (XrayImagesRaw is List<XrayImage> list) return list;
+                var json = XrayImagesRaw.ToString();
+                if (string.IsNullOrWhiteSpace(json) || json == "[]") return new();
+                try
+                {
+                    return System.Text.Json.JsonSerializer.Deserialize<List<XrayImage>>(json,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                }
+                catch { return new(); }
+            }
+        }
         [Column("procedure_details")]
         public string? ProcedureDetails { get; set; }
 

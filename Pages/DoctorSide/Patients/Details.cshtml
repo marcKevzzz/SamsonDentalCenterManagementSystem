@@ -38,15 +38,18 @@
         <div class="lg:col-span-3 space-y-6">
             <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
                 <div class="flex flex-col items-center text-center mb-6">
-                    <div class="relative mb-4">
+                    <div class="relative mb-4 group cursor-pointer" onclick="enlargeAvatar('@p?.AvatarUrl', '@initials')">
                         @if (!string.IsNullOrEmpty(p?.AvatarUrl)) {
-                            <img src="@p.AvatarUrl" class="w-24 h-24 rounded-3xl object-cover ring-4 ring-slate-50 shadow-lg" />
+                            <img src="@p.AvatarUrl" class="w-24 h-24 rounded-3xl object-cover ring-4 ring-slate-50 shadow-lg transition-transform group-hover:scale-105" />
                         } else {
-                            <div class="w-24 h-24 rounded-3xl bg-primary flex items-center justify-center text-white text-3xl font-bold font-display shadow-lg ring-4 ring-slate-50">
+                            <div class="w-24 h-24 rounded-3xl bg-primary flex items-center justify-center text-white text-3xl font-bold font-display shadow-lg ring-4 ring-slate-50 transition-transform group-hover:scale-105">
                                 @initials
                             </div>
                         }
                         <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-4 border-white"></div>
+                        <div class="absolute inset-0 bg-black/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <i class="fa-solid fa-magnifying-glass-plus text-white text-xl"></i>
+                        </div>
                     </div>
                     <h3 class="text-lg font-bold text-brand font-display">@p?.FirstName @p?.LastName</h3>
                     <span class="text-[11px] font-bold uppercase tracking-wider @(p?.IsActive == true ? "text-emerald-500" : "text-rose-500")">@(p?.IsActive == true ? "ACTIVE" : "INACTIVE")</span>
@@ -267,58 +270,76 @@
                             <div class="flex items-center justify-between mb-8">
                                 <div>
                                     <h3 class="text-lg font-bold text-brand font-display">Odontogram Visualization</h3>
-                                    <p class="text-[10px] text-brand/40 font-bold uppercase tracking-widest mt-0.5">Digital charting of patient tooth status</p>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <p class="text-[10px] text-brand/40 font-bold uppercase tracking-widest">Digital charting of patient tooth status</p>
+                                        @if (Model.LastChartUpdate.HasValue) {
+                                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                            <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest">Last Updated: @Model.LastChartUpdate.Value.ToString("MMM dd, yyyy")</p>
+                                        }
+                                    </div>
                                 </div>
-                                <div class="flex gap-3">
-                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand/40 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-emerald-500 shadow-sm"></span> Healthy</div>
-                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand/40 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-blue-500 shadow-sm"></span> Filled</div>
-                                    <div class="flex items-center gap-2 text-[9px] font-bold text-brand/40 uppercase tracking-widest"><span class="w-2.5 h-2.5 rounded bg-rose-500 shadow-sm"></span> Decay</div>
+                                <div class="flex items-center gap-4 flex-wrap justify-end max-w-md">
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-white border border-slate-200"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">Healthy</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-blue-100 border border-blue-300"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">Filled</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-purple-100 border border-purple-300"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">Crown</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">RCT</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-slate-200 border border-slate-300"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">Extracted</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-red-50 border border-red-200"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">Missing</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded bg-red-100 border border-red-300"></div>
+                                        <span class="text-[8px] font-bold text-brand/40 uppercase tracking-wider">Decay</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="bg-slate-50/50 rounded-[2rem] p-10 border border-slate-100 shadow-inner relative overflow-hidden">
-                                <div class="absolute inset-x-0 top-1/2 translate-half h-px bg-slate-200/50"></div>
-                                
-                                <!-- Upper Arch -->
-                                <div class="flex justify-center gap-2 mb-12 relative z-10">
-                                    @for (int i = 1; i <= 16; i++) {
-                                        var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i].ToLower() : "healthy";
-                                        var colorClass = status switch {
-                                            "healthy" => "bg-white text-emerald-500 border-emerald-100",
-                                            "filled" => "bg-blue-500 text-white border-blue-600",
-                                            "crown" => "bg-purple-500 text-white border-purple-600",
-                                            "rct" => "bg-emerald-600 text-white border-emerald-700",
-                                            "extracted" => "bg-slate-400 text-white border-slate-500 line-through",
-                                            "decay" => "bg-rose-500 text-white border-rose-600",
-                                            "missing" => "bg-slate-200 text-slate-400 border-slate-300 opacity-50",
-                                            _ => "bg-amber-500 text-white border-amber-600"
-                                        };
-                                        <div class="flex flex-col items-center gap-1.5">
-                                            <span class="text-[8px] font-bold text-slate-300">#@i</span>
-                                            <div class="w-9 h-12 rounded-lg border flex items-center justify-center font-bold text-[11px] shadow-sm transition-all hover:scale-110 cursor-help @colorClass" title="Tooth #@i: @status">@i</div>
-                                        </div>
-                                    }
-                                </div>
+                            <div class="bg-slate-50/50 rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-inner overflow-x-auto no-scrollbar">
+                                <div class="min-w-[700px]">
+                                    <!-- Upper Arch -->
+                                    <div class="flex justify-center gap-3 mb-16 relative z-10">
+                                        @for (int i = 1; i <= 16; i++) {
+                                            var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i].ToLower() : "healthy";
+                                            <div class="flex flex-col items-center gap-2 group">
+                                                <span class="text-[0.6rem] font-bold text-slate-300 group-hover:text-primary transition-colors">#@i</span>
+                                                <div class="tooth-v2 tooth-@status" title="Tooth #@i: @status">@i</div>
+                                            </div>
+                                        }
+                                    </div>
 
-                                <!-- Lower Arch -->
-                                <div class="flex justify-center gap-2 relative z-10">
-                                    @for (int i = 32; i >= 17; i--) {
-                                        var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i].ToLower() : "healthy";
-                                        var colorClass = status switch {
-                                            "healthy" => "bg-white text-emerald-500 border-emerald-100",
-                                            "filled" => "bg-blue-500 text-white border-blue-600",
-                                            "crown" => "bg-purple-500 text-white border-purple-600",
-                                            "rct" => "bg-emerald-600 text-white border-emerald-700",
-                                            "extracted" => "bg-slate-400 text-white border-slate-500 line-through",
-                                            "decay" => "bg-rose-500 text-white border-rose-600",
-                                            "missing" => "bg-slate-200 text-slate-400 border-slate-300 opacity-50",
-                                            _ => "bg-amber-500 text-white border-amber-600"
-                                        };
-                                        <div class="flex flex-col items-center gap-1.5">
-                                            <div class="w-9 h-12 rounded-lg border flex items-center justify-center font-bold text-[11px] shadow-sm transition-all hover:scale-110 cursor-help @colorClass" title="Tooth #@i: @status">@i</div>
-                                            <span class="text-[8px] font-bold text-slate-300">#@i</span>
-                                        </div>
-                                    }
+                                    <!-- Arch Divider -->
+                                    <div class="h-px bg-slate-200 w-2/3 mx-auto mb-16 relative">
+                                        <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 bg-slate-50 px-6 -top-2 text-[0.6rem] font-bold text-slate-300 uppercase tracking-[0.4em] whitespace-nowrap">Lower Mandibular Arch</div>
+                                    </div>
+                                    
+                                    <!-- Lower Arch -->
+                                    <div class="flex justify-center gap-3 relative z-10">
+                                        @for (int i = 32; i >= 17; i--) {
+                                            var status = Model.ToothStatusMap.ContainsKey(i) ? Model.ToothStatusMap[i].ToLower() : "healthy";
+                                            <div class="flex flex-col items-center gap-2 group">
+                                                <div class="tooth-v2 tooth-@status rotate-180" title="Tooth #@i: @status">
+                                                    <span class="rotate-180 inline-block">@i</span>
+                                                </div>
+                                                <span class="text-[0.6rem] font-bold text-slate-300 group-hover:text-primary transition-colors">#@i</span>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -465,6 +486,19 @@
     </div>
 </div>
 
+<!-- Avatar Modal -->
+<div id="avatar-modal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-brand/90 backdrop-blur-md" onclick="closeAvatarModal()"></div>
+    <div class="relative max-w-2xl w-full aspect-square animate-in zoom-in duration-300">
+        <div id="modal-avatar-container" class="w-full h-full rounded-[2.5rem] overflow-hidden border-8 border-white/10 shadow-2xl shadow-black/50">
+            <!-- Content injected via JS -->
+        </div>
+        <button onclick="closeAvatarModal()" class="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-white text-brand flex items-center justify-center shadow-xl hover:scale-110 transition-transform z-10">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
+</div>
+
 <script type="module">
     import { Toast } from '../../js/ui.js';
 
@@ -560,6 +594,22 @@
         window.switchTab('@(Model.ClinicalTimeline.Any() ? "timeline" : "appointments")');
     });
 
+    window.enlargeAvatar = function(url, initials) {
+        const container = document.getElementById('modal-avatar-container');
+        if (url && url !== 'null' && url !== '') {
+            container.innerHTML = `<img src="${url}" class="w-full h-full object-cover" />`;
+        } else {
+            container.innerHTML = `<div class="w-full h-full bg-primary flex items-center justify-center text-white text-8xl font-bold font-display">${initials}</div>`;
+        }
+        document.getElementById('avatar-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    window.closeAvatarModal = function() {
+        document.getElementById('avatar-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
 </script>
 
 <style>
@@ -579,4 +629,35 @@
         color: white !important;
         box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.15);
     }
+
+    .tooth-v2 {
+        width: 32px;
+        height: 42px;
+        border-radius: 8px 8px 16px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 800;
+        font-family: 'Syne', sans-serif;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+        position: relative;
+        box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05);
+    }
+    .tooth-v2:hover {
+        transform: translateY(-4px) scale(1.1);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1), inset 0 -4px 0 rgba(0,0,0,0.05);
+        z-index: 10;
+    }
+    .tooth-healthy { background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; }
+    .tooth-filled { background: #dbeafe; border: 1px solid #93c5fd; color: #2563eb; }
+    .tooth-crown { background: #f3e8ff; border: 1px solid #d8b4fe; color: #9333ea; }
+    .tooth-rct { background: #d1fae5; border: 1px solid #6ee7b7; color: #059669; }
+    .tooth-extracted { background: #e2e8f0; border: 1px solid #cbd5e1; color: #94a3b8; text-decoration: line-through; }
+    .tooth-missing { background: #fef2f2; border: 1px solid #fecaca; color: #fca5a5; opacity: 0.6; }
+    .tooth-decay { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; }
+    .tooth-plan { background: #fef3c7; border: 1px solid #fde68a; color: #d97706; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>

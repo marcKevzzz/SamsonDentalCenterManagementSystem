@@ -33,6 +33,7 @@ public class PatientDetailsModel : AdminPageModel
     public Appointment? NextAppointment { get; set; }
     public decimal OutstandingBalance { get; set; }
     public DateTime? LastTreatmentDate { get; set; }
+    public DateTime? LastChartUpdate { get; set; }
     public PatientMedicalInfo? MedicalInfo { get; set; }
     public Dictionary<int, string> ToothStatusMap { get; set; } = new();
 
@@ -75,6 +76,7 @@ public class PatientDetailsModel : AdminPageModel
         MedicalInfo = await _recordService.GetMedicalInfoAsync(id);
         var toothStatuses = await _recordService.GetToothChartAsync(id);
         ToothStatusMap = toothStatuses.ToDictionary(ts => ts.ToothNumber, ts => ts.Status);
+        LastChartUpdate = toothStatuses.Any() ? toothStatuses.Max(ts => ts.UpdatedAt) : null;
 
         return Page();
     }

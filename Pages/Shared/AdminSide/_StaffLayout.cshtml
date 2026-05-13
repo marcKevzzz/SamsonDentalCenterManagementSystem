@@ -57,9 +57,18 @@
                 email: '' // Not critical for UI display here
             };
             localStorage.setItem('sb_user', JSON.stringify(userObj));
-            console.log("[StaffLayout] Synchronized user state to localStorage:", userObj.role);
         }
     })();
+
+    // Global function placeholders to prevent ReferenceErrors before modules load
+    window.filterTable = () => {};
+    window.toggleDropdown = (e) => { if(e && e.stopPropagation) e.stopPropagation(); };
+    window.confirmAppt = () => {};
+    window.updateStatus = () => {};
+    window.cancelAppt = () => {};
+    window.deleteAppt = () => {};
+    window.openViewModal = () => {};
+    window.refreshData = () => {};
   </script>
 </head>
 

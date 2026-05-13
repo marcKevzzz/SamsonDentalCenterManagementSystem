@@ -159,6 +159,7 @@ public class AdminDataController : ControllerBase
                     serviceId = a.ServiceId,
                     serviceName = a.Service?.Name,
                     serviceCategory = a.Service?.Category,
+                    predefinedProcedures = a.Service?.PredefinedProcedures,
                     doctorId = a.DoctorId,
                     doctorName = a.Doctor != null
                         ? (
@@ -395,6 +396,7 @@ public class AdminDataController : ControllerBase
                     amount = t.Invoice?.FinalAmount ?? 0,
                     toothData = t.ToothData,
                     xrayData = t.XrayData,
+                    xrayImages = t.XrayImages,
                 })
                 .ToList();
             return Ok(new { ok = true, data = dtos });

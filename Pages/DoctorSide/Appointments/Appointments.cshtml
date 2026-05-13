@@ -5,6 +5,37 @@
 Layout = "AdminSide/_StaffLayout";
 }
 <!-- ── APPOINTMENTS ── -->
+<style>
+  @@media (max-width: 768px) {
+    #appointments-table thead { display: none; }
+    #appointments-table tr { 
+      display: block; 
+      margin-bottom: 1rem; 
+      background: white; 
+      border-radius: 1rem; 
+      border: 1px solid #f1f5f9;
+      padding: 1rem;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    #appointments-table td { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 0.5rem 0; 
+      border-bottom: 1px solid #f8fafc;
+      text-align: right;
+    }
+    #appointments-table td:last-child { border-bottom: none; }
+    #appointments-table td::before {
+      content: attr(data-label);
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      text-align: left;
+    }
+  }
+</style>
 <div id="page-appointments" class="page p-4 md:p-6 relative">
 
   <!-- Header -->
@@ -13,15 +44,18 @@ Layout = "AdminSide/_StaffLayout";
       <h2 class="font-display text-xl font-bold text-brand">Appointments</h2>
       <p class="text-[12px] text-brand/50 mt-0.5">Schedule and manage appointments</p>
     </div>
-    <button onclick="openBookModal()"
-      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-      </svg>
-      Book Appointment
-    </button>
+    @if (Model.CurrentUserRole != "doctor")
+    {
+      <button onclick="openBookModal()"
+        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-medium text-white bg-primary shadow-md shadow-primary/25">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Book Appointment
+      </button>
+    }
   </div>
 
   <!-- Stats -->
@@ -165,21 +199,28 @@ Layout = "AdminSide/_StaffLayout";
             data-status="@appt.Status" 
             data-date="@appt.AppointmentDate.ToString("yyyy-MM-dd")"
             data-search="@(appt.PatientFirstName + " " + appt.PatientLastName + (appt.Doctor?.Profile != null ? appt.Doctor.Profile.FirstName + " " + appt.Doctor.Profile.LastName : "") + appt.ServiceName)">
-              <td class="px-4 py-4">
+              <td class="px-4 py-4" data-label="Ref ID">
                 <span class="text-[10px] font-bold text-brand/40 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">@shortId</span>
               </td>
-              <td class="px-4 py-4">
+              <td class="px-4 py-4" data-label="Patient">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
-                    @($"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}")
-                  </div>
+                  @if (!string.IsNullOrEmpty(appt.PatientProfile?.AvatarUrl))
+                  {
+                    <img src="@appt.PatientProfile.AvatarUrl" alt="@appt.PatientName" class="w-8 h-8 rounded-full object-cover border border-slate-200" />
+                  }
+                  else
+                  {
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase">
+                      @($"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}")
+                    </div>
+                  }
                   <div>
                     <div class="text-[13px] font-bold text-brand leading-none mb-1">@appt.PatientName</div>
                     <div class="text-[10.5px] text-brand/40">@appt.PatientEmail</div>
                   </div>
                 </div>
               </td>
-              <td class="px-4 py-4">
+              <td class="px-4 py-4" data-label="Service & Doctor">
                 <div class="text-[12.5px] font-medium text-brand/80">@appt.ServiceName</div>
                 <div class="text-[11px] text-brand/40 flex items-center gap-1 mt-0.5">
                   <i class="fa-solid fa-user-doctor text-[9px]"></i>
@@ -190,7 +231,7 @@ Layout = "AdminSide/_StaffLayout";
                   @docName
                 </div>
               </td>
-              <td class="px-4 py-4">
+              <td class="px-4 py-4" data-label="Source">
                 <div class="flex flex-col gap-1">
                   @if (!string.IsNullOrEmpty(appt.Notes))
                   {
@@ -201,24 +242,27 @@ Layout = "AdminSide/_StaffLayout";
                   <span class="text-[9px] font-bold text-brand/30 uppercase tracking-widest ml-0.5">@appt.Source?.ToUpper()</span>
                 </div>
               </td>
-              <td class="px-4 py-4">
+              <td class="px-4 py-4" data-label="Schedule">
                 <div class="text-[12.5px] font-bold text-brand">@appt.AppointmentDate.ToString("MMM dd")</div>
                 <div class="text-[11px] text-brand/40">@appt.AppointmentTime</div>
               </td>
-              <td class="px-4 py-4 text-center">
+              <td class="px-4 py-4 text-center" data-label="Status">
                 <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border @badgeClasses font-display uppercase tracking-wider">
                   @statusLabel
                 </span>
               </td>
-              <td class="px-4 py-4 text-right whitespace-nowrap">
+              <td class="px-4 py-4 text-right whitespace-nowrap" data-label="Action">
                 <div class="flex items-center justify-end gap-2">
-                  @if (appt.Status.ToLower() == "pending")
+                  @if (Model.CurrentUserRole != "doctor")
                   {
-                    <button onclick='confirmAppt("@appt.Id")' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>
-                  }
-                  else if (appt.Status.ToLower() == "confirmed")
-                  {
-                    <button onclick='updateStatus("@appt.Id", "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>
+                    @if (appt.Status.ToLower() == "pending")
+                    {
+                      <button onclick='confirmAppt("@appt.Id")' class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors shadow-sm">Confirm</button>
+                    }
+                    else if (appt.Status.ToLower() == "confirmed")
+                    {
+                      <button onclick='updateStatus("@appt.Id", "arrived")' class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition-colors shadow-sm">Check-In</button>
+                    }
                   }
 
                   <div class="inline-block text-left action-dropdown relative">
@@ -230,36 +274,39 @@ Layout = "AdminSide/_StaffLayout";
                         <button onclick='openViewModal(@Html.Raw(apptJson))' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand hover:bg-slate-50 flex items-center gap-3 transition-colors">
                           <i class="fa-solid fa-eye w-4"></i> View Details
                         </button>
-                        @if (appt.Status.ToLower() == "pending")
+                        @if (Model.CurrentUserRole != "doctor")
                         {
-                          <button onclick='confirmAppt("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
-                            <i class="fa-solid fa-check-circle w-4"></i> Confirm Booking
-                          </button>
-                        }
-                        @if (appt.Status.ToLower() == "confirmed")
-                        {
-                          <button onclick='updateStatus("@appt.Id", "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
-                            <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
-                          </button>
-                          <button onclick='updateStatus("@appt.Id", "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-                            <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
-                          </button>
-                        }
-                        @if (appt.Status.ToLower() == "arrived")
-                        {
-                          <button onclick='updateStatus("@appt.Id", "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
-                            <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
-                          </button>
-                        }
-                        <div class="h-px bg-slate-100 my-1"></div>
-                        @if (new[] { "confirmed", "pending", "arrived" }.Contains(appt.Status.ToLower()))
-                        {
-                          <button onclick='openEditModal("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand/60 hover:bg-slate-50 flex items-center gap-3 transition-colors">
-                            <i class="fa-solid fa-rotate w-4"></i> Reschedule
-                          </button>
-                          <button onclick='cancelAppt("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors">
-                            <i class="fa-solid fa-ban w-4"></i> Cancel
-                          </button>
+                          @if (appt.Status.ToLower() == "pending")
+                          {
+                            <button onclick='confirmAppt("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors">
+                              <i class="fa-solid fa-check-circle w-4"></i> Confirm Booking
+                            </button>
+                          }
+                          @if (appt.Status.ToLower() == "confirmed")
+                          {
+                            <button onclick='updateStatus("@appt.Id", "arrived")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 flex items-center gap-3 transition-colors">
+                              <i class="fa-solid fa-person-walking-arrow-right w-4"></i> Mark Arrived
+                            </button>
+                            <button onclick='updateStatus("@appt.Id", "no_show")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-slate-500 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                              <i class="fa-solid fa-user-slash w-4"></i> Mark No-Show
+                            </button>
+                          }
+                          @if (appt.Status.ToLower() == "arrived")
+                          {
+                            <button onclick='updateStatus("@appt.Id", "completed")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-blue-600 hover:bg-blue-50 flex items-center gap-3 transition-colors">
+                              <i class="fa-solid fa-circle-check w-4"></i> Mark Completed
+                            </button>
+                          }
+                          <div class="h-px bg-slate-100 my-1"></div>
+                          @if (new[] { "confirmed", "pending", "arrived" }.Contains(appt.Status.ToLower()))
+                          {
+                            <button onclick='openEditModal("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-brand/60 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                              <i class="fa-solid fa-rotate w-4"></i> Reschedule
+                            </button>
+                            <button onclick='cancelAppt("@appt.Id")' class="w-full text-left px-4 py-2.5 text-[12px] font-medium text-accent hover:bg-red-50 flex items-center gap-3 transition-colors">
+                              <i class="fa-solid fa-ban w-4"></i> Cancel
+                            </button>
+                          }
                         }
                       </div>
                     </div>

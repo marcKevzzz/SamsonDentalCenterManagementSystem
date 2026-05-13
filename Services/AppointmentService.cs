@@ -1301,8 +1301,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                 ["is_waitlist"] = false,
                 ["email_status"] = "pending",
                 ["status"] = "pending",
-                ["soft_lock_until"] = lockUntil,
-                ["notes"] = $"[SYSTEM] Manually promoted. Respond needed by {lockUntil:HH:mm} UTC."
+                ["soft_lock_until"] = lockUntil
             };
 
             var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
@@ -1387,8 +1386,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     ["status"] = "pending",
                     ["appointment_time"] = time,
                     ["doctor_id"] = doctorId,
-                    ["soft_lock_until"] = lockUntil,
-                    ["notes"] = $"[SYSTEM] Promoted from waitlist. Responded needed by {lockUntil:HH:mm} UTC."
+                    ["soft_lock_until"] = lockUntil
                 };
 
                 var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{next.Id}");
@@ -1441,8 +1439,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     {
                         ["is_waitlist"] = true,
                         ["status"] = "pending",
-                        ["soft_lock_until"] = null,
-                        ["notes"] = "[SYSTEM] Promotion expired. Moved back to waitlist."
+                        ["soft_lock_until"] = null
                     };
 
                     var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{appt.Id}");

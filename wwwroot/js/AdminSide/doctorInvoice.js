@@ -493,7 +493,8 @@ function calculateTotals() {
 
 function renderTreatmentForms() {
     const container = document.getElementById('treatment-body');
-    
+    if (!container) return;
+
     // Build Global Odontogram Header
     const renderRow = (start, end, reverse = false) => {
         const arr = [];
@@ -540,40 +541,54 @@ function renderTreatmentForms() {
     `;
 
     container.innerHTML = odontogramUI + addedItems.map((item, idx) => {
-        // Simple logic to detect if x-ray or tooth-related
         const nameLower = item.name.toLowerCase();
         const isXRay = nameLower.includes("x-ray") || nameLower.includes("xray") || nameLower.includes("radiograph");
 
-        let extraUI = "";
+        const liveSvc = SERVICES.find(s => s.id === item.serviceId);
+        const pills = liveSvc?.predefinedProcedures || [];
+        const pillsUI = pills.length > 0 ? `
+            <div class="flex flex-wrap gap-1.5 mb-2 mt-1">
+                ${pills.map(p => `<button type="button" onclick="addProcedurePill(this, \`${p.replace(/`/g, '\\`').replace(/'/g, "\\'")}\`)" class="px-3 py-1 bg-brand-50 text-brand text-[9px] font-bold rounded-full border border-brand/10 hover:bg-brand hover:text-white transition-all transition-colors">${p}</button>`).join('')}
+            </div>
+        ` : '';
 
+        let extraUI = "";
         if (isXRay) {
             extraUI = `
                 <div class="mt-4 p-4 border border-brand/10 bg-white rounded-xl">
-                    <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider mb-3">X-Ray Details</h6>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 mb-1">X-Ray Type</label>
-                            <select class="inv-treat-xray-type w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-primary">
-                                <option value="Panoramic">Panoramic</option>
-                                <option value="Periapical">Periapical</option>
-                                <option value="Cephalometric">Cephalometric</option>
-                                <option value="CBCT">CBCT</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 mb-1">Upload File (Optional)</label>
-                            <input type="file" class="inv-treat-xray-file text-[11px] file:mr-2 file:py-1 file:px-2 file:border-0 file:rounded-md file:bg-primary/10 file:text-primary file:font-medium" />
-                        </div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h6 class="text-[11px] font-bold text-brand uppercase tracking-wider">X-Ray Images</h6>
+                        <span class="text-[9px] text-brand/40">Select multiple files</span>
                     </div>
-                    <div class="mt-3">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1">Findings / Radiographic Report</label>
-                        <textarea class="inv-treat-xray-notes w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none resize-none" rows="2" placeholder="Describe findings..."></textarea>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <div class="flex flex-wrap gap-2 mb-3" id="xray-previews-${idx}"></div>
+                            <div class="relative group">
+                                <input type="file" multiple accept="image/*" onchange="handleXRayPreview(this, ${idx})" class="inv-treat-xray-files hidden" id="xray-input-${idx}" />
+                                <label for="xray-input-${idx}" class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer group-hover:border-primary/40 group-hover:bg-primary/5 transition-all">
+                                    <i class="fa-solid fa-cloud-arrow-up text-slate-300 text-xl mb-1"></i>
+                                    <span class="text-[10px] font-bold text-slate-400">Click to upload multiple X-rays</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 mb-1 ml-1">Type & Findings</label>
+                            <div class="flex gap-2">
+                                <select class="inv-treat-xray-type w-32 text-[11px] px-3 py-2 rounded-xl border border-slate-200 outline-none">
+                                    <option value="Panoramic">Panoramic</option>
+                                    <option value="Periapical">Periapical</option>
+                                    <option value="Cephalometric">Cephalometric</option>
+                                    <option value="CBCT">CBCT</option>
+                                </select>
+                                <textarea class="inv-treat-xray-notes flex-1 text-[11px] px-3 py-2 rounded-xl border border-slate-200 outline-none resize-none" rows="1" placeholder="Findings / Report..."></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
         }
         return `
-        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-4 treatment-block">
+        <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 space-y-4 treatment-block" data-idx="${idx}">
             <div class="flex items-center justify-between">
                 <h5 class="text-[13px] font-bold text-brand flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-[10px]">${idx + 1}</span>
@@ -590,6 +605,7 @@ function renderTreatmentForms() {
 
             <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Procedure Notes</label>
+                ${pillsUI}
                 <textarea class="inv-treat-proc w-full text-[12px] px-3 py-2 rounded-xl border border-slate-200 outline-none resize-none bg-white" rows="2" placeholder="What was done?"></textarea>
             </div>
             <input type="hidden" class="inv-treat-svc-id" value="${item.serviceId}" />
@@ -598,6 +614,41 @@ function renderTreatmentForms() {
         </div>
         `;
     }).join('');
+}
+
+window.handleXRayPreview = function(input, idx) {
+    const previewContainer = document.getElementById(`xray-previews-${idx}`);
+    previewContainer.innerHTML = '';
+    const files = Array.from(input.files);
+    
+    files.forEach((file, fIdx) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = "relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 group";
+            div.innerHTML = `
+                <img src="${e.target.result}" class="w-full h-full object-cover" />
+                <div class="absolute inset-0 bg-brand/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <button type="button" onclick="removeXRayFile(${idx}, ${fIdx})" class="text-white text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+            previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+window.addProcedurePill = function(btn, text) {
+    const block = btn.closest('.treatment-block');
+    const textarea = block.querySelector('.inv-treat-proc');
+    const current = textarea.value.trim();
+    if (current) {
+        textarea.value = current + ", " + text;
+    } else {
+        textarea.value = text;
+    }
+    btn.classList.add('bg-brand', 'text-white');
+    setTimeout(() => btn.classList.remove('bg-brand', 'text-white'), 500);
 }
 
 // Global toggle for Odontogram
@@ -653,14 +704,14 @@ window.submitInvoice = async function() {
         if (isXRay) {
             const xrayType = block.querySelector('.inv-treat-xray-type')?.value;
             const xrayNotes = block.querySelector('.inv-treat-xray-notes')?.value;
-            const xrayFile = block.querySelector('.inv-treat-xray-file')?.files[0];
+            const xrayFiles = Array.from(block.querySelector('.inv-treat-xray-files')?.files || []);
 
             return {
                 serviceId: block.querySelector('.inv-treat-svc-id').value,
                 serviceName: block.querySelector('.inv-treat-svc-name').value,
                 xrayType: xrayType,
                 xrayNotes: xrayNotes,
-                xrayFile: xrayFile, // Temporary for processing
+                xrayFiles: xrayFiles, // Temporary for processing
                 procedure: block.querySelector('.inv-treat-proc').value,
                 status: block.querySelector('.inv-treat-status').value
             };
@@ -696,17 +747,23 @@ window.submitInvoice = async function() {
     try {
         // 1. Upload X-Ray Files if any
         for (let treat of treatments) {
-            if (treat.xrayFile) {
-                try {
-                    const url = await uploadXRayFile(treat.xrayFile, patientId);
-                    treat.xrayUrl = url;
-                } catch (err) {
-                    console.error("X-Ray upload failed:", err);
-                    showToast("X-Ray upload failed, but treatment will still save.", "warning");
+            if (treat.xrayFiles && treat.xrayFiles.length > 0) {
+                treat.xrayImages = [];
+                for (let file of treat.xrayFiles) {
+                    try {
+                        const url = await uploadXRayFile(file, patientId);
+                        treat.xrayImages.push({
+                            url: url,
+                            caption: `${treat.xrayType} - ${new Date().toLocaleDateString()}`
+                        });
+                    } catch (err) {
+                        console.error("X-Ray upload failed:", err);
+                        showToast("X-Ray upload failed, but treatment will still save.", "warning");
+                    }
                 }
             }
             // Clean up temporary file reference before sending to API
-            delete treat.xrayFile;
+            delete treat.xrayFiles;
         }
 
         // 2. If medical info was missing and filled out, save it first
@@ -852,23 +909,40 @@ window.openViewTreatmentModal = function(treatmentId) {
                 ${treat.procedureDetails || "No specific procedure details recorded."}
             </div>
 
-            ${(treat.xrayUrl || treat.xrayData) ? `
-            <div class="mt-4">
+            ${(treat.xrayUrl || treat.xrayData || (treat.xrayImages && treat.xrayImages.length > 0)) ? `
+            <div class="mt-4 space-y-4">
                 <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Radiograph / X-Ray ${treat.xrayType ? `(${treat.xrayType})` : ''}</label>
-                <div class="rounded-2xl border border-slate-200 overflow-hidden bg-black flex items-center justify-center aspect-video">
-                    <img src="${treat.xrayUrl || treat.xrayData}" class="max-w-full max-h-full object-contain" alt="Treatment X-Ray" />
+                
+                <div class="grid grid-cols-1 gap-4">
+                    ${treat.xrayImages && treat.xrayImages.length > 0 
+                        ? treat.xrayImages.map((img, iIdx) => `
+                            <div class="space-y-2">
+                                <div class="rounded-2xl border border-slate-200 overflow-hidden bg-black flex items-center justify-center aspect-video group relative">
+                                    <img src="${img.url}" class="max-w-full max-h-full object-contain" alt="X-Ray ${iIdx + 1}" />
+                                    <a href="${img.url}" download="XRay_${treat.id}_${iIdx}.png" class="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="fa-solid fa-download"></i>
+                                    </a>
+                                </div>
+                                ${img.caption ? `<p class="text-[10px] text-brand/40 text-center font-medium">${img.caption}</p>` : ''}
+                            </div>
+                        `).join('')
+                        : `
+                        <div class="rounded-2xl border border-slate-200 overflow-hidden bg-black flex items-center justify-center aspect-video group relative">
+                            <img src="${treat.xrayUrl || treat.xrayData}" class="max-w-full max-h-full object-contain" alt="Treatment X-Ray" />
+                            <a href="${treat.xrayUrl || treat.xrayData}" download="XRay_${treat.id}.png" class="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                        </div>
+                        `
+                    }
                 </div>
+
                 ${treat.xrayNotes ? `
                 <div class="mt-3 p-3 bg-white/50 rounded-xl border border-slate-100/50 italic text-[11px] text-brand/60">
                     <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Radiographic Findings</label>
                     ${treat.xrayNotes}
                 </div>
                 ` : ''}
-                <div class="mt-2 text-center">
-                    <a href="${treat.xrayUrl || treat.xrayData}" download="XRay_${treat.id.slice(0,8)}.png" class="text-[10px] font-bold text-primary hover:underline">
-                        <i class="fa-solid fa-download mr-1"></i> Download Original
-                    </a>
-                </div>
             </div>
             ` : ''}
         </div>

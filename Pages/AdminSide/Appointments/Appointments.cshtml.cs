@@ -63,7 +63,7 @@ public class AdminAppointmentsModel : AdminPageModel
         try
         {
             var res = await _appointments.GetAllAsync();
-            Appointments = res.OrderByDescending(a => a.AppointmentDate).ToList();
+            Appointments = res.OrderByDescending(a => a.CreatedAt).ToList();
         }
         catch (Exception ex)
         {

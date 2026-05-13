@@ -68,7 +68,7 @@ public class AppointmentsModel : AdminPageModel
             if (doc != null)
             {
                 var res = await _appointments.GetByDoctorIdAsync(doc.Id);
-                Appointments = res.OrderByDescending(a => a.AppointmentDate).ToList();
+                Appointments = res.OrderByDescending(a => a.CreatedAt).ToList();
             }
         }
         catch (Exception ex)
