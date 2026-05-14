@@ -67,9 +67,16 @@ namespace SamsonDentalCenterManagementSystem.Services
             {
                 try
                 {
+                    // Determine if this was a waitlist promotion (no time selected yet)
+                    var isWaitlistPromotion = string.IsNullOrEmpty(appt.AppointmentTime) || appt.AppointmentTime == "—";
+                    var subject = isWaitlistPromotion ? "Waitlist Promotion Expired" : "Appointment Cancelled - Verification Expired";
+                    var reason = isWaitlistPromotion 
+                        ? "The priority window to select a time for your waitlist promotion has expired. The slot has been released to the next patient."
+                        : "The appointment verification period has expired. Please book again if you still wish to visit.";
+
                     // Mark as cancelled
                     appt.Status = "cancelled";
-                    appt.Notes = (appt.Notes ?? "") + "\n[System] Cancelled due to expired soft lock (24h/promoted).";
+                    appt.Notes = (appt.Notes ?? "") + $"\n[System] Cancelled due to expired soft lock. (Waitlist: {isWaitlistPromotion})";
                     
                     await supabase.From<Appointment>().Update(appt);
                     
@@ -77,14 +84,14 @@ namespace SamsonDentalCenterManagementSystem.Services
                     await emailService.SendEmailAsync(
                         appt.PatientEmail,
                         appt.PatientName,
-                        "Appointment Cancelled - Verification Expired",
+                        subject,
                         "Cancellation",
                         new
                         {
                             Name = appt.PatientName,
                             Date = appt.AppointmentDate.ToString("MMMM dd, yyyy"),
                             Time = appt.AppointmentTime,
-                            Reason = "The appointment verification period has expired. Please book again if you still wish to visit.",
+                            Reason = reason,
                         }
                     );
 

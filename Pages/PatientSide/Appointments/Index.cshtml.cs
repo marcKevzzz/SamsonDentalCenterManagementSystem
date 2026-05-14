@@ -30,7 +30,6 @@ public class AppointmentModel : PageModel
         if (!string.IsNullOrEmpty(userId))
         {
             CurrentUser = await _profileService.GetProfileById(userId, email);
-            Console.WriteLine(CurrentUser);
         }
 
         return Page();

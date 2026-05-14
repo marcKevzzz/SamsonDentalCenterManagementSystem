@@ -339,7 +339,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                             if (!string.IsNullOrEmpty(l.ProfileId))
                             {
                                 onLeaveProfileIds.Add(l.ProfileId.Trim().ToLower());
-                                Console.WriteLine($"[GetAvailability.Batch] Found approved leave for ProfileId: {l.ProfileId} on {dateStr}");
                             }
                         }
                     }
@@ -393,7 +392,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                         var dProfId = doc.ProfileId?.Trim().ToLower();
                         if (!string.IsNullOrEmpty(dProfId) && onLeaveProfileIds.Any(lp => lp.Trim().ToLower() == dProfId))
                         {
-                            Console.WriteLine($"[GetAvailability.Batch] Skipping doctor {doc.Id} (Profile: {doc.ProfileId}) - ON LEAVE");
                             continue;
                         }
 
@@ -463,7 +461,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             var settings = await _clinic.GetSettingsAsync();
             var blockedDates = await _blockedDates.GetBlockedDateStringsAsync();
             var doctors = await GetDoctorsForService(category);
-            Console.WriteLine($"[DEBUG] GetMonthAvailability - Category: {category}, Doctors Found: {doctors.Count}");
             if (!doctors.Any()) 
                 return new { fullyBooked = fullyBookedDates, unavailable = unavailableDates };
 
@@ -596,12 +593,10 @@ namespace SamsonDentalCenterManagementSystem.Services
                     // If no slots are available, but doctors are actually working, it's "Fully Booked" (Waitlist)
                     if (hasAnyWaitlistEligible || anyDoctorHasShift) 
                     {
-                        Console.WriteLine($"[DEBUG] Date {dateStr}: Fully Booked (Waitlist). anyDoctorHasShift: {anyDoctorHasShift}");
                         fullyBookedDates.Add(dateStr);
                     }
                     else 
                     {
-                        Console.WriteLine($"[DEBUG] Date {dateStr}: Unavailable. no doctors with category '{category}' have shifts today.");
                         unavailableDates.Add(dateStr);
                     }
                 }
@@ -732,9 +727,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 p.OtherEmail = p.OtherEmail.Trim().ToLower();
 
             // ── Date Parsing ────────────────────────────────────────────────
-            Console.WriteLine(
-                $"[DEBUG] AppointmentService.Create - Incoming AppointmentDate: '{p.AppointmentDate}'"
-            );
             var parsedDate = DateTime.ParseExact(
                 p.AppointmentDate,
                 "yyyy-MM-dd",
@@ -742,10 +734,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             );
             // Force UTC at midnight to ensure consistency across DB/Email
             var fixedDate = DateTime.SpecifyKind(parsedDate.Date, DateTimeKind.Utc);
-
-            Console.WriteLine(
-                $"[DEBUG] AppointmentService.Create - Normalized AppointmentDate (UTC): {fixedDate:yyyy-MM-dd HH:mm:ss} {fixedDate.Kind}"
-            );
 
             // ── Validation ───────────────────────────────────────────────────
             if (!p.IsWaitlist)
@@ -887,15 +875,17 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var targetLast = p.OtherLastName ?? "";
                 var targetSex = p.OtherSex;
                 var targetDob = p.OtherDob;
+                var targetEmail = p.OtherEmail ?? "";
+                var targetPhone = p.OtherPhone ?? "";
 
-                var match = await _profiles.SmartMatchProfile(targetFirst, targetLast, "", ""); 
+                var match = await _profiles.SmartMatchProfile(targetFirst, targetLast, targetEmail, targetPhone); 
                 if (match.Profile != null)
                 {
                     targetPatientId = match.Profile.Id;
                 }
                 else
                 {
-                    targetPatientId = await _profiles.CreateShadowProfile(targetFirst, targetLast, "", "", targetSex, targetDob, null, match.RequiresReview);
+                    targetPatientId = await _profiles.CreateShadowProfile(targetFirst, targetLast, targetEmail, targetPhone, targetSex, targetDob, null, match.RequiresReview);
                     await _profiles.CreatePatientRecord(targetPatientId, targetDob, targetSex, null, p.EmergencyContact, p.Relationship, bookerId); 
                 }
             }
@@ -1010,9 +1000,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 }
 
                 await SendGuestConfirmationEmail(mockAppt);
-                Console.WriteLine(
-                    $"[Appointment] Cached mock waiting for email confirmation. Token: {cacheToken}"
-                );
                 return mockAppt;
             }
 
@@ -1163,10 +1150,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 }
             }
 
-            Console.WriteLine(
-                $"[Appointment] Created {created.Id} emailstatus={emailStatus} guest={p.IsGuest} waitlist={p.IsWaitlist}"
-            );
-
             // Broadcast real-time update
             await _hubContext.Clients.All.SendAsync(
                 "ReceiveAppointmentUpdate",
@@ -1241,6 +1224,50 @@ namespace SamsonDentalCenterManagementSystem.Services
             }
         }
 
+        public async Task<Appointment?> ConfirmPromotionWithTime(string id, string selectedTime)
+        {
+            try
+            {
+                var appt = await GetById(id);
+                if (appt == null || appt.Status != "pending" || appt.IsWaitlist) return null;
+
+                // If lock is still valid
+                if (appt.SoftLockUntil != null && appt.SoftLockUntil < DateTime.UtcNow)
+                {
+                    return null;
+                }
+
+                var payload = new Dictionary<string, object?>
+                {
+                    ["status"] = "confirmed",
+                    ["email_status"] = "confirmed",
+                    ["appointment_time"] = selectedTime, // Set the selected time
+                    ["soft_lock_until"] = null, // Clear the lock
+                    ["confirmed_at"] = DateTime.UtcNow
+                };
+
+                var patchReq = BuildRequest(HttpMethod.Patch, $"/appointments?id=eq.{id}");
+                patchReq.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+                var res = await _http.SendAsync(patchReq);
+
+                if (res.IsSuccessStatusCode)
+                {
+                    var updated = await GetById(id);
+                    if (updated != null)
+                    {
+                        await SendBookingConfirmationEmail(updated);
+                        await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "confirmed", id = id });
+                        return updated;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ConfirmPromotion] Error: {ex.Message}");
+            }
+            return null;
+        }
+
         public async Task<Appointment?> ConfirmPromotion(string id)
         {
             try
@@ -1251,7 +1278,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 // If lock is still valid
                 if (appt.SoftLockUntil != null && appt.SoftLockUntil < DateTime.UtcNow)
                 {
-                    Console.WriteLine($"[Waitlist] Lock expired for {id} at {appt.SoftLockUntil}");
                     return null;
                 }
 
@@ -1407,8 +1433,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     
                     // Notify via SignalR
                     await _hubContext.Clients.All.SendAsync("ReceiveAppointmentUpdate", new { action = "promoted", id = next.Id });
-                    
-                    Console.WriteLine($"[Waitlist] Promoted {next.Id} to slot {time}. Lock until: {lockUntil}");
                 }
             }
             catch (Exception ex)
@@ -1432,8 +1456,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                 foreach (var appt in expired)
                 {
-                    Console.WriteLine($"[Waitlist Cleanup] Expiring lock for {appt.Id}...");
-                    
                     // Move back to waitlist
                     var payload = new Dictionary<string, object?>
                     {
@@ -1583,9 +1605,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                         if (availableCount == 0)
                         {
-                            Console.WriteLine(
-                                $"[AutoCancel] Slot {slotLabel} on {appt.AppointmentDate:yyyy-MM-dd} is now FULL. Cancelling other pendings."
-                            );
 
                             // 2. Find all other PENDING appointments for this same date and time
                             var dateStr = appt.AppointmentDate.ToString("yyyy-MM-dd");
@@ -1727,7 +1746,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             updated.AppointmentTime = newTime;
 
             await SendRescheduleEmail(updated);
-            Console.WriteLine($"[Reschedule] {id} → {fixedDate:yyyy-MM-dd} {newTime}");
         }
 
         public async Task<List<Appointment>> GetAllAsync()
@@ -1919,6 +1937,14 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             try
             {
+                // 0. Guard: If the appointment already has a patient profile linked, trust it.
+                // This prevents redundant "shadow profiles" for account holders and guests.
+                if (!string.IsNullOrEmpty(appt.PatientId))
+                {
+                    await _recordService.InitializePatientRecords(appt.PatientId, "system");
+                    return;
+                }
+
                 string targetEmail = appt.IsForOther ? appt.OtherEmail! : appt.PatientEmail;
                 string targetPhone = appt.IsForOther ? appt.OtherPhone! : appt.PatientPhone;
                 string targetFirst = appt.IsForOther
@@ -1946,13 +1972,9 @@ namespace SamsonDentalCenterManagementSystem.Services
                 if (matchResult.Profile != null)
                 {
                     newPatientId = matchResult.Profile.Id;
-                    Console.WriteLine(
-                        $"[Promotion] Found existing profile {newPatientId} for {targetEmail}/{targetPhone}"
-                    );
                 }
                 else
                 {
-                    // 2. Create Shadow Profile
                     newPatientId = await _profiles.CreateShadowProfile(
                         targetFirst,
                         targetLast,
@@ -1963,7 +1985,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                         null, // address
                         matchResult.RequiresReview
                     );
-                    Console.WriteLine($"[Promotion] Created new Shadow Profile {newPatientId}");
                 }
 
                 // 3. Link appointment to this profile using raw HTTP to bypass ORM cache issues
@@ -1978,10 +1999,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     );
                     var linkRes = await _http.SendAsync(linkReq);
                     linkRes.EnsureSuccessStatusCode();
-
-                    Console.WriteLine(
-                        $"[Promotion] Linked appointment {appt.Id} to profile {newPatientId}"
-                    );
                 }
 
                 // 4. Initialize Clinical Records (Medical Info etc.)

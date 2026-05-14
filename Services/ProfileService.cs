@@ -68,9 +68,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                         return null; // Skip repair, too soon
                     }
 
-                    Console.WriteLine(
-                        $"[ProfileService] No profile found for {userId}. Attempting on-the-fly repair..."
-                    );
 
                     // Fetch user from Auth Admin API
                     _http.DefaultRequestHeaders.Clear();
@@ -143,9 +140,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                             ) ?? "patient"; // Only default to patient at the absolute last resort
                         }
 
-                        Console.WriteLine(
-                            $"[ProfileService] Repairing user {userId} ({authEmail}) with detected role: {role}"
-                        );
 
                         var repairPayload = new UserPayload
                         {
@@ -163,7 +157,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                             var existing = await GetProfileByEmail(authEmail);
                             if (existing != null && existing.Id != userId)
                             {
-                                Console.WriteLine($"[ProfileService] Account fragmentation detected for {authEmail}. Restoring data from {existing.Id} to {userId}.");
                                 repairPayload.DateOfBirth = existing.DateOfBirth;
                                 repairPayload.Sex = existing.Sex;
                                 repairPayload.PhoneNumber = existing.PhoneNumber;
@@ -201,25 +194,16 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                         if (profile != null)
                         {
-                            Console.WriteLine(
-                                $"[ProfileService] Repair successful for {userId}. Role: {profile.Role}"
-                            );
                             _failedRepairAttempts.TryRemove(userId, out _); // Clear failure if it finally worked
                         }
                     }
                     else
                     {
-                        var errStr = await authRes.Content.ReadAsStringAsync();
-                        Console.WriteLine(
-                            $"[ProfileService] Auth API Failure for {userId}: {authRes.StatusCode}"
-                        );
+                        await authRes.Content.ReadAsStringAsync();
                     }
 
                     if (profile == null)
                     {
-                        Console.WriteLine(
-                            $"[ProfileService] Repair failed for {userId}. Record still not found after Upsert."
-                        );
                         _failedRepairAttempts[userId] = DateTime.UtcNow; // Mark as failed for cooldown
                         return null;
                     }
@@ -247,10 +231,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                         profile.Address ??= patient.Address;
                         profile.EmergencyContact = patient.EmergencyContact;
                         profile.Relationship = patient.Relationship;
-
-                        Console.WriteLine(
-                            $"[ProfileService] Hydrated Patient record for {userId}. DOB: {patient.DateOfBirth}, Relationship: {patient.Relationship}"
-                        );
                     }
                 }
 
@@ -263,18 +243,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 if (!string.IsNullOrWhiteSpace(email))
                 {
                     profile.Email = email;
-                }
-                if (profile != null)
-                {
-                    Console.WriteLine(
-                        $"[ProfileService] GetProfileById({userId}) -> Found: {profile.FirstName} {profile.LastName}, Role: '{profile.Role}', HasPatientRecord: {patient != null}"
-                    );
-                }
-                else
-                {
-                    Console.WriteLine(
-                        $"[ProfileService] GetProfileById({userId}) -> Profile NOT FOUND after repair attempts."
-                    );
                 }
                 return profile;
             }
@@ -317,7 +285,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var emailRes = await _adminClient
                     .From<Profile>()
                     .Where(x => x.Email == email)
-                    .Where(x => x.Role == "patient")
                     .Limit(1)
                     .Get();
 
@@ -330,7 +297,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     .Where(x => x.FirstName == firstName)
                     .Where(x => x.LastName == lastName)
                     .Where(x => x.PhoneNumber == phone)
-                    .Where(x => x.Role == "patient")
                     .Limit(1)
                     .Get();
 
@@ -342,7 +308,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     .From<Profile>()
                     .Where(x => x.FirstName == firstName)
                     .Where(x => x.LastName == lastName)
-                    .Where(x => x.Role == "patient")
                     .Limit(1)
                     .Get();
 
@@ -377,7 +342,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(phone))
             {
                 email = $"guest_{Guid.NewGuid().ToString("N")[..12]}@shadow.local";
-                Console.WriteLine($"[CreateShadowProfile] No contact info provided. Using shadow email: {email}");
             }
 
             try
@@ -386,9 +350,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 string? existingId = !string.IsNullOrEmpty(email) ? await GetUserIdByEmail(email) : null;
                 if (!string.IsNullOrEmpty(existingId))
                 {
-                    Console.WriteLine(
-                        $"[CreateShadowProfile] User already exists in auth.users: {existingId}"
-                    );
                     newId = existingId;
                 }
                 else
@@ -419,7 +380,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     if (!resAuth.IsSuccessStatusCode)
                     {
                         var errAuth = await resAuth.Content.ReadAsStringAsync();
-                        Console.WriteLine($"[CreateShadowProfile] Auth creation failed: {errAuth}");
 
                         bool isDuplicate =
                             errAuth.Contains("email_exists", StringComparison.OrdinalIgnoreCase)
@@ -430,9 +390,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                         if (isDuplicate)
                         {
-                            Console.WriteLine(
-                                $"[CreateShadowProfile] Duplicate email detected, falling back to shadow email."
-                            );
                             var shadowEmail =
                                 $"shadow_{Guid.NewGuid().ToString().Substring(0, 8)}@shadow.local";
                             var retryPayload = new
@@ -611,8 +568,6 @@ namespace SamsonDentalCenterManagementSystem.Services
         {
             var filePath = $"avatars/{userId}{ext}";
 
-            Console.WriteLine($"[ProfileService] Uploading avatar to {filePath}");
-
             await _adminClient
                 .Storage.From("avatars")
                 .Upload(
@@ -623,7 +578,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             var publicUrl = _adminClient.Storage.From("avatars").GetPublicUrl(filePath);
 
-            Console.WriteLine($"[ProfileService] Public URL: {publicUrl}");
 
             await _adminClient
                 .From<Profile>()
@@ -652,7 +606,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     .AbsolutePath.Replace("/storage/v1/object/public/", "")
                     .TrimStart('/');
 
-                Console.WriteLine($"[RemoveAvatar] Deleting: {filePath}");
 
                 await _adminClient.Storage.From("avatars").Remove(new List<string> { filePath });
             }
@@ -805,7 +758,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     profile = await GetProfileByEmail(p.Email);
                     if (profile != null)
                     {
-                        Console.WriteLine($"[ProfileService] UpdateProfile: Found orphaned profile by email {p.Email}. Claiming ID {userId}.");
                         // We must set the ID to the current userId so the Upsert updates/replaces correctly
                         profile.Id = userId;
                     }
@@ -813,7 +765,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                 if (profile == null)
                 {
-                    Console.WriteLine($"[ProfileService] UpdateProfile: No profile found in DB for {userId}. Creating NEW object.");
                     profile = new Profile
                     {
                         Id = userId,
@@ -822,10 +773,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                     };
                 }
             }
-            else 
-            {
-                Console.WriteLine($"[ProfileService] UpdateProfile: Loaded existing profile for {userId}. Role: {profile.Role}, DOB: {profile.DateOfBirth}");
-            }
+         
 
             if (!string.IsNullOrWhiteSpace(p.FirstName))
                 profile.FirstName = p.FirstName;
@@ -853,9 +801,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                     )
                 )
                 {
-                    Console.WriteLine(
-                        $"[ProfileService] Preserving administrative role '{currentRole}' for user {userId} (denied downgrade to 'patient')"
-                    );
                 }
                 else
                 {
@@ -880,9 +825,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 var upsertRes = await _adminClient.From<Profile>().Upsert(profile);
                 if (upsertRes.Models?.Any() != true)
                 {
-                    Console.WriteLine(
-                        $"[ProfileService] Upsert Profile returned no models for {userId}. Response: {upsertRes.ResponseMessage?.StatusCode}"
-                    );
                 }
             }
             catch (Exception ex)
@@ -907,9 +849,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                         Address = profile.Address
                     };
                     await _adminClient.From<Patient>().Upsert(patient);
-                    Console.WriteLine(
-                        $"[ProfileService] Synced/Repaired Patient record for {userId}"
-                    );
                 }
                 catch (Exception ex)
                 {
@@ -1037,8 +976,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
         public async Task UpdateUserEmail(string userId, string newEmail)
         {
-            Console.WriteLine($"[UpdateUserEmail] supabaseUrl: '{_supabaseUrl}'");
-            Console.WriteLine($"[UpdateUserEmail] userId: '{userId}', newEmail: '{newEmail}'");
 
             if (string.IsNullOrWhiteSpace(_supabaseUrl))
                 throw new Exception("Supabase URL is not configured.");
@@ -1051,7 +988,6 @@ namespace SamsonDentalCenterManagementSystem.Services
             _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {_serviceRoleKey}");
 
             var fullUrl = $"{_supabaseUrl.TrimEnd('/')}/auth/v1/admin/users/{userId}";
-            Console.WriteLine($"[UpdateUserEmail] Calling: {fullUrl}");
 
             var payload = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(new { email = newEmail }),
@@ -1064,11 +1000,9 @@ namespace SamsonDentalCenterManagementSystem.Services
             if (!res.IsSuccessStatusCode)
             {
                 var error = await res.Content.ReadAsStringAsync();
-                Console.WriteLine($"[UpdateUserEmail] Failed: {error}");
                 throw new Exception($"Failed to update email: {error}");
             }
 
-            Console.WriteLine($"[UpdateUserEmail] Success for {userId}");
         }
 
         public async Task UpdateUserPassword(string userId, string newPassword)
@@ -1187,7 +1121,6 @@ namespace SamsonDentalCenterManagementSystem.Services
                 $"/Admin/Patients?id={userId}"
             );
 
-            Console.WriteLine($"[Service] Profile {userId} set to Active: {isActive}");
         }
 
         public async Task UpdateUserMetadata(string userId, object metadata)
@@ -1209,8 +1142,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             if (!res.IsSuccessStatusCode)
             {
-                var error = await res.Content.ReadAsStringAsync();
-                Console.WriteLine($"[UpdateUserMetadata] Failed: {error}");
+                await res.Content.ReadAsStringAsync();
             }
         }
 
@@ -1355,8 +1287,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                 if (!res.IsSuccessStatusCode)
                 {
-                    var err = await res.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[GenerateLink] Failed: {err}");
+                    await res.Content.ReadAsStringAsync();
                     return null;
                 }
 
@@ -1416,8 +1347,7 @@ namespace SamsonDentalCenterManagementSystem.Services
                             $"This email is already registered to a different account. (ID: {existingId})"
                         );
                     }
-                    Console.WriteLine($"[CreateUserWithId] Failed: {err}");
-                    throw new Exception($"Auth creation failed: {err}");
+                 
                 }
 
                 var resStr = await res.Content.ReadAsStringAsync();
@@ -1598,7 +1528,6 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                 await _adminClient.From<Profile>().Where(x => x.Id == sourceId).Delete();
 
-                Console.WriteLine($"[MergeProfile] Successfully merged {sourceId} into {targetId}");
             }
             catch (Exception ex)
             {
@@ -1631,12 +1560,7 @@ namespace SamsonDentalCenterManagementSystem.Services
 
                 if (!res.IsSuccessStatusCode)
                 {
-                    var err = await res.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[UpdateUserRoleInAuth] Failed for {userId}: {err}");
-                }
-                else
-                {
-                    Console.WriteLine($"[UpdateUserRoleInAuth] Successfully synchronized role '{role}' to Auth metadata for {userId}");
+                    await res.Content.ReadAsStringAsync();
                 }
             }
             catch (Exception ex)

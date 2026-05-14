@@ -100,7 +100,7 @@ export function renderStep4() {
                 ["Patient",      patientDisplay],
                 ...(d.isForOther ? [
                     ["Relationship", d.relationship],
-                    ["Emergency",    d.emergencyContact]
+                    ["Patient Email", d.otherEmail || "—"]
                 ] : [
                     ["Email",        d.email],
                     ["Phone",        d.phone]
@@ -167,9 +167,10 @@ export async function confirmBooking() {
             isForOther:      d.isForOther,
             otherFirstName:  d.otherFirstName || null,
             otherLastName:   d.otherLastName || null,
+            otherEmail:      d.otherEmail || null,
+            otherPhone:      d.otherPhone || null,
             otherSex:        d.otherSex  || null,
             otherDob:        d.otherDob  || null,
-            emergencyContact: d.emergencyContact || null,
             relationship:    d.relationship || null,
             serviceId:       STATE.service?.id   ?? "",
             serviceName:     STATE.service?.name ?? "",

@@ -59,6 +59,20 @@ public class DentalServiceService
         }
     }
 
+    public async Task<DentalService?> GetById(string id)
+    {
+        try
+        {
+            var response = await _supabase.From<DentalService>().Where(x => x.Id == id).Get();
+            return response.Models.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DentalServiceService.GetById] Error: {ex.Message}");
+            return null;
+        }
+    }
+
     public async Task<DentalService> Create(ServicePayload p)
     {
         var service = MapPayload(

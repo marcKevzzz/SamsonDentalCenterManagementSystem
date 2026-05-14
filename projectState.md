@@ -1,6 +1,9 @@
 ## Current Status: Optimizing Availability & Receptionist Workflow
 
 ### Recently Completed
+- **Bug Fixes & Compilation Stability**:
+    - Resolved compilation error `CS1061` in `ConfirmPromotion.cshtml.cs` by adding the missing `GetById` method to `DentalServiceService.cs`.
+    - Verified project stability with a clean `dotnet build`.
 - **Appointment Availability Logic Optimization**:
     - Refactored the backend availability engine (`AppointmentService.cs`) to use a 30-minute granularity instead of the service duration, ensuring thorough slot detection and preventing valid dates from being skipped.
     - Fixed a critical data-driven availability bug where "Teeth Whitening" was unavailable on Saturdays due to missing specialties. Created `20260511_UpdateDoctorSpecialties.sql` to add the 'Cosmetic' specialty to Saturday doctors.
@@ -14,12 +17,19 @@
 - **Visual UX Enhancements**:
     - Upgraded the patient booking calendar with 42-cell skeleton grids to eliminate layout jumping during async availability checks.
     - Standardized date filtering in the admin portal to resolve the 1-day mismatch bug during list view filtering.
-- **Automated Waitlist Promotion System**:
-    - Implemented a robust "soft-lock" engine in `AppointmentService.cs` (4h standard / 30m same-day) to temporarily reserve newly opened slots for waitlisted patients.
-    - Added background cleanup logic (`CleanupExpiredWaitlistLocks`) that automatically recycles expired locks, ensuring optimal clinic throughput without manual intervention.
-    - Integrated automated email notifications and a public confirmation endpoint (`/api/public/confirm-promotion`) to allow patients to secure slots without logging in.
-    - Enhanced the Patient Dashboard with a real-time "Confirm My Slot" action and orange alert banners for promoted appointments.
-    - Exposed manual promotion controls in the Receptionist dashboard for staff-led overrides.
+- **Refined Waitlist Promotion & Manual Overrides**:
+    - Finalized the automated waitlist promotion flow by removing manual staff overrides in favor of a patient-led "Pick Your Time" selection page.
+    - Created a new public confirmation page (`/Confirm-Promotion`) where promoted patients can see real-time availability and select a specific time slot to secure their booking.
+    - Implemented a robust "Lock Expired" notification system in `AppointmentLockWorker.cs` that automatically releases slots and notifies patients if they fail to confirm within the soft-lock window (4h/30m).
+    - Updated `AppointmentService.cs` with `ConfirmPromotionWithTime` to handle the finalized status transition and time assignment.
+- **"Book for Others" Identity & UX Refactor**:
+    - Enhanced the "Someone Else" booking flow by adding a **Patient Email (Optional)** field, enabling the "Identity Bridge" to automatically claim records when the patient eventually signs up.
+    - Simplified the contact model: removed the redundant `OtherPhone` and `EmergencyContact` fields from the UI. The system now uses the booker's phone as the primary contact for better reliability.
+    - Updated the review summary and API payload to ensure seamless data transmission and correct shadow profile association in the backend.
+- **UI Stability & Crash Prevention**:
+    - Resolved critical `IndexOutOfRangeException` in `ReceptionistSide/Appointments/Appointments.cshtml` by implementing defensive null/empty guards for name initials generation.
+    - Conducted a system-wide audit of initials generation logic. Hardened `Details.cshtml` across Admin, Doctor, and Receptionist portals to prevent `NullReferenceException` when patient names are null or incomplete.
+    - Standardized the initials generation pattern: `!string.IsNullOrEmpty(p?.FirstName) ? p.FirstName[0].ToString() : "?"`.
 - **Administrative Dashboard Security & Stability**:
     - Implemented role-based UI filtering in `Appointments.cshtml`, hiding sensitive workflow actions (Confirm, Check-in, Promote) from Doctors while keeping them available for Receptionists.
     - Resolved critical Razor compilation errors (`RZ1006`, `RZ1025`) in the administrative appointment list caused by mismatched tag nesting.
@@ -110,6 +120,12 @@
 - **Enhanced Receptionist Live Dashboard**:
     - Added skeleton loading states to the Clinic Calendar widget for a smoother "live" experience during data refreshes.
     - Ensured consistent interaction between the calendar heatmap and the appointment day-view pane.
+
+- **Fixed Profile Duplication & Identity Matching**:
+    - Resolved the issue where marking an appointment as "Arrived" created redundant shadow profiles by adding a guard clause in `AppointmentService.FindOrCreatePatientProfile` to trust existing `PatientId` links.
+    - Broadened `SmartMatchProfile` logic in `ProfileService.cs` by removing the restrictive `role == 'patient'` filter, allowing seamless matching for account holders with different roles.
+    - Fixed a bug in the "Book for Other" flow where matching was attempted without email or phone, leading to duplicate shadow profiles for family members.
+    - Ensured clinical record initialization (`InitializePatientRecords`) is idempotent and always runs during the "Arrived" workflow regardless of whether a new profile was created.
 
 ### In Progress
 - **Signup Refactor**: Moving UI/Auth fields (`ClaimId`, `Password`) out of the `Profile` model to prevent further schema cache conflicts.

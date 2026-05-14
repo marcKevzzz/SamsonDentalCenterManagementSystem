@@ -1,0 +1,178 @@
+@page "/Confirm-Promotion"
+@model SamsonDentalCenterManagementSystem.Pages.PatientSide.Appointments.ConfirmPromotionModel
+@{
+    ViewData["Title"] = "Confirm Your Appointment";
+    ViewData["HideNav"] = true;
+}
+
+<div class="min-h-screen bg-[#FAFAFA] flex flex-col items-center py-12 px-4">
+    <div class="max-w-[480px] w-full">
+        <!-- Logo/Home Link -->
+        <div class="text-center mb-10">
+            <a href="/" class="inline-block">
+                <h1 class="brand-font text-3xl font-bold text-brand tracking-tight">Samson Dental</h1>
+            </a>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="bg-white rounded-[2rem] shadow-[0_24px_80px_rgba(0,0,0,0.06)] p-10 border border-slate-200/60 text-center">
+                <div class="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 text-3xl"></i>
+                </div>
+                <h2 class="brand-font text-2xl font-bold text-slate-900 mb-4">Slot Unavailable</h2>
+                <p class="text-slate-500 text-[15px] leading-relaxed mb-8">
+                    @Model.ErrorMessage
+                </p>
+                <a href="/Appointments" class="inline-flex items-center justify-center w-full bg-brand text-white font-bold py-4 rounded-2xl hover:bg-primary transition-all duration-300">
+                    Return to Booking
+                </a>
+            </div>
+        }
+        else if (Model.Appointment != null)
+        {
+            <div class="bg-white rounded-[2rem] shadow-[0_24px_80px_rgba(0,0,0,0.06)] overflow-hidden border border-slate-200/60">
+                <!-- Header -->
+                <div class="bg-brand p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-calendar-check text-white text-2xl"></i>
+                    </div>
+                    <h2 class="brand-font text-2xl font-bold text-white tracking-tight">Priority Promotion</h2>
+                    <p class="text-white/60 text-sm mt-2">Pick a time to secure your slot</p>
+                </div>
+
+                <div class="p-8 lg:p-10">
+                    <!-- Appt Info -->
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-brand font-bold text-lg">
+                            <i class="fa-solid fa-tooth"></i>
+                        </div>
+                        <div>
+                            <div class="font-body text-[11px] font-bold text-slate-400 uppercase tracking-wider">Requested Service</div>
+                            <div class="brand-font font-bold text-slate-900">@Model.Service?.Name</div>
+                        </div>
+                        <div class="ml-auto text-right">
+                            <div class="font-body text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date</div>
+                            <div class="brand-font font-bold text-brand">@Model.Appointment.AppointmentDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                    </div>
+
+                    <!-- Time Selection -->
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="font-body text-[12px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-4">Available Times</h3>
+                            <div id="timeGrid" class="grid grid-cols-3 gap-3">
+                                <!-- Loaded via JS -->
+                                <div class="col-span-3 py-12 text-center">
+                                    <div class="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-brand rounded-full mb-3"></div>
+                                    <p class="text-sm text-slate-400 font-body">Checking availability...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="selectionNotice" class="hidden">
+                            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                                <p class="text-[13px] text-emerald-800 font-body leading-relaxed">
+                                    You've selected <strong id="selectedTimeText"></strong>. Click confirm below to finalize.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button id="confirmBtn" disabled onclick="handleConfirm()" class="w-full bg-brand text-white font-bold py-4 rounded-2xl hover:bg-primary transition-all duration-300 shadow-lg shadow-brand/20 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed">
+                            Confirm Appointment ✓
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer info -->
+            <p class="text-center text-slate-400 text-xs mt-8 font-body leading-relaxed max-w-[320px] mx-auto">
+                By confirming, you agree to our booking terms. Your slot is held for a limited time.
+            </p>
+        }
+    </div>
+</div>
+
+<script>
+    let selectedTime = null;
+    const apptId = "@Model.Appointment?.Id";
+    const apptDate = "@Model.Appointment?.AppointmentDate.ToString("yyyy-MM-dd")";
+    const category = "@Model.Service?.Category";
+    const serviceId = "@Model.Service?.Id";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAvailability();
+    });
+
+    async function fetchAvailability() {
+        const grid = document.getElementById('timeGrid');
+        try {
+            const res = await fetch(`/api/appointments/availability?category=${category}&date=${apptDate}&serviceId=${serviceId}`);
+            const slots = await res.json();
+
+            if (slots.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 py-8 text-center text-slate-400 text-sm font-body">No slots available for this day.</div>`;
+                return;
+            }
+
+            grid.innerHTML = slots.map(s => `
+                <button onclick="selectTime('${s.time}')" 
+                    class="time-slot-btn py-3 rounded-xl border-2 border-slate-100 bg-white font-body font-bold text-slate-600 text-[14px] transition-all hover:border-brand hover:text-brand focus:outline-none"
+                    data-time="${s.time}">
+                    ${s.time}
+                </button>
+            `).join('');
+
+        } catch (err) {
+            console.error(err);
+            grid.innerHTML = `<div class="col-span-3 py-8 text-center text-red-400 text-sm font-body">Error loading times.</div>`;
+        }
+    }
+
+    function selectTime(time) {
+        selectedTime = time;
+        document.querySelectorAll('.time-slot-btn').forEach(btn => {
+            if (btn.dataset.time === time) {
+                btn.classList.add('border-brand', 'text-brand', 'bg-brand/5');
+            } else {
+                btn.classList.remove('border-brand', 'text-brand', 'bg-brand/5');
+            }
+        });
+
+        document.getElementById('selectedTimeText').textContent = time;
+        document.getElementById('selectionNotice').classList.remove('hidden');
+        document.getElementById('confirmBtn').disabled = false;
+    }
+
+    async function handleConfirm() {
+        if (!selectedTime) return;
+
+        const btn = document.getElementById('confirmBtn');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Processing...';
+
+        try {
+            const res = await fetch('/api/public/confirm-promotion-with-time', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: apptId, time: selectedTime })
+            });
+
+            const result = await res.json();
+            if (result.ok) {
+                window.location.href = `/appointments/confirmed?id=${apptId}`;
+            } else {
+                alert(result.error || "Failed to confirm appointment.");
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred. Please try again.");
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+</script>

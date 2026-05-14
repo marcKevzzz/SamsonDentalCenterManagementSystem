@@ -224,11 +224,11 @@ function renderDetailsForm() {
                 </div>
                 <div>
                     <label class="block font-body text-[.7rem] font-medium tracking-[.08em] uppercase text-muted mb-2">
-                        Emergency Contact <span class="text-primary">*</span>
+                        Patient Email <span class="text-muted">(Optional)</span>
                     </label>
-                    <input id="f_emergencyContact" type="text" class="form-input" placeholder="Full name of contact"
-                        oninput="clearErr('emergencyContact')" />
-                    <div id="err_emergencyContact" class="field-error">Emergency contact is required.</div>
+                    <input id="f_otherEmail" type="email" class="form-input" placeholder="patient@email.com"
+                        oninput="clearErr('otherEmail')" />
+                    <div id="err_otherEmail" class="field-error">Invalid email format.</div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -346,7 +346,7 @@ function restoreFormValues() {
   set("f_otherFirstName", d.otherFirstName);
   set("f_otherLastName", d.otherLastName);
   set("f_relationship", d.relationship);
-  set("f_emergencyContact", d.emergencyContact);
+  set("f_otherEmail", d.otherEmail);
   set("f_otherSex", d.otherSex);
   set("f_otherDob", d.otherDob);
 
@@ -494,10 +494,15 @@ function submitDetails() {
         rel?.classList.add("error");
         ok = false;
     }
-    if (!ec?.value.trim()) {
-        document.getElementById("err_emergencyContact")?.classList.add("show");
-        ec?.classList.add("error");
-        ok = false;
+
+    const oEmail = document.getElementById("f_otherEmail");
+    if (oEmail?.value.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(oEmail.value.trim())) {
+            document.getElementById("err_otherEmail")?.classList.add("show");
+            oEmail.classList.add("error");
+            ok = false;
+        }
     }
 
     if (fn?.value && nameRegex.test(fn.value)) {
@@ -560,7 +565,8 @@ function submitDetails() {
   STATE.details.otherFirstName = document.getElementById("f_otherFirstName").value;
   STATE.details.otherLastName = document.getElementById("f_otherLastName").value;
   STATE.details.relationship = document.getElementById("f_relationship").value;
-  STATE.details.emergencyContact = document.getElementById("f_emergencyContact").value;
+  STATE.details.otherEmail = document.getElementById("f_otherEmail").value;
+  STATE.details.otherPhone = STATE.details.phone; // Booker's phone is the primary contact
   STATE.details.otherSex = document.getElementById("f_otherSex").value;
   STATE.details.otherDob = document.getElementById("f_otherDob").value;
   STATE.details.notes = document.getElementById("f_notes").value;

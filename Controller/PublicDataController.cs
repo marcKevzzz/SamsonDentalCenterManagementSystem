@@ -118,6 +118,24 @@ public class PublicDataController : ControllerBase
         return Redirect("/Appointments?error=expired");
     }
 
+    public class PromotionConfirmRequest
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Time { get; set; } = string.Empty;
+    }
+
+    [HttpPost("confirm-promotion-with-time")]
+    public async Task<IActionResult> ConfirmPromotionWithTime([FromBody] PromotionConfirmRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req.Id) || string.IsNullOrWhiteSpace(req.Time)) 
+            return BadRequest(new { ok = false, error = "ID and Time are required." });
+
+        var appt = await _appointmentService.ConfirmPromotionWithTime(req.Id, req.Time);
+        if (appt != null) return Ok(new { ok = true, id = appt.Id });
+
+        return BadRequest(new { ok = false, error = "Failed to confirm appointment. Window may have expired." });
+    }
+
     [HttpGet("availability")]
     public async Task<IActionResult> GetAvailability([FromQuery] string date)
     {

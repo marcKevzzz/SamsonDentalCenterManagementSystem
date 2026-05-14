@@ -31,7 +31,6 @@ public class ContactsModel : PageModel
         CurrentPatientId = User.FindFirst("sub")?.Value;
         if (!string.IsNullOrEmpty(CurrentPatientId))
         {
-            Console.WriteLine(CurrentPatientId);
             var inquiries = await _inquiryService.GetInquiriesByPatientIdAsync(CurrentPatientId);
             ActiveInquiry = inquiries.FirstOrDefault();
         }

@@ -162,7 +162,6 @@ public class SigninModel : PageModel
 
                         role ??= "patient"; // final fallback
 
-                        Console.WriteLine($"[SignIn] Returning user {user.Email} with role: {role}");
                         return new JsonResult(
                             new
                             {

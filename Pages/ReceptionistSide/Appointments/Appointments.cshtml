@@ -201,14 +201,16 @@ Layout = "AdminSide/_StaffLayout";
                   {
                       <img src="@appt.PatientProfile.AvatarUrl" alt="@appt.PatientName" class="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-200" />
                   }
-                  else
-                  {
-                      var initials = $"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}".ToUpper();
-                      
-                      <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">
-                        @initials
-                      </div>
-                  }
+                   else
+                   {
+                       var fChar = !string.IsNullOrEmpty(appt.PatientFirstName) ? appt.PatientFirstName[0].ToString() : "?";
+                       var lChar = !string.IsNullOrEmpty(appt.PatientLastName) ? appt.PatientLastName[0].ToString() : "?";
+                       var initials = (fChar + lChar).ToUpper();
+                       
+                       <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">
+                         @initials
+                       </div>
+                   }
                   <div>
                     <div class="text-[13px] font-bold text-brand leading-none mb-1">@appt.PatientName</div>
                     <div class="text-[10.5px] text-brand/40">@appt.PatientEmail</div>

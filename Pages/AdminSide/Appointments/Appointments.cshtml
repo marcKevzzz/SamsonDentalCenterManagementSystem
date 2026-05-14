@@ -204,7 +204,15 @@ Layout = "AdminSide/_StaffLayout";
                   }
                   else
                   {
-                      var initials = $"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}".ToUpper();
+                      var initials = "??";
+                      if (!string.IsNullOrEmpty(appt.PatientFirstName) && !string.IsNullOrEmpty(appt.PatientLastName))
+                      {
+                          initials = $"{appt.PatientFirstName[0]}{appt.PatientLastName[0]}".ToUpper();
+                      }
+                      else if (!string.IsNullOrEmpty(appt.PatientFirstName))
+                      {
+                          initials = appt.PatientFirstName[0].ToString().ToUpper();
+                      }
                       
                       <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-sm">
                         @initials

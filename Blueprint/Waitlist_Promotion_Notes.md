@@ -20,7 +20,8 @@ The system uses a multi-channel approach:
 ### Should I collect the patient's email?
 **Yes, ideally.** 
 - **Reason**: Our "Claim Records" feature relies on email matching. If you book for a friend using *your* email, those records stay linked to *your* account. If they eventually create their own account with *their* email, they won't be able to find those records easily.
-- **Recommendation**: Add an optional "Patient Email" field to the "Someone Else" form.
+- **Recommendation**: Add an optional "Email" field to the "Someone Else" form. Remove the emergency contact field since we already have an optional email field.
+
 
 ### What if the patient is a child with no email?
 - **Handling**: Leave the email blank or use the booker's (parent's) email.

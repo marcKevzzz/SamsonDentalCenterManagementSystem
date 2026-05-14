@@ -3,7 +3,9 @@
 @{
     Layout = "AdminSide/_StaffLayout";
     var p = Model.Patient;
-    var initials = p != null ? $"{(p.FirstName.Length > 0 ? p.FirstName[0] : ' ')}{(p.LastName.Length > 0 ? p.LastName[0] : ' ')}".Trim().ToUpper() : "??";
+    var fChar = !string.IsNullOrEmpty(p?.FirstName) ? p.FirstName[0].ToString() : "?";
+    var lChar = !string.IsNullOrEmpty(p?.LastName) ? p.LastName[0].ToString() : "?";
+    var initials = (fChar + lChar).ToUpper();
     var age = p?.DateOfBirth.HasValue == true ? (DateTime.Today.Year - p.DateOfBirth.Value.Year).ToString() : "N/A";
 }
 
