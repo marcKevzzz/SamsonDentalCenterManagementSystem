@@ -115,6 +115,19 @@ namespace SamsonDentalCenterManagementSystem.Services
 
             return res;
         }
+
+        public async Task<List<Treatment>> GetTreatmentsByDoctorIdAsync(string doctorId)
+        {
+            // Join via invoices to filter by doctor_id
+            var res = await _supabase.From<Treatment>()
+                .Select("*,invoice:invoices!inner(*,patient:profiles(*))")
+                .Filter("invoice.doctor_id", Supabase.Postgrest.Constants.Operator.Equals, doctorId)
+                .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
+                .Get();
+
+            return res.Models;
+        }
+
         public async Task InitializePatientRecords(string patientId, string actorId)
         {
             var existing = await GetMedicalInfoAsync(patientId);

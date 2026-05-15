@@ -50,18 +50,25 @@ namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Treatments
             Services = await _dentalServiceService.GetAll(activeOnly: true);
             Settings = await _settingsService.GetSettingsAsync() ?? new();
 
-            if (CurrentUserRole == "doctor")
+            if (CurrentUserRole == "doctor" || CurrentUserRole == "admin")
             {
                 var doctorRecord = await _doctorService.GetDoctorByProfileIdAsync(CurrentUserId);
                 if (doctorRecord != null)
                 {
                     DoctorRecordId = doctorRecord.Id;
-                    Invoices = await _invoiceService.GetInvoicesByDoctorIdAsync(doctorRecord.Id);
+                }
+            }
+
+            if (CurrentUserRole == "doctor")
+            {
+                if (!string.IsNullOrEmpty(DoctorRecordId))
+                {
+                    Invoices = await _invoiceService.GetInvoicesByDoctorIdAsync(DoctorRecordId);
 
                     // Get arrived appointments for this doctor
                     var allAppts = await _appointmentService.GetAllAsync();
                     ArrivedAppointments = allAppts
-                        .Where(a => a.DoctorId == doctorRecord.Id && a.Status == "arrived")
+                        .Where(a => a.DoctorId == DoctorRecordId && a.Status == "arrived")
                         .ToList();
                 }
             }
@@ -69,11 +76,20 @@ namespace SamsonDentalCenterManagementSystem.Pages.DoctorSide.Treatments
             {
                 Invoices = await _invoiceService.GetAllInvoicesAsync();
 
-                // Admin can invoice any arrived appointment
+                // Admin can invoice any arrived appointment? 
+                // User said: "dont show the create invoice card on admin if its not for him. only show to the asssigned doctor."
+                // So even for Admin, we should filter ArrivedAppointments to their doctorId if they have one.
                 var allAppts = await _appointmentService.GetAllAsync();
-                ArrivedAppointments = allAppts
-                    .Where(a => a.Status == "arrived")
-                    .ToList();
+                if (!string.IsNullOrEmpty(DoctorRecordId))
+                {
+                    ArrivedAppointments = allAppts
+                        .Where(a => a.DoctorId == DoctorRecordId && a.Status == "arrived")
+                        .ToList();
+                }
+                else
+                {
+                    ArrivedAppointments = new List<Appointment>();
+                }
             }
             else
             {

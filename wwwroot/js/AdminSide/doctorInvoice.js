@@ -49,17 +49,33 @@ function initializeWithData(data) {
 
     // Filter by doctor strictly
     const doctorRecordId = document.getElementById('inv-doctor-id')?.value;
-    if (doctorRecordId) {
-        // Only show arrived patients assigned to this doctor
-        ARRIVED_APPTS = ARRIVED_APPTS.filter(a => a.doctorId === doctorRecordId);
-        // Keep all recent treatments but maybe highlight? Actually user said "only show all the records of treatment regarding which doctor"
-        RECENT_TREATMENTS = RECENT_TREATMENTS.filter(i => i.doctorId === doctorRecordId);
+    const staffRole = document.getElementById('inv-staff-role')?.value?.toLowerCase();
+
+    if (staffRole === 'doctor') {
+        if (doctorRecordId) {
+            // Doctors ONLY see their assigned arrived patients
+            ARRIVED_APPTS = ARRIVED_APPTS.filter(a => a.doctorId === doctorRecordId);
+            // Doctors ONLY see their own treatments
+            RECENT_TREATMENTS = RECENT_TREATMENTS.filter(i => i.doctorId === doctorRecordId);
+        } else {
+            // Edge case: User is a doctor but has no record in doctors table (shouldn't happen)
+            ARRIVED_APPTS = [];
+            RECENT_TREATMENTS = [];
+        }
+    } else if (staffRole === 'admin') {
+        // Admins see all recent treatments
+        // But for Arrived Patients (Create Invoice), they only see those assigned to them IF they have a doctor record
+        if (doctorRecordId) {
+            ARRIVED_APPTS = ARRIVED_APPTS.filter(a => a.doctorId === doctorRecordId);
+        } else {
+            // Admin with no doctor record sees NO arrived patients (matches "dont show create invoice card on admin if its not for him")
+            ARRIVED_APPTS = [];
+        }
+        // RECENT_TREATMENTS remains unfiltered for Admins
     } else {
-        // If no doctorRecordId (Admin view), user said "dont show the create invoice card on admin if its not for him"
-        // This means if I am Admin but NOT assigned as a doctor to ANY arrived appts, I see nothing.
-        // Wait, the instruction is slightly ambiguous: "dont show the create invoice card on admin if its not for him. only show to the asssigned doctor."
-        // This implies if Admin is NOT the assigned doctor, they shouldn't see it.
-        ARRIVED_APPTS = []; 
+        // Other roles (Receptionist, etc.)
+        ARRIVED_APPTS = [];
+        RECENT_TREATMENTS = RECENT_TREATMENTS; // Usually they see all
     }
 
     hydrateUI();

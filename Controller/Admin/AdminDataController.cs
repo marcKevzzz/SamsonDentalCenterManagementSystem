@@ -60,6 +60,15 @@ public class AdminDataController : ControllerBase
         _logger = logger;
     }
 
+    private string GetAppRole()
+    {
+        // Prioritize our database-derived 'app_role' claim injected by RoleClaimsTransformer
+        return User.FindFirst("app_role")?.Value?.ToLower() 
+               ?? User.FindFirst("role_app")?.Value?.ToLower()
+               ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower()
+               ?? "patient";
+    }
+
     [HttpGet("available-doctors")]
     public async Task<IActionResult> GetAvailableDoctors(
         [FromQuery] string category,
@@ -103,7 +112,7 @@ public class AdminDataController : ControllerBase
         {
             await _appointmentService.CleanupExpiredWaitlistLocks();
             var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var role = User.FindFirst("role")?.Value?.ToLower() ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
+            var role = GetAppRole();
 
             List<Appointment> data;
             if (role == "doctor")
@@ -206,15 +215,9 @@ public class AdminDataController : ControllerBase
         try
         {
             var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var role = User.FindFirst("role")?.Value?.ToLower();
+            var role = GetAppRole();
             
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            if (string.IsNullOrEmpty(role))
-            {
-                var profile = await _profileService.GetProfileById(userId);
-                role = profile?.Role?.ToLower() ?? "patient";
-            }
 
             List<Profile> allProfiles;
             if (role == "doctor")
@@ -265,7 +268,20 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var data = await _invoiceService.GetAllInvoicesAsync();
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var role = GetAppRole();
+
+            List<Invoice> data;
+            if (role == "doctor")
+            {
+                var doc = await _doctorService.GetDoctorByProfileIdAsync(userId);
+                if (doc == null) return Ok(new { ok = true, data = new List<object>() });
+                data = await _invoiceService.GetInvoicesByDoctorIdAsync(doc.Id);
+            }
+            else
+            {
+                data = await _invoiceService.GetAllInvoicesAsync();
+            }
             var dtos = data.Select(i => new
                 {
                     id = i.Id,
@@ -377,7 +393,20 @@ public class AdminDataController : ControllerBase
     {
         try
         {
-            var data = await _recordService.GetAllTreatmentsWithDetailsAsync();
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var role = GetAppRole();
+
+            List<Treatment> data;
+            if (role == "doctor")
+            {
+                var doc = await _doctorService.GetDoctorByProfileIdAsync(userId);
+                if (doc == null) return Ok(new { ok = true, data = new List<object>() });
+                data = await _recordService.GetTreatmentsByDoctorIdAsync(doc.Id);
+            }
+            else
+            {
+                data = await _recordService.GetAllTreatmentsWithDetailsAsync();
+            }
             var dtos = data.Select(t => new
                 {
                     id = t.Id,

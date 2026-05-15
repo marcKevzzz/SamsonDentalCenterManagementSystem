@@ -109,6 +109,7 @@
         </div>
 
         <!-- Hidden fields -->
+        <input type="hidden" id="inv-staff-role" value="@Model.CurrentUserRole" />
         <input type="hidden" id="inv-doctor-id" value="@Model.DoctorRecordId" />
         <input type="hidden" id="inv-preselect-appt" value="@(Request.Query["appt"].FirstOrDefault() ?? "")" />
 

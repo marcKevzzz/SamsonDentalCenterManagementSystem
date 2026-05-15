@@ -1,138 +1,23 @@
-## Current Status: Optimizing Availability & Receptionist Workflow
+## Current Status: Clinical Access Audit & System Hardening
 
 ### Recently Completed
-- **Bug Fixes & Compilation Stability**:
-    - Resolved compilation error `CS1061` in `ConfirmPromotion.cshtml.cs` by adding the missing `GetById` method to `DentalServiceService.cs`.
-    - Verified project stability with a clean `dotnet build`.
-- **Appointment Availability Logic Optimization**:
-    - Refactored the backend availability engine (`AppointmentService.cs`) to use a 30-minute granularity instead of the service duration, ensuring thorough slot detection and preventing valid dates from being skipped.
-    - Fixed a critical data-driven availability bug where "Teeth Whitening" was unavailable on Saturdays due to missing specialties. Created `20260511_UpdateDoctorSpecialties.sql` to add the 'Cosmetic' specialty to Saturday doctors.
-    - Resolved a database `23514` error (check constraint violation) by updating the `appointments_status_check` constraint to include `'waitlist'` as a valid status. Created `20260511_FixAppointmentStatusConstraint.sql`.
-    - Fixed a UI state bug in the patient booking flow where the "Waitlist" status would persist even after switching back to an available date/time.
-    - Added comprehensive diagnostic logging (`[DEBUG]`) to the availability calculation flow for better production traceability.
-- **Receptionist "Live" Calendar**:
-    - Implemented a full monthly calendar view for the receptionist appointments portal.
-    - Added daily appointment density indicators (counts) and "Pending Approval" markers (orange pulsing dots).
-    - Integrated the calendar with the main table filtering logic, allowing receptionists to click a day and instantly view all relevant bookings.
-- **Visual UX Enhancements**:
-    - Upgraded the patient booking calendar with 42-cell skeleton grids to eliminate layout jumping during async availability checks.
-    - Standardized date filtering in the admin portal to resolve the 1-day mismatch bug during list view filtering.
-- **Refined Waitlist Promotion & Manual Overrides**:
-    - Finalized the automated waitlist promotion flow by removing manual staff overrides in favor of a patient-led "Pick Your Time" selection page.
-    - Created a new public confirmation page (`/Confirm-Promotion`) where promoted patients can see real-time availability and select a specific time slot to secure their booking.
-    - Implemented a robust "Lock Expired" notification system in `AppointmentLockWorker.cs` that automatically releases slots and notifies patients if they fail to confirm within the soft-lock window (4h/30m).
-    - Updated `AppointmentService.cs` with `ConfirmPromotionWithTime` to handle the finalized status transition and time assignment.
-- **"Book for Others" Identity & UX Refactor**:
-    - Enhanced the "Someone Else" booking flow by adding a **Patient Email (Optional)** field, enabling the "Identity Bridge" to automatically claim records when the patient eventually signs up.
-    - Simplified the contact model: removed the redundant `OtherPhone` and `EmergencyContact` fields from the UI. The system now uses the booker's phone as the primary contact for better reliability.
-    - Updated the review summary and API payload to ensure seamless data transmission and correct shadow profile association in the backend.
-- **UI Stability & Crash Prevention**:
-    - Resolved critical `IndexOutOfRangeException` in `ReceptionistSide/Appointments/Appointments.cshtml` by implementing defensive null/empty guards for name initials generation.
-    - Conducted a system-wide audit of initials generation logic. Hardened `Details.cshtml` across Admin, Doctor, and Receptionist portals to prevent `NullReferenceException` when patient names are null or incomplete.
-    - Standardized the initials generation pattern: `!string.IsNullOrEmpty(p?.FirstName) ? p.FirstName[0].ToString() : "?"`.
-- **Administrative Dashboard Security & Stability**:
-    - Implemented role-based UI filtering in `Appointments.cshtml`, hiding sensitive workflow actions (Confirm, Check-in, Promote) from Doctors while keeping them available for Receptionists.
-    - Resolved critical Razor compilation errors (`RZ1006`, `RZ1025`) in the administrative appointment list caused by mismatched tag nesting.
-    - Fixed high-priority JS errors in `adminAppointment.js`: corrected the `Modal.open` utility name and added parameter guards to prevent 400 Bad Request errors on doctor availability fetches.
-    - Standardized workflow button colors: **Emerald (Confirm)**, **Blue (Check-in)**, **Orange (Promote)**.
+- [x] **RBAC Claim Hardening**: Centralized role resolution in `AdminDataController` using `GetAppRole()` to prioritize `app_role` over default Supabase claims.
+- [x] **Clinical Data Isolation**: Implemented server-side filtering for doctors in `GetAppointments`, `GetPatients`, `GetInvoices`, and `GetTreatments`.
+- [x] **Doctor Treatment Portal UI**: Restricted "Arrived Patients" (Create Invoice card) to the assigned doctor only, even for Admins, per user request.
+- [x] **Build & Compilation Stability**: Resolved critical `MSB3027` / `MSB3021` file lock errors by terminating zombie app processes. Verified with clean `dotnet build`.
+- [x] **Hardened Clinical Records Sync**: Fixed 23502 (null id) constraint error in `patient_tooth_status` by implementing true UPSERT logic.
+- [x] **Receptionist "Live" Calendar**: Implemented full monthly calendar view with density indicators and filtering.
 
-- **Hardened Clinical Records Sync**: Fixed 23502 (null id) constraint error in `patient_tooth_status` by implementing true UPSERT logic with `ON CONFLICT (patient_id, tooth_number)`.
-- **Storage Resilience**: Implemented automatic bucket creation in `ClinicService.cs` to handle missing `treatment-xrays` or gallery buckets.
-- **Enhanced Records UI**: Fixed Diagnostic Imaging tab in patient profile to correctly display treatment X-rays.
-- **Stabilized Staff Portal**:
-    - Hardened `submitLeave` JS with null-checks to prevent runtime crashes.
-    - Fixed RLS (42501) permission error in `AdminUsersController` by using service-role services for staff creation.
-    - Resolved `System.TypeLoadException` by fixing corrupted build state and refactoring anonymous types.
-    - Added robust role fallback for staff users with generic 'authenticated' JWT roles.
-    - Enhanced staff creation with detailed logging and try-catch handling.
-    - Fixed 400 Bad Request on leave application by aligning JSON property casing.
-    - Resolved global namespace collision by renaming `Pages/System` to `Pages/ClinicDocs`.
-    - Added `DocsModel` with `[AllowAnonymous]` to ensure public access to `/Clinic/Docs`.
-- **System Documentation**:
-    - Created a modern, minimalist system/developer documentation page at `/Clinic/Docs`.
-- **Service Management Fixes**:
-    - Fixed data loss issue where `DurationMinutes` and `NeedsXray` were not saved during service create/update.
-    - Updated Admin UI to display X-Ray requirement badges on service cards.
-- **Service Expansion**:
-    - Added support for X-Ray services (Digital and Panoramic) via database migration.
-- **Enhanced Booking Logic**:
-    - Implemented auto-confirmation for logged-in patients.
-    - Integrated staff leaves into appointment availability check.
-    - Strengthened double-booking prevention for 'Other' patients.
-- **Optimized Records UI**: Hides dental chart visualization if no data is present.
-- **Resolved PGRST204 Schema Cache Errors**: Fixed ambiguous joins in `InvoiceService`, `AppointmentService`, and `DoctorService`.
-- **Dynamic Chatbot Infrastructure**:
-    - Created `PublicDataController` to provide unauthenticated system-wide data (settings, services, doctors).
-    - Refactored `chatbot.js` to fetch real-time data and update its knowledge base dynamically.
-    - Integrated chatbot logic with clinic settings for enablement and customization.
-    - Resolved compilation error CS1061 in `PublicDataController` by using `GetActiveWithProfilesAsync`.
-    - Expanded chatbot knowledge base with leadership (CEO/Admin), system integrity, and service process/benefits.
-    - Implemented `chatbot_conversations` table and API for session-based message persistence.
-- **Documentation & Transparency**:
-    - Relocated System Documentation to the patient side (`/Clinic/Docs`) with enriched content and public layout.
-    - Integrated "Documentation" link in the website footer.
-    - Added CEO/Admin and System Integrity info to `clinic_settings`.
-- **Admin Settings Modernization**:
-    - Replaced the legacy FAQ settings with a unified **Chatbot Control Panel**.
-    - Added identity controls (name, welcome message) and knowledge base management (formerly FAQs) to the Chatbot settings.
-    - Updated sidebar navigation to prioritize Chatbot management.
-- **Clinic Gallery Synchronization**:
-    - Refactored the Home page gallery to dynamically render photos managed via the Admin portal.
-    - Implemented a scattered-grid layout with fallback placeholders.
-- **Admin Portal Stability**:
-    - Fixed 400 error in `ResendInvite` by resolving email blanking bug in `ProfileService`.
-    - Resolved 400 error in `UpdateLeaveStatus` by robustly fetching admin ID from JWT claims (`sub` or `NameIdentifier`).
-    - Standardized admin ID retrieval across data-modifying endpoints in `AdminDataController`.
-- **Documentation Portal**:
-    - Integrated `/Clinic/Docs` with the shared `_StaffLayout` for a consistent administrative experience.
-    - Added a "System Docs" link to the Admin sidebar.
-- **Clinic Gallery & Settings Improvements**:
-    - Hardened settings retrieval and persistence logic in `ClinicService.cs` with fallback lookups and `Upsert` operations to ensure gallery data is never lost or ignored due to ID mismatches.
-    - Implemented eager hydration in `adminSettings.js` to eliminate loading delays when viewing photos, hours, and FAQs.
-    - Resolved a compilation error (CS8752) by explicitly using `Array.Empty<string>()` instead of target-typed `new()` for clinic photo array initialization.
-    - Implemented a smooth AJAX-based save workflow for the Clinic Gallery, featuring a "Saving..." loading state, premium success modals, and live data synchronization without page reloads.
-    - Finalized homepage gallery responsiveness by enforcing compact image dimensions via inline `style` and refined `clamp` values, ensuring the background "THE CLINIC" text and overlays remain visible.
-    - Included `photos` in the public initialization API for better data availability across client-side components.
-- **Chatbot Infrastructure Optimization**:
-    - Implemented chat history persistence using `localStorage` session tracking and a new `/api/public/chatbot/history` endpoint.
-    - Optimized database usage by preventing the automatic saving of the initial welcome message, ensuring only active conversations are persisted.
-- **Admin Portal Traceability**:
-    - Enhanced Activity Logs with a "Source Path" badge for better traceability of administrative actions.
-    - Resolved TypeScript casing conflicts by standardizing all module imports to lowercase `adminStore.js` and canonical `AdminSide` directory casing.
-- **Clinical Record Infrastructure**:
-    - Implemented secure X-ray file uploads stored in a dedicated `treatment-xrays` bucket.
-    - Updated `treatments` schema to include structured fields for radiographic findings (`xray_url`, `xray_type`, `xray_notes`).
-    - Enforced uniqueness on `patient_tooth_status` to allow clean "Decayed" -> "Crowned" status transitions.
-    - Enhanced the treatment view modal in the Doctor portal with high-resolution image viewing and radiographic reports.
-- **Waitlist & Flow Management**:
-    - Implemented a multi-doctor waitlist eligibility engine in `AppointmentService`.
-    - Slots are now dynamically flagged as `waitlistEligible` when the clinic is open but all specialists are booked.
-    - Optimized batch updates for tooth charts using a cleaner `Upsert` workflow in `RecordService`.
+### Current Blockers
+- **None**: Structural refactor of clinical access is complete.
 
-- **Fixed Admin & Receptionist UI Hydration**:
-    - Standardized profile hydration in `AdminDataController` to return singular objects, fixing "Unassigned" status on receptionist and doctor cards.
-    - Updated `adminReceptionists.js` and `adminAppointment.js` to correctly consume standardized profile structures.
-- **Optimized Appointment Availability Performance**:
-    - Refactored `AppointmentService.GetMonthAvailability` to use batch queries (reducing Supabase HTTP calls from ~200+ down to ~7 per month view), drastically improving load times.
-    - Resolved calendar "flicker" and race conditions by implementing high-fidelity skeleton loaders for both the calendar grid and time slots.
-    - Fixed state leakage bug where waitlist/blocked statuses would persist when switching services by clearing the availability cache during service selection.
-    - Implemented a premium pulsing waitlist indicator (orange dot) for fully booked dates to improve user awareness.
-- **Enhanced Receptionist Live Dashboard**:
-    - Added skeleton loading states to the Clinic Calendar widget for a smoother "live" experience during data refreshes.
-    - Ensured consistent interaction between the calendar heatmap and the appointment day-view pane.
-
-- **Fixed Profile Duplication & Identity Matching**:
-    - Resolved the issue where marking an appointment as "Arrived" created redundant shadow profiles by adding a guard clause in `AppointmentService.FindOrCreatePatientProfile` to trust existing `PatientId` links.
-    - Broadened `SmartMatchProfile` logic in `ProfileService.cs` by removing the restrictive `role == 'patient'` filter, allowing seamless matching for account holders with different roles.
-    - Fixed a bug in the "Book for Other" flow where matching was attempted without email or phone, leading to duplicate shadow profiles for family members.
-    - Ensured clinical record initialization (`InitializePatientRecords`) is idempotent and always runs during the "Arrived" workflow regardless of whether a new profile was created.
-
-### In Progress
-- **Signup Refactor**: Moving UI/Auth fields (`ClaimId`, `Password`) out of the `Profile` model to prevent further schema cache conflicts.
-- **Global Auth & Identity Resilience**: Continuing to harden OTP verification and guest-to-patient transitions.
-
-- **HttpClient Timeouts**: Largely mitigated by optimizing heavy queries and using `IHttpClientFactory`.
+### Next Steps
+- [ ] **Data Sync**: Resolve "ghost availability" mismatch between monthly calendar and day-view time selector.
+- [ ] **Audit Remaining Endpoints**: Check `GetInquiries`, `GetActivityLogs`, etc., for appropriate role-based filtering.
+- [ ] **Manual Verification**: Test the doctor portal with a real doctor account to ensure they only see their assigned patients.
 
 ### Architecture Notes
-- Using direct `HttpClient` REST calls for complex joins and batch operations.
-- `ProfileService` now uses `SupabaseClient` named client from `IHttpClientFactory`.
+- **Authorization**: Prioritizing `app_role` claim derived from the database for all clinical data access.
+- **Data Isolation**: Transitioned from client-side UI filtering to mandatory server-side enforcement for sensitive records.
+- **Database**: Using `ON CONFLICT` clauses for patient record synchronization to prevent 23505/23502 errors.
+- **Infrastructure**: Using `IHttpClientFactory` for Supabase REST calls to ensure connection pooling and stability.
